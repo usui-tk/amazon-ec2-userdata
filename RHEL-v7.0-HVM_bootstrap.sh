@@ -4,6 +4,7 @@
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 # Red Hat Update Infrastructure Client Package Update
+yum clean all
 yum update -y rh-amazon-rhui-client
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
@@ -58,7 +59,17 @@ echo {} > /etc/chef/ohai/hints/ec2.json
 
 # Custom Package Install Fluetnd(td-agent)
 # curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
-yum localinstall -y http://packages.treasuredata.com/2/redhat/7/x86_64/td-agent-2.1.3-0.x86_64.rpm
+rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
+
+cat > /etc/yum.repos.d/td.repo << __EOF__
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/2/redhat/7/\$basearch
+gpgcheck=1
+gpgkey=http://packages.treasuredata.com/GPG-KEY-td-agent
+__EOF__
+
+yum install -y td-agent
 systemctl start td-agent
 systemctl status td-agent
 systemctl enable td-agent
