@@ -75,6 +75,10 @@ systemctl status td-agent
 systemctl enable td-agent
 systemctl is-enabled td-agent
 
+# Update rubygem for Fluentd
+/opt/td-agent/embedded/bin/fluent-gem list --local
+#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
+
 # Setting TimeZone
 # timedatectl status
 # timedatectl set-timezone Asia/Tokyo
