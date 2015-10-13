@@ -38,7 +38,7 @@ yum clean all
 yum update -y 
 
 # Custom Package Install
-yum install -y bash-completion gdisk git yum-priorities yum-plugin-versionlock sos
+yum install -y bash-completion dstat gdisk git yum-priorities yum-plugin-versionlock sos
 
 # yum repository metadata Clean up
 yum clean all
