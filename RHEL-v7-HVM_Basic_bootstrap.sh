@@ -3,6 +3,15 @@
 # Logger
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
+# Instance MetaData
+region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
+instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+#-------------------------------------------------------------------------------
+# Default Package Update
+#-------------------------------------------------------------------------------
+
 # Red Hat Update Infrastructure Client Package Update
 yum clean all
 yum update -y rh-amazon-rhui-client
@@ -35,38 +44,31 @@ yum-config-manager --enable rhui-REGION-rhel-server-extras
 yum clean all
 
 # Default Package Update
-yum update -y 
+yum update -y
 
-# Custom Package Install
-yum install -y bash-completion dstat gdisk git yum-priorities yum-plugin-versionlock sos
+#-------------------------------------------------------------------------------
+# Custom Package Installation
+#-------------------------------------------------------------------------------
 
-# yum repository metadata Clean up
-yum clean all
+# Package Install RHEL System Administration Tools (from Red Hat Offical Repository)
+yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
 
-# Custom Package Install EPEL(Extra Packages for Enterprise Linux) repository Package
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
-# Custom Package Install (from EPEL)
-yum install -y jq
+# Package Install RHEL System Administration Tools (from EPEL Recository)
+yum --enablerepo=epel install -y jq
 
-# Custom Package Install Chef-Client(Chef-Solo)
-curl -L https://www.chef.io/chef/install.sh | bash -v
+#-------------------------------------------------------------------------------
+# Custom Package Clean up
+#-------------------------------------------------------------------------------
+yum clean all
 
-# Ohai EC2 Provider
-mkdir -p /etc/chef/ohai/hints
-echo {} > /etc/chef/ohai/hints/ec2.json
-
-# Custom Package Install Fluetnd(td-agent)
-curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
-/opt/td-agent/embedded/bin/fluent-gem list --local
-#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
-systemctl start td-agent
-systemctl status td-agent
-systemctl enable td-agent
-systemctl is-enabled td-agent
-
-
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Setting TimeZone
 # timedatectl status
@@ -88,14 +90,6 @@ chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
 
-
-# Root Disk Partition Resize (GPT)
-# -- Use RHEL v7 HVM AMI (7.1_HVM_GA) --
-#    HexCode:EF02 [BIOS boot partition]  -> /dev/xvda1 <- None
-#    HexCode:0700 [Microsoft basic data] -> /dev/xvda2 <- /
-df -h
-gdisk -l /dev/xvda
-
 # Disable IPv6 Kernel Module
 echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
@@ -109,4 +103,3 @@ sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
 # Instance Reboot
 reboot
-
