@@ -68,7 +68,7 @@ yum --enablerepo=epel install -y python-pip
 pip install --upgrade pip
 pip install awscli
 aws --version
-aws ec2 describe-regions --region ${region}
+# aws ec2 describe-regions --region ${region}
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -79,6 +79,8 @@ __EOF__
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CloudWatchLogs-Agent]
 #-------------------------------------------------------------------------------
+# yum --enablerepo=epel install -y python-pip
+# pip install --upgrade pip
 curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
 
 cat > /tmp/awslogs.conf << __EOF__
@@ -104,10 +106,10 @@ log_group_name = /var/log/secure
 encoding = utf-8
 __EOF__
 
-python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
-systemctl status awslogs
-systemctl enable awslogs
-systemctl is-enabled awslogs
+# python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+# systemctl status awslogs
+# systemctl enable awslogs
+# systemctl is-enabled awslogs
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
