@@ -8,9 +8,9 @@ yum clean all
 yum update -y rh-amazon-rhui-client
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
-# yum-config-manager --enable rhui-REGION-rhel-server-releases
-# yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-# yum-config-manager --enable rhui-REGION-client-config-server-7
+yum-config-manager --enable rhui-REGION-rhel-server-releases
+yum-config-manager --enable rhui-REGION-rhel-server-rh-common
+yum-config-manager --enable rhui-REGION-client-config-server-7
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
 yum-config-manager --enable rhui-REGION-rhel-server-optional
