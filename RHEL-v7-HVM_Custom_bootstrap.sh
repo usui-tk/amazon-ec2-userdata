@@ -128,9 +128,22 @@ ohai
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Fluetnd(td-agent)]
 #-------------------------------------------------------------------------------
-curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
+
+cat > /etc/yum.repos.d/td.repo << __EOF__
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/2/redhat/\$releasever/\$basearch
+gpgcheck=1
+gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+__EOF__
+
+yum install -y td-agent
+
 /opt/td-agent/embedded/bin/fluent-gem list --local
 #/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
+
 systemctl start td-agent
 systemctl status td-agent
 systemctl enable td-agent
