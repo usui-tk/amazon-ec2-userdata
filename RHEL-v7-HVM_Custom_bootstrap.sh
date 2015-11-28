@@ -68,7 +68,7 @@ yum --enablerepo=epel install -y python-pip
 pip install --upgrade pip
 pip install awscli
 aws --version
-# aws ec2 describe-regions --region ${region}
+aws ec2 describe-regions --region ${region}
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -104,10 +104,10 @@ log_group_name = /var/log/secure
 encoding = utf-8
 __EOF__
 
-# python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
-# systemctl status awslogs
-# systemctl enable awslogs
-# systemctl is-enabled awslogs
+python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+systemctl status awslogs
+systemctl enable awslogs
+systemctl is-enabled awslogs
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
@@ -115,12 +115,12 @@ __EOF__
 curl -L https://www.chef.io/chef/install.sh | bash -v
 mkdir -p /etc/chef/ohai/hints
 echo {} > /etc/chef/ohai/hints/ec2.json
-# OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
-# OHAI_PLUGINS_RACKERLABS="${OHAI_PLUGINS}/rackerlabs"
-# mkdir -p ${OHAI_PLUGINS_RACKERLABS}
-# curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
-# curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
-# curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
+OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
+OHAI_PLUGINS_RACKERLABS="${OHAI_PLUGINS}/rackerlabs"
+mkdir -p ${OHAI_PLUGINS_RACKERLABS}
+curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
+curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
+curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
 ohai
 
 #-------------------------------------------------------------------------------
