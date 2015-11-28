@@ -6,6 +6,7 @@ exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2
 # Instance MetaData
 region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
 instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 #-------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ yum-config-manager --enable rhui-REGION-client-config-server-7
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
 yum-config-manager --enable rhui-REGION-rhel-server-optional
 yum-config-manager --enable rhui-REGION-rhel-server-extras
-#yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # Enable Channnel (RHEL Server Debug RPM)
 # yum-config-manager --enable rhui-REGION-rhel-server-releases-debug
@@ -52,6 +53,8 @@ yum update -y
 
 # Package Install RHEL System Administration Tools (from Red Hat Offical Repository)
 yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
+yum install -y redhat-access-insights redhat-support-tool
+yum install -y setroubleshoot
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
