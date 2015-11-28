@@ -6,6 +6,7 @@ exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2
 # Instance MetaData
 region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
 instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 #-------------------------------------------------------------------------------
@@ -24,7 +25,7 @@ yum-config-manager --enable rhui-REGION-client-config-server-7
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
 yum-config-manager --enable rhui-REGION-rhel-server-optional
 yum-config-manager --enable rhui-REGION-rhel-server-extras
-#yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # Enable Channnel (RHEL Server Debug RPM)
 # yum-config-manager --enable rhui-REGION-rhel-server-releases-debug
@@ -52,6 +53,8 @@ yum update -y
 
 # Package Install RHEL System Administration Tools (from Red Hat Offical Repository)
 yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
+yum install -y redhat-access-insights redhat-support-tool
+yum install -y setroubleshoot
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
@@ -68,7 +71,7 @@ yum --enablerepo=epel install -y python-pip
 pip install --upgrade pip
 pip install awscli
 aws --version
-# aws ec2 describe-regions --region ${region}
+aws ec2 describe-regions --region ${region}
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -77,10 +80,46 @@ fi
 __EOF__
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CloudWatchLogs-Agent]
+# Custom Package Installation [AWS CloudFormation Helper Scripts]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo=epel install -y python-pip
+# pip install --upgrade pip
+
+pip install pystache
+pip install argparse
+pip install python-daemon
+pip install requests
+
+cd /tmp
+curl -O https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+tar -xvpf aws-cfn-bootstrap-latest.tar.gz
+
+cd aws-cfn-bootstrap-1.4/
+python setup.py build
+python setup.py install
+
+chmod 775 /usr/init/redhat/cfn-hup
+ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon Inspector Agent]
+#-------------------------------------------------------------------------------
+cd /tmp
+curl -O https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install
+
+chmod 744 /tmp/install
+# bash -v install
+
+# /opt/aws/inspector/bin/inspector status
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudWatchLogs Agent]
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
+
+cd /tmp
 curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
 
 cat > /tmp/awslogs.conf << __EOF__
@@ -104,12 +143,13 @@ log_stream_name = {instance_id}
 initial_position = start_of_file
 log_group_name = /var/log/secure
 encoding = utf-8
+
 __EOF__
 
-# python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
-# systemctl status awslogs
-# systemctl enable awslogs
-# systemctl is-enabled awslogs
+python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+systemctl status awslogs
+systemctl enable awslogs
+systemctl is-enabled awslogs
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
@@ -142,7 +182,10 @@ __EOF__
 yum install -y td-agent
 
 /opt/td-agent/embedded/bin/fluent-gem list --local
-#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-elasticsearch
+/opt/td-agent/embedded/bin/fluent-gem update fluent-plugin-s3
+/opt/td-agent/embedded/bin/fluent-gem list --local
 
 systemctl start td-agent
 systemctl status td-agent
