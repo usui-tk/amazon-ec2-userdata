@@ -58,26 +58,15 @@ mkdir -p /etc/chef/ohai/hints
 echo {} > /etc/chef/ohai/hints/ec2.json
 
 # Custom Package Install Fluetnd(td-agent)
-# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
-rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
-
-cat > /etc/yum.repos.d/td.repo << __EOF__
-[treasuredata]
-name=TreasureData
-baseurl=http://packages.treasuredata.com/2/redhat/7/\$basearch
-gpgcheck=1
-gpgkey=http://packages.treasuredata.com/GPG-KEY-td-agent
-__EOF__
-
-yum install -y td-agent
+curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+/opt/td-agent/embedded/bin/fluent-gem list --local
+#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
 systemctl start td-agent
 systemctl status td-agent
 systemctl enable td-agent
 systemctl is-enabled td-agent
 
-# Update rubygem for Fluentd
-/opt/td-agent/embedded/bin/fluent-gem list --local
-#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
+
 
 # Setting TimeZone
 # timedatectl status
