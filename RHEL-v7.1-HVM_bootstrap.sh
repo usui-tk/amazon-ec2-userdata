@@ -81,12 +81,12 @@ systemctl is-enabled td-agent
 
 # Setting TimeZone
 # timedatectl status
-# timedatectl set-timezone Asia/Tokyo
+timedatectl set-timezone Asia/Tokyo
 # timedatectl status
 
 # Setting Language
 # localectl status
-# localectl set-locale LANG=ja_JP.utf8
+localectl set-locale LANG=ja_JP.utf8
 # localectl status
 
 # Setting NTP Deamon
