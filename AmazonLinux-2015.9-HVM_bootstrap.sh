@@ -6,6 +6,7 @@ exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2
 # Instance MetaData
 region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
 instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 # Default Package Update
@@ -31,12 +32,30 @@ curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/r
 ohai
 
 # Custom Package Install Fluetnd(td-agent)
-curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
+
+cat > /etc/yum.repos.d/td.repo << __EOF__
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/2/redhat/\$releasever/\$basearch
+gpgcheck=1
+gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+__EOF__
+
+yum install -y td-agent
+
 /opt/td-agent/embedded/bin/fluent-gem list --local
-#/opt/td-agent/embedded/bin/fluent-gem update ${gem-name}
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-elasticsearch
+/opt/td-agent/embedded/bin/fluent-gem update fluent-plugin-s3
+/opt/td-agent/embedded/bin/fluent-gem list --local
+
 service td-agent start
 service td-agent status
+chkconfig --list td-agent
 chkconfig td-agent on
+chkconfig --list td-agent
 
 # Setting SystemClock
 cat > /etc/sysconfig/clock << __EOF__
