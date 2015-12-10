@@ -51,7 +51,7 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Red Hat Offical Repository)
+# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
 yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot
@@ -61,7 +61,7 @@ yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-r
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
-# Package Install RHEL System Administration Tools (from EPEL Recository)
+# Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y jq
 
 #-------------------------------------------------------------------------------
