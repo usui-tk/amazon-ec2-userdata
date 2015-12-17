@@ -9,17 +9,81 @@ instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
+#-------------------------------------------------------------------------------
 # Default Package Update
-yum update -y
-
-# Custom Package Install
-yum install -y dstat git iotop jq lzop mtr sos systat yum-plugin-versionlock
-yum install -y awslogs aws-cli-plugin-cloudwatch-logs
+#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
 
-# Custom Package Install Chef-Client(Chef-Solo)
+# Default Package Update
+yum update -y
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
+yum install -y dstat git jq lzop iotop mtr sos yum-plugin-versionlock
+yum install -y awslogs aws-cli-plugin-cloudwatch-logs aws-kinesis-agent
+
+# Package Install RHEL System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y bash-completion
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-CLI]
+#-------------------------------------------------------------------------------
+aws --version
+aws ec2 describe-regions --region ${region}
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-SHELL]
+#-------------------------------------------------------------------------------
+# pip install --upgrade pip
+# pip install --upgrade awscli
+# pip install aws-shell
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+#-------------------------------------------------------------------------------
+# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+yum localinstall -y https://amazon-ssm-us-east-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+status amazon-ssm-agent
+
+service amazon-ssm-agent start
+status amazon-ssm-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon Inspector Agent]
+#-------------------------------------------------------------------------------
+cd /tmp
+curl -O https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install
+
+chmod 744 /tmp/install
+# bash -v install
+
+# /opt/aws/inspector/bin/inspector status
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudWatchLogs Agent]
+#-------------------------------------------------------------------------------
+service awslogs start
+service awslogs status
+chkconfig --list awslogs
+chkconfig awslogs on
+chkconfig --list awslogs
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel install -y ansible
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Chef-Client(Chef-Solo)]
+#-------------------------------------------------------------------------------
 curl -L https://www.chef.io/chef/install.sh | bash -v
 mkdir -p /etc/chef/ohai/hints
 echo {} > /etc/chef/ohai/hints/ec2.json
@@ -31,7 +95,9 @@ curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rac
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
 ohai
 
-# Custom Package Install Fluetnd(td-agent)
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Fluetnd(td-agent)]
+#-------------------------------------------------------------------------------
 # curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
 rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
 
@@ -56,6 +122,15 @@ service td-agent status
 chkconfig --list td-agent
 chkconfig td-agent on
 chkconfig --list td-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Clean up
+#-------------------------------------------------------------------------------
+yum clean all
+
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Setting SystemClock
 cat > /etc/sysconfig/clock << __EOF__
