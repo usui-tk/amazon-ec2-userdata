@@ -151,6 +151,11 @@ chkconfig awslogs on
 chkconfig --list awslogs
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+yum --enablerepo=epel install -y ansible
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
 #-------------------------------------------------------------------------------
 curl -L https://www.chef.io/chef/install.sh | bash -v
