@@ -84,9 +84,8 @@ __EOF__
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
-
-pip install --upgrade awscli
-pip install aws-shell
+# pip install --upgrade awscli
+# pip install aws-shell
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
