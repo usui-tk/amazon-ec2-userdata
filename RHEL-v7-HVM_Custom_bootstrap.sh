@@ -80,6 +80,15 @@ fi
 __EOF__
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-SHELL]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel install -y python-pip
+# pip install --upgrade pip
+
+pip install --upgrade awscli
+pip install aws-shell
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
@@ -101,6 +110,18 @@ python setup.py install
 
 chmod 775 /usr/init/redhat/cfn-hup
 ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+#-------------------------------------------------------------------------------
+# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+yum localinstall -y https://amazon-ssm-us-east-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+systemctl status amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+systemctl is-enabled amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
@@ -150,6 +171,11 @@ python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.con
 systemctl status awslogs
 systemctl enable awslogs
 systemctl is-enabled awslogs
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+yum --enablerepo=epel install -y ansible
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
