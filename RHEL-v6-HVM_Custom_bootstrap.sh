@@ -68,14 +68,28 @@ yum --enablerepo=epel install -y bash-completion jq
 yum --enablerepo=epel install -y python-pip
 pip install --upgrade pip
 pip install awscli
-aws --version
-aws ec2 describe-regions --region ${region}
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
    complete -C /usr/bin/aws_completer aws
 fi
 __EOF__
+
+aws --version
+aws ec2 describe-regions --region ${region}
+
+aws ec2 describe-instances --instance-ids ${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-instance.txt
+aws ec2 describe-instances --instance-ids ${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-instance.txt
+
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-volume.txt
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-volume.txt
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-SHELL]
+#-------------------------------------------------------------------------------
+# pip install --upgrade pip
+# pip install --upgrade awscli
+# pip install aws-shell
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
@@ -89,25 +103,42 @@ pip install argparse
 pip install python-daemon
 pip install requests
 
-cd /tmp
-curl -O https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-tar -xvpf aws-cfn-bootstrap-latest.tar.gz
+curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
+tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
 
-cd aws-cfn-bootstrap-1.4/
+cd /tmp/aws-cfn-bootstrap-1.4/
 python setup.py build
 python setup.py install
 
 chmod 775 /usr/init/redhat/cfn-hup
 ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
 
+cd /tmp
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+#-------------------------------------------------------------------------------
+# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+status amazon-ssm-agent
+service amazon-ssm-agent start
+status amazon-ssm-agent
+/sbin/restart amazon-ssm-agent
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
 #-------------------------------------------------------------------------------
-cd /tmp
-curl -O https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install
+# curl https://s3-${region}.amazonaws.com/inspector.agent.${region}/latest/install -o /tmp/Install-Amazon-Inspector-Agent
 
-chmod 744 /tmp/install
-# bash -v install
+curl https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install -o /tmp/Install-Amazon-Inspector-Agent
+
+chmod 744 /tmp/Install-Amazon-Inspector-Agent
+# bash -v /tmp/Install-Amazon-Inspector-Agent
+
+# cat /opt/aws/inspector/etcagent.cfg
 
 # /opt/aws/inspector/bin/inspector status
 
@@ -117,8 +148,7 @@ chmod 744 /tmp/install
 # yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
 
-cd /tmp
-curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -o /tmp/awslogs-agent-setup.py
 
 cat > /tmp/awslogs.conf << __EOF__
 [general]
@@ -145,13 +175,26 @@ initial_position = start_of_file
 encoding = utf-8
 buffer_duration = 5000
 
+[SYSTEM-sample-Linux-SSM-Agent-Logs]
+log_group_name = SYSTEM-sample-Linux-SSM-Agent-Logs
+log_stream_name = {instance_id}
+datetime_format = %Y-%m-%d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/amazon/ssm/amazon-ssm-agent.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
 __EOF__
 
-python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+python /tmp/awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+
 service awslogs status
 chkconfig --list awslogs
 chkconfig awslogs on
 chkconfig --list awslogs
+service awslogs restart
+service awslogs status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
@@ -161,7 +204,7 @@ yum --enablerepo=epel install -y ansible
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
 #-------------------------------------------------------------------------------
-curl -L https://www.chef.io/chef/install.sh | bash -v
+curl -L https://www.chef.io/chef/install.sh | bash
 mkdir -p /etc/chef/ohai/hints
 echo {} > /etc/chef/ohai/hints/ec2.json
 OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
@@ -170,12 +213,15 @@ mkdir -p ${OHAI_PLUGINS_RACKERLABS}
 curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
-ohai
+
+ohai | jq '.ec2' > /root/ohai-info_aws-ec2-instance.txt
+ohai | jq '.network' > /root/ohai-info_linux-network.txt
+ohai | jq '.packages' > /root/ohai-info_linux-packages.txt
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Fluetnd(td-agent)]
 #-------------------------------------------------------------------------------
-# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
+# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash
 rpm --import http://packages.treasuredata.com/GPG-KEY-td-agent
 
 cat > /etc/yum.repos.d/td.repo << __EOF__
