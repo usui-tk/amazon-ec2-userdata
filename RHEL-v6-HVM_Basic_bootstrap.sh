@@ -52,7 +52,7 @@ yum update -y
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y git lzop yum-priorities yum-plugin-versionlock
 yum install -y redhat-access-insights redhat-support-tool
-yum install -y setroubleshoot
+yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
@@ -110,9 +110,13 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
 # Disable IPv6 Kernel Parameter
 sysctl -a
-echo "# Custom sysctl Parameter for ipv6 disable" >> /etc/sysctl.conf
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+
+cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+# Custom sysctl Parameter for ipv6 disable
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+__EOF__
+
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
