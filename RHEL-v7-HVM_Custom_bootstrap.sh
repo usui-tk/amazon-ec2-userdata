@@ -54,7 +54,7 @@ yum update -y
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
 yum install -y redhat-access-insights redhat-support-tool
-yum install -y setroubleshoot
+yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
@@ -116,7 +116,7 @@ ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 # yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-us-east-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 systemctl status amazon-ssm-agent
 systemctl enable amazon-ssm-agent
@@ -130,6 +130,8 @@ curl -O https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/inst
 
 chmod 744 /tmp/install
 # bash -v install
+
+# cat /opt/aws/inspector/etcagent.cfg
 
 # /opt/aws/inspector/bin/inspector status
 
@@ -145,24 +147,27 @@ curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-s
 cat > /tmp/awslogs.conf << __EOF__
 [general]
 state_file = /var/awslogs/state/agent-state
+use_gzip_http_content_encoding = true
 
-[/var/log/messages]
+[SYSTEM-sample-Linux-OS-var-log-messages]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
+log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
 file = /var/log/messages
-buffer_duration = 5000
-log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /var/log/messages
 encoding = utf-8
+buffer_duration = 5000
 
-[/var/log/secure]
-datetime_format = %b %d %H:%M:%S
-file = /var/log/secure
-buffer_duration = 5000
+[SYSTEM-sample-Linux-OS-var-log-secure]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
 log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/secure
 initial_position = start_of_file
-log_group_name = /var/log/secure
 encoding = utf-8
+buffer_duration = 5000
 
 __EOF__
 
@@ -185,7 +190,7 @@ echo {} > /etc/chef/ohai/hints/ec2.json
 OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
 OHAI_PLUGINS_RACKERLABS="${OHAI_PLUGINS}/rackerlabs"
 mkdir -p ${OHAI_PLUGINS_RACKERLABS}
-curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
+# curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
 ohai
@@ -251,9 +256,13 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
 # Disable IPv6 Kernel Parameter
 sysctl -a
-echo "# Custom sysctl Parameter for ipv6 disable" >> /etc/sysctl.conf
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+
+cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+# Custom sysctl Parameter for ipv6 disable
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+__EOF__
+
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
