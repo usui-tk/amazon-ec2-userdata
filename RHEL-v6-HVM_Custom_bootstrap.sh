@@ -52,7 +52,7 @@ yum update -y
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y git lzop yum-priorities yum-plugin-versionlock
 yum install -y redhat-access-insights redhat-support-tool
-yum install -y setroubleshoot
+yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
@@ -123,24 +123,27 @@ curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-s
 cat > /tmp/awslogs.conf << __EOF__
 [general]
 state_file = /var/awslogs/state/agent-state
+use_gzip_http_content_encoding = true
 
-[/var/log/messages]
+[SYSTEM-sample-Linux-OS-var-log-messages]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
+log_stream_name = {instance_id}
 datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
 file = /var/log/messages
-buffer_duration = 5000
-log_stream_name = {instance_id}
 initial_position = start_of_file
-log_group_name = /var/log/messages
 encoding = utf-8
+buffer_duration = 5000
 
-[/var/log/secure]
-datetime_format = %b %d %H:%M:%S
-file = /var/log/secure
-buffer_duration = 5000
+[SYSTEM-sample-Linux-OS-var-log-secure]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
 log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/secure
 initial_position = start_of_file
-log_group_name = /var/log/secure
 encoding = utf-8
+buffer_duration = 5000
 
 __EOF__
 
@@ -245,9 +248,13 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
 # Disable IPv6 Kernel Parameter
 sysctl -a
-echo "# Custom sysctl Parameter for ipv6 disable" >> /etc/sysctl.conf
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+
+cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+# Custom sysctl Parameter for ipv6 disable
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+__EOF__
+
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
