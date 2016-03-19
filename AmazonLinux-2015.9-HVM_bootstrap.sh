@@ -25,7 +25,7 @@ yum update -y
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
 yum install -y dstat git jq lzop iotop mtr sos yum-plugin-versionlock
-yum install -y awslogs aws-cli-plugin-cloudwatch-logs aws-kinesis-agent
+yum install -y aws-cli-plugin-cloudwatch-logs aws-kinesis-agent
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -41,7 +41,7 @@ aws ec2 describe-regions --region ${region}
 #-------------------------------------------------------------------------------
 # pip install --upgrade pip
 # pip install --upgrade awscli
-# pip install aws-shell
+pip install aws-shell
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
@@ -49,7 +49,7 @@ aws ec2 describe-regions --region ${region}
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 # yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-us-east-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 status amazon-ssm-agent
 
@@ -65,16 +65,97 @@ curl -O https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/inst
 chmod 744 /tmp/install
 # bash -v install
 
+# cat /opt/aws/inspector/etcagent.cfg
+
 # /opt/aws/inspector/bin/inspector status
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudWatchLogs Agent]
+# Custom Package Installation [AWS CloudWatchLogs Agent] from PIP
+# ### [Workaround Installation Pattern] ###
 #-------------------------------------------------------------------------------
-service awslogs start
+
+cd /tmp
+curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+
+cat > /tmp/awslogs.conf << __EOF__
+[general]
+state_file = /var/awslogs/state/agent-state
+use_gzip_http_content_encoding = true
+
+[SYSTEM-sample-Linux-OS-var-log-messages]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/messages
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+[SYSTEM-sample-Linux-OS-var-log-secure]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/secure
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+__EOF__
+
+python ./awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+
 service awslogs status
 chkconfig --list awslogs
 chkconfig awslogs on
 chkconfig --list awslogs
+service awslogs start
+service awslogs status
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudWatchLogs Agent] from RPM
+# ### [General Installation Pattern] ###
+#-------------------------------------------------------------------------------
+
+# yum install -y awslogs aws-cli-plugin-cloudwatch-logs
+
+# sed -i "s/region = us-east-1/region = ${region}/g" /etc/awslogs/awscli.conf
+
+# cat > /etc/awslogs/awslogs.conf << __EOF__
+# [general]
+# state_file = /var/awslogs/state/agent-state
+# use_gzip_http_content_encoding = true
+# 
+# [SYSTEM-sample-Linux-OS-var-log-messages]
+# log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
+# log_stream_name = {instance_id}
+# datetime_format = %b %d %H:%M:%S
+# time_zone = LOCAL
+# file = /var/log/messages
+# initial_position = start_of_file
+# encoding = utf-8
+# buffer_duration = 5000
+# 
+# [SYSTEM-sample-Linux-OS-var-log-secure]
+# log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
+# log_stream_name = {instance_id}
+# datetime_format = %b %d %H:%M:%S
+# time_zone = LOCAL
+# file = /var/log/secure
+# initial_position = start_of_file
+# encoding = utf-8
+# buffer_duration = 5000
+# 
+# __EOF__
+
+# service awslogs start
+# service awslogs status
+# chkconfig --list awslogs
+# chkconfig awslogs on
+# chkconfig --list awslogs
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
@@ -173,10 +254,14 @@ chkconfig --list ip6tables
 echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
 # Disable IPv6 Kernel Parameter
-sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
-echo "# Custom sysctl Parameter for ipv6 disable" >> /etc/sysctl.conf
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -a
+
+cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+# Custom sysctl Parameter for ipv6 disable
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+__EOF__
+
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
