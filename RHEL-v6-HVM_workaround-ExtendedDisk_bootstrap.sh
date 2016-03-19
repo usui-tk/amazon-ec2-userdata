@@ -3,18 +3,29 @@
 # Logger
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
+# Instance MetaData
+region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
+instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+#-------------------------------------------------------------------------------
+# Default Package Update
+#-------------------------------------------------------------------------------
+
 # Red Hat Update Infrastructure Client Package Update
+yum clean all
 yum update -y rh-amazon-rhui-client
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
-# yum-config-manager --enable rhui-REGION-rhel-server-releases
-# yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-# yum-config-manager --enable rhui-REGION-client-config-server-6
+yum-config-manager --enable rhui-REGION-rhel-server-releases
+yum-config-manager --enable rhui-REGION-rhel-server-rh-common
+yum-config-manager --enable rhui-REGION-client-config-server-6
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
 yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-#yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # Enable Channnel (RHEL Server Debug RPM)
 # yum-config-manager --enable rhui-REGION-rhel-server-debug-rh-common
@@ -32,38 +43,33 @@ yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 yum clean all
 
 # Default Package Update
-yum update -y 
+yum update -y
 
-# Custom Package Install
-yum install -y git yum-priorities yum-plugin-versionlock
+#-------------------------------------------------------------------------------
+# Custom Package Installation
+#-------------------------------------------------------------------------------
 
-# yum repository metadata Clean up
-yum clean all
+# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
+yum install -y git lzop yum-priorities yum-plugin-versionlock
+yum install -y redhat-access-insights redhat-support-tool
+yum install -y setroubleshoot-server
 
-# Custom Package Install EPEL(Extra Packages for Enterprise Linux) repository Package
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum localinstall -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
-# Custom Package Install (from EPEL)
-yum install -y bash-completion gdisk jq
+# Package Install RHEL System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y bash-completion jq
 
-# Custom Package Install AWS CloudFormation Helper Scripts
-# Depends on EPEL repository
-yum localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+#-------------------------------------------------------------------------------
+# Custom Package Clean up
+#-------------------------------------------------------------------------------
+yum clean all
 
-# Custom Package Install Chef-Client(Chef-Solo)
-curl -L https://www.chef.io/chef/install.sh | bash -v
-
-# Ohai EC2 Provider
-mkdir -p /etc/chef/ohai/hints
-echo {} > /etc/chef/ohai/hints/ec2.json
-
-# Custom Package Install Fluetnd(td-agent)
-# curl -L http://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | bash -v
-yum localinstall -y http://packages.treasuredata.com/2/redhat/6/x86_64/td-agent-2.1.3-0.x86_64.rpm
-service td-agent start
-service td-agent status
-chkconfig td-agent on
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Setting SystemClock
 cat > /etc/sysconfig/clock << __EOF__
@@ -90,17 +96,14 @@ __EOF__
 
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop
-
 chkconfig --list iptables
 chkconfig iptables off
 chkconfig --list iptables
 
 service ip6tables stop
-
 chkconfig --list ip6tables
 chkconfig ip6tables off
 chkconfig --list ip6tables
-
 
 # Root Disk Partition Resize (GPT)
 # -- Use RHEL v6 HVM AMI (6.6_HVM_GA) --
@@ -138,13 +141,16 @@ df -h
 echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 
 # Disable IPv6 Kernel Parameter
-sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
-echo "# Custom sysctl Parameter for ipv6 disable" >> /etc/sysctl.conf
-echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+sysctl -a
+
+cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+# Custom sysctl Parameter for ipv6 disable
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+__EOF__
+
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
 # Instance Reboot
 reboot
-
