@@ -241,6 +241,12 @@ systemctl status awslogs
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y ansible
 
+ansible --version
+
+# Get Security Token Serivce Credentials from AWS IAM Role
+IAM_STS_AWS_ACCESS_KEY_ID=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${iamRole} | jq '.AccessKeyId'|sed "s/\"//g")
+IAM_STS_AWS_SECRET_ACCESS_KEY_ID=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/${iamRole} | jq '.SecretAccessKey'|sed "s/\"//g")
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Chef-Client(Chef-Solo)]
 #-------------------------------------------------------------------------------
@@ -250,7 +256,7 @@ echo {} > /etc/chef/ohai/hints/ec2.json
 OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
 OHAI_PLUGINS_RACKERLABS="${OHAI_PLUGINS}/rackerlabs"
 mkdir -p ${OHAI_PLUGINS_RACKERLABS}
-# curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
+curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
 curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
 
@@ -274,16 +280,34 @@ __EOF__
 
 yum install -y td-agent
 
-/opt/td-agent/embedded/bin/fluent-gem list --local
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-elasticsearch
-/opt/td-agent/embedded/bin/fluent-gem update fluent-plugin-s3
-/opt/td-agent/embedded/bin/fluent-gem list --local
+td-agent-gem list --local
+td-agent-gem install fluent-plugin-cloudwatch-logs
+td-agent-gem install fluent-plugin-kinesis
+td-agent-gem install fluent-plugin-elasticsearch
+td-agent-gem update fluent-plugin-s3
+td-agent-gem list --local
 
 systemctl start td-agent
 systemctl status td-agent
 systemctl enable td-agent
 systemctl is-enabled td-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Logstash]
+#-------------------------------------------------------------------------------
+# rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+
+# cat > /etc/yum.repos.d/logstash.repo << __EOF__
+# [logstash-2.2]
+# name=Logstash repository for 2.2.x packages
+# baseurl=http://packages.elastic.co/logstash/2.2/centos
+# gpgcheck=1
+# gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
+# enabled=1
+# __EOF__
+
+# yum install -y logstash
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -320,12 +344,13 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 # Disable IPv6 Kernel Parameter
 sysctl -a
 
-cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
 # Custom sysctl Parameter for ipv6 disable
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 __EOF__
 
+sysctl --system
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
