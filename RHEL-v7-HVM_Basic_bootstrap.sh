@@ -100,12 +100,13 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 # Disable IPv6 Kernel Parameter
 sysctl -a
 
-cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
 # Custom sysctl Parameter for ipv6 disable
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 __EOF__
 
+sysctl --system
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 
