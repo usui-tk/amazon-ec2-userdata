@@ -7,6 +7,7 @@ exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2
 region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
 instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+iamRole=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
 privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 #-------------------------------------------------------------------------------
