@@ -17,6 +17,9 @@ privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 # yum repository metadata Clean up
 yum clean all
 
+# Check AmazonLinux-Preview Repository rpm-files
+yum --enablerepo=amzn-preview list | grep amzn-preview
+
 # Default Package Update
 yum update -y
 
@@ -26,7 +29,7 @@ yum update -y
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
 yum install -y dstat git jq lzop iotop mtr sos yum-plugin-versionlock
-yum install -y aws-cli-plugin-cloudwatch-logs aws-kinesis-agent
+yum install -y aws-cli-plugin-cloudwatch-logs aws-cloudhsm-cli aws-kinesis-agent
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -66,7 +69,8 @@ status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CodeDeploy Agent]
 #-------------------------------------------------------------------------------
-yum install -y ruby wget
+yum install -y wget ruby
+alternatives --display ruby
 
 # curl https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
 # curl https://aws-codedeploy-${region}.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
@@ -264,17 +268,34 @@ __EOF__
 
 yum install -y td-agent
 
-/opt/td-agent/embedded/bin/fluent-gem list --local
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-elasticsearch
-/opt/td-agent/embedded/bin/fluent-gem update fluent-plugin-s3
-/opt/td-agent/embedded/bin/fluent-gem list --local
+td-agent-gem list --local
+td-agent-gem install fluent-plugin-cloudwatch-logs
+td-agent-gem install fluent-plugin-kinesis
+td-agent-gem install fluent-plugin-elasticsearch
+td-agent-gem update fluent-plugin-s3
+td-agent-gem list --local
 
 service td-agent start
 service td-agent status
 chkconfig --list td-agent
 chkconfig td-agent on
 chkconfig --list td-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Logstash]
+#-------------------------------------------------------------------------------
+# rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+
+# cat > /etc/yum.repos.d/logstash.repo << __EOF__
+# [logstash-2.2]
+# name=Logstash repository for 2.2.x packages
+# baseurl=http://packages.elastic.co/logstash/2.2/centos
+# gpgcheck=1
+# gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
+# enabled=1
+# __EOF__
+
+# yum install -y logstash
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -328,7 +349,7 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 # Disable IPv6 Kernel Parameter
 sysctl -a
 
-cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
 # Custom sysctl Parameter for ipv6 disable
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
