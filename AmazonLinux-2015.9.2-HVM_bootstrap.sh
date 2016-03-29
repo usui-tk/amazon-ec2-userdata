@@ -28,7 +28,7 @@ yum update -y
 yum install -y dstat git jq lzop iotop mtr sos yum-plugin-versionlock
 yum install -y aws-cli-plugin-cloudwatch-logs aws-kinesis-agent
 
-# Package Install RHEL System Administration Tools (from EPEL Repository)
+# Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
 
 #-------------------------------------------------------------------------------
