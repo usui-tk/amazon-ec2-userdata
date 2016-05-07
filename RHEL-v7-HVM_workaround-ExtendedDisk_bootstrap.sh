@@ -58,7 +58,7 @@ yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+yum localinstall -y http://download.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-6.noarch.rpm
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
