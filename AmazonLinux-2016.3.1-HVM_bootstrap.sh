@@ -95,7 +95,6 @@ service codedeploy-agent status
 #-------------------------------------------------------------------------------
 curl https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install -o /tmp/Install-Amazon-Inspector-Agent
 
-
 chmod 744 /tmp/Install-Amazon-Inspector-Agent
 bash -v /tmp/Install-Amazon-Inspector-Agent
 
