@@ -160,16 +160,21 @@ systemctl status codedeploy-agent
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
 #-------------------------------------------------------------------------------
-# curl https://s3-${region}.amazonaws.com/inspector.agent.${region}/latest/install -o /tmp/Install-Amazon-Inspector-Agent
-
-curl https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install -o /tmp/Install-Amazon-Inspector-Agent
+curl https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install -o /tmp/Install-Amazon-Inspector-Agent
 
 chmod 744 /tmp/Install-Amazon-Inspector-Agent
-# bash -v /tmp/Install-Amazon-Inspector-Agent
+bash -v /tmp/Install-Amazon-Inspector-Agent
 
-# cat /opt/aws/inspector/etcagent.cfg
+cat /opt/aws/awsagent/.version
 
-# /opt/aws/inspector/bin/inspector status
+systemctl status awsagent
+systemctl enable awsagent
+systemctl is-enabled awsagent
+
+systemctl restart awsagent
+systemctl status awsagent
+
+/opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudWatchLogs Agent]
@@ -318,15 +323,39 @@ yum clean all
 # System Setting
 #-------------------------------------------------------------------------------
 
+# Setting ulimit (System Boot Process Only)
+mkdir /etc/systemd/system.conf.d
+
+cat > /etc/systemd/system.conf.d/limits.conf << __EOF__
+[Manager]
+DefaultLimitNOFILE=1006500
+DefaultLimitNPROC=1006500
+__EOF__
+
+
+# Setting ulimit (Service:rsyslog)
+mkdir /etc/systemd/system/rsyslog.service.d
+
+cat > /etc/systemd/system/rsyslog.service.d/limits.conf << __EOF__
+[Service]
+LimitNOFILE=1006500
+LimitNPROC=1006500
+__EOF__
+
+grep "open files" /proc/`pidof rsyslogd`/limits
+
+
 # Setting TimeZone
 # timedatectl status
 timedatectl set-timezone Asia/Tokyo
 # timedatectl status
 
+
 # Setting Language
 # localectl status
 localectl set-locale LANG=ja_JP.utf8
 # localectl status
+
 
 # Setting NTP Deamon
 sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
@@ -338,8 +367,10 @@ chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
 
+
 # Disable IPv6 Kernel Module
 echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
 
 # Disable IPv6 Kernel Parameter
 sysctl -a
@@ -353,6 +384,7 @@ __EOF__
 sysctl --system
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+
 
 # Instance Reboot
 reboot
