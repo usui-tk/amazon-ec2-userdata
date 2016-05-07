@@ -93,16 +93,19 @@ service codedeploy-agent status
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
 #-------------------------------------------------------------------------------
-# curl https://s3-${region}.amazonaws.com/inspector.agent.${region}/latest/install -o /tmp/Install-Amazon-Inspector-Agent
+curl https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install -o /tmp/Install-Amazon-Inspector-Agent
 
-curl https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install -o /tmp/Install-Amazon-Inspector-Agent
 
 chmod 744 /tmp/Install-Amazon-Inspector-Agent
-# bash -v /tmp/Install-Amazon-Inspector-Agent
+bash -v /tmp/Install-Amazon-Inspector-Agent
 
-# cat /opt/aws/inspector/etcagent.cfg
+cat /opt/aws/awsagent/.version
 
-# /opt/aws/inspector/bin/inspector status
+chkconfig --list awsagent
+chkconfig awsagent on
+chkconfig --list awsagent
+
+/opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudWatchLogs Agent] from PIP
