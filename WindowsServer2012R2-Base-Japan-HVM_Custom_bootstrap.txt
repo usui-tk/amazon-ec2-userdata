@@ -1,0 +1,389 @@
+<powershell>
+
+# Define Function
+function Expand-ZIPFile($file, $destination)
+{
+   $shell = New-Object -com shell.application
+   $zip = $shell.NameSpace($file)
+   foreach($item in $zip.items())
+     {
+        $shell.Namespace($destination).copyhere($item)
+     }
+}
+
+# TimeCounter
+$StartTime = Get-Date
+
+# Changing the execution policy
+Get-ExecutionPolicy
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+Get-ExecutionPolicy
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-0 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Load Module (AWS Tools for Windows PowerShell)
+Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
+Get-AWSPowerShellVersion
+
+# Get Instance MetaData
+$AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+$Region = $AZ.Substring(0, $AZ.Length -1)
+$InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+$InstanceType = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-type').Content
+$PrivateIp = (Invoke-WebRequest '169.254.169.254/latest/meta-data/local-ipv4').Content
+
+# Get Setting File
+$SysprepSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+$EC2SettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+$CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Setting Timezone
+tzutil.exe /s "Tokyo Standard Time"
+
+# Setting SystemLocale
+Set-WinSystemLocale -SystemLocale ja-JP
+Set-WinHomeLocation -GeoId 0x7A
+Set-WinCultureFromLanguageListOptOut -OptOut $False
+
+# Setting Japanese UI
+Set-WinUILanguageOverride ja-JP
+
+# Update PowerShell Helper
+Update-Help
+
+# Enable EC2config EventLog Output
+
+Get-Content "# Before EC2config Settings File"
+Get-Content $EC2SettingsFile
+
+$xml1 = [xml](Get-Content $EC2SettingsFile)
+$xmlElement1 = $xml1.get_DocumentElement()
+$xmlElementToModify1 = $xmlElement1.Plugins
+
+foreach ($element in $xmlElementToModify1.Plugin)
+{
+    if ($element.name -eq "Ec2EventLog")
+    {
+        $element.State="Enabled"
+    }
+}
+$xml1.Save($EC2SettingsFile)
+
+Get-Content "# After EC2config Settings File"
+Get-Content $EC2SettingsFile
+
+# Change System PowerPlan (High Performance)
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
+
+if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "高パフォーマンス" }) {
+    Write-Output "Change System PowerPlan : 高パフォーマンス"
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="高パフォーマンス"').Activate()
+    Start-Sleep -Seconds 5
+} elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+    Write-Output "Change System PowerPlan : High performance"
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="High performance"').Activate()
+    Start-Sleep -Seconds 5
+} else {
+    Write-Output "Change System PowerPlan : No change"
+}
+
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
+
+# Disable IPv6 Binding
+Get-NetAdapterBinding
+
+if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+    Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6
+    Start-Sleep -Seconds 5
+} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+    Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6
+    Start-Sleep -Seconds 5
+} else {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
+}
+
+Get-NetAdapterBinding
+
+# Setting Hostname
+Rename-Computer $InstanceId -Force
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Make Directory
+New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
+Set-Location -Path "C:\EC2-Bootstrap"
+$WorkingDirectoryPath = "C:\EC2-Bootstrap\"
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-1 Execution Time taken[Update Amazon EC2 Windows Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Amazon EC2 Windows Drivers (http://aws.amazon.com/developertools/0847543877823643/)
+$DriverUrl = "https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip"
+$DriverZip = "AWSPVDriverSetup.zip"
+$DriverLog = "AWSPVDriverSetup.log"
+Invoke-Webrequest -Uri $DriverUrl -Outfile $WorkingDirectoryPath\$DriverZip
+
+# Expand-ZIPFile -File $WorkingDirectoryPath\$DriverZip -Destination $WorkingDirectoryPath
+# msiexec.exe /u
+# Start-Sleep -Seconds 60
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-2 Execution Time taken[Update AWS Tools for Windows PowerShell]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# AWS Tools for Windows PowerShell (https://aws.amazon.com/jp/powershell/)
+$AwsPsUrl = "http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi"
+$AwsPsMsi = "AWSToolsAndSDKForNet.msi"
+$AwsPsLog = "AWSToolsAndSDKForNet.log"
+
+Invoke-Webrequest -Uri $AwsPsUrl -Outfile $WorkingDirectoryPath\$AwsPsMsi
+
+# msiexec.exe /u $WorkingDirectoryPath\$AwsPsMsi /quiet /lx $WorkingDirectoryPath\$AwsPsLog
+# Start-Sleep -Seconds 60
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-3 Execution Time taken[Update Amazon Windows EC2Config Service]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Amazon Windows EC2Config Service (https://aws.amazon.com/developertools/5562082477397515)
+$AwsEc2ConfigUrl = "https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip"
+$AwsEc2ConfigZip = "EC2Install.zip"
+$AwsEc2ConfigLog = "EC2Install.log"
+
+Invoke-Webrequest -Uri $AwsEc2ConfigUrl -Outfile $WorkingDirectoryPath\$AwsEc2ConfigZip
+
+# Expand-ZIPFile -File $WorkingDirectoryPath\$AwsEc2ConfigZip -Destination $WorkingDirectoryPath
+# msiexec.exe /u $WorkingDirectoryPath\$AwsPsMsi /quiet /lx $WorkingDirectoryPath\$AwsEc2ConfigLog
+# Start-Sleep -Seconds 60
+
+# Get-SSMDocumentDescription -Name "AWS-UpdateEC2Config" | select -ExpandProperty Parameters
+# Send-SSMCommand -InstanceId Instance-ID -DocumentName "AWS-UpdateEC2Config"
+# Get-SSMCommandInvocation -CommandId ID -Details $true -InstanceId Instance-ID | select -ExpandProperty CommandPlugins
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-4 Execution Time taken[Install Intel Ethernet Adapter Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Intel Ethernet Adapter Drivers (https://downloadcenter.intel.com/ja/download/23073/Windows-Server2012R2-)
+# NIC Driver Version:20.7.1
+$NicDriverUrl = "https://downloadmirror.intel.com/23073/eng/PROWinx64.exe"
+$NicDriverExe = "PROWinx64.exe"
+$NicDriverLog = "PROWinx64.log"
+Invoke-Webrequest -Uri $NicDriverUrl -Outfile $WorkingDirectoryPath\$NicDriverExe
+
+# Intel Ethernet Adapters Connections CD (https://downloadcenter.intel.com/download/22283)
+# Intel Ethernet Adapters Connections CD Version:20.7.1
+$EthernetDriverUrl = "https://downloadmirror.intel.com/22283/eng/20_7_1_cd.zip"
+$EthernetDriverZip = "20_7_1_cd.zip"
+$EthernetDriverLog = "20_7_1_cd.log"
+Invoke-Webrequest -Uri $EthernetDriverUrl -Outfile $WorkingDirectoryPath\$EthernetDriverZip
+
+
+# msiexec.exe /u
+# Start-Sleep -Seconds 60
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#3-0 Execution Time taken[Show Desktop Icon]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Show Desktop Icons (https://gallery.technet.microsoft.com/scriptcenter/PowerShell-Show-Desktop-4c0f9630)
+$ScriptUrl1 = "https://gallery.technet.microsoft.com/scriptcenter/PowerShell-Show-Desktop-4c0f9630/file/145753/1/ShowDesktopIcons.ps1"
+$Script1 = "ShowDesktopIcons.ps1"
+Invoke-Webrequest -Uri $ScriptUrl1 -Outfile $WorkingDirectoryPath\$Script1
+
+Measure-Command -Expression { $WorkingDirectoryPath + $Script1 }
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-0 Execution Time taken[Install AWS-CLI]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# AWS-CLI (https://aws.amazon.com/jp/cli/)
+$AwsCliUrl = "https://s3.amazonaws.com/aws-cli/AWSCLI64.msi"
+$AwsCliMsi = "AWSCLI64.msi"
+$AwsCliLog = "AWSCLI64.log"
+Invoke-Webrequest -Uri $AwsCliUrl -Outfile $WorkingDirectoryPath\$AwsCliMsi
+
+msiexec.exe /i $WorkingDirectoryPath\$AwsCliMsi /quiet /lx $WorkingDirectoryPath\$AwsCliLog
+Start-Sleep -Seconds 60
+
+cmd.exe /c "C:\Program Files\Amazon\AWSCLI\aws.exe" --version
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-1 Execution Time taken[Update AWS CloudFormation helper scripts]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# AWS CloudFormation helper scripts (https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html)
+$AwsCfnUrl = "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.msi"
+$AwsCfnMsi = "aws-cfn-bootstrap-latest.msi"
+$AwsCfnLog = "aws-cfn-bootstrap-latest.log"
+Invoke-Webrequest -Uri $AwsCfnUrl -Outfile $WorkingDirectoryPath\$AwsCfnMsi
+
+# msiexec.exe /u $WorkingDirectoryPath\$AwsCfnMsi /quiet /lx $WorkingDirectoryPath\$AwsCfnLog
+# Start-Sleep -Seconds 60
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-2 Execution Time taken[Configure Amazon EC2 SSM-Agent(EC2Config)]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Reload Module (AWS Tools for Windows PowerShell)
+Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
+Get-AWSPowerShellVersion
+
+# Get-SSMDocumentList
+# Get-SSMDocumentDescription -Name "AWS-RunPowerShellScript" | select -ExpandProperty Parameters
+# Get-SSMDocumentDescription -Name "AWS-InstallApplication" | select -ExpandProperty Parameters
+# Get-SSMDocumentDescription -Name "AWS-InstallPowerShellModule" | select -ExpandProperty Parameters
+# Get-SSMDocumentDescription -Name "AWS-JoinDirectoryServiceDomain" | select -ExpandProperty Parameters
+# Get-SSMDocumentDescription -Name "AWS-ConfigureCloudWatch" | select -ExpandProperty Parameters
+
+# $cloudWatchCommand=Send-SSMCommand -InstanceID Instance-ID -DocumentName 'AWS-ConfigureCloudWatch' -Parameter @{'properties'='{"engineConfiguration": {"PollInterval":"00:00:15", "Components":[{"Id":"ApplicationEventLog", "FullName":"AWS.EC2.Windows.CloudWatch.EventLog.EventLogInputComponent,AWS.EC2.Windows.CloudWatch", "Parameters":{"LogName":"Application", "Levels":"7"}},{"Id":"CloudWatch", "FullName":"AWS.EC2.Windows.CloudWatch.CloudWatchLogsOutput,AWS.EC2.Windows.CloudWatch", "Parameters":{"Region":"us-east-1", "LogGroup":"My-Log-Group", "LogStream":"i-1234567890abcdef0"}}], "Flows":{"Flows":["ApplicationEventLog,CloudWatch"]}}}'}
+# Get-SSMCommandInvocation -CommandId $cloudWatchCommand.CommandId -Details $true
+# Get-SSMCommandInvocation -CommandId $cloudWatchCommand.CommandId -Details $true -InstanceId Instance-ID | select -ExpandProperty CommandPlugins
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-3 Execution Time taken[Configure AWS CodeDeploy-Agent]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# AWS CodeDeploy Agent (http://docs.aws.amazon.com/codedeploy/latest/userguide/how-to-run-agent.html#how-to-run-agent-install-windows)
+$AwsCodeDeployBacketName = [String]::Join("-", ("aws-codedeploy", $Region))
+$AwsCodeDeployMsi = "codedeploy-agent.msi"
+$AwsCodeDeployLog = "codedeploy-agent.log"
+
+Read-S3Object -BucketName $AwsCodeDeployBacketName -Key latest/codedeploy-agent.msi -File $AwsCodeDeployMsi
+
+msiexec.exe /i $WorkingDirectoryPath\$AwsCodeDeployMsi /quiet /lx $WorkingDirectoryPath\$AwsCodeDeployLog
+Start-Sleep -Seconds 90
+
+Get-Service -Name codedeployagent
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-5 Execution Time taken[Install Amazon Inspector-Agent]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Amazon Inspector (https://docs.aws.amazon.com/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows)
+$AmazonInspectorUrl = "https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe"
+$AmazonInspectorExe = "AWSAgentInstall.exe"
+$AmazonInspectorLog = "AWSAgentInstall.log"
+Invoke-Webrequest -Uri $AmazonInspectorUrl -Outfile $WorkingDirectoryPath\$AmazonInspectorExe
+
+# Inspector support only Windows Server 2008 R2 & Windows Server 2012 [Not Support Windows Server 2012 R2]
+# cmd.exe /c "$WorkingDirectoryPath\$AmazonInspectorExe /install /quiet /log $WorkingDirectoryPath\$AmazonInspectorLog"
+# Start-Sleep -Seconds 60
+
+#-------------------------------------------------------------------------------
+Write-Output "#4-6 Execution Time taken[Configure Amazon CloudWatch Logs-Agent(EC2Config)]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+Get-Content "# Before EC2config Settings File"
+Get-Content $EC2SettingsFile
+
+$xml2 = [xml](Get-Content $EC2SettingsFile)
+$xmlElement2 = $xml2.get_DocumentElement()
+$xmlElementToModify2 = $xmlElement2.Plugins
+
+foreach ($element in $xmlElementToModify2.Plugin)
+{
+    if ($element.name -eq "AWS.EC2.Windows.CloudWatch.PlugIn")
+    {
+        $element.State="Enabled"
+    }
+}
+$xml2.Save($EC2SettingsFile)
+
+Get-Content "# After EC2config Settings File"
+Get-Content $EC2SettingsFile
+
+
+Get-Content "# Before CloudWatch Logs Settings File"
+Get-Content $CWLogsSettingsFile
+
+# Configure CloudWatch Logs Agent from SSM-Agent
+
+# Get-SSMDocumentDescription -Name "AWS-ConfigureCloudWatch" | select -ExpandProperty Parameters
+# $cloudWatchCommand=Send-SSMCommand -InstanceID Instance-ID -DocumentName 'AWS-ConfigureCloudWatch' -Parameter @{'properties'='{"engineConfiguration": {"PollInterval":"00:00:15", "Components":[{"Id":"ApplicationEventLog", "FullName":"AWS.EC2.Windows.CloudWatch.EventLog.EventLogInputComponent,AWS.EC2.Windows.CloudWatch", "Parameters":{"LogName":"Application", "Levels":"7"}},{"Id":"CloudWatch", "FullName":"AWS.EC2.Windows.CloudWatch.CloudWatchLogsOutput,AWS.EC2.Windows.CloudWatch", "Parameters":{"Region":"us-east-1", "LogGroup":"My-Log-Group", "LogStream":"i-1234567890abcdef0"}}], "Flows":{"Flows":["ApplicationEventLog,CloudWatch"]}}}'}
+# Get-SSMCommandInvocation -CommandId $cloudWatchCommand.CommandId -Details $true
+# Get-SSMCommandInvocation -CommandId $cloudWatchCommand.CommandId -Details $true -InstanceId Instance-ID | select -ExpandProperty CommandPlugins
+
+Get-Content "# After CloudWatch Logs Settings File"
+Get-Content $CWLogsSettingsFile
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#5-0 Execution Time taken[Configure Windows Update]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+# Get-SSMDocumentDescription -Name "AWS-ConfigureWindowsUpdate"
+# Get-SSMDocumentDescription -Name "AWS-ConfigureWindowsUpdate" | select -ExpandProperty Parameters
+
+# Configure Windows Update from SSM-Agent
+# $configureWindowsUpdateCommand = Send-SSMCommand -InstanceId Instance-ID -DocumentName 'AWS-ConfigureWindowsUpdate' -Parameters @{'updateLevel'='InstallUpdatesAutomatically'; 'scheduledInstallDay'='Daily'; 'scheduledInstallTime'='22:00'}
+# Get-SSMCommandInvocation -Details $true -CommandId $configureWindowsUpdateCommand.CommandId | select -ExpandProperty CommandPlugins
+# $configureWindowsUpdateCommand = Send-SSMCommand -InstanceId Instance-ID -DocumentName 'AWS-ConfigureWindowsUpdate' -Parameters @{'updateLevel'='NeverCheckForUpdates'}
+# Get-SSMCommandInvocation -Details $true -CommandId $configureWindowsUpdateCommand.CommandId | select -ExpandProperty CommandPlugins
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#5-1 Execution Time taken[Configure Windows Avvanced Firewall]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#6-0 Execution Time taken[Install Google Chrome]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+#######[Working]#########
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Save Logging Data
+Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
+Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
+
+Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
+Copy-Item $EC2SettingsFile $WorkingDirectoryPath
+Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#9-1 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Restart-Computer -Force
+
+</powershell>
