@@ -23,6 +23,7 @@ $InstanceType = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-ty
 $PrivateIp = (Invoke-WebRequest '169.254.169.254/latest/meta-data/local-ipv4').Content
 
 # Get Setting File
+$SysprepSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 $EC2SettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 $CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
@@ -48,7 +49,7 @@ Update-Help
 # Before EC2config Settings File
 Get-Content $EC2SettingsFile
 
-$xml1 = [xml](get-content $EC2SettingsFile)
+$xml1 = [xml](Get-Content $EC2SettingsFile)
 $xmlElement1 = $xml1.get_DocumentElement()
 $xmlElementToModify1 = $xmlElement1.Plugins
 
@@ -66,7 +67,6 @@ Get-Content $EC2SettingsFile
 
 # Disable IPv6 Binding
 Get-NetAdapterBinding
-
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
     Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6
@@ -78,7 +78,6 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 
 } else {
     Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
-
 Get-NetAdapterBinding
 
 # Setting Hostname
@@ -98,6 +97,11 @@ Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTi
 # Save Logging Data
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
+
+Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
+Copy-Item $EC2SettingsFile $WorkingDirectoryPath
+Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
+
 
 #-------------------------------------------------------------------------------
 Write-Output "#9-1 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
