@@ -65,6 +65,23 @@ $xml1.Save($EC2SettingsFile)
 # After EC2config Settings File
 Get-Content $EC2SettingsFile
 
+# Change System PowerPlan (High Performance)
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
+
+if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "高パフォーマンス" }) {
+    Write-Output "Change System PowerPlan : 高パフォーマンス"
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="高パフォーマンス"').Activate()
+    Start-Sleep -Seconds 5
+} elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+    Write-Output "Change System PowerPlan : High performance"
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="High performance"').Activate()
+    Start-Sleep -Seconds 5
+} else {
+    Write-Output "Change System PowerPlan : No change"
+}
+
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
+
 # Disable IPv6 Binding
 Get-NetAdapterBinding
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
