@@ -66,6 +66,174 @@ yum clean all
 yum --enablerepo=epel install -y jq
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-CLI]
+#-------------------------------------------------------------------------------
+yum --enablerepo=epel install -y python-pip
+pip install --upgrade pip
+pip install awscli
+
+cat > /etc/profile.d/aws-cli.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/aws_completer aws
+fi
+__EOF__
+
+aws --version
+aws ec2 describe-regions --region ${region}
+
+aws ec2 describe-instances --instance-ids ${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-instance.txt
+aws ec2 describe-instances --instance-ids ${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-instance.txt
+
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-volume.txt
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-volume.txt
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudFormation Helper Scripts]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo=epel install -y python-pip
+# pip install --upgrade pip
+
+pip install pystache
+pip install argparse
+pip install python-daemon
+pip install requests
+
+curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
+tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
+
+cd /tmp/aws-cfn-bootstrap-1.4/
+python setup.py build
+python setup.py install
+
+chmod 775 /usr/init/redhat/cfn-hup
+ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+cd /tmp
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+#-------------------------------------------------------------------------------
+# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+systemctl status amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+systemctl is-enabled amazon-ssm-agent
+
+systemctl restart amazon-ssm-agent
+systemctl status amazon-ssm-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CodeDeploy Agent]
+#-------------------------------------------------------------------------------
+yum install -y ruby wget
+
+# curl https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
+# curl https://aws-codedeploy-${region}.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
+
+curl https://aws-codedeploy-${region}.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
+
+chmod 744 /tmp/Install-AWS-CodeDeploy-Agent
+
+ruby /tmp/Install-AWS-CodeDeploy-Agent auto
+
+cat /opt/codedeploy-agent/.version
+
+systemctl status codedeploy-agent
+systemctl enable codedeploy-agent
+systemctl is-enabled codedeploy-agent
+
+systemctl restart codedeploy-agent
+systemctl status codedeploy-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon Inspector Agent]
+#-------------------------------------------------------------------------------
+curl https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install -o /tmp/Install-Amazon-Inspector-Agent
+
+chmod 744 /tmp/Install-Amazon-Inspector-Agent
+bash -v /tmp/Install-Amazon-Inspector-Agent
+
+cat /opt/aws/awsagent/.version
+
+systemctl status awsagent
+systemctl enable awsagent
+systemctl is-enabled awsagent
+
+systemctl restart awsagent
+systemctl status awsagent
+
+/opt/aws/awsagent/bin/awsagent status
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudWatchLogs Agent]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel install -y python-pip
+# pip install --upgrade pip
+
+cd /tmp
+curl -O https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+
+cat > /tmp/awslogs.conf << __EOF__
+[general]
+state_file = /var/awslogs/state/agent-state
+use_gzip_http_content_encoding = true
+
+[SYSTEM-sample-Linux-OS-var-log-messages]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/messages
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+[SYSTEM-sample-Linux-OS-var-log-secure]
+log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/secure
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+[SYSTEM-sample-Linux-SSM-Agent-Logs]
+log_group_name = SYSTEM-sample-Linux-SSM-Agent-Logs
+log_stream_name = {instance_id}
+datetime_format = %Y-%m-%d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/amazon/ssm/amazon-ssm-agent.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+[SYSTEM-sample-Linux-CodeDeploy-Agent-Logs]
+log_group_name = SYSTEM-sample-Linux-CodeDeploy-Agent-Logs
+log_stream_name = {instance_id}
+datetime_format = %Y-%m-%d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/aws/codedeploy-agent/codedeploy-agent.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+__EOF__
+
+python /tmp/awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+
+systemctl status awslogs
+systemctl enable awslogs
+systemctl is-enabled awslogs
+
+systemctl restart awslogs
+systemctl status awslogs
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all
@@ -74,15 +242,39 @@ yum clean all
 # System Setting
 #-------------------------------------------------------------------------------
 
+# Setting ulimit (System Boot Process Only)
+mkdir /etc/systemd/system.conf.d
+
+cat > /etc/systemd/system.conf.d/limits.conf << __EOF__
+[Manager]
+DefaultLimitNOFILE=1006500
+DefaultLimitNPROC=1006500
+__EOF__
+
+
+# Setting ulimit (Service:rsyslog)
+mkdir /etc/systemd/system/rsyslog.service.d
+
+cat > /etc/systemd/system/rsyslog.service.d/limits.conf << __EOF__
+[Service]
+LimitNOFILE=1006500
+LimitNPROC=1006500
+__EOF__
+
+grep "open files" /proc/`pidof rsyslogd`/limits
+
+
 # Setting TimeZone
 # timedatectl status
 timedatectl set-timezone Asia/Tokyo
 # timedatectl status
 
+
 # Setting Language
 # localectl status
 localectl set-locale LANG=ja_JP.utf8
 # localectl status
+
 
 # Setting NTP Deamon
 sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
@@ -94,8 +286,10 @@ chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
 
+
 # Disable IPv6 Kernel Module
 echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
 
 # Disable IPv6 Kernel Parameter
 sysctl -a
@@ -109,6 +303,7 @@ __EOF__
 sysctl --system
 sysctl -p
 sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+
 
 # Instance Reboot
 reboot
