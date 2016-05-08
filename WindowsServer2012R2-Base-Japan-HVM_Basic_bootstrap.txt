@@ -4,7 +4,7 @@
 $StartTime = Get-Date
 
 # Changing the execution policy
-Get-Content "# Changing the execution policy"
+Write-Output "# Changing the execution policy"
 Get-ExecutionPolicy
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 Get-ExecutionPolicy
@@ -13,16 +13,16 @@ Get-ExecutionPolicy
 Write-Output "#1-0 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Load Module (AWS Tools for Windows PowerShell)
-Get-Content "# Load Module (AWS Tools for Windows PowerShell)"
+Write-Output "# Load Module (AWS Tools for Windows PowerShell)"
 Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
 Get-AWSPowerShellVersion
 
 # Get PowerShell Version
-Get-Content "# Get PowerShell Version"
+Write-Output "# Get PowerShell Version"
 $PSVersionTable
 
 # Get Windows Environment Variables
-Get-Content "# Get Windows Environment Variables"
+Write-Output "# Get Windows Environment Variables"
 Get-ChildItem env:
 
 # Get Instance MetaData
@@ -38,7 +38,7 @@ $EC2SettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml
 $CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Get System & User Variables
-Get-Content "# Get System & User Variables"
+Write-Output "# Get System & User Variables"
 Get-Variable | ConvertTo-Json
 
 #-------------------------------------------------------------------------------
@@ -59,12 +59,15 @@ Set-WinUILanguageOverride ja-JP
 
 
 # Update PowerShell Helper
-Update-Help
+Get-Help about_*
+Update-Help -UICulture en-US -Force
+Update-Help -UICulture ja-JP -Force
+Get-Help about_*
 
 
 # Enable EC2config EventLog Output
 
-Get-Content "# Before EC2config Settings File"
+Write-Output "# Before EC2config Settings File"
 Get-Content $EC2SettingsFile
 
 $xml1 = [xml](Get-Content $EC2SettingsFile)
@@ -80,7 +83,7 @@ foreach ($element in $xmlElementToModify1.Plugin)
 }
 $xml1.Save($EC2SettingsFile)
 
-Get-Content "# After EC2config Settings File"
+Write-Output "# After EC2config Settings File"
 Get-Content $EC2SettingsFile
 
 
@@ -100,7 +103,7 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
     Write-Output "Change System PowerPlan : $HighPowerString"
     $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
-    $HighPower.Activate()
+    $HighPowerObject.Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
     Write-Output "Change System PowerPlan : High performance"
@@ -130,7 +133,6 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 
 
 Get-NetAdapterBinding
 
-
 # Setting Hostname
 Rename-Computer $InstanceId -Force
 
@@ -143,6 +145,7 @@ New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
 Set-Location -Path "C:\EC2-Bootstrap"
 $WorkingDirectoryPath = "C:\EC2-Bootstrap\"
 
+
 #-------------------------------------------------------------------------------
 Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
@@ -150,6 +153,7 @@ Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTi
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
 
+# Save Configuration Files
 Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
 Copy-Item $EC2SettingsFile $WorkingDirectoryPath
 Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
