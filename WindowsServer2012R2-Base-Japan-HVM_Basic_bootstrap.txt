@@ -17,6 +17,8 @@ $WorkingDirectoryPath = "C:\EC2-Bootstrap\"
 # Start Logging
 Start-Transcript -Append -Force -Path $WorkingDirectoryPath\bootstrap.log
 
+Write-Output "#1-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
 
 #-------------------------------------------------------------------------------
 Write-Output "#1-1 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -26,7 +28,6 @@ Write-Output "# Changing the execution policy"
 Get-ExecutionPolicy
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 Get-ExecutionPolicy
-
 
 # Load Module (AWS Tools for Windows PowerShell)
 Write-Output "# Load Module (AWS Tools for Windows PowerShell)"
@@ -170,7 +171,7 @@ Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 Write-Output "#9-1 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Get Command History
-Get-History | ConvertTo-Json
+Get-History | ConvertTo-Json | Out-File -FilePath $WorkingDirectoryPath\bootstrap-command-list.json
 
 # Stop Logging
 Stop-Transcript
@@ -181,4 +182,3 @@ Write-Output "#9-2 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTim
 Restart-Computer -Force
 
 </powershell>
-
