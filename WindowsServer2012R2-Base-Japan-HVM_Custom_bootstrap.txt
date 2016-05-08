@@ -58,16 +58,20 @@ Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($
 # Setting Timezone
 tzutil.exe /s "Tokyo Standard Time"
 
+
 # Setting SystemLocale
 Set-WinSystemLocale -SystemLocale ja-JP
 Set-WinHomeLocation -GeoId 0x7A
 Set-WinCultureFromLanguageListOptOut -OptOut $False
 
+
 # Setting Japanese UI
 Set-WinUILanguageOverride ja-JP
 
+
 # Update PowerShell Helper
 Update-Help
+
 
 # Enable EC2config EventLog Output
 
@@ -90,22 +94,35 @@ $xml1.Save($EC2SettingsFile)
 Get-Content "# After EC2config Settings File"
 Get-Content $EC2SettingsFile
 
+
 # Change System PowerPlan (High Performance)
+
+# A string of "high performance" was Base64 encoded in Japanese
+$HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"
+
+# Conversion from base64 to byte sequence
+$HighPowerByte = [System.Convert]::FromBase64String( $HighPowerBase64 )
+
+# To convert a sequence of bytes into a string of UTF-8 encoding
+$HighPowerString = [System.Text.Encoding]::UTF8.GetString( $HighPowerByte )
+
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
 
-if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "高パフォーマンス" }) {
-    Write-Output "Change System PowerPlan : 高パフォーマンス"
-    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="高パフォーマンス"').Activate()
+if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
+    Write-Output "Change System PowerPlan : $HighPowerString"
+    $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
+    $HighPower.Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
     Write-Output "Change System PowerPlan : High performance"
-    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName="High performance"').Activate()
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
 } else {
     Write-Output "Change System PowerPlan : No change"
 }
 
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
+
 
 # Disable IPv6 Binding
 Get-NetAdapterBinding
@@ -187,6 +204,8 @@ Invoke-Webrequest -Uri $AwsEc2ConfigUrl -Outfile $WorkingDirectoryPath\$AwsEc2Co
 # Get-SSMDocumentDescription -Name "AWS-UpdateEC2Config" | select -ExpandProperty Parameters
 # Send-SSMCommand -InstanceId Instance-ID -DocumentName "AWS-UpdateEC2Config"
 # Get-SSMCommandInvocation -CommandId ID -Details $true -InstanceId Instance-ID | select -ExpandProperty CommandPlugins
+
+cmd.exe /c "C:\Program Files\Amazon\Ec2ConfigService\\ec2config-cli.exe" --ec2config-version
 
 
 #-------------------------------------------------------------------------------
