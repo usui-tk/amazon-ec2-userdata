@@ -84,6 +84,7 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 
 # Disable IPv6 Binding
 Get-NetAdapterBinding
+
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
     Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6
@@ -95,6 +96,7 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 
 } else {
     Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
+
 Get-NetAdapterBinding
 
 # Setting Hostname
