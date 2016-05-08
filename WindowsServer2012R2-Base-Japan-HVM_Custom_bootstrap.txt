@@ -11,8 +11,26 @@ function Expand-ZIPFile($file, $destination)
      }
 }
 
-# TimeCounter
+# Set TimeCounter
 $StartTime = Get-Date
+
+# Set Command History Number
+$MaximumHistoryCount = 8192
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Make Directory
+New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
+Set-Location -Path "C:\EC2-Bootstrap"
+$WorkingDirectoryPath = "C:\EC2-Bootstrap\"
+
+# Start Logging
+Start-Transcript -Append -Force -Path $WorkingDirectoryPath\bootstrap.log
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-1 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Changing the execution policy
 Write-Output "# Changing the execution policy"
@@ -20,8 +38,6 @@ Get-ExecutionPolicy
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 Get-ExecutionPolicy
 
-#-------------------------------------------------------------------------------
-Write-Output "#1-0 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Load Module (AWS Tools for Windows PowerShell)
 Write-Output "# Load Module (AWS Tools for Windows PowerShell)"
@@ -53,7 +69,7 @@ Write-Output "# Get System & User Variables"
 Get-Variable | ConvertTo-Json
 
 #-------------------------------------------------------------------------------
-Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#1-2 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Setting Timezone
 tzutil.exe /s "Tokyo Standard Time"
@@ -148,17 +164,11 @@ Get-NetAdapterBinding
 Rename-Computer $InstanceId -Force
 
 
-#-------------------------------------------------------------------------------
-Write-Output "#2-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
-# Make Directory
-New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
-Set-Location -Path "C:\EC2-Bootstrap"
-$WorkingDirectoryPath = "C:\EC2-Bootstrap\"
 
 
 #-------------------------------------------------------------------------------
-Write-Output "#2-1 Execution Time taken[Update Amazon EC2 Windows Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#2-0 Execution Time taken[Update Amazon EC2 Windows Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 #######[Working]#########
 
@@ -173,7 +183,7 @@ Invoke-Webrequest -Uri $DriverUrl -Outfile $WorkingDirectoryPath\$DriverZip
 # Start-Sleep -Seconds 60
 
 #-------------------------------------------------------------------------------
-Write-Output "#2-2 Execution Time taken[Update AWS Tools for Windows PowerShell]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#2-1 Execution Time taken[Update AWS Tools for Windows PowerShell]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 #######[Working]#########
 
@@ -189,7 +199,7 @@ Invoke-Webrequest -Uri $AwsPsUrl -Outfile $WorkingDirectoryPath\$AwsPsMsi
 
 
 #-------------------------------------------------------------------------------
-Write-Output "#2-3 Execution Time taken[Update Amazon Windows EC2Config Service]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#2-2 Execution Time taken[Update Amazon Windows EC2Config Service]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 #######[Working]#########
 
@@ -212,7 +222,7 @@ cmd.exe /c "C:\Program Files\Amazon\Ec2ConfigService\\ec2config-cli.exe" --ec2co
 
 
 #-------------------------------------------------------------------------------
-Write-Output "#2-4 Execution Time taken[Install Intel Ethernet Adapter Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#2-3 Execution Time taken[Install Intel Ethernet Adapter Drivers]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 #######[Working]#########
 
@@ -422,19 +432,30 @@ Write-Output "#6-0 Execution Time taken[Install Google Chrome]: $((Get-Date).Sub
 
 
 #-------------------------------------------------------------------------------
-Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#9-0 Execution Time taken[Save Files]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Save Logging Data
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
 
+# Save Configuration Files
 Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
 Copy-Item $EC2SettingsFile $WorkingDirectoryPath
 Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 
 
 #-------------------------------------------------------------------------------
-Write-Output "#9-1 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Write-Output "#9-1 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Get Command History
+Get-History | ConvertTo-Json
+
+# Stop Logging
+Stop-Transcript
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#9-2 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 Restart-Computer -Force
 
 </powershell>
