@@ -1,0 +1,95 @@
+<powershell>
+
+# TimeCounter
+$StartTime = Get-Date
+
+# Changing the execution policy
+Get-ExecutionPolicy
+Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+Get-ExecutionPolicy
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-0 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Load Module (AWS Tools for Windows PowerShell)
+Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
+Get-AWSPowerShellVersion
+
+# Get Instance MetaData
+$AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+$Region = $AZ.Substring(0, $AZ.Length -1)
+$InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+$InstanceType= (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-type').Content
+$PrivateIp = (Invoke-WebRequest '169.254.169.254/latest/meta-data/local-ipv4').Content
+
+# Get Setting File
+$EC2SettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+$CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Setting Timezone
+tzutil.exe /s "Tokyo Standard Time"
+
+# Setting SystemLocale
+Set-WinSystemLocale -SystemLocale ja-JP
+Set-WinHomeLocation -GeoId 0x7A
+Set-WinCultureFromLanguageListOptOut -OptOut $False
+
+# Setting Japanese UI
+Set-WinUILanguageOverride ja-JP
+
+# Update PowerShell Helper
+Update-Help
+
+# Enable EC2config EventLog Output
+
+# Before EC2config Settings File
+Get-Content $EC2SettingsFile
+
+$xml1 = [xml](get-content $EC2SettingsFile)
+$xmlElement1 = $xml1.get_DocumentElement()
+$xmlElementToModify1 = $xmlElement1.Plugins
+
+foreach ($element in $xmlElementToModify1.Plugin)
+{
+    if ($element.name -eq "Ec2EventLog")
+    {
+        $element.State="Enabled"
+    }
+}
+$xml1.Save($EC2SettingsFile)
+
+# After EC2config Settings File
+Get-Content $EC2SettingsFile
+
+# Disable IPv6 Binding
+Get-NetAdapterBinding
+Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6
+Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6
+Get-NetAdapterBinding
+
+# Setting Hostname
+Rename-Computer $InstanceId -Force
+
+#-------------------------------------------------------------------------------
+Write-Output "#2-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Make Directory
+New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
+Set-Location -Path "C:\EC2-Bootstrap"
+$WorkingDirectoryPath = "C:\EC2-Bootstrap\"
+
+#-------------------------------------------------------------------------------
+Write-Output "#9-0 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Save Logging Data
+Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
+Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
+
+#-------------------------------------------------------------------------------
+Write-Output "#9-1 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+Restart-Computer -Force
+
+</powershell>
