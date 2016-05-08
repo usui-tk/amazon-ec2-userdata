@@ -15,6 +15,7 @@ function Expand-ZIPFile($file, $destination)
 $StartTime = Get-Date
 
 # Changing the execution policy
+Get-Content "# Changing the execution policy"
 Get-ExecutionPolicy
 Set-ExecutionPolicy RemoteSigned -Scope Process -Force
 Get-ExecutionPolicy
@@ -23,8 +24,17 @@ Get-ExecutionPolicy
 Write-Output "#1-0 Execution Time taken[Environment variable]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Load Module (AWS Tools for Windows PowerShell)
+Get-Content "# Load Module (AWS Tools for Windows PowerShell)"
 Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
 Get-AWSPowerShellVersion
+
+# Get PowerShell Version
+Get-Content "# Get PowerShell Version"
+$PSVersionTable
+
+# Get Windows Environment Variables
+Get-Content "# Get Windows Environment Variables"
+Get-ChildItem env:
 
 # Get Instance MetaData
 $AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
@@ -37,6 +47,10 @@ $PrivateIp = (Invoke-WebRequest '169.254.169.254/latest/meta-data/local-ipv4').C
 $SysprepSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 $EC2SettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 $CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+
+# Get System & User Variables
+Get-Content "# Get System & User Variables"
+Get-Variable | ConvertTo-Json
 
 #-------------------------------------------------------------------------------
 Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -219,6 +233,21 @@ Measure-Command -Expression { $WorkingDirectoryPath + $Script1 }
 
 
 #-------------------------------------------------------------------------------
+Write-Output "#3-1 Execution Time taken[Install jq]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# jq (https://stedolan.github.io/jq/)
+$JqUrl = "https://github.com/stedolan/jq/releases/download/jq-1.5/jq-win64.exe"
+$JqExe = "jq.exe"
+$SystemRootExecPath = [String]::Join("\", ($env:SystemRoot, "System32"))
+
+Invoke-Webrequest -Uri $JqUrl -Outfile $WorkingDirectoryPath\$JqExe
+
+Copy-Item $WorkingDirectoryPath\$JqExe $SystemRootExecPath
+
+cmd.exe /c jq.exe --version
+
+
+#-------------------------------------------------------------------------------
 Write-Output "#4-0 Execution Time taken[Install AWS-CLI]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # AWS-CLI (https://aws.amazon.com/jp/cli/)
@@ -387,3 +416,4 @@ Write-Output "#9-1 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTim
 Restart-Computer -Force
 
 </powershell>
+
