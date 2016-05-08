@@ -67,7 +67,8 @@ $CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2
 
 # Get System & User Variables
 Write-Output "# Get System & User Variables"
-Get-Variable | ConvertTo-Json
+Get-Variable | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-variable.csv
+
 
 #-------------------------------------------------------------------------------
 Write-Output "#1-2 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -87,10 +88,8 @@ Set-WinUILanguageOverride ja-JP
 
 
 # Update PowerShell Helper
-Get-Help about_*
 Update-Help -UICulture en-US -Force
 Update-Help -UICulture ja-JP -Force
-Get-Help about_*
 
 
 # Enable EC2config EventLog Output
@@ -163,9 +162,6 @@ Get-NetAdapterBinding
 
 # Setting Hostname
 Rename-Computer $InstanceId -Force
-
-
-
 
 
 #-------------------------------------------------------------------------------
@@ -449,7 +445,7 @@ Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 Write-Output "#9-1 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Get Command History
-Get-History | ConvertTo-Json | Out-File -FilePath $WorkingDirectoryPath\bootstrap-command-list.json
+Get-History | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-command-list.csv
 
 # Stop Logging
 Stop-Transcript
@@ -460,3 +456,4 @@ Write-Output "#9-2 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTim
 Restart-Computer -Force
 
 </powershell>
+
