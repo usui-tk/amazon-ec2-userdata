@@ -39,8 +39,7 @@ $CWLogsSettingsFile = "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2
 
 # Get System & User Variables
 Get-Content "# Get System & User Variables"
-Get-Variable
-
+Get-Variable | ConvertTo-Json
 
 #-------------------------------------------------------------------------------
 Write-Output "#1-1 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
