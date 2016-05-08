@@ -46,7 +46,7 @@ Update-Help
 
 # Enable EC2config EventLog Output
 
-# Before EC2config Settings File
+Get-Content "# Before EC2config Settings File"
 Get-Content $EC2SettingsFile
 
 $xml1 = [xml](Get-Content $EC2SettingsFile)
@@ -62,7 +62,7 @@ foreach ($element in $xmlElementToModify1.Plugin)
 }
 $xml1.Save($EC2SettingsFile)
 
-# After EC2config Settings File
+Get-Content "# After EC2config Settings File"
 Get-Content $EC2SettingsFile
 
 # Change System PowerPlan (High Performance)
