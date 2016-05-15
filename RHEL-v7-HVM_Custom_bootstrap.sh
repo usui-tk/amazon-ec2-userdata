@@ -242,6 +242,50 @@ systemctl restart awslogs
 systemctl status awslogs
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Docker(Docker Engine)] - Current Package (v1.9.x)
+#-------------------------------------------------------------------------------
+# yum install -y docker docker-logrotate docker-registry docker-distribution docker-rhel-push-plugin docker-python skopeo
+
+# systemctl start docker
+# systemctl status docker
+# systemctl enable docker
+# systemctl is-enabled docker
+
+# systemctl start docker-registry
+# systemctl status docker-registry
+# systemctl enable docker-registry
+# systemctl is-enabled docker-registry
+
+# docker version
+# docker info
+
+# docker pull rhel7:latest
+# docker images
+# docker inspect rhel7:latest
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Docker(Docker Engine)] - Future Package (v1.10.x)
+#-------------------------------------------------------------------------------
+yum install -y docker-latest docker-latest-logrotate docker-registry docker-distribution docker-rhel-push-plugin docker-python skopeo
+
+systemctl start docker-latest
+systemctl status docker-latest
+systemctl enable docker-latest
+systemctl is-enabled docker-latest
+
+systemctl start docker-registry
+systemctl status docker-registry
+systemctl enable docker-registry
+systemctl is-enabled docker-registry
+
+docker version
+docker info
+
+docker pull rhel7:latest
+docker images
+docker inspect rhel7:latest
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y ansible
