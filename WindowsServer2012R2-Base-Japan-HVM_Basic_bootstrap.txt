@@ -7,9 +7,9 @@ $StartTime = Get-Date
 Write-Output "#1-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Make Directory
-New-Item -ItemType Directory -Path "C:\EC2-Bootstrap"
-Set-Location -Path "C:\EC2-Bootstrap"
-$WorkingDirectoryPath = "C:\EC2-Bootstrap\"
+Set-Variable -Name WorkingDirectoryPath -Value "C:\EC2-Bootstrap\"
+New-Item -ItemType Directory -Path $WorkingDirectoryPath -Force
+Set-Location -Path $WorkingDirectoryPath
 
 # Start Logging
 Start-Transcript -Append -Force -Path $WorkingDirectoryPath\bootstrap.log
@@ -22,7 +22,7 @@ Write-Output "#1-1 Execution Time taken[Initial parameters]: $((Get-Date).Subtra
 # Changing the execution policy
 Write-Output "# Changing the execution policy"
 Get-ExecutionPolicy
-Set-ExecutionPolicy RemoteSigned -Scope Process -Force
+Set-ExecutionPolicy Unrestricted -Scope Process -Force
 Get-ExecutionPolicy
 
 # Load Module (AWS Tools for Windows PowerShell)
@@ -39,14 +39,14 @@ $PSVersionTable
 Write-Output "# Get Windows Environment Variables"
 Get-ChildItem env:
 
-# Get Instance MetaData
-Set-Variable -Name AZ -Value (Invoke-Restmethod -uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
+# Set AWS Instance MetaData
+Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
 Set-Variable -Name Region -Value ($AZ.Substring(0, $AZ.Length -1))
-Set-Variable -Name InstanceId -Value (Invoke-Restmethod -uri http://169.254.169.254/latest/meta-data/instance-id)
-Set-Variable -Name InstanceType -Value (Invoke-Restmethod -uri http://169.254.169.254/latest/meta-data/instance-type)
-Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -uri http://169.254.169.254/latest/meta-data/local-ipv4)
+Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
+Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
+Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
 
-# Get Setting File
+# Set Setting File
 Set-Variable -Name SysprepSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 Set-Variable -Name CWLogsSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
@@ -169,34 +169,6 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 
 Get-NetAdapterBinding
 
 
-# Setting Windows Folder Option
-# Set-Variable -Name CheckAdministrator -Value (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
-Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-Set-Variable -Name CheckRegistryFolderOption -Value (Test-Path -Path $RegistryFolderOption)
-
-if (($CheckAdministrator -eq $true) -and ($CheckRegistryFolderOption -eq $true)) {
-    Write-Output "[Infomation] Modify the Folder Options Setting start"
-    Write-Output "# Before Modify the Folder Options Registry"
-    Get-ItemProperty -Path $RegistryFolderOption
-
-    # [Put the check box] Show hidden files, folders, or drives
-    Set-ItemProperty -Path $RegistryFolderOption -Name "Hidden" -PropertyType DWord -Value 0x00000001 -Force
-
-    # [Uncheck the checkbox] Hide extensions for known file types
-    Set-ItemProperty -Path $RegistryFolderOption -Name "HideFileExt" -PropertyType DWord -Value 0x00000000 -Force
-
-    # [Put the check box] Restore previous folders windows
-    Set-ItemProperty -Path $RegistryFolderOption -Name "PersistBrowsers" -PropertyType DWord -Value 0x00000000 -Force
-
-    Write-Output "# After Modify the Folder Options Registry"
-    Get-ItemProperty -Path $RegistryFolderOption
-} elseif (($CheckAdministrator -eq $true) -and ($CheckRegistryFolderOption -eq $false)) {
-    Write-Output "[Warning] No registry path of setting target is present"
-} else {
-    Write-Output "[Warning] UserData scripts run with the privileges of the non-administrator"
-}
-
-
 # Setting Hostname
 Rename-Computer $InstanceId -Force
 
@@ -208,7 +180,9 @@ Write-Output "#9-0 Execution Time taken[Save Files]: $((Get-Date).Subtract($Star
 
 # Save Logging Data
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
+Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
+
 
 # Save Configuration Files
 Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
@@ -219,11 +193,6 @@ Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 #-------------------------------------------------------------------------------
 Write-Output "#9-1 Execution Time taken[Logging]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
-# Get Command History
-Get-History | ConvertTo-Csv | Out-File $WorkingDirectoryPath\bootstrap-command-list.csv
-Get-History | ConvertTo-Json | Out-File $WorkingDirectoryPath\bootstrap-command-list.json
-
-
 # Stop Logging
 Stop-Transcript
 
@@ -233,5 +202,4 @@ Write-Output "#9-2 Execution Time taken[Reboot]: $((Get-Date).Subtract($StartTim
 Restart-Computer -Force
 
 </powershell>
-<powershellArguments>-ExecutionPolicy Unrestricted -NoProfile -NonInteractive</powershellArguments> 
-<runAsLocalSystem>true</runAsLocalSystem>
+
