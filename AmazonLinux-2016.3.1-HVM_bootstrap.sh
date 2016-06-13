@@ -28,7 +28,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y dstat git jq lzop iotop mtr sos yum-plugin-versionlock
+yum install -y dstat git jq lzop iotop mtr nmap sos yum-plugin-versionlock
 yum install -y aws-cli-plugin-cloudwatch-logs aws-cloudhsm-cli aws-kinesis-agent
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
