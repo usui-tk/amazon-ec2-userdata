@@ -53,7 +53,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y bash-completion dstat gdisk git lzop iotop mtr sos traceroute yum-priorities yum-plugin-versionlock
+yum install -y bash-completion dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock
 yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
