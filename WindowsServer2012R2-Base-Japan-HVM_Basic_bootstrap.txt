@@ -7,7 +7,7 @@ $StartTime = Get-Date
 Write-Output "#1-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Make Directory
-Set-Variable -Name WorkingDirectoryPath -Value "C:\EC2-Bootstrap\"
+Set-Variable -Name WorkingDirectoryPath -Value "C:\EC2-Bootstrap"
 New-Item -ItemType Directory -Path $WorkingDirectoryPath -Force
 Set-Location -Path $WorkingDirectoryPath
 
@@ -19,17 +19,15 @@ Write-Output "#1-0 Execution Time taken[WorkingDirectorySettings]: $((Get-Date).
 #-------------------------------------------------------------------------------
 Write-Output "#1-1 Execution Time taken[Initial parameters]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
-# Changing the execution policy
-Write-Output "# Changing the execution policy"
-Get-ExecutionPolicy
-Set-ExecutionPolicy Unrestricted -Scope Process -Force
+# Get Powershell execution policy
+Write-Output "# Get Powershell execution policy"
 Get-ExecutionPolicy
 
 # Load Module (AWS Tools for Windows PowerShell)
 Write-Output "# Load Module (AWS Tools for Windows PowerShell)"
 Import-Module 'C:\Program Files (x86)\AWS Tools\PowerShell\AWSPowerShell\AWSPowerShell.psd1'
 Get-Module -Name AWSPowerShell
-Get-AWSPowerShellVersion -ListServices
+Get-AWSPowerShellVersion -ListServices | Export-Csv -Encoding default $WorkingDirectoryPath\AWSPowerShell-ListServices.csv
 
 # Get PowerShell Version
 Write-Output "# Get PowerShell Version"
@@ -37,14 +35,25 @@ $PSVersionTable
 
 # Get Windows Environment Variables
 Write-Output "# Get Windows Environment Variables"
-Get-ChildItem env:
+Get-ChildItem env: | Export-Csv -Encoding default $WorkingDirectoryPath\windows-environment-variable.csv
+
+# Get Windows Update agent Version
+(Get-ItemProperty C:\Windows\System32\wuaueng.dll).VersionInfo.FileVersion
 
 # Set AWS Instance MetaData
 Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
-Set-Variable -Name Region -Value ($AZ.Substring(0, $AZ.Length -1))
+Set-Variable -Name Region -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
 Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
 Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
 Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+
+Set-Variable -Name RoleArn -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+Set-Variable -Name RoleName -Value ($RoleArn -split "/" | select -Index 1)
+
+Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
+Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
+Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
+Set-Variable -Name StsToken -Value $StsCredential.Token
 
 # Set Setting File
 Set-Variable -Name SysprepSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
@@ -75,17 +84,29 @@ While (-Not (Test-Connection -ComputerName 8.8.8.8 -Count 1 -ErrorAction Silentl
 Write-Output "#1-2 Execution Time taken[SystemSettings]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Setting Timezone
+tzutil.exe /g
 tzutil.exe /s "Tokyo Standard Time"
+tzutil.exe /g
 
 
 # Setting SystemLocale
+Get-WinSystemLocale
 Set-WinSystemLocale -SystemLocale ja-JP
+Get-WinSystemLocale
+
+Get-WinHomeLocation
 Set-WinHomeLocation -GeoId 0x7A
+Get-WinHomeLocation
+
+Get-WinCultureFromLanguageListOptOut
 Set-WinCultureFromLanguageListOptOut -OptOut $False
+Get-WinCultureFromLanguageListOptOut
 
 
 # Setting Japanese UI
+Get-WinUILanguageOverride
 Set-WinUILanguageOverride ja-JP
+Get-WinUILanguageOverride
 
 
 # Update PowerShell Helper
@@ -118,6 +139,17 @@ $xml1.Save($EC2SettingsFile)
 
 Write-Output "# After EC2config Settings File"
 Get-Content $EC2SettingsFile
+
+
+# Change Windows Update Policy
+Write-Host "# Change Windows Update Policy"
+$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates before downloading or installing
+$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
+$AUSettings.ScheduledInstallationTime = 3      # AM 3:00
+$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
+$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+$AUSettings.Save()
 
 
 # Change System PowerPlan (High Performance)
@@ -156,11 +188,11 @@ Get-NetAdapterBinding
 
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
     Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
-    Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6
+    Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
     Write-Output "Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
-    Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6
+    Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } else {
     Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
@@ -172,6 +204,89 @@ Get-NetAdapterBinding
 # Setting Hostname
 Rename-Computer $InstanceId -Force
 
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-3 Execution Time taken[EC2 Instance Parameters]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Get EC2 Instance Information
+(Get-EC2Instance).RunningInstance | Where-Object { $_.InstanceId -eq $InstanceId }
+
+# Get EC2 Instance Attribute[Network Interface Performance Attribute]
+if ($InstanceType -match "^x1.*") {
+    # Get EC2 Instance Attribute(Elastic Network Adapter Status)
+    Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
+    Start-Sleep -Seconds 3
+} elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
+    # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+    Write-Output "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
+    Start-Sleep -Seconds 3
+} else {
+    Write-Output "Instance type of None [Network Interface Performance Attribute]"
+}
+
+# Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^r3.*") {
+    # Get EC2 Instance Attribute(EBS-optimized instance Status)
+    Write-Output "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
+    Start-Sleep -Seconds 3
+} else {
+    Write-Output "Instance type of None [Storage Interface Performance Attribute]"
+}
+
+
+#-------------------------------------------------------------------------------
+Write-Output "#1-4 Execution Time taken[EC2 Instance Configuratons]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Update Amazon Windows EC2Config Service from SSM-Agent
+$UpdateECConfigCommand = Send-SSMCommand -InstanceId $InstanceId -DocumentName "AWS-UpdateEC2Config"
+Start-Sleep -Seconds 60
+Get-SSMCommandInvocation -CommandId $UpdateECConfigCommand.CommandId -Details $true -InstanceId $InstanceId | select -ExpandProperty CommandPlugins
+
+
+# Configure Windows Update Policy(Disable Windows automatic update) from SSM-Agent
+# $configureWindowsUpdateCommand = Send-SSMCommand -InstanceId $InstanceId -DocumentName 'AWS-ConfigureWindowsUpdate' -Parameters @{'updateLevel'='NeverCheckForUpdates'}
+# Start-Sleep -Seconds 30
+# Get-SSMCommandInvocation -Details $true -CommandId $configureWindowsUpdateCommand.CommandId | select -ExpandProperty CommandPlugins
+
+
+
+# Update Intel NIC Driverfrom SSM-Agent
+# (https://downloadcenter.intel.com/ja/download/23073/)
+ Set-Variable -Name IntelNicDriverUrl -Value ("https://downloadmirror.intel.com/23073/eng/PROWinx64.exe")
+# $installIntelNicDriver = Send-SSMCommand -InstanceId $InstanceId -DocumentName AWS-InstallApplication -Parameter @{'source'=$IntelNicDriverUrl; 'parameters'='/norestart /quiet /log C:\EC2-Bootstrap\InstallLog-IntelNicDriver.txt'}
+# Start-Sleep -Seconds 60
+# Get-SSMCommandInvocation -Details $true -CommandId $installIntelNicDriver.CommandId | select -ExpandProperty CommandPlugins
+
+
+# Install AWS CLI from SSM-Agent
+# AWS-CLI (https://aws.amazon.com/jp/cli/)
+Set-Variable -Name AwsCliUrl -Value ("https://s3.amazonaws.com/aws-cli/AWSCLI64.msi")
+# $installAwsCli = Send-SSMCommand -InstanceId $InstanceId -DocumentName AWS-InstallApplication -Parameter @{'source'=AwsCliUrl; 'parameters'='/norestart /quiet /log C:\EC2-Bootstrap\InstallLog-AWS-CLI.txt'}
+# Start-Sleep -Seconds 30
+# Get-SSMCommandInvocation -Details $true -CommandId $installAwsCli.CommandId | select -ExpandProperty CommandPlugins
+
+
+# Install AWS CodeDeploy Agent from SSM-Agent
+# AWS CodeDeploy Agent (http://docs.aws.amazon.com/codedeploy/latest/userguide/how-to-run-agent.html#how-to-run-agent-install-windows)
+Set-Variable -Name CodeDeployAgentUrl -Value ("https://aws-codedeploy-" + $Region + ".s3-" +  $Region + ".amazonaws.com/latest/codedeploy-agent.msi")
+# $installAwsCodeDeployAgent = Send-SSMCommand -InstanceId $InstanceId -DocumentName AWS-InstallApplication -Parameter @{'source'=$CodeDeployAgentUrl; 'parameters'='/norestart /quiet /log C:\EC2-Bootstrap\InstallLog-AWS-CodeDeploy-Agent.txt'}
+# Start-Sleep -Seconds 60
+# Get-SSMCommandInvocation -Details $true -CommandId $installAwsCodeDeployAgent.CommandId | select -ExpandProperty CommandPlugins
+# Get-Service -Name codedeployagent
+
+
+# Install Amazon Inspector Agent from SSM-Agent
+# Amazon Inspector (https://docs.aws.amazon.com/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows)
+Set-Variable -Name InspectorAgentUrl -Value ("https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe")
+# $installAwsInspectorAgent = Send-SSMCommand -InstanceId $InstanceId -DocumentName AWS-InstallApplication -Parameter @{'source'=$InspectorAgentUrl; 'parameters'='/install /norestart /quiet /log C:\EC2-Bootstrap\InstallLog-Amazon-Inspector-Agent.txt'}
+# Start-Sleep -Seconds 60
+# Get-SSMCommandInvocation -Details $true -CommandId $installAwsInspectorAgent.CommandId | select -ExpandProperty CommandPlugins
+# Get-Service -Name AWSAgent
+# Get-Service -Name AWSAgentUpdater
+# cmd.exe /c "C:\Program Files\Amazon Web Services\Aws Agent\AWSAgentStatus.exe"
 
 
 
