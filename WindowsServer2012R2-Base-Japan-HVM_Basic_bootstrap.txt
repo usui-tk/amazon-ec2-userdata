@@ -152,9 +152,9 @@ $AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
 $AUSettings.Save()
 Start-Sleep -Seconds 5
 
-New-Item -Path $RegistryMicrosoftUpdate
-New-ItemProperty -Path $RegistryMicrosoftUpdate -name 'RegisteredWithAU' -value '1' -propertyType "DWord" -force
-Start-Sleep -Seconds 3
+# New-Item -Path $RegistryMicrosoftUpdate
+# New-ItemProperty -Path $RegistryMicrosoftUpdate -name 'RegisteredWithAU' -value '1' -propertyType "DWord" -force
+# Start-Sleep -Seconds 3
 
 Get-ChildItem -Path $RegistryWindowsUpdate -Recurse | ConvertTo-Json > $WorkingDirectoryPath\WindowsUpdate-Policy_After.json
 
