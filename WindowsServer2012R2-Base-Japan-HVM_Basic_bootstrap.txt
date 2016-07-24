@@ -5,7 +5,6 @@ tzutil.exe /g
 </script>
 
 <powershell>
-
 # EC2-Bootstrap Start
 $StartTime = Get-Date
 Write-Output "#Execution Time taken[EC2-Bootstrap Start]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -56,7 +55,7 @@ Get-WinUILanguageOverride
 # Update PowerShell Helper
 Update-Help -UICulture en-US -Force
 
-# Setting AWS Tools for Windows PowerShell (Region Setting)
+# Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
 Get-DefaultAWSRegion
 
@@ -77,9 +76,6 @@ foreach ($element in $xmlElementToModify1.Plugin)
 $xml1.Save($EC2SettingsFile)
 
 # Change Windows Update Policy
-Set-Variable -Name RegistryWindowsUpdate -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
-Set-Variable -Name RegistryMicrosoftUpdate -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RequestedAppCategories\7971f918-a847-4430-9279-4a52d1efe18d"
-
 $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
 $AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
 $AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
@@ -97,14 +93,14 @@ $SMSettings.Services
 
 Start-Sleep -Seconds 5
 
-# Change Windows Folder Option Policy (from PowerShell registry Edit)
+# Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
 Set-ItemProperty -Path $RegistryFolderOption -name 'Hidden' -value '1' -force                                  # [Check] Show hidden files, folders, or drives
 Set-ItemProperty -Path $RegistryFolderOption -name 'HideFileExt' -value '0' -force                             # [UnCheck] Hide extensions for known file types
 New-ItemProperty -Path $RegistryFolderOption -name 'PersistBrowsers' -value '1' -propertyType "DWord" -force   # [Check] Restore previous folders windows
 
-# Change Display Desktop Icon Policy (from PowerShell registry Edit)
+# Change Display Desktop Icon Policy
 Set-Variable -Name RegistryDesktopIcon -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
 Set-Variable -Name RegistryDesktopIconSetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
