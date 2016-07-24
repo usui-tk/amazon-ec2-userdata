@@ -199,7 +199,7 @@ if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|
 
 # Update Intel NIC Driverfrom SSM-Agent
 # (https://downloadcenter.intel.com/ja/download/23073/)
- Set-Variable -Name IntelNicDriverUrl -Value ("https://downloadmirror.intel.com/23073/eng/PROWinx64.exe")
+Set-Variable -Name IntelNicDriverUrl -Value ("https://downloadmirror.intel.com/23073/eng/PROWinx64.exe")
 # $installIntelNicDriver = Send-SSMCommand -InstanceId $InstanceId -DocumentName AWS-InstallApplication -Parameter @{'source'=$IntelNicDriverUrl; 'parameters'='/norestart /quiet /log C:\EC2-Bootstrap\InstallLog-IntelNicDriver.txt'}
 # Start-Sleep -Seconds 60
 # Get-SSMCommandInvocation -Details $true -CommandId $installIntelNicDriver.CommandId | select -ExpandProperty CommandPlugins
