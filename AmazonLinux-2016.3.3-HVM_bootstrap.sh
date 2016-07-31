@@ -331,22 +331,6 @@ chkconfig td-agent on
 chkconfig --list td-agent
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Logstash]
-#-------------------------------------------------------------------------------
-# rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
-
-# cat > /etc/yum.repos.d/logstash.repo << __EOF__
-# [logstash-2.2]
-# name=Logstash repository for 2.2.x packages
-# baseurl=http://packages.elastic.co/logstash/2.2/centos
-# gpgcheck=1
-# gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch
-# enabled=1
-# __EOF__
-
-# yum install -y logstash
-
-#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all
