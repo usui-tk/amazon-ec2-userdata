@@ -122,6 +122,8 @@ elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+	modinfo ixgbevf
+	ethtool -i eth0
 else
 	echo "Instance type of None [Network Interface Performance Attribute]"
 fi
