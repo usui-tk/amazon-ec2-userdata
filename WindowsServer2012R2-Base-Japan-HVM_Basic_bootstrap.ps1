@@ -161,8 +161,8 @@ Rename-Computer $InstanceId -Force
 Write-Output "# Get EC2 Instance Information"
 Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
 
-# Get EC2 Instance attched EBS Volume Information
-Write-Output "# Get EC2 Instance attched EBS Volume Information"
+# Get EC2 Instance attached EBS Volume Information
+Write-Output "# Get EC2 Instance attached EBS Volume Information"
 Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
