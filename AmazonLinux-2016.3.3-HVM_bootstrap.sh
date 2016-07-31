@@ -148,8 +148,6 @@ curl https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install -o /tmp/Install-
 chmod 744 /tmp/Install-Amazon-Inspector-Agent
 bash /tmp/Install-Amazon-Inspector-Agent
 
-cat /opt/aws/awsagent/.version
-
 chkconfig --list awsagent
 chkconfig awsagent on
 chkconfig --list awsagent
