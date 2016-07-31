@@ -64,7 +64,7 @@ yum clean all
 yum --enablerepo=epel install -y jq
 
 #-------------------------------------------------------------------------------
-# Getting IAM & STS Infomation
+# Getting IAM Role & STS Information
 #-------------------------------------------------------------------------------
 RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
