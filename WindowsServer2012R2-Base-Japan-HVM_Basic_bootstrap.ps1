@@ -10,9 +10,9 @@ $StartTime = Get-Date
 Write-Output "#Execution Time taken[EC2-Bootstrap Start]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
 
 # Make Directory
-Set-Variable -Name WorkDir -Value "C:\EC2-Bootstrap"
-New-Item -ItemType Directory -Path $WorkDir -Force
-Set-Location -Path $WorkDir
+Set-Variable -Name WorkingDirectoryPath -Value "C:\EC2-Bootstrap"
+New-Item -ItemType Directory -Path $WorkingDirectoryPath -Force
+Set-Location -Path $WorkingDirectoryPath
 
 # Set AWS Instance MetaData
 Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
@@ -35,7 +35,7 @@ Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigServ
 Set-Variable -Name CWLogsSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Get System & User Variables
-Get-Variable | Export-Csv -Encoding default $WorkDir\bootstrap-variable.csv
+Get-Variable | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-variable.csv
 
 
 # Setting SystemLocale
@@ -75,43 +75,43 @@ foreach ($element in $xmlElementToModify1.Plugin)
 }
 $xml1.Save($EC2SettingsFile)
 
-# Change Windows Update Policy (WUP)
-$WUP = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
-$WUP.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
-$WUP.ScheduledInstallationDay  = 1      # Every Sunday
-$WUP.ScheduledInstallationTime = 3      # AM 3:00
-$WUP.IncludeRecommendedUpdates = $True  # Enabled
-$WUP.FeaturedUpdatesEnabled    = $True  # Enabled
-$WUP.Save()
+# Change Windows Update Policy
+$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
+$AUSettings.ScheduledInstallationTime = 3      # AM 3:00
+$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
+$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+$AUSettings.Save()
 
 Start-Sleep -Seconds 5
 
-# Enable Microsoft Update Service (MUS)
-$MUS = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
-$MUS.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
-$MUS.Services
+# Enable Microsoft Update
+$SMSettings = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
+$SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+$SMSettings.Services
 
 Start-Sleep -Seconds 5
 
-# Change Windows Folder Option(FO) Policy
-Set-Variable -Name HKCU-FO -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+# Change Windows Folder Option Policy
+Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
-Set-ItemProperty -Path $HKCU-FO -name 'Hidden' -value '1' -force                                  # [Check] Show hidden files, folders, or drives
-Set-ItemProperty -Path $HKCU-FO -name 'HideFileExt' -value '0' -force                             # [UnCheck] Hide extensions for known file types
-New-ItemProperty -Path $HKCU-FO -name 'PersistBrowsers' -value '1' -propertyType "DWord" -force   # [Check] Restore previous folders windows
+Set-ItemProperty -Path $RegistryFolderOption -name 'Hidden' -value '1' -force                                  # [Check] Show hidden files, folders, or drives
+Set-ItemProperty -Path $RegistryFolderOption -name 'HideFileExt' -value '0' -force                             # [UnCheck] Hide extensions for known file types
+New-ItemProperty -Path $RegistryFolderOption -name 'PersistBrowsers' -value '1' -propertyType "DWord" -force   # [Check] Restore previous folders windows
 
-# Change Display Desktop Icon(DI) Policy
-Set-Variable -Name HKCU-DI -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
-Set-Variable -Name HKCU-DIS -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+# Change Display Desktop Icon Policy
+Set-Variable -Name RegistryDesktopIcon -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
+Set-Variable -Name RegistryDesktopIconSetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
-New-Item -Path $HKCU-DI
-New-Item -Path $HKCU-DIS
+New-Item -Path $RegistryDesktopIcon
+New-Item -Path $RegistryDesktopIconSetting
 
-New-ItemProperty -Path $HKCU-DIS -name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -value '0' -propertyType "DWord" -force  #[CLSID] : My Computer
-New-ItemProperty -Path $HKCU-DIS -name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -value '0' -propertyType "DWord" -force  #[CLSID] : Control Panel
-New-ItemProperty -Path $HKCU-DIS -name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -value '0' -propertyType "DWord" -force  #[CLSID] : User's Files
-New-ItemProperty -Path $HKCU-DIS -name '{645FF040-5081-101B-9F08-00AA002F954E}' -value '0' -propertyType "DWord" -force  #[CLSID] : Recycle Bin
-New-ItemProperty -Path $HKCU-DIS -name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -value '0' -propertyType "DWord" -force  #[CLSID] : Network
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -value '0' -propertyType "DWord" -force  #[CLSID] : My Computer
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -value '0' -propertyType "DWord" -force  #[CLSID] : Control Panel
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -value '0' -propertyType "DWord" -force  #[CLSID] : User's Files
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{645FF040-5081-101B-9F08-00AA002F954E}' -value '0' -propertyType "DWord" -force  #[CLSID] : Recycle Bin
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -value '0' -propertyType "DWord" -force  #[CLSID] : Network
 
 # Change System PowerPlan (High Performance)
 $HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                       # A string of "high performance" was Base64 encoded in Japanese
@@ -233,19 +233,19 @@ Set-Variable -Name InspectorAgentUrl -Value ("https://d1wk0tztpsntt1.cloudfront.
 
 
 # Save Logging Data
-Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkDir
-Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" $WorkDir
-Copy-Item "C:\Windows\TEMP\*.tmp" $WorkDir
+Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
+Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" $WorkingDirectoryPath
+Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
 
 # Save Configuration Files
-Copy-Item $SysprepSettingsFile $WorkDir
-Copy-Item $EC2SettingsFile $WorkDir
-Copy-Item $CWLogsSettingsFile $WorkDir
+Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
+Copy-Item $EC2SettingsFile $WorkingDirectoryPath
+Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 
 # Get Command History
-# Get-History | Export-Csv -Encoding default $WorkDir\bootstrap-command-list1.csv
-# Get-History | ConvertTo-Csv > $WorkDir\bootstrap-command-list2.csv
-# Get-History | ConvertTo-Json > $WorkDir\bootstrap-command-list.json
+# Get-History | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-command-list1.csv
+# Get-History | ConvertTo-Csv > $WorkingDirectoryPath\bootstrap-command-list2.csv
+# Get-History | ConvertTo-Json > $WorkingDirectoryPath\bootstrap-command-list.json
 
 # EC2-Bootstrap Complete
 Write-Output "#Execution Time taken[EC2-Bootstrap Complete]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
