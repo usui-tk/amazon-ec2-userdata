@@ -25,23 +25,11 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y bash-completion dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock
+yum install -y bash-completion bind-utils dstat gdisk git lsof lzop iotop mtr nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
-
-yum --enablerepo=epel -y install epel-release
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
+yum install -y epel-release
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
@@ -107,6 +95,8 @@ elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+	modinfo ixgbevf
+	ethtool -i eth0
 else
 	echo "Instance type of None [Network Interface Performance Attribute]"
 fi
@@ -295,9 +285,9 @@ systemctl status awslogs
 # docker version
 # docker info
 
-# docker pull rhel7:latest
+# docker pull centos:7
 # docker images
-# docker inspect rhel7:latest
+# docker inspect centos:7
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
