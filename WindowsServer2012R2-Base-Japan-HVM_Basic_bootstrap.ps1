@@ -75,21 +75,21 @@ foreach ($element in $xmlElementToModify1.Plugin)
 }
 $xml1.Save($EC2SettingsFile)
 
-# Change Windows Update Policy
-$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
-$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
-$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
-$AUSettings.ScheduledInstallationTime = 3      # AM 3:00
-$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
-$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
-$AUSettings.Save()
+# Change Windows Update Policy (WUP)
+$WUP = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
+$WUP.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+$WUP.ScheduledInstallationDay  = 1      # Every Sunday
+$WUP.ScheduledInstallationTime = 3      # AM 3:00
+$WUP.IncludeRecommendedUpdates = $True  # Enabled
+$WUP.FeaturedUpdatesEnabled    = $True  # Enabled
+$WUP.Save()
 
 Start-Sleep -Seconds 5
 
-# Enable Microsoft Update
-$SMSettings = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
-$SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
-$SMSettings.Services
+# Enable Microsoft Update Service (MUS)
+$MUS = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
+$MUS.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+$MUS.Services
 
 Start-Sleep -Seconds 5
 
