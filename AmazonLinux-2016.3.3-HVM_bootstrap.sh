@@ -28,7 +28,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y dstat git jq lzop iotop mtr nmap sos yum-plugin-versionlock
+yum install -y dstat git jq lzop iotop mtr nmap sos yum-plugin-versionlock wget
 yum install -y aws-cloudhsm-cli aws-kinesis-agent
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
@@ -121,7 +121,7 @@ status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CodeDeploy Agent]
 #-------------------------------------------------------------------------------
-yum install -y wget ruby
+yum install -y ruby
 alternatives --display ruby
 
 # curl https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
