@@ -158,19 +158,22 @@ Rename-Computer $InstanceId -Force
 
 
 # Get EC2 Instance Information
-(Get-EC2Instance -Instance $InstanceId).RunningInstance[0]
+Write-Output "# Get EC2 Instance Information"
+Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
+
+# Get EC2 Instance attched EBS Volume Information
+Write-Output "# Get EC2 Instance attched EBS Volume Information"
+Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 if ($InstanceType -match "^x1.*") {
     # Get EC2 Instance Attribute(Elastic Network Adapter Status)
     Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
     Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
-    Start-Sleep -Seconds 3
 } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
     # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
     Write-Output "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
     Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
-    Start-Sleep -Seconds 3
 } else {
     Write-Output "Instance type of None [Network Interface Performance Attribute]"
 }
@@ -180,7 +183,6 @@ if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|
     # Get EC2 Instance Attribute(EBS-optimized instance Status)
     Write-Output "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
     Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
-    Start-Sleep -Seconds 3
 } else {
     Write-Output "Instance type of None [Storage Interface Performance Attribute]"
 }
