@@ -83,7 +83,7 @@ aws ec2 describe-regions --region ${Region}
 # Get EC2 Instance Information
 aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
 
-# Get EC2 Instance attched EBS Volume Information
+# Get EC2 Instance attached EBS Volume Information
 aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
