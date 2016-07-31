@@ -4,11 +4,11 @@
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 # Instance MetaData
-region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
-instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-iamRole=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
-privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+Region=$(echo $AZ | sed -e 's/.$//g')
+InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -28,18 +28,6 @@ yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 # yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
-# Enable Channnel (RHEL Server Debug RPM)
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-rh-common
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-rhscl
-
-# Enable Channnel (RHEL Server Source RPM)
-# yum-config-manager --enable rhui-REGION-rhel-server-releases-source
-# yum-config-manager --enable rhui-REGION-rhel-server-source-rh-common
-# yum-config-manager --enable rhui-REGION-rhel-server-releases-optional-source
-# yum-config-manager --enable rhui-REGION-rhel-server-source-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-source-rhscl
-
 # yum repository metadata Clean up
 yum clean all
 
@@ -56,12 +44,35 @@ yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-yum localinstall -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
+[epel]
+name=Bootstrap EPEL
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch
+failovermethod=priority
+enabled=0
+gpgcheck=0
+__EOF__
+
+yum --enablerepo=epel -y install epel-release
+rm -f /etc/yum.repos.d/epel-bootstrap.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion jq
+
+#-------------------------------------------------------------------------------
+# Getting IAM Role & STS Information
+#-------------------------------------------------------------------------------
+RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
+RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+
+StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+StsToken=$(echo $StsCredential | jq -r '.Token')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -77,13 +88,52 @@ fi
 __EOF__
 
 aws --version
-aws ec2 describe-regions --region ${region}
 
-aws ec2 describe-instances --instance-ids ${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-instance.txt
-aws ec2 describe-instances --instance-ids ${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-instance.txt
+# Setting AWS-CLI default Region & Output format
+aws configure << __EOF__ 
 
-aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-volume.txt
-aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-volume.txt
+
+${Region}
+json
+
+__EOF__
+
+sleep 3
+
+# Getting AWS-CLI default Region & Output format
+aws configure list
+cat ~/.aws/config
+
+# Get EC2 Region Information
+aws ec2 describe-regions --region ${Region}
+
+# Get EC2 Instance Information
+aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
+
+# Get EC2 Instance attched EBS Volume Information
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
+
+# Get EC2 Instance Attribute[Network Interface Performance Attribute]
+if [[ "$InstanceType" =~ ^(x1.*)$ ]]; then
+	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute enaSupport --output json --region ${Region}
+elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
+	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+else
+	echo "Instance type of None [Network Interface Performance Attribute]"
+fi
+
+# Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|r3.*)$ ]]; then
+	# Get EC2 Instance Attribute(EBS-optimized instance Status)
+	echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+else
+	echo "Instance type of None [Storage Interface Performance Attribute]"
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
@@ -113,9 +163,9 @@ cd /tmp
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 status amazon-ssm-agent
 service amazon-ssm-agent start
@@ -167,7 +217,7 @@ buffer_duration = 5000
 
 __EOF__
 
-python /tmp/awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+python /tmp/awslogs-agent-setup.py --region ${Region} --configfile /tmp/awslogs.conf --non-interactive
 
 service awslogs status
 chkconfig --list awslogs
