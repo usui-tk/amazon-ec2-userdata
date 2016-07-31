@@ -39,7 +39,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y bash-completion dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock
+yum install -y bash-completion dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock wget
 yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
@@ -179,7 +179,7 @@ systemctl status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CodeDeploy Agent]
 #-------------------------------------------------------------------------------
-yum install -y ruby wget
+yum install -y ruby
 
 # curl https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
 # curl https://aws-codedeploy-${Region}.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
