@@ -4,11 +4,11 @@
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 # Instance MetaData
-region=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed -e 's/.$//g')
-instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-instanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-iamRole=$(curl -s http://169.254.169.254/latest/meta-data/iam/security-credentials/)
-privateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+Region=$(echo $AZ | sed -e 's/.$//g')
+InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -28,18 +28,6 @@ yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 # yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
-# Enable Channnel (RHEL Server Debug RPM)
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-rh-common
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-debug-rhscl
-
-# Enable Channnel (RHEL Server Source RPM)
-# yum-config-manager --enable rhui-REGION-rhel-server-releases-source
-# yum-config-manager --enable rhui-REGION-rhel-server-source-rh-common
-# yum-config-manager --enable rhui-REGION-rhel-server-releases-optional-source
-# yum-config-manager --enable rhui-REGION-rhel-server-source-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-source-rhscl
-
 # yum repository metadata Clean up
 yum clean all
 
@@ -56,12 +44,35 @@ yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-yum localinstall -y http://download.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+
+cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
+[epel]
+name=Bootstrap EPEL
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch
+failovermethod=priority
+enabled=0
+gpgcheck=0
+__EOF__
+
+yum --enablerepo=epel -y install epel-release
+rm -f /etc/yum.repos.d/epel-bootstrap.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion jq
+
+#-------------------------------------------------------------------------------
+# Getting IAM Role & STS Information
+#-------------------------------------------------------------------------------
+RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
+RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+
+StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+StsToken=$(echo $StsCredential | jq -r '.Token')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -77,20 +88,52 @@ fi
 __EOF__
 
 aws --version
-aws ec2 describe-regions --region ${region}
 
-aws ec2 describe-instances --instance-ids ${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-instance.txt
-aws ec2 describe-instances --instance-ids ${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-instance.txt
+# Setting AWS-CLI default Region & Output format
+aws configure << __EOF__ 
 
-aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output json --region ${region} > /root/aws-cli-info-json_aws-ec2-volume.txt
-aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${instanceId} --output table --region ${region} > /root/aws-cli-info-table_aws-ec2-volume.txt
 
-#-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-SHELL]
-#-------------------------------------------------------------------------------
-# pip install --upgrade pip
-# pip install --upgrade awscli
-# pip install aws-shell
+${Region}
+json
+
+__EOF__
+
+sleep 3
+
+# Getting AWS-CLI default Region & Output format
+aws configure list
+cat ~/.aws/config
+
+# Get EC2 Region Information
+aws ec2 describe-regions --region ${Region}
+
+# Get EC2 Instance Information
+aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
+
+# Get EC2 Instance attched EBS Volume Information
+aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
+
+# Get EC2 Instance Attribute[Network Interface Performance Attribute]
+if [[ "$InstanceType" =~ ^(x1.*)$ ]]; then
+	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute enaSupport --output json --region ${Region}
+elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
+	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+else
+	echo "Instance type of None [Network Interface Performance Attribute]"
+fi
+
+# Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|r3.*)$ ]]; then
+	# Get EC2 Instance Attribute(EBS-optimized instance Status)
+	echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+else
+	echo "Instance type of None [Storage Interface Performance Attribute]"
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
@@ -120,28 +163,14 @@ cd /tmp
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-# yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-${region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 status amazon-ssm-agent
 service amazon-ssm-agent start
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon Inspector Agent]
-#-------------------------------------------------------------------------------
-# curl https://s3-${region}.amazonaws.com/inspector.agent.${region}/latest/install -o /tmp/Install-Amazon-Inspector-Agent
-
-curl https://s3-us-west-2.amazonaws.com/inspector.agent.us-west-2/latest/install -o /tmp/Install-Amazon-Inspector-Agent
-
-chmod 744 /tmp/Install-Amazon-Inspector-Agent
-# bash -v /tmp/Install-Amazon-Inspector-Agent
-
-# cat /opt/aws/inspector/etcagent.cfg
-
-# /opt/aws/inspector/bin/inspector status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudWatchLogs Agent]
@@ -188,7 +217,7 @@ buffer_duration = 5000
 
 __EOF__
 
-python /tmp/awslogs-agent-setup.py --region ${region} --configfile /tmp/awslogs.conf --non-interactive
+python /tmp/awslogs-agent-setup.py --region ${Region} --configfile /tmp/awslogs.conf --non-interactive
 
 service awslogs status
 chkconfig --list awslogs
@@ -202,22 +231,7 @@ service awslogs status
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y ansible
 
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Chef-Client(Chef-Solo)]
-#-------------------------------------------------------------------------------
-curl -L https://www.chef.io/chef/install.sh | bash
-mkdir -p /etc/chef/ohai/hints
-echo {} > /etc/chef/ohai/hints/ec2.json
-OHAI_PLUGINS="$(ohai | jq -r '.chef_packages.ohai.ohai_root + "/plugins"')"
-OHAI_PLUGINS_RACKERLABS="${OHAI_PLUGINS}/rackerlabs"
-mkdir -p ${OHAI_PLUGINS_RACKERLABS}
-curl -o ${OHAI_PLUGINS_RACKERLABS}/packages.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/packages.rb
-curl -o ${OHAI_PLUGINS_RACKERLABS}/sshd.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sshd.rb
-curl -o ${OHAI_PLUGINS_RACKERLABS}/sysctl.rb https://raw.githubusercontent.com/rackerlabs/ohai-plugins/master/plugins/sysctl.rb
-
-ohai | jq '.ec2' > /root/ohai-info_aws-ec2-instance.txt
-ohai | jq '.network' > /root/ohai-info_linux-network.txt
-ohai | jq '.packages' > /root/ohai-info_linux-packages.txt
+ansible --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Fluetnd(td-agent)]
@@ -235,11 +249,13 @@ __EOF__
 
 yum install -y td-agent
 
-/opt/td-agent/embedded/bin/fluent-gem list --local
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-elasticsearch
-/opt/td-agent/embedded/bin/fluent-gem update fluent-plugin-s3
-/opt/td-agent/embedded/bin/fluent-gem list --local
+td-agent-gem list --local
+td-agent-gem install fluent-plugin-aws-elasticsearch-service
+td-agent-gem install fluent-plugin-cloudwatch-logs
+td-agent-gem install fluent-plugin-kinesis
+td-agent-gem install fluent-plugin-kinesis-firehose
+td-agent-gem update fluent-plugin-s3
+td-agent-gem list --local
 
 service td-agent start
 service td-agent status
