@@ -25,7 +25,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y bash-completion bind-utils dstat gdisk git lsof lzop iotop mtr nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock
+yum install -y bash-completion bind-utils dstat gdisk git lsof lzop iotop mtr nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -152,7 +152,7 @@ systemctl status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CodeDeploy Agent]
 #-------------------------------------------------------------------------------
-yum install -y ruby wget
+yum install -y ruby
 
 # curl https://aws-codedeploy-ap-southeast-1.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
 # curl https://aws-codedeploy-${Region}.s3.amazonaws.com/latest/install -o /tmp/Install-AWS-CodeDeploy-Agent
