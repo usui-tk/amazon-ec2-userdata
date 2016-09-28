@@ -20,6 +20,7 @@ Set-Variable -Name Region -Value (Invoke-RestMethod -Uri http://169.254.169.254/
 Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
 Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
 Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+Set-Variable -Name AmiId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
 
 Set-Variable -Name RoleArn -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
 Set-Variable -Name RoleName -Value ($RoleArn -split "/" | select -Index 1)
@@ -138,7 +139,11 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 # Disable IPv6 Binding
 Get-NetAdapterBinding
 
-if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
+if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+    Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
+    Start-Sleep -Seconds 5
+} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
     Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
@@ -157,6 +162,10 @@ Rename-Computer $InstanceId -Force
 
 
 
+# Get AMI Information
+Write-Output "# Get AMI Information"
+Get-EC2Image -ImageId $AmiId | ConvertTo-Json
+
 # Get EC2 Instance Information
 Write-Output "# Get EC2 Instance Information"
 Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
@@ -166,10 +175,11 @@ Write-Output "# Get EC2 Instance attached EBS Volume Information"
 Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if ($InstanceType -match "^x1.*") {
+if ($InstanceType -match "^x1.*|^m4.16xlarge") {
     # Get EC2 Instance Attribute(Elastic Network Adapter Status)
     Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
+    #Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
 } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
     # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
     Write-Output "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
