@@ -9,6 +9,7 @@ Region=$(echo $AZ | sed -e 's/.$//g')
 InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -107,6 +108,10 @@ cat ~/.aws/config
 # Get EC2 Region Information
 aws ec2 describe-regions --region ${Region}
 
+# Get AMI Information
+echo "# Get AMI Information"
+aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region}
+
 # Get EC2 Instance Information
 echo "# Get EC2 Instance Information"
 aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
@@ -116,10 +121,12 @@ echo "# Get EC2 Instance attached EBS Volume Information"
 aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*)$ ]]; then
+if [[ "$InstanceType" =~ ^(x1.*|m4.16xlarge)$ ]]; then
 	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute enaSupport --output json --region ${Region}
+	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+	modinfo ena
+	ethtool -i eth0
 elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
@@ -128,6 +135,7 @@ elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	ethtool -i eth0
 else
 	echo "Instance type of None [Network Interface Performance Attribute]"
+	ethtool -i eth0
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
