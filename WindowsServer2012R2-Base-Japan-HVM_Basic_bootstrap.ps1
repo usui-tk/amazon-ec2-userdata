@@ -136,6 +136,15 @@ if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Obj
 
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive | Format-Table -AutoSize
 
+# Test Connecting to the Internet (Google Public DNS:8.8.8.8)
+if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
+    # Change NetConnectionProfile
+    Get-NetConnectionProfile -IPv4Connectivity Internet
+    Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
+    Start-Sleep -Seconds 5
+    Get-NetConnectionProfile -IPv4Connectivity Internet
+}
+
 # Disable IPv6 Binding
 Get-NetAdapterBinding
 
@@ -159,7 +168,6 @@ Get-NetAdapterBinding
 
 # Setting Hostname
 Rename-Computer $InstanceId -Force
-
 
 
 # Get AMI Information
