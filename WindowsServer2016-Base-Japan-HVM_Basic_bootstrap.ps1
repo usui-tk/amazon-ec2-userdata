@@ -30,10 +30,6 @@ Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
 Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
 Set-Variable -Name StsToken -Value $StsCredential.Token
 
-# Set Setting File
-Set-Variable -Name SysprepSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-Set-Variable -Name CWLogsSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Get System & User Variables
 Get-Variable | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-variable.csv
@@ -228,14 +224,12 @@ Set-Variable -Name InspectorAgentUrl -Value ("https://d1wk0tztpsntt1.cloudfront.
 # Save UserData Script
 Copy-Item "C:\Windows\Temp\UserScript.*" $WorkingDirectoryPath
 
+# Save EC2Launch Configuration Files
+Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" $WorkingDirectoryPath
+
 # Save Logging Data
 Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
-
-# Save Configuration Files
-Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
-Copy-Item $EC2SettingsFile $WorkingDirectoryPath
-Copy-Item $CWLogsSettingsFile $WorkingDirectoryPath
 
 # Get Command History
 # Get-History | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-command-list1.csv
