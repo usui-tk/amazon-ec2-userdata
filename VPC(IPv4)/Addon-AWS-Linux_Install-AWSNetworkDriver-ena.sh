@@ -1,23 +1,21 @@
 #!/bin/bash -v
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Intel Network Driver(ixgbevf)]
+# Custom Package Installation [AWs Network Driver(ena)]
 #
 # Target Linux Distribution
 #  - Red Hat Enterprise Linux v7.3
 #  - CentOS v7.3(1602)
 #
 # Target AWS EC2 Instance Type
-#  - General Purpose   [m4] (exclude m4.16xlarge)
-#  - Compute Optimized [c3,c4]
-#  - Memory Optimized  [r3]
-#  - Storage Optimized [i2,d2]
+#  - General Purpose                           [m4.16xlarge]
+#  - Memory Optimized                          [r4, x1]
+#  - General Purpose GPU compute applications  [p2]
 #
 # Reference
-#  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking.html
+#  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/instance-types.html
-#  http://blog.father.gedow.net/2016/03/15/enhanced-networking/
-#  https://sourceforge.net/projects/e1000/files/ixgbevf%20stable/
+#  https://github.com/amzn/amzn-drivers
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
@@ -50,7 +48,7 @@ else
 fi
 
 # Package Install DKMS (from EPEL Repository)
-yum --enablerepo=epel install -y dkms wget
+yum --enablerepo=epel install -y dkms wget gcc kernel-devel
 
 # Set Grub2 Parameter
 rpm -qa | grep -e '^systemd-[0-9]\+\|^udev-[0-9]\+'
@@ -58,30 +56,29 @@ sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 cd /usr/src
-wget -O ixgbevf-3.3.2.tar.gz "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/3.3.2/ixgbevf-3.3.2.tar.gz"
-tar xzf ixgbevf-3.3.2.tar.gz
-cd ixgbevf-3.3.2
+git clone https://github.com/amzn/amzn-drivers
+
+mv amzn-drivers /usr/src/amzn-drivers-1.1.3
+cd /usr/src/amzn-drivers-1.1.3
 
 cat > dkms.conf << "__EOF__"
-PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="3.3.2"
-CLEAN="cd src/; make clean"
-MAKE="cd src/; make BUILD_KERNEL=${kernelver}"
-BUILT_MODULE_LOCATION[0]="src/"
-BUILT_MODULE_NAME[0]="ixgbevf"
+PACKAGE_NAME="ena"
+PACKAGE_VERSION="1.1.3"
+CLEAN="make -C kernel/linux/ena clean"
+MAKE="make -C kernel/linux/ena/ BUILD_KERNEL=${kernelver}"
+BUILT_MODULE_NAME[0]="ena"
+BUILT_MODULE_LOCATION="kernel/linux/ena"
 DEST_MODULE_LOCATION[0]="/updates"
-DEST_MODULE_NAME[0]="ixgbevf"
+DEST_MODULE_NAME[0]="ena"
 AUTOINSTALL="yes"
 __EOF__
 
 # Make & Build & Install ixgbevf
-modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 3.3.2
-dkms build -m ixgbevf -v 3.3.2
-dkms install -m ixgbevf -v 3.3.2
+dkms add -m amzn-drivers -v 1.1.3
+dkms build -m amzn-drivers -v 1.1.3
+dkms install -m amzn-drivers -v 1.1.3
 
-modinfo ixgbevf
+modinfo ena
 ethtool -i eth0
-

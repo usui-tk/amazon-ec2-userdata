@@ -94,7 +94,7 @@ echo "# Get EC2 Instance attached EBS Volume Information"
 aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*|r4.*|m4.16xlarge)$ ]]; then
+if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
 	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
