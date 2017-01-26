@@ -41,7 +41,6 @@ yum update -y
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock
-yum install -y redhat-access-insights redhat-support-tool
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -121,30 +120,37 @@ echo "# Get EC2 Instance attached EBS Volume Information"
 aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*|m4.16xlarge)$ ]]; then
+if [[ "$InstanceType" =~ ^(x1.*|r4.*|m4.16xlarge)$ ]]; then
 	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+	echo "# Get Linux Kernel Module(modinfo ena)"
 	modinfo ena
+	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
 	ethtool -i eth0
 elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+	echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 	modinfo ixgbevf
+	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
 	ethtool -i eth0
 else
-	echo "Instance type of None [Network Interface Performance Attribute]"
+	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
 	ethtool -i eth0
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|r3.*)$ ]]; then
+if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|r3.*|r4.*)$ ]]; then
 	# Get EC2 Instance Attribute(EBS-optimized instance Status)
 	echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+	blockdev --report
 else
-	echo "Instance type of None [Storage Interface Performance Attribute]"
+    echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+	blockdev --report
 fi
 
 #-------------------------------------------------------------------------------
@@ -175,7 +181,6 @@ cd /tmp
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-# yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
@@ -183,60 +188,6 @@ status amazon-ssm-agent
 service amazon-ssm-agent start
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudWatchLogs Agent]
-#-------------------------------------------------------------------------------
-# yum --enablerepo=epel install -y python-pip
-# pip install --upgrade pip
-
-curl https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py -o /tmp/awslogs-agent-setup.py
-
-cat > /tmp/awslogs.conf << __EOF__
-[general]
-state_file = /var/awslogs/state/agent-state
-use_gzip_http_content_encoding = true
-
-[SYSTEM-sample-Linux-OS-var-log-messages]
-log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/messages
-initial_position = start_of_file
-encoding = utf-8
-buffer_duration = 5000
-
-[SYSTEM-sample-Linux-OS-var-log-secure]
-log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/secure
-initial_position = start_of_file
-encoding = utf-8
-buffer_duration = 5000
-
-[SYSTEM-sample-Linux-SSM-Agent-Logs]
-log_group_name = SYSTEM-sample-Linux-SSM-Agent-Logs
-log_stream_name = {instance_id}
-datetime_format = %Y-%m-%d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/amazon/ssm/amazon-ssm-agent.log
-initial_position = start_of_file
-encoding = ascii
-buffer_duration = 5000
-
-__EOF__
-
-python /tmp/awslogs-agent-setup.py --region ${Region} --configfile /tmp/awslogs.conf --non-interactive
-
-service awslogs status
-chkconfig --list awslogs
-chkconfig awslogs on
-chkconfig --list awslogs
-service awslogs restart
-service awslogs status
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -287,7 +238,7 @@ echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 # Disable IPv6 Kernel Parameter
 sysctl -a
 
-cat > /etc/sysctl.d/ipv6-disable.conf << __EOF__
+cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
 # Custom sysctl Parameter for ipv6 disable
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
