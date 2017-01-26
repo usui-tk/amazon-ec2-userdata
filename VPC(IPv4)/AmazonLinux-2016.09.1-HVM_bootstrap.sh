@@ -86,7 +86,7 @@ if [[ "$InstanceType" =~ ^(x1.*|r4.*|m4.16xlarge)$ ]]; then
 	modinfo ena
 	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
 	ethtool -i eth0
-elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*|r4.*)$ ]]; then
+elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
