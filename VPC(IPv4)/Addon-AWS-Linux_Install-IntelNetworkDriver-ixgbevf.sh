@@ -4,8 +4,8 @@
 # Custom Package Installation [Intel Network Driver(ixgbevf)]
 #
 # Target Linux Distribution
-#  - Red Hat Enterprise Linux v7.2
-#  - CentOS v7.2(1511)
+#  - Red Hat Enterprise Linux v7.3
+#  - CentOS v7.3(1602)
 #
 # Target AWS EC2 Instance Type
 #  - General Purpose   [m4]
@@ -49,13 +49,13 @@ sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 cd /usr/src
-wget -O ixgbevf-3.2.2.tar.gz "http://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/3.2.2/ixgbevf-3.2.2.tar.gz"
-tar xzf ixgbevf-3.2.2.tar.gz
-cd ixgbevf-3.2.2
+wget -O ixgbevf-3.3.2.tar.gz "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/3.3.2/ixgbevf-3.3.2.tar.gz"
+tar xzf ixgbevf-3.3.2.tar.gz
+cd ixgbevf-3.3.2
 
 cat > dkms.conf << "__EOF__"
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="3.2.2"
+PACKAGE_VERSION="3.3.2"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
@@ -69,9 +69,9 @@ __EOF__
 modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 3.2.2
-dkms build -m ixgbevf -v 3.2.2
-dkms install -m ixgbevf -v 3.2.2
+dkms add -m ixgbevf -v 3.3.2
+dkms build -m ixgbevf -v 3.3.2
+dkms install -m ixgbevf -v 3.3.2
 
 modinfo ixgbevf
 ethtool -i eth0
