@@ -163,7 +163,7 @@ Write-Output "# Get EC2 Instance attached EBS Volume Information"
 Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if ($InstanceType -match "^x1.*|^m4.16xlarge") {
+if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
     # Get EC2 Instance Attribute(Elastic Network Adapter Status)
     Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
@@ -177,7 +177,7 @@ if ($InstanceType -match "^x1.*|^m4.16xlarge") {
 }
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^r3.*") {
+if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
     # Get EC2 Instance Attribute(EBS-optimized instance Status)
     Write-Output "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
     Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized

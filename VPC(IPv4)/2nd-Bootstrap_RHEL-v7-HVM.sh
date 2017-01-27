@@ -142,7 +142,7 @@ else
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|r3.*|r4.*)$ ]]; then
+if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|p2.*|r3.*|r4.*|x1.*)$ ]]; then
 	# Get EC2 Instance Attribute(EBS-optimized instance Status)
 	echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
