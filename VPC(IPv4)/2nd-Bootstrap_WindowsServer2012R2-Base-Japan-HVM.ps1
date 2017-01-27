@@ -1,10 +1,3 @@
-<script>
-tzutil.exe /g
-tzutil.exe /s "Tokyo Standard Time"
-tzutil.exe /g
-</script>
-
-<powershell>
 # EC2-Bootstrap Start
 $StartTime = Get-Date
 Write-Output "#Execution Time taken[EC2-Bootstrap Start]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -254,6 +247,7 @@ Set-Variable -Name InspectorAgentUrl -Value ("https://d1wk0tztpsntt1.cloudfront.
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" $WorkingDirectoryPath
 Copy-Item "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" $WorkingDirectoryPath
 Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
+Copy-Item "C:\Windows\TEMP\*.ps1" $WorkingDirectoryPath
 
 # Save Configuration Files
 Copy-Item $SysprepSettingsFile $WorkingDirectoryPath
@@ -270,4 +264,4 @@ Write-Output "#Execution Time taken[EC2-Bootstrap Complete]: $((Get-Date).Subtra
 
 # EC2 Instance Reboot
 Restart-Computer -Force
-</powershell>
+

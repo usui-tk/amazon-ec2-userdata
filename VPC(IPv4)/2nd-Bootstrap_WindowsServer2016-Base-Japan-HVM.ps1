@@ -1,10 +1,3 @@
-<script>
-tzutil.exe /g
-tzutil.exe /s "Tokyo Standard Time"
-tzutil.exe /g
-</script>
-
-<powershell>
 # EC2-Bootstrap Start
 $StartTime = Get-Date
 Write-Output "#Execution Time taken[EC2-Bootstrap Start]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
@@ -226,6 +219,7 @@ Copy-Item "C:\Windows\Temp\UserScript.*" $WorkingDirectoryPath
 
 # Save EC2Launch Configuration Files
 Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" $WorkingDirectoryPath
+Copy-Item "C:\Windows\TEMP\*.ps1" $WorkingDirectoryPath
 
 # Save Logging Data
 Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" $WorkingDirectoryPath
@@ -241,4 +235,4 @@ Write-Output "#Execution Time taken[EC2-Bootstrap Complete]: $((Get-Date).Subtra
 
 # EC2 Instance Reboot
 Restart-Computer -Force
-</powershell>
+

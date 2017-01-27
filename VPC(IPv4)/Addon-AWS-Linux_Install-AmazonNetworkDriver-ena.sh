@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWs Network Driver(ena)]
+# Custom Package Installation [Amazon Network Driver(ena)]
 #
 # Target Linux Distribution
 #  - Red Hat Enterprise Linux v7.3
