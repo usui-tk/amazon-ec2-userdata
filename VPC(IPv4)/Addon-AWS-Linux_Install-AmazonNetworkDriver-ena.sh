@@ -24,6 +24,7 @@ Region=$(echo $AZ | sed -e 's/.$//g')
 InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
 InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
 PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
@@ -56,10 +57,10 @@ sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 cd /usr/src
-git clone https://github.com/amzn/amzn-drivers
-
-mv amzn-drivers /usr/src/amzn-drivers-1.1.3
-cd /usr/src/amzn-drivers-1.1.3
+wget -O ena_linux_1.1.3.tar.gz "https://github.com/amzn/amzn-drivers/archive/ena_linux_1.1.3.tar.gz"
+tar xzf ena_linux_1.1.3.tar.gz
+rm -fr ena_linux_1.1.3.tar.gz
+cd amzn-drivers-ena_linux_1.1.3
 
 cat > dkms.conf << "__EOF__"
 PACKAGE_NAME="ena"
