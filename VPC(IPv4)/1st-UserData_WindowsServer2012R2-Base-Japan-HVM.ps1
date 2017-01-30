@@ -6,7 +6,7 @@ tzutil.exe /g
 
 <powershell>
 # Parameter Settings
-Set-Variable -Name BootstrapScriptURL -Value "https://s3-ap-northeast-1.amazonaws.com/public-open-usui/2nd-Bootstrap_WindowsServer2012R2-Base-Japan-HVM.ps1"
+Set-Variable -Name BootstrapScriptURL -Value "https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_WindowsServer2012R2-Base-Japan-HVM.ps1"
 
 # Bootstrap Script Executite
 cd "C:\Windows\TEMP"
