@@ -4,7 +4,7 @@
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 # Parameter Settings
-BootstrapScriptURL="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh"
+BootstrapScriptURL="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_CentOS-v7-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
