@@ -139,9 +139,6 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic 
 
 Get-NetAdapterBinding
 
-# Setting Hostname
-Rename-Computer $InstanceId -Force
-
 
 # Get AMI Information
 Write-Output "# Get AMI Information"
@@ -232,6 +229,9 @@ Copy-Item "C:\Windows\TEMP\*.tmp" $WorkingDirectoryPath
 
 # EC2-Bootstrap Complete
 Write-Output "#Execution Time taken[EC2-Bootstrap Complete]: $((Get-Date).Subtract($StartTime).Seconds) second(s)"  
+
+# Setting Hostname
+Rename-Computer $PrivateIp.Replace(".", "-") -Force
 
 # EC2 Instance Reboot
 Restart-Computer -Force
