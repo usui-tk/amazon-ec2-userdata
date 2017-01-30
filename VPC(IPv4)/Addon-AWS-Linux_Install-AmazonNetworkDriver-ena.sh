@@ -60,7 +60,9 @@ cd /usr/src
 wget -O ena_linux_1.1.3.tar.gz "https://github.com/amzn/amzn-drivers/archive/ena_linux_1.1.3.tar.gz"
 tar xzf ena_linux_1.1.3.tar.gz
 rm -fr ena_linux_1.1.3.tar.gz
-cd amzn-drivers-ena_linux_1.1.3
+
+mv amzn-drivers-ena_linux_1.1.3 amzn-drivers-ena_linux-1.1.3
+cd amzn-drivers-ena_linux-1.1.3
 
 cat > dkms.conf << "__EOF__"
 PACKAGE_NAME="ena"
@@ -77,9 +79,9 @@ __EOF__
 # Make & Build & Install ixgbevf
 ethtool -i eth0
 
-dkms add -m amzn-drivers -v 1.1.3
-dkms build -m amzn-drivers -v 1.1.3
-dkms install -m amzn-drivers -v 1.1.3
+dkms add -m amzn-drivers-ena_linux -v 1.1.3
+dkms build -m amzn-drivers-ena_linux -v 1.1.3
+dkms install -m amzn-drivers-ena_linux -v 1.1.3
 
 modinfo ena
 ethtool -i eth0
