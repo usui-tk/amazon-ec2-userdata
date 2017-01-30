@@ -128,7 +128,7 @@ if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|p2.
 	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 	blockdev --report
 else
-    echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 	blockdev --report
 fi
 
