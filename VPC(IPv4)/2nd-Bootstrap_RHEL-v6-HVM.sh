@@ -3,14 +3,6 @@
 # Logger
 exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
 
-# Instance MetaData
-AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
-
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -64,8 +56,18 @@ yum clean all
 yum --enablerepo=epel install -y bash-completion jq
 
 #-------------------------------------------------------------------------------
-# Getting IAM Role & STS Information
+# Set AWS Instance MetaData
 #-------------------------------------------------------------------------------
+
+# Instance MetaData
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+Region=$(echo $AZ | sed -e 's/.$//g')
+InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
+
+# IAM Role & STS Information
 RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
@@ -73,6 +75,9 @@ StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-cr
 StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
 StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 StsToken=$(echo $StsCredential | jq -r '.Token')
+
+# AWS Account ID
+AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]

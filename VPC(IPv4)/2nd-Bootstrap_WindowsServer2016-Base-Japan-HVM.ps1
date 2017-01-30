@@ -15,6 +15,7 @@ Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.16
 Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
 Set-Variable -Name AmiId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
 
+# Set IAM Role & STS Information
 Set-Variable -Name RoleArn -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
 Set-Variable -Name RoleName -Value ($RoleArn -split "/" | select -Index 1)
 
@@ -23,6 +24,8 @@ Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
 Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
 Set-Variable -Name StsToken -Value $StsCredential.Token
 
+# Set AWS Account ID
+Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
 # Get System & User Variables
 Get-Variable | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-variable.csv
