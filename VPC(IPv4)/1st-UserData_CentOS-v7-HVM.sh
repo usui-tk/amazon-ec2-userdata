@@ -13,7 +13,7 @@ BootstrapScriptURL="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Boot
 # yum repository metadata Clean up
 yum clean all
 
-# Default Package Update
+# Package Install curl Tools
 yum install -y curl
 
 #-------------------------------------------------------------------------------
