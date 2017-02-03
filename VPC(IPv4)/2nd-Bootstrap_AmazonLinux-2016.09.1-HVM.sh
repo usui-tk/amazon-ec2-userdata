@@ -119,10 +119,12 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Systems Manager (SM) agent]
 #-------------------------------------------------------------------------------
-yum install -y amazon-ssm-agent
+# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+
+yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 status amazon-ssm-agent
-start amazon-ssm-agent
+service amazon-ssm-agent start
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 
