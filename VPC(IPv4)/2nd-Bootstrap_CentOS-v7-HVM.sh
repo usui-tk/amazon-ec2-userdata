@@ -163,6 +163,26 @@ cd /tmp
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
+# Workaround (https://github.com/aws/amazon-ssm-agent/pull/33)
+cat > /etc/systemd/system/amazon-ssm-agent.service << __EOF__
+[Unit]
+Description=amazon-ssm-agent
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/
+ExecStart=/usr/bin/amazon-ssm-agent
+KillMode=process
+Restart=on-failure
+RestartSec=15min
+
+[Install]
+WantedBy=network-online.target
+__EOF__
+
+systemctl daemon-reload
+
 systemctl status amazon-ssm-agent
 systemctl enable amazon-ssm-agent
 systemctl is-enabled amazon-ssm-agent
