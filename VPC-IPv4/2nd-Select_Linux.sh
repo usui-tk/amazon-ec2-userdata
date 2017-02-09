@@ -15,10 +15,10 @@ echo "#########################################################################"
 echo $SetupMode
 
 # Parameter Settings(BootstrapScript)
-Bootstrap-AmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
-Bootstrap-RHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v7-HVM.sh"
-Bootstrap-RHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v6-HVM.sh"
-Bootstrap-CentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_CentOS-v7-HVM.sh"
+Bootstrap-AmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
+Bootstrap-RHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_RHEL-v7-HVM.sh"
+Bootstrap-RHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_RHEL-v6-HVM.sh"
+Bootstrap-CentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_CentOS-v7-HVM.sh"
 
 
 
@@ -118,7 +118,7 @@ echo "Distribution type of the machine is ${DIST_TYPE}."
 echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
-echo "Bootstrap Script URL is ${BootstrapScript}."
+
 
 
 #-------------------------------------------------------------------------------
