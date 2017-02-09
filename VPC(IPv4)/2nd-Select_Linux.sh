@@ -68,34 +68,26 @@ function get_os_info () {
 
     if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
        echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-       exit 1
+       # exit 1
     fi
 }
 
 function get_script_url () {
     if [ "${DIST_TYPE}" = "Amazon" || "${DIST_TYPE}" = "amzn" ]; then
         BootstrapScript=${Bootstrap-AmazonLinux}
-    elif [ "${DIST_TYPE}" = "RHEL" ]; then
-        if [ "${REV}" = "7" ]; then
-            BootstrapScript=${Bootstrap-RHELv7}
-        elif [ "${REV}" = "6" ]; then
-            BootstrapScript=${Bootstrap-RHELv6}
-        else
-            BootstrapScript=""
-        fi
-    elif [ "${DIST_TYPE}" = "CentOS" ]; then
-        if [ "${REV}" = "7" ]; then
-            BootstrapScript=${Bootstrap-CentOSv7}
-        else
-            BootstrapScript=""
-        fi
+    elif [ "${DIST_TYPE}" = "RHEL" && "${REV}" = "7" ]; then
+        BootstrapScript=${Bootstrap-RHELv7}
+    elif [ "${DIST_TYPE}" = "RHEL" && "${REV}" = "6" ]; then
+        BootstrapScript=${Bootstrap-RHELv6}
+    elif [ "${DIST_TYPE}" = "CentOS" && "${REV}" = "7" ]; then
+        BootstrapScript=${Bootstrap-CentOSv7}
     else
         BootstrapScript=""
     fi
 
     if [[ -z "${BootstrapScript}" ]]; then
        echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-       exit 1
+       # exit 1
     fi
 }
 
