@@ -12,7 +12,7 @@ echo "#########################################################################"
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(Script)
-SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Select_Linux.sh"
+SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Select_Linux.sh"
 
 # Parameter Settings(SetupMode)
 SetupMode="Japanese"
