@@ -15,10 +15,10 @@ echo "#########################################################################"
 echo $SetupMode
 
 # Parameter Settings(BootstrapScript)
-Bootstrap-AmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
-Bootstrap-RHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_RHEL-v7-HVM.sh"
-Bootstrap-RHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_RHEL-v6-HVM.sh"
-Bootstrap-CentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC(IPv4)/2nd-Bootstrap_CentOS-v7-HVM.sh"
+BootstrapAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
+BootstrapRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v7-HVM.sh"
+BootstrapRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v6-HVM.sh"
+BootstrapCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_CentOS-v7-HVM.sh"
 
 
 
@@ -67,14 +67,20 @@ function get_os_info () {
     UNIQ_OS_ID="${LOWERCASE_DIST_TYPE}-${KERNEL}-${MACH}"
     UNIQ_PLATFORM_ID="${LOWERCASE_DIST_TYPE}-${KERNEL_GROUP}."
 
-    if [ "${DIST_TYPE}" = "Amazon" || "${DIST_TYPE}" = "amzn" ]; then
-        BootstrapScript=${Bootstrap-AmazonLinux}
-    elif [ "${DIST_TYPE}" = "RHEL" && "${REV}" = "7" ]; then
-        BootstrapScript=${Bootstrap-RHELv7}
-    elif [ "${DIST_TYPE}" = "RHEL" && "${REV}" = "6" ]; then
-        BootstrapScript=${Bootstrap-RHELv6}
-    elif [ "${DIST_TYPE}" = "CentOS" || "${DIST_TYPE}" = "centos" ] && [ "${REV}" = "7" ]; then
-        BootstrapScript=${Bootstrap-CentOSv7}
+    if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
+          BootstrapScript=${BootstrapAmazonLinux}
+    elif [ "${DIST_TYPE}" = "RHEL" ] || [ "${DIST_TYPE}" = "RedHat" ]; then
+        if [ "${REV}" = "7" ]; then
+           BootstrapScript=${BootstrapRHELv7}
+        elif [ "${REV}" = "6" ]; then
+           BootstrapScript=${BootstrapRHELv6}
+        else
+           BootstrapScript=""
+    elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
+        if [ "${REV}" = "7" ]; then
+           BootstrapScript=${BootstrapCentOSv7}
+        else
+           BootstrapScript=""
     else
         BootstrapScript=""
     fi
@@ -118,7 +124,7 @@ echo "Distribution type of the machine is ${DIST_TYPE}."
 echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
-
+echo "Bootstrap Script of the distro is ${BootstrapScript}."
 
 
 #-------------------------------------------------------------------------------
