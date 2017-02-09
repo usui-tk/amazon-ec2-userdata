@@ -45,24 +45,19 @@ function get_os_info () {
           DIST_TYPE=$ID
           DIST=$NAME
           REV=$VERSION_ID
-      elif [ -f /usr/lib/os-release ]; then
-          source /usr/lib/os-release
-          DIST_TYPE=$ID
-          DIST=$NAME
-          REV=$VERSION_ID
       elif [ -f /etc/centos-release ]; then
           DIST_TYPE='CentOS'
-          DIST=`cat /etc/centos-release |sed s/\ release.*//`
+          DIST=`cat /etc/centos-release | sed s/\ release.*//`
           REV=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/redhat-release ]; then
           DIST_TYPE='RHEL'
-          DIST=`cat /etc/redhat-release |sed s/\ release.*//`
+          DIST=`cat /etc/redhat-release | sed s/\ release.*//`
           REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/system-release ]; then
           if grep "Amazon Linux AMI" /etc/system-release; then
             DIST_TYPE='Amazon'
           fi
-          DIST=`cat /etc/system-release |sed s/\ release.*//`
+          DIST=`cat /etc/system-release | sed s/\ release.*//`
           REV=`cat /etc/system-release | sed s/.*release\ // | sed s/\ .*//`
       fi
     fi
@@ -72,13 +67,13 @@ function get_os_info () {
     UNIQ_PLATFORM_ID="${LOWERCASE_DIST_TYPE}-${KERNEL_GROUP}."
 
     if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
-    echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-    exit 1
+       echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+       exit 1
     fi
 }
 
 function get_script_url () {
-    if [ "${DIST_TYPE}" = "Amazon" ]; then
+    if [ "${DIST_TYPE}" = "Amazon" || "${DIST_TYPE}" = "amzn" ]; then
         BootstrapScript=${Bootstrap-AmazonLinux}
     elif [ "${DIST_TYPE}" = "RHEL" ]; then
         if [ "${REV}" = "7" ]; then
@@ -99,8 +94,8 @@ function get_script_url () {
     fi
 
     if [[ -z "${BootstrapScript}" ]]; then
-    echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-    exit 1
+       echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+       exit 1
     fi
 }
 
