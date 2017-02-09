@@ -41,7 +41,7 @@ function get_os_info () {
     KERNEL_GROUP=$(echo $KERNEL | cut -f1-2 -d'.')
 
     if [ "${OS}" = "linux" ] ; then
-       if [ -f /etc/os-release ]; then
+      if [ -f /etc/os-release ]; then
           source /etc/os-release
           DIST_TYPE=$ID
           DIST=$NAME
@@ -60,6 +60,10 @@ function get_os_info () {
           fi
           DIST=`cat /etc/system-release | sed s/\ release.*//`
           REV=`cat /etc/system-release | sed s/.*release\ // | sed s/\ .*//`
+      else
+          DIST_TYPE=""
+          DIST=""
+          REV=""
       fi
     fi
 
@@ -76,11 +80,13 @@ function get_os_info () {
            BootstrapScript=${BootstrapRHELv6}
         else
            BootstrapScript=""
+        fi
     elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
         if [ "${REV}" = "7" ]; then
            BootstrapScript=${BootstrapCentOSv7}
         else
            BootstrapScript=""
+        fi
     else
         BootstrapScript=""
     fi
