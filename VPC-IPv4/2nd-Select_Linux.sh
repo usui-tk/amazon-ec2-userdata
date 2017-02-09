@@ -73,10 +73,10 @@ function get_os_info () {
 
     if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
           BootstrapScript=${BootstrapAmazonLinux}
-    elif [ "${DIST_TYPE}" = "RHEL" ] || [ "${DIST_TYPE}" = "RedHat" ]; then
-        if [ "${REV}" = "7" ]; then
+    elif [ "${DIST_TYPE}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
+        if [ "${REV}" = "7.*" ]; then
            BootstrapScript=${BootstrapRHELv7}
-        elif [ "${REV}" = "6" ]; then
+        elif [ "${REV}" = "6.*" ]; then
            BootstrapScript=${BootstrapRHELv6}
         else
            BootstrapScript=""
