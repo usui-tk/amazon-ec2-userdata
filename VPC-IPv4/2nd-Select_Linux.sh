@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 # Logger
-exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data_2nd-select.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 echo "#########################################################################"
 echo " This script name is `basename $0`"
@@ -15,10 +15,10 @@ echo "#########################################################################"
 echo $SetupMode
 
 # Parameter Settings(BootstrapScript)
-BootstrapAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
-BootstrapRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v7-HVM.sh"
-BootstrapRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_RHEL-v6-HVM.sh"
-BootstrapCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Bootstrap_CentOS-v7-HVM.sh"
+BootstrapAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
+BootstrapRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v7-HVM.sh"
+BootstrapRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
+BootstrapCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
 
 
 

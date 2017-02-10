@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 # Logger
-exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data_1st-userdata.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 echo "#########################################################################"
 echo " This script name is `basename $0`"

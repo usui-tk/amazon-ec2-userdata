@@ -1,25 +1,11 @@
 #!/bin/bash -v
 
 # Logger
-exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-
-# Red Hat Update Infrastructure Client Package Update
-yum clean all
-yum update -y rh-amazon-rhui-client
-
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases
-yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-yum-config-manager --enable rhui-REGION-client-config-server-6
-
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
-yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # yum repository metadata Clean up
 yum clean all
@@ -31,29 +17,11 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock
-yum install -y setroubleshoot-server
+# Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
+yum install -y dstat git jq lzop iotop mtr nmap sos sysstat yum-plugin-versionlock wget
 
-# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
-
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
-
-yum --enablerepo=epel -y install epel-release
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-yum clean all
-
-# Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion jq
+# Package Install Amazon Linux System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y bash-completion
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -82,16 +50,6 @@ AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/d
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python-pip
-pip install --upgrade pip
-pip install awscli
-
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
-
 aws --version
 
 # Setting AWS-CLI default Region & Output format
@@ -159,31 +117,7 @@ else
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudFormation Helper Scripts]
-#-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python-pip
-# pip install --upgrade pip
-
-pip install pystache
-pip install argparse
-pip install python-daemon
-pip install requests
-
-curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
-tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
-
-cd /tmp/aws-cfn-bootstrap-1.4/
-python setup.py build
-python setup.py install
-
-chmod 775 /usr/init/redhat/cfn-hup
-ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
-
-cd /tmp
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+# Custom Package Installation [Amazon EC2 Systems Manager (SM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
@@ -213,18 +147,21 @@ __EOF__
 date
 /bin/cp -fp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 date
-ntpdate 0.rhel.pool.ntp.org
+ntpdate 0.amazon.pool.ntp.org
 date
 
 # Setting NTP Deamon
 sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-service ntpd start
+service ntpd restart
 chkconfig ntpd on
 
 # Setting Language
 cat > /etc/sysconfig/i18n << __EOF__
 LANG=ja_JP.UTF-8
 __EOF__
+
+# Ephemeral-Disk Auto Mount Disabled (cloud-init)
+sed -i '/ephemeral0/d' /etc/cloud/cloud.cfg
 
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop

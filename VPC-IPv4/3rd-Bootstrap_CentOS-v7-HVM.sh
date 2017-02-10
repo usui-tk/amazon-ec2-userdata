@@ -1,25 +1,11 @@
 #!/bin/bash -v
 
 # Logger
-exec > >(tee /var/log/user-data.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-
-# Red Hat Update Infrastructure Client Package Update
-yum clean all
-yum update -y rh-amazon-rhui-client
-
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases
-yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-yum-config-manager --enable rhui-REGION-client-config-server-7
-
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-optional
-yum-config-manager --enable rhui-REGION-rhel-server-extras
-# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # yum repository metadata Clean up
 yum clean all
@@ -31,24 +17,12 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y bash-completion dstat gdisk git lsof lzop iotop mtr nmap sos traceroute yum-priorities yum-plugin-versionlock wget
+# Package Install CentOS System Administration Tools (from CentOS Community Repository)
+yum install -y bash-completion bind-utils dstat gdisk git lsof lzop iotop mtr nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
-
-yum --enablerepo=epel -y install epel-release
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
+yum install -y epel-release
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
