@@ -13,7 +13,6 @@ ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Bootstr
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
 
-
 #-------------------------------------------------------------------------------
 # Define Function
 #-------------------------------------------------------------------------------
@@ -67,7 +66,9 @@ function get_os_info () {
     LOWERCASE_DIST_TYPE=`lowercase $DIST_TYPE`
     UNIQ_OS_ID="${LOWERCASE_DIST_TYPE}-${KERNEL}-${MACH}"
     UNIQ_PLATFORM_ID="${LOWERCASE_DIST_TYPE}-${KERNEL_GROUP}."
+}
 
+function get_bootstrap_script () {
     if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
         # Bootstrap Script for Amazon Linux
         BootstrapScript=${ScriptForAmazonLinux}
@@ -94,7 +95,6 @@ function get_os_info () {
 }
 
 
-
 #-------------------------------------------------------------------------------
 # Main Routine
 #-------------------------------------------------------------------------------
@@ -115,6 +115,9 @@ fi
 # call the os info function to get details
 get_os_info
 
+# call the bootstrap script function to get details
+get_bootstrap_script
+
 # Information Linux Distribution
 KERNEL_VERSION=$(uname -r )
 KERNEL_GROUP=$(echo "${KERNEL_VERSION}" | cut -f 1-2 -d'.')
@@ -126,7 +129,6 @@ echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
 echo "BootstrapScript of the distro is ${BootstrapScript}."
-
 
 #-------------------------------------------------------------------------------
 # Bootstrap Script Executite

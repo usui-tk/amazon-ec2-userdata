@@ -9,6 +9,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 if [ -f /tmp/userdata-parameter ]; then
     source /tmp/userdata-parameter
+	# echo
 	echo $Language
 	echo $Timezone
 	echo $VpcNetwork
@@ -21,8 +22,11 @@ if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
 	Timezone="Asia/Tokyo"
 	# Default VPC Network
 	VpcNetwork="IPv4"
+	# echo
+	echo $Language
+	echo $Timezone
+	echo $VpcNetwork
 fi
-
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -145,9 +149,8 @@ fi
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
 status amazon-ssm-agent
-service amazon-ssm-agent start
-status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
+status amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -157,29 +160,6 @@ yum clean all
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
-
-# Setting SystemClock
-cat > /etc/sysconfig/clock << __EOF__
-ZONE="Asia/Tokyo"
-UTC=false
-__EOF__
-
-# Setting TimeZone
-date
-/bin/cp -fp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
-date
-ntpdate 0.amazon.pool.ntp.org
-date
-
-# Setting NTP Deamon
-sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-service ntpd restart
-chkconfig ntpd on
-
-# Setting Language
-cat > /etc/sysconfig/i18n << __EOF__
-LANG=ja_JP.UTF-8
-__EOF__
 
 # Ephemeral-Disk Auto Mount Disabled (cloud-init)
 sed -i '/ephemeral0/d' /etc/cloud/cloud.cfg
@@ -195,20 +175,98 @@ chkconfig --list ip6tables
 chkconfig ip6tables off
 chkconfig --list ip6tables
 
-# Disable IPv6 Kernel Module
-echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+# Setting SystemClock and Timezone
+if [ "${Timezone}" = "Asia/Tokyo" ]; then
+	echo "# Setting SystemClock and Timezone -> $Timezone"
+	# Setting SystemClock
+	cat /dev/null > /etc/sysconfig/clock
+	echo 'ZONE="Asia/Tokyo"' >> /etc/sysconfig/clock
+	echo 'UTC=false' >> /etc/sysconfig/clock
+	cat /etc/sysconfig/clock
+	# Setting TimeZone
+	date
+	/bin/cp -fp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+	date
+elif [ "${Timezone}" = "UTC" ]; then
+	echo "# Setting SystemClock and Timezone -> $Timezone"
+	# Setting SystemClock
+	cat /dev/null > /etc/sysconfig/clock
+	echo 'ZONE="UTC"' >> /etc/sysconfig/clock
+	echo 'UTC=true' >> /etc/sysconfig/clock
+	cat /etc/sysconfig/clock
+	# Setting TimeZone
+	date
+	/bin/cp -fp /usr/share/zoneinfo/UTC /etc/localtime
+	date
+else
+	echo "# Default SystemClock and Timezone"
+	cat /etc/sysconfig/clock
+	cat /etc/localtime
+fi
 
-# Disable IPv6 Kernel Parameter
-sysctl -a
+# Time synchronization with NTP server
+date
+ntpdate 0.amazon.pool.ntp.org
+date
 
-cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
-# Custom sysctl Parameter for ipv6 disable
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
-__EOF__
+# Setting System Language
+if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	echo "# Setting System Language -> $Language"
+	cat /dev/null > /etc/sysconfig/i18n
+	echo 'LANG=ja_JP.UTF-8' >> /etc/sysconfig/i18n
+	cat /etc/sysconfig/i18n
+elif [ "${Language}" = "en_US.UTF-8" ]; then
+	echo "# Setting System Language -> $Language"
+	cat /dev/null > /etc/sysconfig/i18n
+	echo 'LANG=en_US.UTF-8' >> /etc/sysconfig/i18n
+	cat /etc/sysconfig/i18n
+else
+	echo "# Default Language"
+	cat /etc/sysconfig/i18n
+fi
 
-sysctl -p
-sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+# Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
+if [ "${VpcNetwork}" = "IPv4" ]; then
+	echo "# Setting IP Protocol Stack -> $VpcNetwork"
+	# Setting NTP Deamon
+	sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
+	service ntpd restart
+	# Disable IPv6 Kernel Module
+	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	# Disable IPv6 Kernel Parameter
+	sysctl -a
+
+	DisableIPv6Conf="/etc/sysctl.d/99-ipv6-disable.conf"
+
+	cat /dev/null > $DisableIPv6Conf
+	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
+	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
+	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
+
+	sysctl -p
+
+	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+elif [ "${Timezone}" = "IPv6" ]; then
+	echo "# Show IP Protocol Stack -> $VpcNetwork"
+	# Show IPv6 Network Interface Address
+	ifconfig
+	# Show IPv6 Kernel Module
+	lsmod | grep ipv6
+	# Show Network Listen Address and report
+	netstat -an -A inet6
+	# Show Network Routing Table
+	netstat -r -A inet6
+else
+	echo "# Default IP Protocol Stack"
+	# Show IPv6 Network Interface Address
+	ifconfig
+	# Show IPv6 Kernel Module
+	lsmod | grep ipv6
+	# Show Network Listen Address and report
+	netstat -an -A inet6
+	# Show Network Routing Table
+	netstat -r -A inet6
+fi
 
 # Instance Reboot
 reboot
