@@ -4,6 +4,27 @@
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
+# Set UserData Parameter
+#-------------------------------------------------------------------------------
+
+if [ -f /tmp/userdata-parameter ]; then
+    source /tmp/userdata-parameter
+	echo $Language
+	echo $Timezone
+	echo $VpcNetwork
+fi
+
+if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
+    # Default Language
+	Language="ja_JP.UTF-8"
+    # Default Timezone
+	Timezone="Asia/Tokyo"
+	# Default VPC Network
+	VpcNetwork="IPv4"
+fi
+
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 

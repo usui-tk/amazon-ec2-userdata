@@ -8,7 +8,7 @@ exec > >(tee /var/log/user-data_2nd-select.log || logger -t user-data -s 2> /dev
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(BootstrapScript)
-ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
+ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-HVM.sh'
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
@@ -59,6 +59,11 @@ function get_os_info () {
       fi
     fi
 
+    if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
+       echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+       exit 1
+    fi
+
     LOWERCASE_DIST_TYPE=`lowercase $DIST_TYPE`
     UNIQ_OS_ID="${LOWERCASE_DIST_TYPE}-${KERNEL}-${MACH}"
     UNIQ_PLATFORM_ID="${LOWERCASE_DIST_TYPE}-${KERNEL_GROUP}."
@@ -86,11 +91,6 @@ function get_os_info () {
     else
         BootstrapScript=""
     fi
-
-    if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
-       echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-       exit 1
-    fi
 }
 
 
@@ -101,25 +101,16 @@ function get_os_info () {
 
 # Install curl Command
 if [ $(command -v yum) ]; then
-    # yum repository metadata Clean up
+    # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS)
     yum clean all
-    # Package Install curl Tools
     yum install -y curl
 elif [ $(command -v apt-get) ]; then
-    # Package Install curl Tools
+    # Package Install curl Tools (Debian, Ubuntu)
     apt-get install -y curl
 else
     echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
     exit 1
 fi
-
-# Instance MetaData
-AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
-Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 # call the os info function to get details
 get_os_info
