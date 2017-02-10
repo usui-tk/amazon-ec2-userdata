@@ -227,6 +227,11 @@ yum clean all
 # System Setting
 #-------------------------------------------------------------------------------
 
+# NTP Service Enabled(ntpd)
+chkconfig --list ntpd
+chkconfig ntpd on
+chkconfig --list ntpd
+
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop
 chkconfig --list iptables
