@@ -8,10 +8,10 @@ exec > >(tee /var/log/user-data_2nd-select.log || logger -t user-data -s 2> /dev
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(BootstrapScript)
-ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-HVM.sh'
-ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v7-HVM.sh"
-ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
-ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
+ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_AmazonLinux-HVM.sh'
+ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
+ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
+ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Define Function

@@ -8,7 +8,7 @@ exec > >(tee /var/log/user-data_1st-userdata.log || logger -t user-data -s 2> /d
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(Script)
-SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Select_Linux.sh"
+SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/2nd-Select_Linux.sh"
 
 # Parameter file Settings
 cat > /tmp/userdata-parameter << __EOF__
