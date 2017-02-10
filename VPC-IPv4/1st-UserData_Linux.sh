@@ -3,10 +3,6 @@
 # Logger
 exec > >(tee /var/log/user-data_1st-userdata.log || logger -t user-data -s 2> /dev/console) 2>&1
 
-echo "#########################################################################"
-echo " This script name is `basename $0`"
-echo "#########################################################################"
-
 #-------------------------------------------------------------------------------
 # Parameter Settings
 #-------------------------------------------------------------------------------
@@ -14,8 +10,17 @@ echo "#########################################################################"
 # Parameter Settings(Script)
 SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/2nd-Select_Linux.sh"
 
-# Parameter Settings(SetupMode)
-SetupMode="Japanese"
+# Parameter file Settings
+cat > /tmp/userdata-parameter << __EOF__
+# Language [ja_JP.UTF-8],[en_US.UTF-8]
+Language="ja_JP.UTF-8"
+
+# Timezone [Asia/Tokyo],[UTC]
+Timezone="Asia/Tokyo"
+
+# VPC Network [IPv4],[IPv6]
+VpcNetwork="IPv4"
+__EOF__
 
 #-------------------------------------------------------------------------------
 # Select Script Execute
@@ -33,4 +38,4 @@ fi
 # Execute SelectScript
 chmod 700 SelectScript.sh
 
-SetupMode=$SetupMode bash -x SelectScript.sh
+bash -x SelectScript.sh

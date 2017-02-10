@@ -3,23 +3,15 @@
 # Logger
 exec > >(tee /var/log/user-data_2nd-select.log || logger -t user-data -s 2> /dev/console) 2>&1
 
-echo "#########################################################################"
-echo " This script name is `basename $0`"
-echo "#########################################################################"
-
 #-------------------------------------------------------------------------------
 # Parameter Settings
 #-------------------------------------------------------------------------------
 
-# Parameter Settings(SetupMode)
-echo $SetupMode
-
 # Parameter Settings(BootstrapScript)
-BootstrapAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
-BootstrapRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v7-HVM.sh"
-BootstrapRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
-BootstrapCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
-
+ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_AmazonLinux-2016.09.1-HVM.sh'
+ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v7-HVM.sh"
+ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_RHEL-v6-HVM.sh"
+ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/VPC-IPv4/3rd-Bootstrap_CentOS-v7-HVM.sh"
 
 
 #-------------------------------------------------------------------------------
@@ -72,18 +64,22 @@ function get_os_info () {
     UNIQ_PLATFORM_ID="${LOWERCASE_DIST_TYPE}-${KERNEL_GROUP}."
 
     if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
-          BootstrapScript=${BootstrapAmazonLinux}
+        # Bootstrap Script for Amazon Linux
+        BootstrapScript=${ScriptForAmazonLinux}
     elif [ "${DIST_TYPE}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
         if [ $(echo ${REV} | grep -e '7.') ]; then
-           BootstrapScript=${BootstrapRHELv7}
+           # Bootstrap Script for Red Hat Enterprise Linux v7.x
+           BootstrapScript=${ScriptForRHELv7}
         elif [ $(echo ${REV} | grep -e '6.') ]; then
-           BootstrapScript=${BootstrapRHELv6}
+           # Bootstrap Script for Red Hat Enterprise Linux v6.x
+           BootstrapScript=${ScriptForRHELv6}
         else
            BootstrapScript=""
         fi
     elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
         if [ "${REV}" = "7" ]; then
-           BootstrapScript=${BootstrapCentOSv7}
+           # Bootstrap Script for CentOS v7.x
+           BootstrapScript=${ScriptForCentOSv7}
         else
            BootstrapScript=""
         fi
@@ -93,7 +89,7 @@ function get_os_info () {
 
     if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
        echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-       # exit 1
+       exit 1
     fi
 }
 
@@ -103,11 +99,19 @@ function get_os_info () {
 # Main Routine
 #-------------------------------------------------------------------------------
 
-# yum repository metadata Clean up
-yum clean all
-
-# Package Install curl Tools
-yum install -y curl
+# Install curl Command
+if [ $(command -v yum) ]; then
+    # yum repository metadata Clean up
+    yum clean all
+    # Package Install curl Tools
+    yum install -y curl
+elif [ $(command -v apt-get) ]; then
+    # Package Install curl Tools
+    apt-get install -y curl
+else
+    echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+    exit 1
+fi
 
 # Instance MetaData
 AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
@@ -130,11 +134,11 @@ echo "Distribution type of the machine is ${DIST_TYPE}."
 echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
-echo "Bootstrap Script of the distro is ${BootstrapScript}."
+echo "BootstrapScript of the distro is ${BootstrapScript}."
 
 
 #-------------------------------------------------------------------------------
 # Bootstrap Script Executite
 #-------------------------------------------------------------------------------
 
-SetupMode=$SetupMode bash -vc "$(curl -L ${BootstrapScript})"
+bash -vc "$(curl -L ${BootstrapScript})"
