@@ -164,6 +164,11 @@ yum clean all
 # Ephemeral-Disk Auto Mount Disabled (cloud-init)
 sed -i '/ephemeral0/d' /etc/cloud/cloud.cfg
 
+# NTP Service Enabled(ntpd)
+chkconfig --list ntpd
+chkconfig ntpd on
+chkconfig --list ntpd
+
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop
 chkconfig --list iptables
