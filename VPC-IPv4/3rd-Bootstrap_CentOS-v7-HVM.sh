@@ -4,6 +4,31 @@
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
+# Set UserData Parameter
+#-------------------------------------------------------------------------------
+
+if [ -f /tmp/userdata-parameter ]; then
+    source /tmp/userdata-parameter
+	# echo
+	echo $Language
+	echo $Timezone
+	echo $VpcNetwork
+fi
+
+if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
+    # Default Language
+	Language="ja_JP.UTF-8"
+    # Default Timezone
+	Timezone="Asia/Tokyo"
+	# Default VPC Network
+	VpcNetwork="IPv4"
+	# echo
+	echo $Language
+	echo $Timezone
+	echo $VpcNetwork
+fi
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
@@ -199,16 +224,7 @@ yum clean all
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Setting TimeZone
-timedatectl set-timezone Asia/Tokyo
-# timedatectl status
-
-# Setting Language
-localectl set-locale LANG=ja_JP.utf8
-# localectl status
-
-# Setting NTP Deamon
-sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
+# NTP Service Enabled(chronyd)
 systemctl restart chronyd
 systemctl enable chronyd
 systemctl is-enabled chronyd
@@ -217,21 +233,100 @@ chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
 
-# Disable IPv6 Kernel Module
-echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+# Setting SystemClock and Timezone
+if [ "${Timezone}" = "Asia/Tokyo" ]; then
+	echo "# Setting SystemClock and Timezone -> $Timezone"
+	date
+	# timedatectl status
+	timedatectl set-timezone Asia/Tokyo
+	date
+	# timedatectl status
+elif [ "${Timezone}" = "UTC" ]; then
+	echo "# Setting SystemClock and Timezone -> $Timezone"
+	date
+	# timedatectl status
+	timedatectl set-timezone UTC
+	date
+	# timedatectl status
+else
+	echo "# Default SystemClock and Timezone"
+	# timedatectl status
+	date
+fi
 
-# Disable IPv6 Kernel Parameter
-sysctl -a
+# Time synchronization with NTP server
+date
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
+date
 
-cat > /etc/sysctl.d/99-ipv6-disable.conf << __EOF__
-# Custom sysctl Parameter for ipv6 disable
-net.ipv6.conf.all.disable_ipv6 = 1
-net.ipv6.conf.default.disable_ipv6 = 1
-__EOF__
+# Setting System Language
+if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	echo "# Setting System Language -> $Language"
+	locale
+	# localectl status
+	localectl set-locale LANG=ja_JP.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
+elif [ "${Language}" = "en_US.UTF-8" ]; then
+	echo "# Setting System Language -> $Language"
+	locale
+	# localectl status
+	localectl set-locale LANG=en_US.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
+else
+	echo "# Default Language"
+	locale
+	cat /etc/locale.conf
+fi
 
-sysctl --system
-sysctl -p
-sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+# Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
+if [ "${VpcNetwork}" = "IPv4" ]; then
+	echo "# Setting IP Protocol Stack -> $VpcNetwork"
+	# Setting NTP Deamon
+	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
+	systemctl restart chronyd
+	# Disable IPv6 Kernel Module
+	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	# Disable IPv6 Kernel Parameter
+	sysctl -a
+
+	DisableIPv6Conf="/etc/sysctl.d/99-ipv6-disable.conf"
+
+	cat /dev/null > $DisableIPv6Conf
+	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
+	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
+	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
+
+	sysctl --system
+	sysctl -p
+
+	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+elif [ "${Timezone}" = "IPv6" ]; then
+	echo "# Show IP Protocol Stack -> $VpcNetwork"
+	echo "# Show IPv6 Network Interface Address"
+	ifconfig
+	echo "# Show IPv6 Kernel Module"
+	lsmod | grep ipv6
+	echo "# Show Network Listen Address and report"
+	netstat -an -A inet6
+	echo "# Show Network Routing Table"
+	netstat -r -A inet6
+else
+	echo "# Default IP Protocol Stack"
+	echo "# Show IPv6 Network Interface Address"
+	ifconfig
+	echo "# Show IPv6 Kernel Module"
+	lsmod | grep ipv6
+	echo "# Show Network Listen Address and report"
+	netstat -an -A inet6
+	echo "# Show Network Routing Table"
+	netstat -r -A inet6
+fi
 
 # Instance Reboot
 reboot
