@@ -248,23 +248,23 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 elif [ "${Timezone}" = "IPv6" ]; then
 	echo "# Show IP Protocol Stack -> $VpcNetwork"
-	# Show IPv6 Network Interface Address
+	echo "# Show IPv6 Network Interface Address"
 	ifconfig
-	# Show IPv6 Kernel Module
+	echo "# Show IPv6 Kernel Module"
 	lsmod | grep ipv6
-	# Show Network Listen Address and report
+	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
-	# Show Network Routing Table
+	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 else
 	echo "# Default IP Protocol Stack"
-	# Show IPv6 Network Interface Address
+	echo "# Show IPv6 Network Interface Address"
 	ifconfig
-	# Show IPv6 Kernel Module
+	echo "# Show IPv6 Kernel Module"
 	lsmod | grep ipv6
-	# Show Network Listen Address and report
+	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
-	# Show Network Routing Table
+	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
 
