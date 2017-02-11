@@ -1,0 +1,352 @@
+########################################################################################################################
+#.SYNOPSIS
+#
+#   Amazon EC2 Bootstrap Script - 3rd Bootstrap
+#
+#.DESCRIPTION
+#
+#   Uses option settings to Windows Server Configuration
+#
+#.NOTES
+#
+#   Services can be quickly added with custom functionality by adding an entry in serviceDefinition with the name
+#   of the service and the name of the function which will perform the service-specific functionality.
+#
+########################################################################################################################
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# User Define Parameter
+#-----------------------------------------------------------------------------------------------------------------------
+$BASE_DIR                        = "$Env:SystemDrive\EC2-Bootstrap"
+$LOGS_DIR                        = "$BASE_DIR\Logs"
+
+$TEMP_DIR                        = "$Env:SystemRoot\Temp"
+
+$USERDATA_LOG                    = "$TEMP_DIR\userdata.log"
+$TRANSCRIPT_LOG                  = "$LOGS_DIR\userdata-transcript-3rd.log"
+
+
+
+########################################################################################################################
+#
+# Service-specific Functionality
+#
+########################################################################################################################
+
+function Format-Message {
+  param([string]$message)
+
+  $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff"
+  "$timestamp - $message"
+} # end function Format-Message
+
+function Log {
+  param([string]$message, $log=$USERDATA_LOG)
+
+  Format-Message $message | Out-File $log -Append -Force
+} # end function Log
+
+function Create-Directory {
+  param([string]$dir)
+  
+  If (!(Test-Path -Path $dir)) {
+    Log "Creating directory: $dir"
+    New-Item -Path $dir -ItemType Directory -Force
+  }
+} # end function Create-Directory
+
+function Set-TimeZone {
+  [CmdletBinding(SupportsShouldProcess = $True)]
+  param( 
+    [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
+    [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
+    [ValidateNotNullOrEmpty()]
+    [string]$TimeZone = "Tokyo Standard Time"
+  ) 
+
+  $process = New-Object System.Diagnostics.Process 
+  $process.StartInfo.WindowStyle = "Hidden" 
+  $process.StartInfo.FileName = "tzutil.exe" 
+  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
+  $process.Start() | Out-Null 
+} # end function Set-TimeZone
+
+
+
+########################################################################################################################
+#
+# Start of script
+#
+########################################################################################################################
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Timezone Setting
+#-----------------------------------------------------------------------------------------------------------------------
+
+Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+Set-TimeZone "Tokyo Standard Time"
+Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+
+Start-Sleep -Seconds 5
+
+#-----------------------------------------------------------------------------------------------------------------------
+# 
+#-----------------------------------------------------------------------------------------------------------------------
+
+Create-Directory $BASE_DIR
+Create-Directory $LOGS_DIR
+
+Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
+
+Set-Location -Path $BASE_DIR
+
+Set-StrictMode -Version Latest
+
+Get-ExecutionPolicy
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
+Get-ExecutionPolicy
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Amazon EC2 System Define Parameter
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Set AWS Instance MetaData
+Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
+Set-Variable -Name Region -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
+Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
+Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
+Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+Set-Variable -Name AmiId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
+
+# Set IAM Role & STS Information
+Set-Variable -Name RoleArn -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+Set-Variable -Name RoleName -Value ($RoleArn -split "/" | select -Index 1)
+
+Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
+Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
+Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
+Set-Variable -Name StsToken -Value $StsCredential.Token
+
+# Set AWS Account ID
+Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
+
+# Set Setting File
+Set-Variable -Name SysprepSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+Set-Variable -Name CWLogsSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+
+# Get System & User Variables
+Get-Variable | Export-Csv -Encoding default bootstrap-variable.csv
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Amazon EC2 Information [AMI & Instance & EBS Volume]
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Setting AWS Tools for Windows PowerShell
+Set-DefaultAWSRegion -Region $Region
+Get-DefaultAWSRegion
+
+# Get AMI Information
+Write-Output "# Get AMI Information"
+Get-EC2Image -ImageId $AmiId | ConvertTo-Json
+
+# Get EC2 Instance Information
+Write-Output "# Get EC2 Instance Information"
+Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
+
+# Get EC2 Instance attached EBS Volume Information
+Write-Output "# Get EC2 Instance attached EBS Volume Information"
+Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
+
+# Get EC2 Instance Attribute[Network Interface Performance Attribute]
+if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
+    # Get EC2 Instance Attribute(Elastic Network Adapter Status)
+    Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
+    #Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
+} elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
+    # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+    Write-Output "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
+} else {
+    Write-Output "Instance type of None [Network Interface Performance Attribute]"
+}
+
+# Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
+    # Get EC2 Instance Attribute(EBS-optimized instance Status)
+    Write-Output "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
+} else {
+    Write-Output "Instance type of None [Storage Interface Performance Attribute]"
+}
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Amazon EC2 Information [AMI & Instance & EBS Volume]
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Setting SystemLocale
+Get-WinSystemLocale
+Set-WinSystemLocale -SystemLocale ja-JP
+Get-WinSystemLocale
+
+Get-WinHomeLocation
+Set-WinHomeLocation -GeoId 0x7A
+Get-WinHomeLocation
+
+Get-WinCultureFromLanguageListOptOut
+Set-WinCultureFromLanguageListOptOut -OptOut $False
+Get-WinCultureFromLanguageListOptOut
+
+# Setting Japanese UI
+Get-WinUILanguageOverride
+Set-WinUILanguageOverride ja-JP
+Get-WinUILanguageOverride
+
+# Change Windows Update Policy
+$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
+$AUSettings.ScheduledInstallationTime = 5      # AM 5:00
+$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
+$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+$AUSettings.Save()
+
+Start-Sleep -Seconds 5
+
+# Enable Microsoft Update
+$SMSettings = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
+$SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+$SMSettings.Services
+
+Start-Sleep -Seconds 5
+
+# Enable EC2config EventLog Output
+Get-Content $EC2SettingsFile
+
+$xml1 = [xml](Get-Content $EC2SettingsFile)
+$xmlElement1 = $xml1.get_DocumentElement()
+$xmlElementToModify1 = $xmlElement1.Plugins
+
+foreach ($element in $xmlElementToModify1.Plugin)
+{
+    if ($element.name -eq "Ec2EventLog")
+    {
+        $element.State="Enabled"
+    }
+}
+$xml1.Save($EC2SettingsFile)
+
+# Change Windows Folder Option Policy
+Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+Set-ItemProperty -Path $RegistryFolderOption -name 'Hidden' -value '1' -force                                  # [Check] Show hidden files, folders, or drives
+Set-ItemProperty -Path $RegistryFolderOption -name 'HideFileExt' -value '0' -force                             # [UnCheck] Hide extensions for known file types
+New-ItemProperty -Path $RegistryFolderOption -name 'PersistBrowsers' -value '1' -propertyType "DWord" -force   # [Check] Restore previous folders windows
+
+# Change Display Desktop Icon Policy
+Set-Variable -Name RegistryDesktopIcon -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
+Set-Variable -Name RegistryDesktopIconSetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+
+New-Item -Path $RegistryDesktopIcon
+New-Item -Path $RegistryDesktopIconSetting
+
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -value '0' -propertyType "DWord" -force  #[CLSID] : My Computer
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -value '0' -propertyType "DWord" -force  #[CLSID] : Control Panel
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -value '0' -propertyType "DWord" -force  #[CLSID] : User's Files
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{645FF040-5081-101B-9F08-00AA002F954E}' -value '0' -propertyType "DWord" -force  #[CLSID] : Recycle Bin
+New-ItemProperty -Path $RegistryDesktopIconSetting -name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -value '0' -propertyType "DWord" -force  #[CLSID] : Network
+
+# Test Connecting to the Internet (Google Public DNS:8.8.8.8)
+if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
+    # Change NetConnectionProfile
+    Get-NetConnectionProfile -IPv4Connectivity Internet
+    Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
+    Start-Sleep -Seconds 5
+    Get-NetConnectionProfile -IPv4Connectivity Internet
+}
+
+# Disable IPv6 Binding
+Get-NetAdapterBinding
+
+if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+    Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
+    Start-Sleep -Seconds 5
+} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+    Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
+    Start-Sleep -Seconds 5
+} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+    Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
+    Start-Sleep -Seconds 5
+} else {
+    Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
+}
+
+Get-NetAdapterBinding
+
+# Change System PowerPlan (High Performance)
+$HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                       # A string of "high performance" was Base64 encoded in Japanese
+$HighPowerByte = [System.Convert]::FromBase64String($HighPowerBase64)       # Conversion from base64 to byte sequence
+$HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To convert a sequence of bytes into a string of UTF-8 encoding
+
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
+
+if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
+    Write-Output "Change System PowerPlan : $HighPowerString"
+    $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
+    $HighPowerObject.Activate()
+    Start-Sleep -Seconds 5
+} elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+    Write-Output "Change System PowerPlan : High performance"
+    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
+    Start-Sleep -Seconds 5
+} else {
+    Write-Output "Change System PowerPlan : No change"
+}
+
+Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Collect Log Data
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Stop Transcript Logging
+Stop-Transcript
+
+# Save Script Files
+Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
+Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+# Save Configuration Files
+Copy-Item -Path $SysprepSettingsFile -Destination $BASE_DIR
+Copy-Item -Path $EC2SettingsFile -Destination $BASE_DIR
+Copy-Item -Path $CWLogsSettingsFile -Destination $BASE_DIR
+
+# Save Logging Files
+Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
+Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
+Copy-Item -Path "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log" -Destination $LOGS_DIR 
+Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
+# Get Command History
+# Get-History | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-command-list1.csv
+# Get-History | ConvertTo-Csv > $WorkingDirectoryPath\bootstrap-command-list2.csv
+# Get-History | ConvertTo-Json > $WorkingDirectoryPath\bootstrap-command-list.json
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Hostname rename & Instance Reboot
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Setting Hostname
+Rename-Computer $PrivateIp.Replace(".", "-") -Force
+
+# EC2 Instance Reboot
+Restart-Computer -Force
