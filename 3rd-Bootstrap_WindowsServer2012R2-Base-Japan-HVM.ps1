@@ -9,8 +9,8 @@
 #
 #.NOTES
 #
-#   Services can be quickly added with custom functionality by adding an entry in serviceDefinition with the name
-#   of the service and the name of the function which will perform the service-specific functionality.
+#   Target Windows Server OS Version
+#      - 6.3 : Windows Server 2012 R2
 #
 ########################################################################################################################
 
@@ -18,14 +18,13 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # User Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
-$BASE_DIR                        = "$Env:SystemDrive\EC2-Bootstrap"
-$LOGS_DIR                        = "$BASE_DIR\Logs"
+$BASE_DIR           = "$Env:SystemDrive\EC2-Bootstrap"
+$LOGS_DIR           = "$BASE_DIR\Logs"
 
-$TEMP_DIR                        = "$Env:SystemRoot\Temp"
+$TEMP_DIR           = "$Env:SystemRoot\Temp"
 
-$USERDATA_LOG                    = "$TEMP_DIR\userdata.log"
-$TRANSCRIPT_LOG                  = "$LOGS_DIR\userdata-transcript-3rd.log"
-
+$USERDATA_LOG       = "$TEMP_DIR\userdata.log"
+$TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 
 
 ########################################################################################################################
@@ -71,7 +70,6 @@ function Set-TimeZone {
   $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
   $process.Start() | Out-Null 
 } # end function Set-TimeZone
-
 
 
 ########################################################################################################################
@@ -148,40 +146,49 @@ Set-DefaultAWSRegion -Region $Region
 Get-DefaultAWSRegion
 
 # Get AMI Information
-Write-Output "# Get AMI Information"
-Get-EC2Image -ImageId $AmiId | ConvertTo-Json
+if ($RoleName) {
+    Log "# Get AMI Information"
+    Get-EC2Image -ImageId $AmiId | ConvertTo-Json
+}
 
 # Get EC2 Instance Information
-Write-Output "# Get EC2 Instance Information"
-Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
+if ($RoleName) {
+    Log "# Get EC2 Instance Information"
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
+}
 
 # Get EC2 Instance attached EBS Volume Information
-Write-Output "# Get EC2 Instance attached EBS Volume Information"
-Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
+if ($RoleName) {
+    Log "# Get EC2 Instance attached EBS Volume Information"
+    Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
+}
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
-    # Get EC2 Instance Attribute(Elastic Network Adapter Status)
-    Write-Output "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
-    #Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
-} elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
-    # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-    Write-Output "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
-    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
-} else {
-    Write-Output "Instance type of None [Network Interface Performance Attribute]"
+if ($RoleName) {
+    if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
+        # Get EC2 Instance Attribute(Elastic Network Adapter Status)
+        Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
+        # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
+    } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
+        # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+        Log "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
+    } else {
+        Log "# Instance type of None [Network Interface Performance Attribute]"
+    }
 }
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
-    # Get EC2 Instance Attribute(EBS-optimized instance Status)
-    Write-Output "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
-    Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
-} else {
-    Write-Output "Instance type of None [Storage Interface Performance Attribute]"
+if ($RoleName) {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
+        # Get EC2 Instance Attribute(EBS-optimized instance Status)
+        Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
+    } else {
+        Log "# Instance type of None [Storage Interface Performance Attribute]"
+    }
 }
-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -313,10 +320,31 @@ if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Obj
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
 
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Installation
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Install Text Editor (Visual Studio Code)
+Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$BASE_DIR\VSCodeSetup-stable.exe"
+Start-Process -FilePath "$BASE_DIR\VSCodeSetup-stable.exe" -ArgumentList '/verysilent /suppressmsgboxes /LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log' | Out-Null
+Start-Sleep -Seconds 30
+
+# Package Install Modern Web Browser (Google Chrome 64bit)
+Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$BASE_DIR\googlechrome.msi"
+Start-Process -FilePath "$BASE_DIR\googlechrome.msi" -ArgumentList '/quiet /log C:\EC2-Bootstrap\Logs\ChromeSetup.log' | Out-Null
+Start-Sleep -Seconds 30
+
+
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Collect Log Data
+# Collect Logging Data Files
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Get Command History
+Get-History
+Get-History | Export-Csv -Encoding default bootstrap-command-list1.csv
+Get-History | ConvertTo-Csv 
+Get-History | ConvertTo-Json 
 
 # Stop Transcript Logging
 Stop-Transcript
@@ -335,11 +363,6 @@ Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR
 Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
 Copy-Item -Path "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log" -Destination $LOGS_DIR 
 Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
-
-# Get Command History
-# Get-History | Export-Csv -Encoding default $WorkingDirectoryPath\bootstrap-command-list1.csv
-# Get-History | ConvertTo-Csv > $WorkingDirectoryPath\bootstrap-command-list2.csv
-# Get-History | ConvertTo-Json > $WorkingDirectoryPath\bootstrap-command-list.json
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Hostname rename & Instance Reboot

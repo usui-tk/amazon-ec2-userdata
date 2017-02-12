@@ -108,50 +108,69 @@ sleep 3
 aws configure list
 cat ~/.aws/config
 
-# Get EC2 Region Information
-aws ec2 describe-regions --region ${Region}
+# Get AWS Region Information
+if [ -n "$RoleName" ]; then
+	echo "# Get AWS Region Infomation"
+	aws ec2 describe-regions --region ${Region}
+fi
 
 # Get AMI Information
-echo "# Get AMI Information"
-aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region}
+if [ -n "$RoleName" ]; then
+	echo "# Get AMI Information"
+	aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region}
+fi
 
 # Get EC2 Instance Information
-echo "# Get EC2 Instance Information"
-aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance Information"
+	aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
+fi
 
 # Get EC2 Instance attached EBS Volume Information
-echo "# Get EC2 Instance attached EBS Volume Information"
-aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance attached EBS Volume Information"
+	aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
+fi
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
-	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
-	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
-	echo "# Get Linux Kernel Module(modinfo ena)"
-	modinfo ena
-	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
-	ethtool -i eth0
-elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
-	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-	echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
-	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-	echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-	modinfo ixgbevf
-	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
-	ethtool -i eth0
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
+		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+		echo "# Get Linux Kernel Module(modinfo ena)"
+		modinfo ena
+		echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
+		ethtool -i eth0
+	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
+		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
+		modinfo ixgbevf
+		echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
+		ethtool -i eth0
+	else
+		echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
+		ethtool -i eth0
+	fi
 else
 	echo "# Get Linux Network Interface Driver(ethtool -i eth0)"
 	ethtool -i eth0
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|p2.*|r3.*|r4.*|x1.*)$ ]]; then
-	# Get EC2 Instance Attribute(EBS-optimized instance Status)
-	echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
-	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
-	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
-	blockdev --report
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|i2.*|m1.*|m2.*|m3.*|m4.*|p2.*|r3.*|r4.*|x1.*)$ ]]; then
+		# Get EC2 Instance Attribute(EBS-optimized instance Status)
+		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+		blockdev --report
+	else
+		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+		blockdev --report
+	fi
 else
 	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 	blockdev --report
