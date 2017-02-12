@@ -88,8 +88,9 @@ Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
 
 Start-Sleep -Seconds 5
 
+
 #-----------------------------------------------------------------------------------------------------------------------
-# 
+# Preparation for script execution
 #-----------------------------------------------------------------------------------------------------------------------
 
 Create-Directory $BASE_DIR
@@ -104,6 +105,7 @@ Set-StrictMode -Version Latest
 Get-ExecutionPolicy
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
 Get-ExecutionPolicy
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 System Define Parameter
@@ -136,6 +138,7 @@ Set-Variable -Name CWLogsSettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigS
 
 # Get System & User Variables
 Get-Variable | Export-Csv -Encoding default bootstrap-variable.csv
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 Information [AMI & Instance & EBS Volume]
@@ -192,7 +195,7 @@ if ($RoleName) {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Amazon EC2 Information [AMI & Instance & EBS Volume]
+# Windows Server OS Configuration
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Setting SystemLocale
@@ -321,30 +324,92 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Installation
+# Custom Package Download (System Utility)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Download System Utility (Sysinternals Suite)
+# https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
+Log "# Package Download System Utility (Sysinternals Suite)"
+Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$BASE_DIR\SysinternalsSuite.zip"
+
+# Package Download System Utility (System Explorer)
+# http://systemexplorer.net/
+Log "# Package Download System Utility (System Explorer)"
+Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$BASE_DIR\SystemExplorerSetup.exe"
+
+# Package Download System Utility (Tera Term)
+# https://ja.osdn.net/projects/ttssh2/
+Log "# Package Download System Utility (Tera Term)"
+Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.93.exe' -OutFile "$BASE_DIR\TeraTermSetup.exe"
+
+# Package Download System Utility (AWS-CLI)
+# https://aws.amazon.com/jp/cli/
+Log "# Package Download System Utility (AWS-CLI)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$BASE_DIR\AWSCLI64.msi"
+
+# Package Download System Utility (AWS Diagnostics for Windows Server)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
+Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$BASE_DIR\AWSDiagnostics.zip"
+
+# Package Download System Utility (Amazon Inspector Agent)
+# https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows
+Log "# Package Download System Utility (Amazon Inspector Agent)"
+Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$BASE_DIR\AWSAgentInstall.exe"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (Monitoring Service Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Download Monitoring Service Agent (Zabix Agent)
+# http://www.zabbix.com/download
+Log "# Package Download Monitoring Service Agent (Zabix Agent)"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$BASE_DIR\zabbix_agents_2.2.14.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$BASE_DIR\zabbix_agents_3.0.4.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$BASE_DIR\zabbix_agents_3.2.0.win.zip"
+
+# Package Download Monitoring Service Agent (Datadog Agent)
+# http://docs.datadoghq.com/ja/guides/basic_agent_usage/windows/
+Log "# Package Download Monitoring Service Agent (Datadog Agent)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$BASE_DIR\ddagent-cli.msi"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (Network Driver)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Download Intel Network Driver
+# https://downloadcenter.intel.com/ja/download/23073/
+Log "# Package Download Intel Network Driver"
+Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+
+# Package Download Amazon Elastic Network Adapter Driver
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
+Log "# Package Download Amazon Elastic Network Adapter Driver"
+Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$BASE_DIR\ENA.zip"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Installation (Application)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Package Install Text Editor (Visual Studio Code)
+Log "# Package Install Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$BASE_DIR\VSCodeSetup-stable.exe"
 Start-Process -FilePath "$BASE_DIR\VSCodeSetup-stable.exe" -ArgumentList '/verysilent /suppressmsgboxes /LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log' | Out-Null
-Start-Sleep -Seconds 30
+Start-Sleep -Seconds 120
 
 # Package Install Modern Web Browser (Google Chrome 64bit)
+Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$BASE_DIR\googlechrome.msi"
 Start-Process -FilePath "$BASE_DIR\googlechrome.msi" -ArgumentList '/quiet /log C:\EC2-Bootstrap\Logs\ChromeSetup.log' | Out-Null
-Start-Sleep -Seconds 30
-
+Start-Sleep -Seconds 120
 
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Collect Logging Data Files
 #-----------------------------------------------------------------------------------------------------------------------
-
-# Get Command History
-Get-History
-Get-History | Export-Csv -Encoding default bootstrap-command-list1.csv
-Get-History | ConvertTo-Csv 
-Get-History | ConvertTo-Json 
 
 # Stop Transcript Logging
 Stop-Transcript
@@ -363,6 +428,7 @@ Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR
 Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
 Copy-Item -Path "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log" -Destination $LOGS_DIR 
 Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Hostname rename & Instance Reboot
