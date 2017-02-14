@@ -243,6 +243,45 @@ yum clean all
 # System Setting
 #-------------------------------------------------------------------------------
 
+# CPU Information [cat /proc/cpuinfo]
+cat /proc/cpuinfo
+
+# CPU Information [lscpu]
+lscpu
+
+# Memory Information [cat /proc/meminfo]
+cat /proc/meminfo
+
+# Memory Information [free]
+free
+
+# Disk Information(Partition) [parted -l]
+parted -l
+
+# Disk Information(MountPoint) [lsblk]
+lsblk
+
+# Disk Information(File System) [df -h]
+df -h
+
+# Network Information(Network Interface) [ip addr show]
+ip addr show
+
+# Network Information(Routing Table) [ip route show]
+ip route show
+
+# Network Information(Firewall Service) [firewalld]
+if [ $(command -v firewall-cmd) ]; then
+    # Network Information(Firewall Service) [systemctl status firewalld]
+    systemctl status firewalld
+    # Network Information(Firewall Service) [firewall-cmd --list-all]
+    firewall-cmd --list-all
+fi
+
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
+
 # NTP Service Enabled(chronyd)
 systemctl restart chronyd
 systemctl enable chronyd
