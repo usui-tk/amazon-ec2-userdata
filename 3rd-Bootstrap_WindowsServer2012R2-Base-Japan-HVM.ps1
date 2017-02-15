@@ -283,19 +283,19 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 Get-NetAdapterBinding
 
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
-    Write-Output "Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+    Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
     Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
-    Write-Output "Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+    Log "# Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
-    Write-Output "Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+    Log "# Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
     Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } else {
-    Write-Output "Disable-NetAdapterBinding(IPv6) : No Target Device"
+    Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
 
 Get-NetAdapterBinding
@@ -308,16 +308,16 @@ $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
-    Write-Output "Change System PowerPlan : $HighPowerString"
+    Log "# Change System PowerPlan : $HighPowerString"
     $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
     $HighPowerObject.Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
-    Write-Output "Change System PowerPlan : High performance"
+    Log "# Change System PowerPlan : High performance"
     (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
 } else {
-    Write-Output "Change System PowerPlan : No change"
+    Log "# Change System PowerPlan : No change"
 }
 
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
@@ -342,10 +342,15 @@ Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.e
 Log "# Package Download System Utility (Tera Term)"
 Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.93.exe' -OutFile "$BASE_DIR\TeraTermSetup.exe"
 
-# Package Download System Utility (AWS-CLI)
+# Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
-Log "# Package Download System Utility (AWS-CLI)"
+Log "# Package Download System Utility (AWS-CLI - 64bit)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$BASE_DIR\AWSCLI64.msi"
+
+# Package Download System Utility (AWS Tools for Windows PowerShell)
+# https://aws.amazon.com/jp/powershell/
+Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
+Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$BASE_DIR\AWSToolsAndSDKForNet.msi"
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
@@ -356,6 +361,12 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows
 Log "# Package Download System Utility (Amazon Inspector Agent)"
 Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$BASE_DIR\AWSAgentInstall.exe"
+
+# Package Download System Utility (AWS CodeDeploy agent)
+# http://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/how-to-run-agent-install.html#how-to-run-agent-install-windows
+Log "# Package Download System Utility (AWS CodeDeploy agent)"
+### Region Parameter Change
+Invoke-WebRequest -Uri 'https://aws-codedeploy-ap-northeast-1.s3.amazonaws.com/latest/codedeploy-agent.msi' -OutFile "$BASE_DIR\codedeploy-agent.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -376,13 +387,33 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Download (Network Driver)
+# Custom Package Download (Storage & Network Driver)
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Package Download Intel Network Driver
+# Package Download Amazon Windows Paravirtual Drivers
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
+Log "# Package Download Amazon Windows Paravirtual Drivers"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$BASE_DIR\PROWinx64.exe"
+
+# Package Download Intel Network Driver (Windows Server 2008 R2)
+# https://downloadcenter.intel.com/ja/download/18725/
+# Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+
+# Package Download Intel Network Driver (Windows Server 2012)
+# https://downloadcenter.intel.com/ja/download/21694/
+# Log "# Package Download Intel Network Driver (Windows Server 2012)"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+
+# Package Download Intel Network Driver (Windows Server 2012 R2)
 # https://downloadcenter.intel.com/ja/download/23073/
-Log "# Package Download Intel Network Driver"
+Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
 Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+
+# Package Download Intel Network Driver (Windows Server 2016)
+# https://downloadcenter.intel.com/ja/download/26092/
+# Log "# Package Download Intel Network Driver (Windows Server 2016)"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
