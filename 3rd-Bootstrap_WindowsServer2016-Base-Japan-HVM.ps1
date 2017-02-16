@@ -10,7 +10,7 @@
 #.NOTES
 #
 #   Target Windows Server OS Version
-#      - 6.3 : Windows Server 2012 R2
+#      - 10.0 : Windows Server 2016
 #
 ########################################################################################################################
 
@@ -55,22 +55,6 @@ function Create-Directory {
   }
 } # end function Create-Directory
 
-function Set-TimeZone {
-  [CmdletBinding(SupportsShouldProcess = $True)]
-  param( 
-    [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
-    [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
-    [ValidateNotNullOrEmpty()]
-    [string]$TimeZone = "Tokyo Standard Time"
-  ) 
-
-  $process = New-Object System.Diagnostics.Process 
-  $process.StartInfo.WindowStyle = "Hidden" 
-  $process.StartInfo.FileName = "tzutil.exe" 
-  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
-  $process.Start() | Out-Null 
-} # end function Set-TimeZone
-
 
 ########################################################################################################################
 #
@@ -82,12 +66,10 @@ function Set-TimeZone {
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
 
-Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-Set-TimeZone "Tokyo Standard Time"
-Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-
+Get-TimeZone
+Set-TimeZone -Name "Tokyo Standard Time"
 Start-Sleep -Seconds 5
-
+Get-TimeZone
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Preparation for script execution
@@ -105,7 +87,6 @@ Set-StrictMode -Version Latest
 Get-ExecutionPolicy
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
 Get-ExecutionPolicy
-
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 System Define Parameter
@@ -132,9 +113,9 @@ Set-Variable -Name StsToken -Value $StsCredential.Token
 Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
 # Set Config File
-Set-Variable -Name SysprepFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-Set-Variable -Name EC2ConfigFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+Set-Variable -Name SysprepFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2LaunchFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
+# Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Get System & User Variables
 Get-Variable | Export-Csv -Encoding default bootstrap-variable.csv
@@ -217,13 +198,13 @@ Set-WinUILanguageOverride ja-JP
 Get-WinUILanguageOverride
 
 # Change Windows Update Policy
-$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
-$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
-$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
-$AUSettings.ScheduledInstallationTime = 5      # AM 5:00
-$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
-$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
-$AUSettings.Save()
+#$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+#$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+#$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
+#$AUSettings.ScheduledInstallationTime = 3      # AM 3:00
+#$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
+#$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+#$AUSettings.Save()
 
 Start-Sleep -Seconds 5
 
@@ -233,22 +214,6 @@ $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 $SMSettings.Services
 
 Start-Sleep -Seconds 5
-
-# Enable EC2config EventLog Output
-Get-Content $EC2SettingsFile
-
-$xml1 = [xml](Get-Content $EC2SettingsFile)
-$xmlElement1 = $xml1.get_DocumentElement()
-$xmlElementToModify1 = $xmlElement1.Plugins
-
-foreach ($element in $xmlElementToModify1.Plugin)
-{
-    if ($element.name -eq "Ec2EventLog")
-    {
-        $element.State="Enabled"
-    }
-}
-$xml1.Save($EC2SettingsFile)
 
 # Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -344,14 +309,14 @@ Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.93.exe' -OutFil
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-Log "# Package Download System Utility (EC2Config)"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$BASE_DIR\EC2Install.zip"
+# Log "# Package Download System Utility (EC2Config)"
+# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$BASE_DIR\EC2Install.zip"
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-# Log "# Package Download System Utility (EC2Launch)"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$BASE_DIR\EC2-Windows-Launch.zip"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$BASE_DIR\EC2-Windows-Launch-install.ps1"
+Log "# Package Download System Utility (EC2Launch)"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$BASE_DIR\EC2-Windows-Launch.zip"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$BASE_DIR\EC2-Windows-Launch-install.ps1"
 
 # Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
@@ -423,13 +388,13 @@ Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/A
 
 # Package Download Intel Network Driver (Windows Server 2012 R2)
 # https://downloadcenter.intel.com/ja/download/23073/
-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+# Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2016)
 # https://downloadcenter.intel.com/ja/download/26092/
-# Log "# Package Download Intel Network Driver (Windows Server 2016)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+Log "# Package Download Intel Network Driver (Windows Server 2016)"
+Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
@@ -460,17 +425,17 @@ Start-Process -FilePath "$BASE_DIR\googlechrome.msi" -ArgumentList @("/quiet", "
 Stop-Transcript
 
 # Save Script Files
-Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
 Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
 
 # Save Configuration Files
 Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
+# Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" $BASE_DIR
 
 # Save Logging Files
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
-Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
+Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" -Destination $LOGS_DIR 
 Copy-Item -Path "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log" -Destination $LOGS_DIR 
 Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
