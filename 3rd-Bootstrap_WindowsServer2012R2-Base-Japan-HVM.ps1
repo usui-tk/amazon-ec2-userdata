@@ -237,18 +237,12 @@ Start-Sleep -Seconds 5
 # Enable EC2config EventLog Output
 Get-Content $EC2SettingsFile
 
-$xml1 = [xml](Get-Content $EC2SettingsFile)
-$xmlElement1 = $xml1.get_DocumentElement()
-$xmlElementToModify1 = $xmlElement1.Plugins
+$xml = [xml](Get-Content $EC2SettingsFile)
+$node = $xml.SelectSingleNode("//Plugins/Plugin[Name='Ec2EventLog']/State")
+$node.'#text' = "Enabled"
+$xml.Save($EC2SettingsFile)
 
-foreach ($element in $xmlElementToModify1.Plugin)
-{
-    if ($element.name -eq "Ec2EventLog")
-    {
-        $element.State="Enabled"
-    }
-}
-$xml1.Save($EC2SettingsFile)
+Get-Content $EC2SettingsFile
 
 # Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
