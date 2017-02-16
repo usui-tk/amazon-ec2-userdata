@@ -36,7 +36,7 @@ $TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 function Format-Message {
   param([string]$message)
 
-  $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff"
+  $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
   "$timestamp - $message"
 } # end function Format-Message
 
@@ -55,6 +55,26 @@ function Create-Directory {
   }
 } # end function Create-Directory
 
+function Update-SysprepAnswerFile($answerFile)
+{
+    [xml] $document = Get-Content $answerFile -Encoding UTF8
+
+    $ns = New-Object System.Xml.XmlNamespaceManager($document.NameTable)
+    $ns.AddNamespace("u", $document.DocumentElement.NamespaceURI)
+
+    $settings = $document.SelectSingleNode("//u:settings[@pass='oobeSystem']", $ns)
+
+    $international = $settings.SelectSingleNode("u:component[@name='Microsoft-Windows-International-Core']", $ns)
+    $shell = $settings.SelectSingleNode("u:component[@name='Microsoft-Windows-Shell-Setup']", $ns)
+
+    $international.SystemLocale = "ja-JP"
+    $international.UserLocale = "ja-JP"
+
+    $shell.TimeZone = "Tokyo Standard Time"
+
+    $document.Save($answerFile)
+} # end function Update-SysprepAnswerFile
+
 
 ########################################################################################################################
 #
@@ -67,7 +87,7 @@ function Create-Directory {
 #-----------------------------------------------------------------------------------------------------------------------
 
 Get-TimeZone
-Set-TimeZone -Name "Tokyo Standard Time"
+Set-TimeZone -Id "Tokyo Standard Time"
 Start-Sleep -Seconds 5
 Get-TimeZone
 
@@ -215,6 +235,13 @@ $SMSettings.Services
 
 Start-Sleep -Seconds 5
 
+# Update Sysprep Answer Files
+Get-Content $SysprepFile
+
+Update-SysprepAnswerFile $SysprepFile
+
+Get-Content $SysprepFile
+
 # Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
@@ -301,6 +328,11 @@ Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuit
 # http://systemexplorer.net/
 Log "# Package Download System Utility (System Explorer)"
 Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$BASE_DIR\SystemExplorerSetup.exe"
+
+# Package Download System Utility (7-zip)
+# http://www.7-zip.org/
+Log "# Package Download System Utility (7-zip)"
+Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$BASE_DIR\7z1604-x64.exe"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
@@ -406,12 +438,13 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 Log "# Package Install Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$BASE_DIR\VSCodeSetup-stable.exe"
 Start-Process -FilePath "$BASE_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") -Wait | Out-Null
+Start-Sleep -Seconds 120
 
 # Package Install Modern Web Browser (Google Chrome 64bit)
 Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$BASE_DIR\googlechrome.msi"
 Start-Process -FilePath "$BASE_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
-
+Start-Sleep -Seconds 120
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Collect Logging Data Files
