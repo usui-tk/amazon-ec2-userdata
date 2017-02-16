@@ -235,14 +235,14 @@ $SMSettings.Services
 Start-Sleep -Seconds 5
 
 # Enable EC2config EventLog Output
-Get-Content $EC2SettingsFile
+Get-Content $EC2ConfigFile
 
-$xml = [xml](Get-Content $EC2SettingsFile)
+$xml = [xml](Get-Content $EC2ConfigFile)
 $node = $xml.SelectSingleNode("//Plugins/Plugin[Name='Ec2EventLog']/State")
 $node.'#text' = "Enabled"
-$xml.Save($EC2SettingsFile)
+$xml.Save($EC2ConfigFile)
 
-Get-Content $EC2SettingsFile
+Get-Content $EC2ConfigFile
 
 # Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
@@ -331,11 +331,6 @@ Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuit
 Log "# Package Download System Utility (System Explorer)"
 Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$BASE_DIR\SystemExplorerSetup.exe"
 
-# Package Download System Utility (Tera Term)
-# https://ja.osdn.net/projects/ttssh2/
-Log "# Package Download System Utility (Tera Term)"
-Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.93.exe' -OutFile "$BASE_DIR\TeraTermSetup.exe"
-
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 Log "# Package Download System Utility (EC2Config)"
@@ -365,7 +360,8 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 # Package Download System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
-Invoke-WebRequest -Uri 'https://amazon-ssm-region.s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$BASE_DIR\AmazonSSMAgentSetup.exe"
+### Region Parameter Change
+Invoke-WebRequest -Uri 'https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$BASE_DIR\AmazonSSMAgentSetup.exe"
 
 # Package Download System Utility (Amazon Inspector Agent)
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows

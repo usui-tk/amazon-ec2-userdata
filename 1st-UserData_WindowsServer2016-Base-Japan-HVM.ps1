@@ -8,4 +8,3 @@ Invoke-WebRequest -Uri $BootstrapScriptURL -OutFile 3rd-Bootstrap_WindowsServer2
 
 powershell.exe -ExecutionPolicy Bypass .\3rd-Bootstrap_WindowsServer2016-Base-Japan-HVM.ps1 -SkipNetworkProfileCheck
 </powershell>
-
