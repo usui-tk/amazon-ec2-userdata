@@ -51,7 +51,7 @@ function Create-Directory {
   param([string]$dir)
   
   if (!(Test-Path -Path $dir)) {
-    Log "Creating directory: $dir"
+    Log "# Creating directory : $dir"
     New-Item -Path $dir -ItemType Directory -Force
   }
 } # end function Create-Directory
@@ -120,6 +120,8 @@ Create-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
+Log "# Script Execution 3rd-Bootstrap Script [START] : $MyInvocation.MyCommand.Path"
+
 Set-Location -Path $BASE_DIR
 
 Set-StrictMode -Version Latest
@@ -154,6 +156,9 @@ Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.2
 Set-Variable -Name SysprepFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 Set-Variable -Name EC2ConfigFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+
+# Set Log File
+Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 # Logging AWS Instance Metadata
 Log "# Display AWS Instance Metadata [Region] : $Region"
@@ -378,6 +383,16 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
     Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
+# Clear Log File
+Clear-Content $SSMAgentLogFile
+
+# Get Amazon SSM Agent Service Status
+Restart-Service -Name AmazonSSMAgent
+Start-Sleep -Seconds 30
+Get-Service -Name AmazonSSMAgent
+
+Get-Content $SSMAgentLogFile
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (System Utility)
@@ -527,6 +542,8 @@ Start-Sleep -Seconds 120
 # Stop Transcript Logging
 Stop-Transcript
 
+Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $MyInvocation.MyCommand.Path"
+
 # Save Script Files
 Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
 Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
@@ -539,7 +556,7 @@ Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
 # Save Logging Files
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
 Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
-Copy-Item -Path "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log" -Destination $LOGS_DIR 
+Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
 Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
 
