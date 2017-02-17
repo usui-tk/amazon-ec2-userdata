@@ -219,9 +219,9 @@ Set-WinSystemLocale -SystemLocale ja-JP
 Log "# Display Windows System Locale [After] : $__WinSystemLocale"
 
 $__WinHomeLocation = Get-WinHomeLocation
-Log "# Display Windows Home Location [Before] : $__WinHomeLocation"
+Log "# Display Windows Home Location [Before] : $__WinHomeLocation.HomeLocation"
 Set-WinHomeLocation -GeoId 0x7A
-Log "# Display Windows Home Location [After] : $__WinHomeLocation"
+Log "# Display Windows Home Location [After] : $__WinHomeLocation.HomeLocation"
 
 $__WinCultureFromLanguageListOptOut = Get-WinCultureFromLanguageListOptOut
 Log "# Make the date and time [format] the same as the display language [Before] : $__WinCultureFromLanguageListOptOut"
@@ -230,9 +230,9 @@ Log "# Make the date and time [format] the same as the display language [After] 
 
 # Setting Japanese UI Language
 $__WinUILanguageOverride = Get-WinUILanguageOverride
-Log "# Override display language [Before] : $__WinUILanguageOverride"
-Set-WinUILanguageOverride ja-JP
-Log "# Override display language [After] : $__WinUILanguageOverride"
+Log "# Override display language [Before] : $__WinUILanguageOverride.DisplayName"
+Set-WinUILanguageOverride -Language ja-JP
+Log "# Override display language [After] : $__WinUILanguageOverride.DisplayName"
 
 
 # Change Windows Update Policy
