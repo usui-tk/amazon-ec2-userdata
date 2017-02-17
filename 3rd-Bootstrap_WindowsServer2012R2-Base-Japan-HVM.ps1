@@ -19,6 +19,7 @@
 # User Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
 $BASE_DIR           = "$Env:SystemDrive\EC2-Bootstrap"
+$TOOL_DIR           = "$BASE_DIR\Tools"
 $LOGS_DIR           = "$BASE_DIR\Logs"
 
 $TEMP_DIR           = "$Env:SystemRoot\Temp"
@@ -114,6 +115,7 @@ Start-Sleep -Seconds 5
 #-----------------------------------------------------------------------------------------------------------------------
 
 Create-Directory $BASE_DIR
+Create-Directory $TOOL_DIR
 Create-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
@@ -123,9 +125,6 @@ Set-Location -Path $BASE_DIR
 Set-StrictMode -Version Latest
 
 Get-ExecutionPolicy
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Unrestricted -Force
-Get-ExecutionPolicy
-
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 System Define Parameter
@@ -345,66 +344,83 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Update (Amazon EC2 Systems Manager Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Update System Utility (Amazon EC2 Systems Manager Agent)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
+Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
+### Region Parameter Change
+Invoke-WebRequest -Uri 'https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
+Start-Sleep -Seconds 120
+
+Get-Service -Name AmazonSSMAgent
+
+if (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'" | Where-Object { $_.StartMode -ne "Auto" }) {
+    Log "# Change Service Startup Type [AmazonSSMAgent]"
+    (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
+    Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
+    (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
+    Start-Sleep -Seconds 5
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (System Utility)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Package Download System Utility (Sysinternals Suite)
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
 Log "# Package Download System Utility (Sysinternals Suite)"
-Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$BASE_DIR\SysinternalsSuite.zip"
+Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
 
 # Package Download System Utility (System Explorer)
 # http://systemexplorer.net/
 Log "# Package Download System Utility (System Explorer)"
-Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$BASE_DIR\SystemExplorerSetup.exe"
+Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
 
 # Package Download System Utility (7-zip)
 # http://www.7-zip.org/
 Log "# Package Download System Utility (7-zip)"
-Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$BASE_DIR\7z1604-x64.exe"
+Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 Log "# Package Download System Utility (EC2Config)"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$BASE_DIR\EC2Install.zip"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
 # Log "# Package Download System Utility (EC2Launch)"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$BASE_DIR\EC2-Windows-Launch.zip"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$BASE_DIR\EC2-Windows-Launch-install.ps1"
+# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
 
 # Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
 Log "# Package Download System Utility (AWS-CLI - 64bit)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$BASE_DIR\AWSCLI64.msi"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
 Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$BASE_DIR\AWSToolsAndSDKForNet.msi"
+Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
 Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$BASE_DIR\AWSDiagnostics.zip"
-
-# Package Download System Utility (Amazon EC2 Systems Manager Agent)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
-### Region Parameter Change
-Invoke-WebRequest -Uri 'https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$BASE_DIR\AmazonSSMAgentSetup.exe"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 
 # Package Download System Utility (Amazon Inspector Agent)
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows
 Log "# Package Download System Utility (Amazon Inspector Agent)"
-Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$BASE_DIR\AWSAgentInstall.exe"
+Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
 
 # Package Download System Utility (AWS CodeDeploy agent)
 # http://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/how-to-run-agent-install.html#how-to-run-agent-install-windows
 Log "# Package Download System Utility (AWS CodeDeploy agent)"
 ### Region Parameter Change
-Invoke-WebRequest -Uri 'https://aws-codedeploy-ap-northeast-1.s3.amazonaws.com/latest/codedeploy-agent.msi' -OutFile "$BASE_DIR\codedeploy-agent.msi"
+Invoke-WebRequest -Uri 'https://aws-codedeploy-ap-northeast-1.s3.amazonaws.com/latest/codedeploy-agent.msi' -OutFile "$TOOL_DIR\codedeploy-agent.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -414,14 +430,29 @@ Invoke-WebRequest -Uri 'https://aws-codedeploy-ap-northeast-1.s3.amazonaws.com/l
 # Package Download Monitoring Service Agent (Zabix Agent)
 # http://www.zabbix.com/download
 Log "# Package Download Monitoring Service Agent (Zabix Agent)"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$BASE_DIR\zabbix_agents_2.2.14.win.zip"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$BASE_DIR\zabbix_agents_3.0.4.win.zip"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$BASE_DIR\zabbix_agents_3.2.0.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_2.2.14.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.0.4.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.2.0.win.zip"
 
 # Package Download Monitoring Service Agent (Datadog Agent)
 # http://docs.datadoghq.com/ja/guides/basic_agent_usage/windows/
 Log "# Package Download Monitoring Service Agent (Datadog Agent)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$BASE_DIR\ddagent-cli.msi"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$TOOL_DIR\ddagent-cli.msi"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (Security Service Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Package Download Security Service Agent (Deep Security Agent)
+# http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
+Log "# Package Download Security Service Agent (Deep Security Agent)"
+Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA_agent.msi"
+
+# Package Download Security Service Agent (Alert Logic Universal Agent)
+# https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
+Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
+Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\al_agent-LATEST.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -431,48 +462,48 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Log "# Package Download Amazon Windows Paravirtual Drivers"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$BASE_DIR\PROWinx64.exe"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2008 R2)
 # https://downloadcenter.intel.com/ja/download/18725/
 # Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2012)
 # https://downloadcenter.intel.com/ja/download/21694/
 # Log "# Package Download Intel Network Driver (Windows Server 2012)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2012 R2)
 # https://downloadcenter.intel.com/ja/download/23073/
 Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2016)
 # https://downloadcenter.intel.com/ja/download/26092/
 # Log "# Package Download Intel Network Driver (Windows Server 2016)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$BASE_DIR\PROWinx64.exe"
+# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 Log "# Package Download Amazon Elastic Network Adapter Driver"
-Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$BASE_DIR\ENA.zip"
+Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\ENA.zip"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Installation (Application)
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Package Install Text Editor (Visual Studio Code)
-Log "# Package Install Text Editor (Visual Studio Code)"
-Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$BASE_DIR\VSCodeSetup-stable.exe"
-Start-Process -FilePath "$BASE_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") -Wait | Out-Null
-Start-Sleep -Seconds 120
-
 # Package Install Modern Web Browser (Google Chrome 64bit)
 Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
-Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$BASE_DIR\googlechrome.msi"
-Start-Process -FilePath "$BASE_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
+Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
+Start-Sleep -Seconds 120
+
+# Package Install Text Editor (Visual Studio Code)
+Log "# Package Install Text Editor (Visual Studio Code)"
+Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
+Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") -Wait | Out-Null
 Start-Sleep -Seconds 120
 
 
