@@ -50,7 +50,7 @@ function Log {
 function Create-Directory {
   param([string]$dir)
   
-  If (!(Test-Path -Path $dir)) {
+  if (!(Test-Path -Path $dir)) {
     Log "Creating directory: $dir"
     New-Item -Path $dir -ItemType Directory -Force
   }
@@ -130,7 +130,7 @@ Get-ExecutionPolicy
 # Amazon EC2 System Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Set AWS Instance MetaData
+# Set AWS Instance Metadata
 Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
 Set-Variable -Name Region -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
 Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
@@ -155,8 +155,15 @@ Set-Variable -Name SysprepFile -Value "C:\Program Files\Amazon\Ec2ConfigService\
 Set-Variable -Name EC2ConfigFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
-# Get System & User Variables
-Get-Variable | Export-Csv -Encoding default bootstrap-variable.csv
+# Logging AWS Instance Metadata
+Log "# Display AWS Instance Metadata [Region] : $Region"
+Log "# Display AWS Instance Metadata [Availability Zone] : $AZ"
+Log "# Display AWS Instance Metadata [Instance ID] : $InstanceId"
+Log "# Display AWS Instance Metadata [Instance Type] : $InstanceType"
+Log "# Display AWS Instance Metadata [VPC Private IP Address] : $PrivateIp"
+Log "# Display AWS Instance Metadata [Amazon Machine Images] : $AmiId"
+Log "# Display AWS Instance Metadata [EC2 - Instance Profile ARN] : $RoleArn"
+Log "# Display AWS Instance Metadata [EC2 - IAM Role Name] : $RoleName"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -165,7 +172,8 @@ Get-Variable | Export-Csv -Encoding default bootstrap-variable.csv
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
-Get-DefaultAWSRegion
+$__DefaultAWSRegion = Get-DefaultAWSRegion
+Log "# Display Default Region at AWS Tools for Windows Powershell : $__DefaultAWSRegion"
 
 # Get AMI Information
 if ($RoleName) {
@@ -217,23 +225,28 @@ if ($RoleName) {
 # Windows Server OS Configuration
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Setting SystemLocale
-Get-WinSystemLocale
+# Setting System Locale
+$__WinSystemLocale = Get-WinSystemLocale
+Log "# Display Windows System Locale [Before] : $__WinSystemLocale"
 Set-WinSystemLocale -SystemLocale ja-JP
-Get-WinSystemLocale
+Log "# Display Windows System Locale [After] : $__WinSystemLocale"
 
-Get-WinHomeLocation
+$__WinHomeLocation = Get-WinHomeLocation
+Log "# Display Windows Home Location [Before] : $__WinHomeLocation"
 Set-WinHomeLocation -GeoId 0x7A
-Get-WinHomeLocation
+Log "# Display Windows Home Location [After] : $__WinHomeLocation"
 
-Get-WinCultureFromLanguageListOptOut
+$__WinCultureFromLanguageListOptOut = Get-WinCultureFromLanguageListOptOut
+Log "# Make the date and time [format] the same as the display language [Before] : $__WinCultureFromLanguageListOptOut"
 Set-WinCultureFromLanguageListOptOut -OptOut $False
-Get-WinCultureFromLanguageListOptOut
+Log "# Make the date and time [format] the same as the display language [After] : $__WinCultureFromLanguageListOptOut"
 
-# Setting Japanese UI
-Get-WinUILanguageOverride
+# Setting Japanese UI Language
+$__WinUILanguageOverride = Get-WinUILanguageOverride
+Log "# Override display language [Before] : $__WinUILanguageOverride"
 Set-WinUILanguageOverride ja-JP
-Get-WinUILanguageOverride
+Log "# Override display language [After] : $__WinUILanguageOverride"
+
 
 # Change Windows Update Policy
 $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
@@ -350,19 +363,19 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 # Package Update System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
-### Region Parameter Change
-Invoke-WebRequest -Uri 'https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+$AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
+Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 Start-Sleep -Seconds 120
 
 Get-Service -Name AmazonSSMAgent
 
-if (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'" | Where-Object { $_.StartMode -ne "Auto" }) {
-    Log "# Change Service Startup Type [AmazonSSMAgent]"
-    (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
+$AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
+
+if ($AmazonSSMAgentStatus -ne "Auto") {
+    Log "# Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
-    (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
-    Start-Sleep -Seconds 5
+    Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
 
@@ -419,8 +432,8 @@ Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/
 # Package Download System Utility (AWS CodeDeploy agent)
 # http://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/how-to-run-agent-install.html#how-to-run-agent-install-windows
 Log "# Package Download System Utility (AWS CodeDeploy agent)"
-### Region Parameter Change
-Invoke-WebRequest -Uri 'https://aws-codedeploy-ap-northeast-1.s3.amazonaws.com/latest/codedeploy-agent.msi' -OutFile "$TOOL_DIR\codedeploy-agent.msi"
+$AWSCodeDeployAgentUrl = "https://aws-codedeploy-" + ${Region} + ".s3.amazonaws.com/latest/codedeploy-agent.msi"
+Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-agent.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -503,7 +516,7 @@ Start-Sleep -Seconds 120
 # Package Install Text Editor (Visual Studio Code)
 Log "# Package Install Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
-Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") | Out-Null
 Start-Sleep -Seconds 120
 
 
