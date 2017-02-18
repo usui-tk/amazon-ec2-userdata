@@ -481,7 +481,7 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 #   psid - Index Series
 #   pfid - index of the family
 #   osid - index OS
-#   lid - the index language
+#   lid  - the index language
 #
 # Steps:
 #  Find the ID type of products from xml-specification at:
@@ -495,7 +495,7 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 #  Find the ID of the operating system from the xml-spec at:
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=4
 #    Obtain "osid".
-# Find a language identifier of the xml-spec at:
+#  Find a language identifier of the xml-spec at:
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=5
 #    Obtain the "lid".
 #
