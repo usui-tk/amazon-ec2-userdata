@@ -135,9 +135,8 @@ Set-Variable -Name StsToken -Value $StsCredential.Token
 Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
 # Set Config File
-Set-Variable -Name SysprepFile -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-Set-Variable -Name EC2ConfigFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+Set-Variable -Name SysprepFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2LaunchFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
 # Set Log File
 Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
@@ -648,8 +647,8 @@ Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
 # Save Configuration Files
 Copy-Item -Path $SysprepFile -Destination $BASE_DIR
 Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
-# Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
-Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" $BASE_DIR
+Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
+Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
 
 # Save Logging Files
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
