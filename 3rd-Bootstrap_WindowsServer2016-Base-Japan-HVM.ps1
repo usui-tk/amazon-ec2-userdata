@@ -456,6 +456,133 @@ Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi'
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit 8.0)
+#-----------------------------------------------------------------------------------------------------------------------
+
+#=======================================================================================================================
+# NVIDIA API Lookup
+#=======================================================================================================================
+#
+# Request Format:
+#  http://www.nvidia.com/Download/processDriver.aspx?psid=[value]&pfid=[value]&osid=[value]&lid=[value]&lang=ru
+#   psid - Index Series
+#   pfid - index of the family
+#   osid - index OS
+#   lid - the index language
+#
+# Steps:
+#  Find the ID type of products from xml-specification at:
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#  Substitute the value found in the "ParentID" query on xml-specification product line at:
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=[value]
+#    Obtain "psid".
+#  Substitute the value "psid" in "ParentID" query on xml-specification product family at:
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=[value]
+#    Obtain "pfid"
+#  Find the ID of the operating system from the xml-spec at:
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=4
+#    Obtain "osid".
+# Find a language identifier of the xml-spec at:
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=5
+#    Obtain the "lid".
+#
+#=======================================================================================================================
+#
+#  NVIDIA GRID K520 GPU Parameter
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> GRID : 9
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=9
+#    -> [psid] GRID Series : 94
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=94
+#    -> [pfid] GRID K520 : 704
+#
+#=======================================================================================================================
+#
+#  NVIDIA Tesla K80
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] K-Series : 91
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
+#    -> [pfid] Tesla K80 : 762
+#
+#=======================================================================================================================
+#
+#  Windows Server OS [osid]
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=4
+#    -> Windows Server 2003       : 15
+#    -> Windows Server 2003 x64   : 8
+#    -> Windows Server 2008       : 16
+#    -> Windows Server 2008 x64   : 17
+#    -> Windows Server 2008 R2 64 : 21
+#    -> Windows Server 2012       : 32
+#    -> Windows Server 2012 R2 64 : 44
+#    -> Windows Server 2016       : 74
+#
+#=======================================================================================================================
+#
+#  Language Identifier [lid]
+#   http://www.nvidia.ru/Download/API/lookupValueSearch.aspx?TypeID=5
+#    -> English (US) : 1
+#    -> Japanese     : 7
+#
+#=======================================================================================================================
+
+# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+
+if ($InstanceType -match "^p2.*") {
+    Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
+
+    # [Windows Server 2008 R2]
+    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
+
+    # [Windows Server 2012 R2]
+    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
+
+    # [Windows Server 2016]
+    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
+    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
+
+}
+
+
+# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+
+if ($InstanceType -match "^g2.*") {
+    Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
+
+    # [Windows Server 2008 R2]
+    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
+
+    # [Windows Server 2012]
+    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
+
+    # [Windows Server 2012 R2]
+    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
+
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (Storage & Network Driver)
 #-----------------------------------------------------------------------------------------------------------------------
 
