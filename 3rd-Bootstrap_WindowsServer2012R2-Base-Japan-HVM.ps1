@@ -629,6 +629,21 @@ Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.e
 Write-Log "# Package Download System Utility (7-zip)"
 Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
 
+# Package Download System Utility (Wireshark)
+# https://www.wireshark.org/download.html
+Write-Log "# Package Download System Utility (Wireshark)"
+Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.4.exe' -OutFile "$TOOL_DIR\Wireshark-win64-2.2.4.exe"
+
+# Package Download System Utility (Microsoft Message Analyzer)
+# https://blogs.technet.microsoft.com/messageanalyzer/
+Write-Log "# Package Download System Utility (Microsoft Message Analyzer)"
+Invoke-WebRequest -Uri 'https://download.microsoft.com/download/2/8/3/283DE38A-5164-49DB-9883-9D1CC432174D/MessageAnalyzer64.msi' -OutFile "$TOOL_DIR\MessageAnalyzer64.msi"
+
+# Package Download System Utility (AWS Directory Service PortTest Application)
+# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
+Write-Log "# Package Download System Utility (AWS DirectoryServicePortTest Application)"
+Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 if ($osVersion -match "^5.*|^6.*") {
@@ -702,7 +717,7 @@ Write-Log-Separator "Custom Package Download (Security Service Agent)"
 # Package Download Security Service Agent (Deep Security Agent)
 # http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
 Write-Log "# Package Download Security Service Agent (Deep Security Agent)"
-Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA_agent.msi"
+Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA-Windows-Agent_x86-64.msi"
 
 # Package Download Security Service Agent (Alert Logic Universal Agent)
 # https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
