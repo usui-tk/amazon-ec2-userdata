@@ -155,7 +155,8 @@ function Get-WindowsDriverInfo
 function Get-WindowsOSInfo
 {
     #--------------------------------------------------------------------------------------
-    # Windows Server OS Version Tables (Windows NT Version Tables)
+    #  Windows Server OS Version Tables (Windows NT Version Tables)
+    #   https://msdn.microsoft.com/ja-jp/library/windows/desktop/ms724832(v=vs.85).aspx
     #--------------------------------------------------------------------------------------
     #   - Windows Server 2003    : 5.2
     #   - Windows Server 2003 R2 : 5.2
@@ -366,19 +367,19 @@ Write-Log "# Display Default Region at AWS Tools for Windows Powershell : $__Def
 # Get AMI Information
 if ($RoleName) {
     Write-Log "# Get AMI Information"
-    Get-EC2Image -ImageId $AmiId | ConvertTo-Json
+    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_AMI-Infomation.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
 if ($RoleName) {
     Write-Log "# Get EC2 Instance Information"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance attached EBS Volume Information
 if ($RoleName) {
     Write-Log "# Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
+    Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
@@ -386,12 +387,12 @@ if ($RoleName) {
     if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
+        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
     } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
         # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
         Write-Log "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
-        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
+        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport | Out-File "$LOGS_DIR\AWS-EC2_ENI-SRIOV-Information.txt" -Append -Force
     } else {
         Write-Log "# Instance type of None [Network Interface Performance Attribute]"
     }
@@ -402,7 +403,7 @@ if ($RoleName) {
     if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
-        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
+        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
     } else {
         Write-Log "# Instance type of None [Storage Interface Performance Attribute]"
     }
@@ -458,11 +459,13 @@ $SMSettings.Services
 Start-Sleep -Seconds 5
 
 # Update Sysprep Answer Files
-Get-Content $SysprepFile
+if (Test-Path $SysprepFile) {
+    Get-Content $SysprepFile
+    
+    Update-SysprepAnswerFile $SysprepFile
 
-Update-SysprepAnswerFile $SysprepFile
-
-Get-Content $SysprepFile
+    Get-Content $SysprepFile
+}
 
 # Change Windows Folder Option Policy
 Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
