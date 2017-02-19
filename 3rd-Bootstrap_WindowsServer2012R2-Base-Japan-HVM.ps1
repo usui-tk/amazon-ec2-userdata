@@ -68,8 +68,8 @@ function Get-AMIInfo
         $AMI_OriginalName = $__AMIInfoRegistry.AMIName
 
         # Write the information to the Log Files
-        Write-Log "# AMI Origin Version : $AMI_OriginalVersion"
-        Write-Log "# AMI Origin Name : $AMI_OriginalName"
+        Write-Log "# [AMI] Windows - AMI Origin Version : $AMI_OriginalVersion"
+        Write-Log "# [AMI] Windows - AMI Origin Name : $AMI_OriginalName"
     }
 } # end function Get-AMIInfo
 
@@ -81,9 +81,48 @@ function Get-Ec2ConfigVersion
 
     # Write the information to the Log Files
     if ($Ec2ConfigVersion) {
-        Write-Log "# Amazon EC2Config Version : $Ec2ConfigVersion"
+        Write-Log "# [Windows] Amazon EC2Config Version : $Ec2ConfigVersion"
     }
 } # end Get-Ec2ConfigVersion
+
+function Get-Ec2LaunchVersion
+{
+    Set-Variable Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
+
+    # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
+    if (Test-Path $Ec2LaunchModuleConfig) {
+        $__EC2Launch_ModuleVersion = Select-String -Path $Ec2LaunchModuleConfig -Pattern "ModuleVersion"
+        $Ec2LaunchVersion = $($__EC2Launch_ModuleVersion -match '(\d\.\d.\d)' | Out-Null; $Matches[1])
+
+        # Write the information to the Log Files
+        if ($Ec2LaunchVersion) {
+            Write-Log "# [Windows] Amazon EC2Launch Version : $Ec2LaunchVersion"
+        }
+    }
+} # end Get-Ec2LaunchVersion
+
+function Get-SSMAgentVersion
+{
+    Set-Variable __SSMAgentInfoRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
+    Set-Variable __SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
+
+    $SSM_AgentVersion = ""
+
+    if (Test-Path $__SSMAgentInfoRegistry) {
+        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentInfoRegistry -ErrorAction SilentlyContinue
+        $SSM_AgentVersion = $__SSMAgentService.Version
+    }
+
+    if (-not $SSM_AgentVersion -and (Test-Path $__SSMAgentUninstallRegistry)) {
+        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentUninstallRegistry -ErrorAction SilentlyContinue
+        $SSM_AgentVersion = $__SSMAgentService.DisplayVersion
+    }
+
+    # Write the information to the Log Files
+    if ($SSM_AgentVersion) {
+        Write-Log "# [Windows] Amazon SSM Agent Version : $SSM_AgentVersion"
+    }
+} # end function Get-SSMAgentVersion
 
 function Get-WindowsDriverInfo
 {
@@ -99,7 +138,7 @@ function Get-WindowsDriverInfo
             if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) 
                 {
                     # Write the information to the Log Files
-                    Write-Log ("# Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
+                    Write-Log ("# [Windows] AWS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
                 }
         }
     }    
@@ -107,6 +146,18 @@ function Get-WindowsDriverInfo
 
 function Get-WindowsOSInfo
 {
+    #--------------------------------------------------------------------------------------
+    # Windows Server OS Version Tables (Windows NT Version Tables)
+    #--------------------------------------------------------------------------------------
+    #   - Windows Server 2003    : 5.2
+    #   - Windows Server 2003 R2 : 5.2
+    #   - Windows Server 2008    : 6.0
+    #   - Windows Server 2008 R2 : 6.1
+    #   - Windows Server 2012    : 6.2
+    #   - Windows Server 2012 R2 : 6.3
+    #   - Windows Server 2016    : 10.0
+    #--------------------------------------------------------------------------------------
+
     Set-Variable windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
     Set-Variable fullServer -Option Constant -Scope Local -Value "Full"
     Set-Variable nanoServer -Option Constant -Scope Local -Value "Nano"
@@ -162,30 +213,7 @@ function Get-WindowsOSInfo
     Write-Log ("# [Windows] Windows Server OS TimeZone : {0}" -f ([TimeZoneInfo]::Local).StandardName)
     Write-Log ("# [Windows] Windows Server OS Offset : {0}" -f ([TimeZoneInfo]::Local).GetUtcOffset([DateTime]::Now))
 
-} # end function Get-WindowsDriverInfo
-
-function Get-SSMAgentVersion
-{
-    Set-Variable __SSMAgentInfoRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
-    Set-Variable __SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
-
-    $SSM_AgentVersion = ""
-
-    if (Test-Path $__SSMAgentInfoRegistry) {
-        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentInfoRegistry -ErrorAction SilentlyContinue
-        $SSM_AgentVersion = $__SSMAgentService.Version
-    }
-
-    if (-not $SSM_AgentVersion -and (Test-Path $__SSMAgentUninstallRegistry)) {
-        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentUninstallRegistry -ErrorAction SilentlyContinue
-        $SSM_AgentVersion = $service.DisplayVersion
-    }
-
-    # Write the information to the Log Files
-    if ($SSM_AgentVersion) {
-        Write-Log "# Amazon SSM Agent Version : $AMI_OriginalVersion"
-    }
-} # end function Get-SSMAgentVersion
+} # end function Get-WindowsOSInfo
 
 function Set-TimeZone
 {
@@ -299,20 +327,36 @@ Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Logging AWS Instance Metadata
-Write-Log "# AWS Instance Metadata [Region] : $Region"
-Write-Log "# AWS Instance Metadata [Availability Zone] : $AZ"
-Write-Log "# AWS Instance Metadata [Instance ID] : $InstanceId"
-Write-Log "# AWS Instance Metadata [Instance Type] : $InstanceType"
-Write-Log "# AWS Instance Metadata [VPC Private IP Address] : $PrivateIp"
-Write-Log "# AWS Instance Metadata [Amazon Machine Images] : $AmiId"
-Write-Log "# AWS Instance Metadata [EC2 - Instance Profile ARN] : $RoleArn"
-Write-Log "# AWS Instance Metadata [EC2 - IAM Role Name] : $RoleName"
+Write-Log "# [AWS] Region : $Region"
+Write-Log "# [AWS] Availability Zone : $AZ"
+Write-Log "# [AWS] Instance ID : $InstanceId"
+Write-Log "# [AWS] Instance Type : $InstanceType"
+Write-Log "# [AWS] VPC Private IP Address : $PrivateIp"
+Write-Log "# [AWS] Amazon Machine Images ID : $AmiId"
+Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
+Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
 
-# Logging Windows Server OS Parameter
+# Logging Windows Server OS Parameter [AMI]
 Get-AMIInfo
+
+# Logging Windows Server OS Parameter [Windows OS Information]
 Get-WindowsOSInfo
+
+# Logging Windows Server OS Parameter [Windows OS Driver Information]
 Get-WindowsDriverInfo
-Get-Ec2ConfigVersion
+
+# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information]
+if ($osVersion) {
+    if ($osVersion -match "^5.*|^6.*") {
+        Get-Ec2ConfigVersion
+    } elseif ($InstanceType -match "^10.0") {
+        Get-Ec2LaunchVersion
+    } else {
+        Write-Log "# No Target EC2 Bootstrap Applicaiton"
+    }
+}
+
+# Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-SSMAgentVersion
 
 
@@ -564,14 +608,19 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-Write-Log "# Package Download System Utility (EC2Config)"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+if ($osVersion -match "^5.*|^6.*") {
+    Write-Log "# Package Download System Utility (EC2Config)"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+}
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-# Write-Log "# Package Download System Utility (EC2Launch)"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
-# Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+if ($osVersion -match "^10.0") {
+    # Get EC2 Bootstrap Application[EC2Config] Information
+    Write-Log "# Package Download System Utility (EC2Launch)"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+}
 
 # Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
@@ -692,55 +741,69 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
-
 if ($InstanceType -match "^p2.*") {
     Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
-
-    # [Windows Server 2008 R2]
-    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
-    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
-    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
-
-    # [Windows Server 2012 R2]
-    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
-    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
-    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
-
-    # [Windows Server 2016]
-    # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
-    # $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
-    # Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
-
+    if ($osVersion) {
+        if ($osVersion -match "^6.1") {
+            # [Windows Server 2008 R2]
+            $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+            $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
+        } elseif ($osVersion -match "^6.3") {
+            # [Windows Server 2012 R2]
+            $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
+        } elseif ($osVersion -match "^10.0") {
+            # [Windows Server 2016]
+            $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+            $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
+            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
+        } else {
+            # [No Target Server OS]
+            Write-Log ("# [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $osVersion)
+        }
+    } else {
+        # [Undefined Server OS]
+        Write-Log "# [NVIDIA Tesla K80 GPU Driver] Undefined Server OS"
+    }
 }
 
 
 # Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
-
 if ($InstanceType -match "^g2.*") {
     Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
-
-    # [Windows Server 2008 R2]
-    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
-
-    # [Windows Server 2012]
-    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
-
-    # [Windows Server 2012 R2]
-    # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
-    # $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-    # $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-    # Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
-
+    if ($osVersion) {
+        if ($osVersion -match "^6.1") {
+            # [Windows Server 2008 R2]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
+        } elseif ($osVersion -match "^6.2") {
+            # [Windows Server 2012]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
+        } elseif ($osVersion -match "^6.3") {
+            # [Windows Server 2012 R2]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
+        } else {
+            # [No Target Server OS]
+            Write-Log ("# [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $osVersion)
+        }
+    } else {
+        # [Undefined Server OS]
+        Write-Log "# [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
+    }
 }
 
 
@@ -766,27 +829,42 @@ Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi'
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\PROWinx64.exe"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWSPVDriverSetup.zip"
 
-# Package Download Intel Network Driver (Windows Server 2008 R2)
-# https://downloadcenter.intel.com/ja/download/18725/
-# Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-
-# Package Download Intel Network Driver (Windows Server 2012)
-# https://downloadcenter.intel.com/ja/download/21694/
-# Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-
-# Package Download Intel Network Driver (Windows Server 2012 R2)
-# https://downloadcenter.intel.com/ja/download/23073/
-Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-
-# Package Download Intel Network Driver (Windows Server 2016)
-# https://downloadcenter.intel.com/ja/download/26092/
-# Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-# Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+# Package Download Intel Network Driver
+if ($osVersion) {
+    if ($osVersion -match "^6.1") {
+        # [Windows Server 2008 R2]
+        # https://downloadcenter.intel.com/ja/download/18725/
+        # Package Download Intel Network Driver (Windows Server 2008 R2)
+        Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+    } elseif ($osVersion -match "^6.2") {
+        # [Windows Server 2012]
+        # https://downloadcenter.intel.com/ja/download/21694/
+        # Package Download Intel Network Driver (Windows Server 2012)
+        Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+    } elseif ($osVersion -match "^6.3") {
+        # [Windows Server 2012 R2]
+        # https://downloadcenter.intel.com/ja/download/23073/
+        # Package Download Intel Network Driver (Windows Server 2012 R2)
+        Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+    } elseif ($osVersion -match "^10.0") {
+        # [Windows Server 2016]
+        # https://downloadcenter.intel.com/ja/download/26092/
+        # Package Download Intel Network Driver (Windows Server 2016)
+        Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+    } else {
+        # [No Target Server OS]
+        Write-Log ("# [Intel Network Driver] No Target Server OS Version : " + $osVersion)
+    }
+} else {
+    # [Undefined Server OS]
+    Write-Log "# [Intel Network Driver] Undefined Server OS"
+}
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
