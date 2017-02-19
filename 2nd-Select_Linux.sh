@@ -92,6 +92,11 @@ function get_bootstrap_script () {
     else
         BootstrapScript=""
     fi
+
+    if [ -z "${BootstrapScript}" ]; then
+       echo "Unsupported Bootstrap Script Linux distribution"
+       exit 1
+    fi
 }
 
 
