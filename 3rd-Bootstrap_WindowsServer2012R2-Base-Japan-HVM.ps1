@@ -334,6 +334,9 @@ Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon
 # Logging Amazon EC2 System & Windows Server OS Parameter
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Log Separator
+Write-Log-Separator "Logging Amazon EC2 System & Windows Server OS Parameter"
+
 # Logging AWS Instance Metadata
 Write-Log "# [AWS] Region : $Region"
 Write-Log "# [AWS] Availability Zone : $AZ"
@@ -371,6 +374,9 @@ Get-SSMAgentVersion
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 Information [AMI & Instance & EBS Volume]
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-Log-Separator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
@@ -426,6 +432,9 @@ if ($RoleName) {
 #-----------------------------------------------------------------------------------------------------------------------
 # Windows Server OS Configuration
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-Log-Separator "Windows Server OS Configuration"
 
 # Setting System Locale
 $__WinSystemLocale = Get-WinSystemLocale
@@ -561,6 +570,9 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 # Custom Package Update (Amazon EC2 Systems Manager Agent)
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Log Separator
+Write-Log-Separator "Package Update System Utility (Amazon EC2 Systems Manager Agent)"
+
 # Package Update System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
@@ -598,6 +610,9 @@ Get-Content $SSMAgentLogFile
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (System Utility)
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-Log-Separator "Custom Package Download (System Utility)"
 
 # Package Download System Utility (Sysinternals Suite)
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
@@ -661,6 +676,9 @@ Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-age
 # Custom Package Download (Monitoring Service Agent)
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Log Separator
+Write-Log-Separator "Custom Package Download (Monitoring Service Agent)"
+
 # Package Download Monitoring Service Agent (Zabix Agent)
 # http://www.zabbix.com/download
 Write-Log "# Package Download Monitoring Service Agent (Zabix Agent)"
@@ -675,7 +693,25 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit 8.0)
+# Custom Package Download (Security Service Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-Log-Separator "Custom Package Download (Security Service Agent)"
+
+# Package Download Security Service Agent (Deep Security Agent)
+# http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
+Write-Log "# Package Download Security Service Agent (Deep Security Agent)"
+Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA_agent.msi"
+
+# Package Download Security Service Agent (Alert Logic Universal Agent)
+# https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
+Write-Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
+Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\al_agent-LATEST.msi"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)
 #-----------------------------------------------------------------------------------------------------------------------
 
 #=======================================================================================================================
@@ -747,6 +783,9 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 #
 #=======================================================================================================================
 
+# Log Separator
+Write-Log-Separator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
+
 # Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^p2.*") {
@@ -816,23 +855,11 @@ if ($InstanceType -match "^g2.*") {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Download (Security Service Agent)
-#-----------------------------------------------------------------------------------------------------------------------
-
-# Package Download Security Service Agent (Deep Security Agent)
-# http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
-Write-Log "# Package Download Security Service Agent (Deep Security Agent)"
-Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA_agent.msi"
-
-# Package Download Security Service Agent (Alert Logic Universal Agent)
-# https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
-Write-Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
-Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\al_agent-LATEST.msi"
-
-
-#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (Storage & Network Driver)
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-Log-Separator "Custom Package Download (Storage & Network Driver)"
 
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
@@ -884,11 +911,13 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 # Custom Package Installation (Application)
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Log Separator
+Write-Log-Separator "Custom Package Installation (Application)"
+
 # Package Install Modern Web Browser (Google Chrome 64bit)
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
-# Start-Sleep -Seconds 120
 
 # Package Install Text Editor (Visual Studio Code)
 Write-Log "# Package Install Text Editor (Visual Studio Code)"
