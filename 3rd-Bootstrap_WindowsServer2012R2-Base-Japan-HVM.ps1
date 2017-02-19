@@ -361,7 +361,7 @@ Get-WindowsDriverInfo
 if ($osVersion) {
     if ($osVersion -match "^5.*|^6.*") {
         Get-Ec2ConfigVersion
-    } elseif ($InstanceType -match "^10.0") {
+    } elseif ($InstanceType -match "10.0") {
         Get-Ec2LaunchVersion
     } else {
         Write-Log "# No Target EC2 Bootstrap Applicaiton"
@@ -658,7 +658,7 @@ if ($osVersion -match "^5.*|^6.*") {
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-if ($osVersion -match "^10.0") {
+if ($osVersion -match "10.0") {
     # Get EC2 Bootstrap Application[EC2Config] Information
     Write-Log "# Package Download System Utility (EC2Launch)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
@@ -710,6 +710,11 @@ Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.
 # http://docs.datadoghq.com/ja/guides/basic_agent_usage/windows/
 Write-Log "# Package Download Monitoring Service Agent (Datadog Agent)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$TOOL_DIR\ddagent-cli.msi"
+
+# Package Download Monitoring Service Agent (New Relic Infrastructure Agent)
+# https://docs.newrelic.com/docs/infrastructure/new-relic-infrastructure/installation/install-infrastructure-windows-server
+Write-Log "# Package Download Monitoring Service Agent (New Relic Infrastructure Agent)"
+Invoke-WebRequest -Uri 'https://download.newrelic.com/infrastructure_agent/windows/newrelic-infra.msi' -OutFile "$TOOL_DIR\newrelic-infra.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -811,19 +816,19 @@ Write-Log-Separator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
 if ($InstanceType -match "^p2.*") {
     Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
     if ($osVersion) {
-        if ($osVersion -match "^6.1") {
+        if ($osVersion -match "6.1") {
             # [Windows Server 2008 R2]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($osVersion -match "^6.3") {
+        } elseif ($osVersion -match "6.3") {
             # [Windows Server 2012 R2]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
-        } elseif ($osVersion -match "^10.0") {
+        } elseif ($osVersion -match "10.0") {
             # [Windows Server 2016]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
@@ -845,19 +850,19 @@ if ($InstanceType -match "^p2.*") {
 if ($InstanceType -match "^g2.*") {
     Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
     if ($osVersion) {
-        if ($osVersion -match "^6.1") {
+        if ($osVersion -match "6.1") {
             # [Windows Server 2008 R2]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($osVersion -match "^6.2") {
+        } elseif ($osVersion -match "6.2") {
             # [Windows Server 2012]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
-        } elseif ($osVersion -match "^6.3") {
+        } elseif ($osVersion -match "6.3") {
             # [Windows Server 2012 R2]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
@@ -888,25 +893,25 @@ Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/A
 
 # Package Download Intel Network Driver
 if ($osVersion) {
-    if ($osVersion -match "^6.1") {
+    if ($osVersion -match "6.1") {
         # [Windows Server 2008 R2]
         # https://downloadcenter.intel.com/ja/download/18725/
         # Package Download Intel Network Driver (Windows Server 2008 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-    } elseif ($osVersion -match "^6.2") {
+    } elseif ($osVersion -match "6.2") {
         # [Windows Server 2012]
         # https://downloadcenter.intel.com/ja/download/21694/
         # Package Download Intel Network Driver (Windows Server 2012)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-    } elseif ($osVersion -match "^6.3") {
+    } elseif ($osVersion -match "6.3") {
         # [Windows Server 2012 R2]
         # https://downloadcenter.intel.com/ja/download/23073/
         # Package Download Intel Network Driver (Windows Server 2012 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
-    } elseif ($osVersion -match "^10.0") {
+    } elseif ($osVersion -match "10.0") {
         # [Windows Server 2016]
         # https://downloadcenter.intel.com/ja/download/26092/
         # Package Download Intel Network Driver (Windows Server 2016)
