@@ -36,27 +36,35 @@ $TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 
 function Format-Message
 {
-  param([string]$message)
-
-  $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
-  "$timestamp - $message"
+    param([string]$message)
+    
+    $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
+    "$timestamp - $message"
 } # end function Format-Message
 
 function Write-Log
 {
-  param([string]$message, $log=$USERDATA_LOG)
-
-  Format-Message $message | Out-File $log -Append -Force
+    param([string]$message, $log=$USERDATA_LOG)
+    
+    Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
+
+function Write-Log-Separator
+{
+      param([string]$message)
+      Write-Log "#-------------------------------------------------------------------------------"
+      Write-Log ("#        Script Executetion Step : " + $message)
+      Write-Log "#-------------------------------------------------------------------------------"
+} # end function Write-Log-Separator
 
 function Create-Directory
 {
-  param([string]$dir)
-  
-  if (!(Test-Path -Path $dir)) {
-    Write-Log "# Creating directory : $dir"
-    New-Item -Path $dir -ItemType Directory -Force
-  }
+    param([string]$dir)
+
+    if (!(Test-Path -Path $dir)) {
+        Write-Log "# Creating directory : $dir"
+        New-Item -Path $dir -ItemType Directory -Force
+    }
 } # end function Create-Directory
 
 function Get-AMIInfo
