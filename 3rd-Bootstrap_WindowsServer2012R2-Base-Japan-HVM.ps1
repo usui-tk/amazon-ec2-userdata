@@ -802,7 +802,7 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
-Start-Sleep -Seconds 120
+# Start-Sleep -Seconds 120
 
 # Package Install Text Editor (Visual Studio Code)
 Write-Log "# Package Install Text Editor (Visual Studio Code)"
