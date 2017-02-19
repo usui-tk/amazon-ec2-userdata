@@ -34,29 +34,161 @@ $TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 #
 ########################################################################################################################
 
-function Format-Message {
+function Format-Message
+{
   param([string]$message)
 
   $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
   "$timestamp - $message"
 } # end function Format-Message
 
-function Log {
+function Write-Log
+{
   param([string]$message, $log=$USERDATA_LOG)
 
   Format-Message $message | Out-File $log -Append -Force
-} # end function Log
+} # end function Write-Log
 
-function Create-Directory {
+function Create-Directory
+{
   param([string]$dir)
   
   if (!(Test-Path -Path $dir)) {
-    Log "# Creating directory : $dir"
+    Write-Log "# Creating directory : $dir"
     New-Item -Path $dir -ItemType Directory -Force
   }
 } # end function Create-Directory
 
-function Set-TimeZone {
+function Get-AMIInfo
+{
+    Set-Variable __AMIInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
+    if (Test-Path $__AMIInfoKey) {
+        $__AMIInfoRegistry = Get-ItemProperty -Path $__AMIInfoKey -ErrorAction SilentlyContinue
+        $AMI_OriginalVersion = $__AMIInfoRegistry.AMIVersion
+        $AMI_OriginalName = $__AMIInfoRegistry.AMIName
+
+        # Write the information to the Log Files
+        Write-Log "# AMI Origin Version : $AMI_OriginalVersion"
+        Write-Log "# AMI Origin Name : $AMI_OriginalName"
+    }
+} # end function Get-AMIInfo
+
+function Get-Ec2ConfigVersion
+{
+    # Get EC2Config Version
+    $__EC2Config_Infomation = $(Get-WmiObject -Class Win32_Product | Select Name,Version | Where-Object { $_.Name -eq "EC2ConfigService" })
+    $Ec2ConfigVersion = $__EC2Config_Infomation.Version
+
+    # Write the information to the Log Files
+    if ($Ec2ConfigVersion) {
+        Write-Log "# Amazon EC2Config Version : $Ec2ConfigVersion"
+    }
+} # end Get-Ec2ConfigVersion
+
+function Get-WindowsDriverInfo
+{
+    $win_drivers = Get-WindowsDriver -Online | Where-Object { $_.OriginalFileName -like '*xenvbd*' -or $_.ClassName -eq 'Net' -and `
+         ($_.ProviderName -eq 'Amazon Inc.' -or $_.ProviderName -eq 'Citrix Systems, Inc.' -or $_.ProviderName -like 'Intel*' -or $_.ProviderName -eq 'Amazon Web Services, Inc.') }
+    $pnp_drivers = Get-CimInstance -ClassName Win32_PnPEntity | Where-Object { $_.Service -eq 'xenvbd' -or `
+         $_.Manufacturer -like 'Intel*' -or $_.Manufacturer -eq 'Citrix Systems, Inc.' -or $_.Manufacturer -eq 'Amazon Inc.' -or $_.Manufacturer -eq 'Amazon Web Services, Inc.' }
+    
+    foreach ($win_driver in $win_drivers)
+    {
+        foreach ($pnp_driver in $pnp_drivers)
+        {
+            if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) 
+                {
+                    # Write the information to the Log Files
+                    Write-Log ("# Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
+                }
+        }
+    }    
+} # end function Get-WindowsDriverInfo
+
+function Get-WindowsOSInfo
+{
+    Set-Variable windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+    Set-Variable fullServer -Option Constant -Scope Local -Value "Full"
+    Set-Variable nanoServer -Option Constant -Scope Local -Value "Nano"
+    Set-Variable serverCore -Option Constant -Scope Local -Value "Server Core"
+    Set-Variable serverOptions -Option Constant -Scope Local -Value @{ 0 = "Undefined"; 12 = $serverCore; 13 = $serverCore;
+        14 = $serverCore; 29 = $serverCore; 39 = $serverCore; 40 = $serverCore; 41 = $serverCore; 43 = $serverCore;
+        44 = $serverCore; 45 = $serverCore; 46 = $serverCore; 63 = $serverCore; 143 = $nanoServer; 144 = $nanoServer;
+        147 = $serverCore; 148 = $serverCore; }
+    
+    $productName = ""
+    $installOption = ""
+    $osVersion = ""
+    $osBuildLabEx = ""
+
+
+    # Get ProductName and BuildLabEx from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
+    if (Test-Path $windowInfoKey) {
+        $windowInfo = Get-ItemProperty -Path $windowInfoKey
+        $productName = $windowInfo.ProductName
+        $osBuildLabEx = $windowInfo.BuildLabEx
+
+        if ($windowInfo.CurrentMajorVersionNumber -and $windowInfo.CurrentMinorVersionNumber) {
+            $osVersion = ("{0}.{1}" -f $windowInfo.CurrentMajorVersionNumber, $windowInfo.CurrentMinorVersionNumber)
+        }
+    }
+
+    # Get Version and SKU from Win32_OperatingSystem
+    $osInfo = Get-CimInstance Win32_OperatingSystem | Select-Object Version, OperatingSystemSKU
+    $osSkuNumber = [int]$osInfo.OperatingSystemSKU
+    if (-not $osVersion -and $osInfo.Version) {
+        $osVersionSplit = $osInfo.Version.Split(".")
+        if ($osVersionSplit.Count -gt 1) {
+            $osVersion = ("{0}.{1}" -f $osVersionSplit[0], $osVersionSplit[1])
+        } elseif ($osVersionSplit.Count -eq 1) {
+            $osVersion = ("{0}.0" -f $osVersionSplit[0])
+        }
+    }
+
+    if ($serverOptions[$osSkuNumber]) {
+        $installOption = $serverOptions[$osSkuNumber]
+    } else {
+        $installOption = $fullServer
+    }
+
+    # Write the information to the Log Files
+    Write-Log ("# [Windows] Microsoft Windows NT version : {0}" -f $osVersion)
+    Write-Log ("# [Windows] Windows Server OS Product Name : {0}" -f $productName)
+    Write-Log ("# [Windows] Windows Server OS Install Option : {0}" -f $installOption)
+    Write-Log ("# [Windows] Windows Server OS Version : {0}" -f $osVersion)
+    Write-Log ("# [Windows] Windows Server Build Lab Ex : {0}" -f $osBuildLabEx)
+
+    Write-Log ("# [Windows] Windows Server OS Language : {0}" -f ([CultureInfo]::CurrentCulture).IetfLanguageTag)
+    Write-Log ("# [Windows] Windows Server OS TimeZone : {0}" -f ([TimeZoneInfo]::Local).StandardName)
+    Write-Log ("# [Windows] Windows Server OS Offset : {0}" -f ([TimeZoneInfo]::Local).GetUtcOffset([DateTime]::Now))
+
+} # end function Get-WindowsDriverInfo
+
+function Get-SSMAgentVersion
+{
+    Set-Variable __SSMAgentInfoRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
+    Set-Variable __SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
+
+    $SSM_AgentVersion = ""
+
+    if (Test-Path $__SSMAgentInfoRegistry) {
+        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentInfoRegistry -ErrorAction SilentlyContinue
+        $SSM_AgentVersion = $__SSMAgentService.Version
+    }
+
+    if (-not $SSM_AgentVersion -and (Test-Path $__SSMAgentUninstallRegistry)) {
+        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentUninstallRegistry -ErrorAction SilentlyContinue
+        $SSM_AgentVersion = $service.DisplayVersion
+    }
+
+    # Write the information to the Log Files
+    if ($SSM_AgentVersion) {
+        Write-Log "# Amazon SSM Agent Version : $AMI_OriginalVersion"
+    }
+} # end function Get-SSMAgentVersion
+
+function Set-TimeZone
+{
   [CmdletBinding(SupportsShouldProcess = $True)]
   param( 
     [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
@@ -72,24 +204,24 @@ function Set-TimeZone {
   $process.Start() | Out-Null 
 } # end function Set-TimeZone
 
-function Update-SysprepAnswerFile($answerFile)
+function Update-SysprepAnswerFile($SysprepAnswerFile)
 {
-    [xml] $document = Get-Content $answerFile -Encoding UTF8
+    [xml] $__SysprepXMLDocument = Get-Content $SysprepAnswerFile -Encoding UTF8
 
-    $ns = New-Object System.Xml.XmlNamespaceManager($document.NameTable)
-    $ns.AddNamespace("u", $document.DocumentElement.NamespaceURI)
+    $__SysprepNamespace = New-Object System.Xml.XmlNamespaceManager($__SysprepXMLDocument.NameTable)
+    $__SysprepNamespace.AddNamespace("u", $__SysprepXMLDocument.DocumentElement.NamespaceURI)
 
-    $settings = $document.SelectSingleNode("//u:settings[@pass='oobeSystem']", $ns)
+    $__SysprepSettings = $__SysprepXMLDocument.SelectSingleNode("//u:settings[@pass='oobeSystem']", $__SysprepNamespace)
 
-    $international = $settings.SelectSingleNode("u:component[@name='Microsoft-Windows-International-Core']", $ns)
-    $shell = $settings.SelectSingleNode("u:component[@name='Microsoft-Windows-Shell-Setup']", $ns)
+    $__Sysprep_Node_International = $__SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-International-Core']", $__SysprepNamespace)
+    $__Sysprep_Node_Shell = $__SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-Shell-Setup']", $__SysprepNamespace)
 
-    $international.SystemLocale = "ja-JP"
-    $international.UserLocale = "ja-JP"
+    $__Sysprep_Node_International.SystemLocale = "ja-JP"
+    $__Sysprep_Node_International.UserLocale = "ja-JP"
 
-    $shell.TimeZone = "Tokyo Standard Time"
+    $__Sysprep_Node_Shell.TimeZone = "Tokyo Standard Time"
 
-    $document.Save($answerFile)
+    $__SysprepXMLDocument.Save($SysprepAnswerFile)
 } # end function Update-SysprepAnswerFile
 
 
@@ -120,7 +252,8 @@ Create-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
-Log "# Script Execution 3rd-Bootstrap Script [START] : $MyInvocation.MyCommand.Path"
+Set-Variable -Name ScriptFullPath -Value $MyInvocation.InvocationName
+Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 
 Set-Location -Path $BASE_DIR
 
@@ -160,15 +293,27 @@ Set-Variable -Name CWLogsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\S
 # Set Log File
 Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Logging Amazon EC2 System & Windows Server OS Parameter
+#-----------------------------------------------------------------------------------------------------------------------
+
 # Logging AWS Instance Metadata
-Log "# Display AWS Instance Metadata [Region] : $Region"
-Log "# Display AWS Instance Metadata [Availability Zone] : $AZ"
-Log "# Display AWS Instance Metadata [Instance ID] : $InstanceId"
-Log "# Display AWS Instance Metadata [Instance Type] : $InstanceType"
-Log "# Display AWS Instance Metadata [VPC Private IP Address] : $PrivateIp"
-Log "# Display AWS Instance Metadata [Amazon Machine Images] : $AmiId"
-Log "# Display AWS Instance Metadata [EC2 - Instance Profile ARN] : $RoleArn"
-Log "# Display AWS Instance Metadata [EC2 - IAM Role Name] : $RoleName"
+Write-Log "# AWS Instance Metadata [Region] : $Region"
+Write-Log "# AWS Instance Metadata [Availability Zone] : $AZ"
+Write-Log "# AWS Instance Metadata [Instance ID] : $InstanceId"
+Write-Log "# AWS Instance Metadata [Instance Type] : $InstanceType"
+Write-Log "# AWS Instance Metadata [VPC Private IP Address] : $PrivateIp"
+Write-Log "# AWS Instance Metadata [Amazon Machine Images] : $AmiId"
+Write-Log "# AWS Instance Metadata [EC2 - Instance Profile ARN] : $RoleArn"
+Write-Log "# AWS Instance Metadata [EC2 - IAM Role Name] : $RoleName"
+
+# Logging Windows Server OS Parameter
+Get-AMIInfo
+Get-WindowsOSInfo
+Get-WindowsDriverInfo
+Get-Ec2ConfigVersion
+Get-SSMAgentVersion
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -178,23 +323,23 @@ Log "# Display AWS Instance Metadata [EC2 - IAM Role Name] : $RoleName"
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
 $__DefaultAWSRegion = Get-DefaultAWSRegion
-Log "# Display Default Region at AWS Tools for Windows Powershell : $__DefaultAWSRegion"
+Write-Log "# Display Default Region at AWS Tools for Windows Powershell : $__DefaultAWSRegion"
 
 # Get AMI Information
 if ($RoleName) {
-    Log "# Get AMI Information"
+    Write-Log "# Get AMI Information"
     Get-EC2Image -ImageId $AmiId | ConvertTo-Json
 }
 
 # Get EC2 Instance Information
 if ($RoleName) {
-    Log "# Get EC2 Instance Information"
+    Write-Log "# Get EC2 Instance Information"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json
 }
 
 # Get EC2 Instance attached EBS Volume Information
 if ($RoleName) {
-    Log "# Get EC2 Instance attached EBS Volume Information"
+    Write-Log "# Get EC2 Instance attached EBS Volume Information"
     Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json
 }
 
@@ -202,15 +347,15 @@ if ($RoleName) {
 if ($RoleName) {
     if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
-        Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+        Write-Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances"
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
     } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
         # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-        Log "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+        Write-Log "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport
     } else {
-        Log "# Instance type of None [Network Interface Performance Attribute]"
+        Write-Log "# Instance type of None [Network Interface Performance Attribute]"
     }
 }
 
@@ -218,10 +363,10 @@ if ($RoleName) {
 if ($RoleName) {
     if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
-        Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+        Write-Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized
     } else {
-        Log "# Instance type of None [Storage Interface Performance Attribute]"
+        Write-Log "# Instance type of None [Storage Interface Performance Attribute]"
     }
 }
 
@@ -232,26 +377,25 @@ if ($RoleName) {
 
 # Setting System Locale
 $__WinSystemLocale = Get-WinSystemLocale
-Log "# Display Windows System Locale [Before] : $__WinSystemLocale"
+Write-Log "# Display Windows System Locale [Before] : $__WinSystemLocale"
 Set-WinSystemLocale -SystemLocale ja-JP
-Log "# Display Windows System Locale [After] : $__WinSystemLocale"
+Write-Log "# Display Windows System Locale [After] : $__WinSystemLocale"
 
 $__WinHomeLocation = Get-WinHomeLocation
-Log "# Display Windows Home Location [Before] : $__WinHomeLocation.HomeLocation"
+Write-Log ("# Display Windows Home Location [Before] : " + $__WinHomeLocation.HomeLocation)
 Set-WinHomeLocation -GeoId 0x7A
-Log "# Display Windows Home Location [After] : $__WinHomeLocation.HomeLocation"
+Write-Log ("# Display Windows Home Location [After] : " + $__WinHomeLocation.HomeLocation)
 
 $__WinCultureFromLanguageListOptOut = Get-WinCultureFromLanguageListOptOut
-Log "# Make the date and time [format] the same as the display language [Before] : $__WinCultureFromLanguageListOptOut"
+Write-Log "# Make the date and time [format] the same as the display language [Before] : $__WinCultureFromLanguageListOptOut"
 Set-WinCultureFromLanguageListOptOut -OptOut $False
-Log "# Make the date and time [format] the same as the display language [After] : $__WinCultureFromLanguageListOptOut"
+Write-Log "# Make the date and time [format] the same as the display language [After] : $__WinCultureFromLanguageListOptOut"
 
 # Setting Japanese UI Language
 $__WinUILanguageOverride = Get-WinUILanguageOverride
-Log "# Override display language [Before] : $__WinUILanguageOverride.DisplayName"
+Write-Log ("# Override display language [Before] : " + $__WinUILanguageOverride.DisplayName)
 Set-WinUILanguageOverride -Language ja-JP
-Log "# Override display language [After] : $__WinUILanguageOverride.DisplayName"
-
+Write-Log ("# Override display language [After] : " + $__WinUILanguageOverride.DisplayName)
 
 # Change Windows Update Policy
 $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
@@ -274,10 +418,10 @@ Start-Sleep -Seconds 5
 # Enable EC2config EventLog Output
 Get-Content $EC2ConfigFile
 
-$xml = [xml](Get-Content $EC2ConfigFile)
-$node = $xml.SelectSingleNode("//Plugins/Plugin[Name='Ec2EventLog']/State")
-$node.'#text' = "Enabled"
-$xml.Save($EC2ConfigFile)
+$__EC2ConfigXMLDocument = [xml](Get-Content $EC2ConfigFile)
+$__EC2Config_Node_Ec2EventLog = $__EC2ConfigXMLDocument.SelectSingleNode("//Plugins/Plugin[Name='Ec2EventLog']/State")
+$__EC2Config_Node_Ec2EventLog.'#text' = "Enabled"
+$__EC2ConfigXMLDocument.Save($EC2ConfigFile)
 
 Get-Content $EC2ConfigFile
 
@@ -321,19 +465,19 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 Get-NetAdapterBinding
 
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
-    Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+    Write-Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
     Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
-    Log "# Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+    Write-Log "# Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
-    Log "# Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+    Write-Log "# Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
     Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } else {
-    Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
+    Write-Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
 
 Get-NetAdapterBinding
@@ -346,16 +490,16 @@ $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
-    Log "# Change System PowerPlan : $HighPowerString"
+    Write-Log "# Change System PowerPlan : $HighPowerString"
     $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
     $HighPowerObject.Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
-    Log "# Change System PowerPlan : High performance"
+    Write-Log "# Change System PowerPlan : High performance"
     (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
 } else {
-    Log "# Change System PowerPlan : No change"
+    Write-Log "# Change System PowerPlan : No change"
 }
 
 Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
@@ -367,9 +511,12 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 
 # Package Update System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
+Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+
+Get-SSMAgentVersion
+
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 Start-Sleep -Seconds 120
 
@@ -378,10 +525,12 @@ Get-Service -Name AmazonSSMAgent
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
-    Log "# Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
+    Write-Log "# Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
-    Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
+    Write-Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
+
+Get-SSMAgentVersion
 
 # Clear Log File
 Clear-Content $SSMAgentLogFile
@@ -400,53 +549,53 @@ Get-Content $SSMAgentLogFile
 
 # Package Download System Utility (Sysinternals Suite)
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
-Log "# Package Download System Utility (Sysinternals Suite)"
+Write-Log "# Package Download System Utility (Sysinternals Suite)"
 Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
 
 # Package Download System Utility (System Explorer)
 # http://systemexplorer.net/
-Log "# Package Download System Utility (System Explorer)"
+Write-Log "# Package Download System Utility (System Explorer)"
 Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
 
 # Package Download System Utility (7-zip)
 # http://www.7-zip.org/
-Log "# Package Download System Utility (7-zip)"
+Write-Log "# Package Download System Utility (7-zip)"
 Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-Log "# Package Download System Utility (EC2Config)"
+Write-Log "# Package Download System Utility (EC2Config)"
 Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-# Log "# Package Download System Utility (EC2Launch)"
+# Write-Log "# Package Download System Utility (EC2Launch)"
 # Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
 # Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
 
 # Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
-Log "# Package Download System Utility (AWS-CLI - 64bit)"
+Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
+Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
 Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
+Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 
 # Package Download System Utility (Amazon Inspector Agent)
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows
-Log "# Package Download System Utility (Amazon Inspector Agent)"
+Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
 Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
 
 # Package Download System Utility (AWS CodeDeploy agent)
 # http://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/how-to-run-agent-install.html#how-to-run-agent-install-windows
-Log "# Package Download System Utility (AWS CodeDeploy agent)"
+Write-Log "# Package Download System Utility (AWS CodeDeploy agent)"
 $AWSCodeDeployAgentUrl = "https://aws-codedeploy-" + ${Region} + ".s3.amazonaws.com/latest/codedeploy-agent.msi"
 Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-agent.msi"
 
@@ -457,14 +606,14 @@ Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-age
 
 # Package Download Monitoring Service Agent (Zabix Agent)
 # http://www.zabbix.com/download
-Log "# Package Download Monitoring Service Agent (Zabix Agent)"
+Write-Log "# Package Download Monitoring Service Agent (Zabix Agent)"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_2.2.14.win.zip"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.0.4.win.zip"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.2.0.win.zip"
 
 # Package Download Monitoring Service Agent (Datadog Agent)
 # http://docs.datadoghq.com/ja/guides/basic_agent_usage/windows/
-Log "# Package Download Monitoring Service Agent (Datadog Agent)"
+Write-Log "# Package Download Monitoring Service Agent (Datadog Agent)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$TOOL_DIR\ddagent-cli.msi"
 
 
@@ -545,7 +694,7 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 
 if ($InstanceType -match "^p2.*") {
-    Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
+    Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
 
     # [Windows Server 2008 R2]
     # $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
@@ -572,7 +721,7 @@ if ($InstanceType -match "^p2.*") {
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 
 if ($InstanceType -match "^g2.*") {
-    Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
+    Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
 
     # [Windows Server 2008 R2]
     # $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
@@ -601,12 +750,12 @@ if ($InstanceType -match "^g2.*") {
 
 # Package Download Security Service Agent (Deep Security Agent)
 # http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
-Log "# Package Download Security Service Agent (Deep Security Agent)"
+Write-Log "# Package Download Security Service Agent (Deep Security Agent)"
 Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/Windows/x86_64/agent.msi' -OutFile "$TOOL_DIR\DSA_agent.msi"
 
 # Package Download Security Service Agent (Alert Logic Universal Agent)
 # https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
-Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
+Write-Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
 Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\al_agent-LATEST.msi"
 
 
@@ -616,32 +765,32 @@ Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi'
 
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
-Log "# Package Download Amazon Windows Paravirtual Drivers"
+Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
 Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2008 R2)
 # https://downloadcenter.intel.com/ja/download/18725/
-# Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
+# Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
 # Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2012)
 # https://downloadcenter.intel.com/ja/download/21694/
-# Log "# Package Download Intel Network Driver (Windows Server 2012)"
+# Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
 # Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2012 R2)
 # https://downloadcenter.intel.com/ja/download/23073/
-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
+Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
 Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Intel Network Driver (Windows Server 2016)
 # https://downloadcenter.intel.com/ja/download/26092/
-# Log "# Package Download Intel Network Driver (Windows Server 2016)"
+# Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
 # Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
-Log "# Package Download Amazon Elastic Network Adapter Driver"
+Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
 Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\ENA.zip"
 
 
@@ -650,13 +799,13 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Package Install Modern Web Browser (Google Chrome 64bit)
-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
+Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
 Start-Sleep -Seconds 120
 
 # Package Install Text Editor (Visual Studio Code)
-Log "# Package Install Text Editor (Visual Studio Code)"
+Write-Log "# Package Install Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
 Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") | Out-Null
 Start-Sleep -Seconds 120
@@ -669,7 +818,7 @@ Start-Sleep -Seconds 120
 # Stop Transcript Logging
 Stop-Transcript
 
-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $MyInvocation.MyCommand.Path"
+Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
 
 # Save Script Files
 Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
