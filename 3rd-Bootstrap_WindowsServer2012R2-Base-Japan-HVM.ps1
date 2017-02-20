@@ -642,11 +642,6 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 Write-Log "# Package Download System Utility (Wireshark)"
 Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.4.exe' -OutFile "$TOOL_DIR\Wireshark-win64-2.2.4.exe"
 
-# Package Download System Utility (Microsoft Message Analyzer)
-# https://blogs.technet.microsoft.com/messageanalyzer/
-Write-Log "# Package Download System Utility (Microsoft Message Analyzer)"
-Invoke-WebRequest -Uri 'https://download.microsoft.com/download/2/8/3/283DE38A-5164-49DB-9883-9D1CC432174D/MessageAnalyzer64.msi' -OutFile "$TOOL_DIR\MessageAnalyzer64.msi"
-
 # Package Download System Utility (AWS Directory Service PortTest Application)
 # http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
 Write-Log "# Package Download System Utility (AWS DirectoryServicePortTest Application)"
@@ -948,13 +943,12 @@ Write-Log-Separator "Custom Package Installation (Application)"
 # Package Install Modern Web Browser (Google Chrome 64bit)
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
-Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\ChromeSetup.log") -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_ChromeSetup.log") -Wait | Out-Null
 
 # Package Install Text Editor (Visual Studio Code)
 Write-Log "# Package Install Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
-Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/verysilent", "/suppressmsgboxes", "/LOG=C:\EC2-Bootstrap\Logs\VSCodeSetup.log") | Out-Null
-Start-Sleep -Seconds 120
+Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 
 
 #-----------------------------------------------------------------------------------------------------------------------
