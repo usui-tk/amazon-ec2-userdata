@@ -179,10 +179,10 @@ function Get-WindowsOSInfo
         44 = $serverCore; 45 = $serverCore; 46 = $serverCore; 63 = $serverCore; 143 = $nanoServer; 144 = $nanoServer;
         147 = $serverCore; 148 = $serverCore; }
     
-    $productName = ""
-    $installOption = ""
-    $osVersion = ""
-    $osBuildLabEx = ""
+    $Global:productName = ""
+    $Global:installOption = ""
+    $Global:osVersion = ""
+    $Global:osBuildLabEx = ""
 
     # Get ProductName and BuildLabEx from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     if (Test-Path $windowInfoKey) {
@@ -334,23 +334,18 @@ Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
 Get-AMIInfo
 
 # Logging Windows Server OS Parameter [Windows OS Information]
-$osVersion = ""
 Get-WindowsOSInfo
 
 # Logging Windows Server OS Parameter [Windows OS Driver Information]
 Get-WindowsDriverInfo
 
 # Logging Windows Server OS Parameter [EC2 Bootstrap Application Information]
-if ($osVersion) {
-    if ($osVersion -match "^5.*|^6.*") {
-        Get-Ec2ConfigVersion
-    } elseif ($osVersion -match "^10.*") {
-        Get-Ec2LaunchVersion
-    } else {
-        Write-Log ("# No Target - Windows NT Version Information : " + $osVersion)
-    }
+if ($osVersion -match "^5.*|^6.*") {
+    Get-Ec2ConfigVersion
+} elseif ($osVersion -match "^10.*") {
+    Get-Ec2LaunchVersion
 } else {
-    Write-Log "# No Parameter - Windows NT Version Information"
+    Write-Log ("# No Target - Windows NT Version Information : " + $osVersion)
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
