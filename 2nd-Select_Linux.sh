@@ -12,6 +12,7 @@ ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Bo
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
+ScriptForUbuntuv16.04=""
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -89,6 +90,13 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
+    elif [ "${DIST_TYPE}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
+        if [ "${REV}" = "16.04" ]; then
+           # Bootstrap Script for Ubuntu v16.04 LTS
+           BootstrapScript=${ScriptForUbuntuv16.04}
+        else
+           BootstrapScript=""
+        fi    
     else
         BootstrapScript=""
     fi
