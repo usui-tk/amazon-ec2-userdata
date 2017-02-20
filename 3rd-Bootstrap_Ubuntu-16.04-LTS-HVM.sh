@@ -1,5 +1,7 @@
 #!/bin/bash -v
 
+set -e -x
+
 # Logger
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
@@ -33,14 +35,13 @@ fi
 #-------------------------------------------------------------------------------
 
 # Command Non-Interactive Mode
-DEBIAN_FRONTEND=noninteractive
+export DEBIAN_FRONTEND=noninteractive
 
 # yum repository metadata Clean up
 apt-get -y clean
 
 # Default Package Update
-apt-get -y update
-apt-get -y upgrade
+apt-get update -y && apt-get upgrade -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
