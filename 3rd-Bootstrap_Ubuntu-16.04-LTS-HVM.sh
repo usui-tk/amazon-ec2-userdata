@@ -262,6 +262,8 @@ if [ $(command -v ufw) ]; then
     ufw disable
     # Network Information(Firewall Service Status) [systemctl status ufw]
 	systemctl status ufw
+	systemctl disable ufw
+	systemctl status ufw
 fi
 
 #-------------------------------------------------------------------------------
