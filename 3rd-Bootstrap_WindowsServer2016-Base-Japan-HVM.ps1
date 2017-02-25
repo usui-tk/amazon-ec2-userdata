@@ -381,7 +381,7 @@ function Get-WindowsServerInformation
 
     # Get Windows OS Version and OS Language
     $WindowsOSVersion = $osVersion.ToString()
-    $WindowsOSLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag)
+    $WindowsOSLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 
 } # end function Get-WindowsServerInformation
 
@@ -414,6 +414,7 @@ function Update-SysprepAnswerFile($SysprepAnswerFile)
 #
 ########################################################################################################################
 
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
@@ -422,6 +423,7 @@ Get-TimeZone
 Set-TimeZone -Id "Tokyo Standard Time"
 Start-Sleep -Seconds 5
 Get-TimeZone
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Preparation for script execution
@@ -439,6 +441,8 @@ Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 Set-Location -Path $BASE_DIR
 
 Set-StrictMode -Version Latest
+
+$WindowsOSVersion = ""
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -492,7 +496,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 } elseif ($WindowsOSVersion -match "^10.*") {
     Get-Ec2LaunchVersion
 } else {
-    Write-Log ("# No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
@@ -774,7 +778,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Write-Log "# Package Download System Utility (EC2Config)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
 } else {
-    Write-Log ("# No Target [EC2Config] - Windows NT Version Information : " + $osVersion)
+    Write-Log ("# [Warning] No Target [EC2Config] - Windows NT Version Information : " + $osVersion)
 }
 
 # Package Download System Utility (EC2Launch)
@@ -784,7 +788,7 @@ if ($WindowsOSVersion -match "^10.*") {
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
 } else {
-    Write-Log ("# No Target [EC2Launch] - Windows NT Version Information : " + $osVersion)
+    Write-Log ("# [Warning] No Target [EC2Launch] - Windows NT Version Information : " + $osVersion)
 }
 
 # Package Download System Utility (AWS-CLI - 64bit)
