@@ -109,6 +109,11 @@ function Get-DotNetFrameworkVersion
 
 function Get-Ec2ConfigVersion
 {
+    #--------------------------------------------------------------------------------------
+    #  Configuring a Windows Instance Using the EC2Config Service
+    #   http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/UsingConfig_WinAMI.html
+    #--------------------------------------------------------------------------------------
+
     $Ec2ConfigVersion = ""
 
     # Get EC2Config Version
@@ -126,6 +131,11 @@ function Get-Ec2ConfigVersion
 
 function Get-Ec2InstanceMetadata
 {
+    #--------------------------------------------------------------------------------------
+    #  Instance Metadata and User Data (Windows)
+    #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html
+    #--------------------------------------------------------------------------------------
+
     # Set AWS Instance Metadata
     Set-Variable -Name AZ -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
     Set-Variable -Name Region -Option Constant -Scope Global -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
@@ -165,6 +175,11 @@ function Get-Ec2InstanceMetadata
 
 function Get-Ec2LaunchVersion
 {
+    #--------------------------------------------------------------------------------------
+    #  Configuring a Windows Instance Using EC2Launch
+    #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch.html
+    #--------------------------------------------------------------------------------------
+
     Set-Variable Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
 
     $Ec2LaunchVersion = ""
@@ -184,6 +199,11 @@ function Get-Ec2LaunchVersion
 
 function Get-Ec2SystemManagerAgentVersion
 {
+    #--------------------------------------------------------------------------------------
+    #  Amazon EC2 Systems Manager
+    #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager.html
+    #--------------------------------------------------------------------------------------
+
     Set-Variable SSMAgentRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
     Set-Variable SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
 
@@ -741,11 +761,11 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
 Write-Log "# Package Download System Utility (Wireshark)"
-Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.4.exe' -OutFile "$TOOL_DIR\Wireshark-win64-2.2.4.exe"
+Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.4.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
 # http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
-Write-Log "# Package Download System Utility (AWS DirectoryServicePortTest Application)"
+Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
 Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
 
 # Package Download System Utility (EC2Config)
@@ -777,6 +797,11 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile 
 Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
 Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 
+# Package Download System Utility (AWS CloudFormation Helper Scripts)
+# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
 Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
@@ -785,13 +810,13 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 # Package Download System Utility (Amazon Inspector Agent)
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_working-with-agents.html#inspector-agent-windows
 Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
-Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
+Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AmazonInspectorAgent-Windows.exe"
 
 # Package Download System Utility (AWS CodeDeploy agent)
 # http://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/how-to-run-agent-install.html#how-to-run-agent-install-windows
 Write-Log "# Package Download System Utility (AWS CodeDeploy agent)"
 $AWSCodeDeployAgentUrl = "https://aws-codedeploy-" + ${Region} + ".s3.amazonaws.com/latest/codedeploy-agent.msi"
-Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-agent.msi"
+Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\AWSCodeDeployAgent-Windows.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -804,19 +829,19 @@ Write-LogSeparator "Custom Package Download (Monitoring Service Agent)"
 # Package Download Monitoring Service Agent (Zabix Agent)
 # http://www.zabbix.com/download
 Write-Log "# Package Download Monitoring Service Agent (Zabix Agent)"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_2.2.14.win.zip"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.0.4.win.zip"
-Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$TOOL_DIR\zabbix_agents_3.2.0.win.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v2.2-Latest-Windows.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v3.0-Latest-Windows.zip"
+Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v3.2-Latest-Windows.zip"
 
 # Package Download Monitoring Service Agent (Datadog Agent)
 # http://docs.datadoghq.com/ja/guides/basic_agent_usage/windows/
 Write-Log "# Package Download Monitoring Service Agent (Datadog Agent)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$TOOL_DIR\ddagent-cli.msi"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ddagent-windows-stable/ddagent-cli.msi' -OutFile "$TOOL_DIR\DatadogAgent-Windows.msi"
 
 # Package Download Monitoring Service Agent (New Relic Infrastructure Agent)
 # https://docs.newrelic.com/docs/infrastructure/new-relic-infrastructure/installation/install-infrastructure-windows-server
 Write-Log "# Package Download Monitoring Service Agent (New Relic Infrastructure Agent)"
-Invoke-WebRequest -Uri 'https://download.newrelic.com/infrastructure_agent/windows/newrelic-infra.msi' -OutFile "$TOOL_DIR\newrelic-infra.msi"
+Invoke-WebRequest -Uri 'https://download.newrelic.com/infrastructure_agent/windows/newrelic-infra.msi' -OutFile "$TOOL_DIR\NewRelicInfrastructureAgent-Windows.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -834,7 +859,7 @@ Invoke-WebRequest -Uri 'https://app.deepsecurity.trendmicro.com/software/agent/W
 # Package Download Security Service Agent (Alert Logic Universal Agent)
 # https://docs.alertlogic.com/requirements/system-requirements.htm#reqsAgent
 Write-Log "# Package Download Security Service Agent (Alert Logic Universal Agent)"
-Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\al_agent-LATEST.msi"
+Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi' -OutFile "$TOOL_DIR\AlertLogic-Windows_agent-LATEST.msi"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
