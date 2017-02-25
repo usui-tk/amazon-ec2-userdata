@@ -55,9 +55,9 @@ function Write-Log
 function Write-LogSeparator
 {
       param([string]$message)
-      Write-Log "#-------------------------------------------------------------------------------"
+      Write-Log "#---------------------------------------------------------------------------------------------------------------------"
       Write-Log ("#        Script Executetion Step : " + $message)
-      Write-Log "#-------------------------------------------------------------------------------"   
+      Write-Log "#---------------------------------------------------------------------------------------------------------------------"
 } # end function Write-LogSeparator
 
 
@@ -686,15 +686,15 @@ $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To
 Get-PowerPlanInformation
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
-    Write-Log "# Change System PowerPlan : $HighPowerString"
+    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - $HighPowerString"
     (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }).Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
-    Write-Log "# Change System PowerPlan : High performance"
+    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - High performance"
     (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
 } else {
-    Write-Log "# Change System PowerPlan : No change"
+    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - No change"
 }
 
 Get-PowerPlanInformation
