@@ -30,7 +30,7 @@ $TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 
 ########################################################################################################################
 #
-# Service-specific Functionality
+# Windows Bootstrap Common function
 #
 ########################################################################################################################
 
@@ -70,6 +70,13 @@ function New-Directory
         New-Item -Path $dir -ItemType Directory -Force
     }
 } # end function New-Directory
+
+
+########################################################################################################################
+#
+# Windows Bootstrap Individual requirement function
+#
+########################################################################################################################
 
 
 function Get-AmazonMachineImageInformation
@@ -115,6 +122,45 @@ function Get-Ec2ConfigVersion
         Write-Log "# [Windows] Amazon EC2Config Version : $Ec2ConfigVersion"
     }
 } # end Get-Ec2ConfigVersion
+
+
+function Get-Ec2InstanceMetadata
+{
+    # Set AWS Instance Metadata
+    Set-Variable -Name AZ -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    Set-Variable -Name Region -Option Constant -Scope Global -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
+    Set-Variable -Name InstanceId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
+    Set-Variable -Name InstanceType -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
+    Set-Variable -Name PrivateIp -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+    Set-Variable -Name AmiId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
+
+    # Set IAM Role & STS Information
+    Set-Variable -Name RoleArn -Option Constant -Scope Global -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+    Set-Variable -Name RoleName -Option Constant -Scope Global -Value ($RoleArn -split "/" | select -Index 1)
+    
+    if ($RoleName) {
+        Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
+        Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
+        Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
+        Set-Variable -Name StsToken -Value $StsCredential.Token
+    }
+
+    # Set AWS Account ID
+    Set-Variable -Name AwsAccountId -Option Constant -Scope Global -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
+
+    # Logging AWS Instance Metadata
+    Write-Log "# [AWS] Region : $Region"
+    Write-Log "# [AWS] Availability Zone : $AZ"
+    Write-Log "# [AWS] Instance ID : $InstanceId"
+    Write-Log "# [AWS] Instance Type : $InstanceType"
+    Write-Log "# [AWS] VPC Private IP Address : $PrivateIp"
+    Write-Log "# [AWS] Amazon Machine Images ID : $AmiId"
+    if ($RoleName) {
+        Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
+        Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
+    }
+
+} # end function Get-Ec2InstanceMetadata
 
 
 function Get-Ec2LaunchVersion
@@ -210,6 +256,17 @@ function Get-PowerPlanInformation
         }
     } 
 } # end Get-PowerPlanInformation
+
+
+function Get-PowerShellVerson
+{
+    # Get PowerShell Environment Information
+    $PowerShellVersion = $PSVersionTable.PSVersion.ToString()
+    $PowerShellClrVersion = $PSVersionTable.CLRVersion.ToString()
+
+    # Write the information to the Log Files
+    Write-Log ("# [Windows] PowerShell Information : [Version - {0}] [CLR Version - {1}]" -f $PowerShellVersion, $PowerShellClrVersion)
+} # end Get-PowerShellVerson
 
 
 function Get-WindowsDriverInformation
@@ -363,31 +420,10 @@ Set-Location -Path $BASE_DIR
 
 Set-StrictMode -Version Latest
 
-Get-ExecutionPolicy
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Amazon EC2 System Define Parameter
+# Setting Amazon EC2 Windows Server Parameter
 #-----------------------------------------------------------------------------------------------------------------------
-
-# Set AWS Instance Metadata
-Set-Variable -Name AZ -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
-Set-Variable -Name Region -Option Constant -Scope Global -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
-Set-Variable -Name InstanceId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
-Set-Variable -Name InstanceType -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
-Set-Variable -Name PrivateIp -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
-Set-Variable -Name AmiId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
-
-# Set IAM Role & STS Information
-Set-Variable -Name RoleArn -Option Constant -Scope Global -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
-Set-Variable -Name RoleName -Option Constant -Scope Global -Value ($RoleArn -split "/" | select -Index 1)
-
-Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
-Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
-Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
-Set-Variable -Name StsToken -Value $StsCredential.Token
-
-# Set AWS Account ID
-Set-Variable -Name AwsAccountId -Option Constant -Scope Global -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
 # Set Config File
 Set-Variable -Name SysprepFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
@@ -405,16 +441,9 @@ Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon
 Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 
 # Logging AWS Instance Metadata
-Write-Log "# [AWS] Region : $Region"
-Write-Log "# [AWS] Availability Zone : $AZ"
-Write-Log "# [AWS] Instance ID : $InstanceId"
-Write-Log "# [AWS] Instance Type : $InstanceType"
-Write-Log "# [AWS] VPC Private IP Address : $PrivateIp"
-Write-Log "# [AWS] Amazon Machine Images ID : $AmiId"
-Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
-Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
+Get-Ec2InstanceMetadata
 
-# Logging Windows Server OS Parameter [AMI]
+# Logging Windows Server OS Parameter [AMI : Amazon Machine Image]
 Get-AmazonMachineImageInformation
 
 # Logging PowerShell Script Execution UserName
@@ -423,11 +452,16 @@ Get-ScriptExecuteByAccount
 # Logging Windows Server OS Parameter [Windows Server Information]
 Get-WindowsServerInformation
 
-# Logging Windows Server OS Parameter [Page File Information]
-Get-PageFileInformation
-
 # Logging Windows Server OS Parameter [.NET Framework Information]
 Get-DotNetFrameworkVersion
+
+# Logging Windows Server OS Parameter [PowerShell Environment Information]
+Get-PowerShellVerson
+
+# Logging Windows Server OS Parameter [OS Settings]
+Get-PageFileInformation
+Get-NetAdapterBindingInformation
+Get-PowerPlanInformation
 
 # Logging Windows Server OS Parameter [Windows Driver Information]
 Get-WindowsDriverInformation
