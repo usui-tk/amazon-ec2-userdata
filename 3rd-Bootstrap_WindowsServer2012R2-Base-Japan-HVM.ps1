@@ -49,13 +49,13 @@ function Write-Log
     Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
-function Write-Log-Separator
+function Write-LogSeparator
 {
       param([string]$message)
       Write-Log "#-------------------------------------------------------------------------------"
       Write-Log ("#        Script Executetion Step : " + $message)
       Write-Log "#-------------------------------------------------------------------------------"
-} # end function Write-Log-Separator
+} # end function Write-LogSeparator
 
 function Create-Directory
 {
@@ -337,7 +337,7 @@ Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Logging Amazon EC2 System & Windows Server OS Parameter"
+Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 
 # Logging AWS Instance Metadata
 Write-Log "# [AWS] Region : $Region"
@@ -376,7 +376,7 @@ Get-SSMAgentVersion
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
+Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
@@ -403,7 +403,7 @@ if ($RoleName) {
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 if ($RoleName) {
-    if ($InstanceType -match "^x1.*|^p2.*|^r4.*|^m4.16xlarge") {
+    if ($InstanceType -match "^i3.*|^m4.16xlarge|^p2.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -419,7 +419,7 @@ if ($RoleName) {
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -434,7 +434,7 @@ if ($RoleName) {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Windows Server OS Configuration"
+Write-LogSeparator "Windows Server OS Configuration"
 
 # Setting System Locale
 $__WinSystemLocale = Get-WinSystemLocale
@@ -575,7 +575,7 @@ Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Package Update System Utility (Amazon EC2 Systems Manager Agent)"
+Write-LogSeparator "Package Update System Utility (Amazon EC2 Systems Manager Agent)"
 
 # Package Update System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
@@ -615,7 +615,7 @@ Get-Content $SSMAgentLogFile
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Custom Package Download (System Utility)"
+Write-LogSeparator "Custom Package Download (System Utility)"
 
 # Package Download System Utility (Sysinternals Suite)
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
@@ -693,7 +693,7 @@ Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\codedeploy-age
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Custom Package Download (Monitoring Service Agent)"
+Write-LogSeparator "Custom Package Download (Monitoring Service Agent)"
 
 # Package Download Monitoring Service Agent (Zabix Agent)
 # http://www.zabbix.com/download
@@ -718,7 +718,7 @@ Invoke-WebRequest -Uri 'https://download.newrelic.com/infrastructure_agent/windo
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Custom Package Download (Security Service Agent)"
+Write-LogSeparator "Custom Package Download (Security Service Agent)"
 
 # Package Download Security Service Agent (Deep Security Agent)
 # http://esupport.trendmicro.com/ja-jp/enterprise/dsaas/top.aspx
@@ -805,7 +805,7 @@ Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi'
 #=======================================================================================================================
 
 # Log Separator
-Write-Log-Separator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
+Write-LogSeparator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -880,7 +880,7 @@ if ($InstanceType -match "^g2.*") {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Custom Package Download (Storage & Network Driver)"
+Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
@@ -933,7 +933,7 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-Log-Separator "Custom Package Installation (Application)"
+Write-LogSeparator "Custom Package Installation (Application)"
 
 # Package Install Modern Web Browser (Google Chrome 64bit)
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
