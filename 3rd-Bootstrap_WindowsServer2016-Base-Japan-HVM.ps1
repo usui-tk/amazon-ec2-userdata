@@ -34,6 +34,7 @@ $TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
 #
 ########################################################################################################################
 
+
 function Format-Message
 {
     param([string]$message)
@@ -42,22 +43,25 @@ function Format-Message
     "$timestamp - $message"
 } # end function Format-Message
 
+
 function Write-Log
 {
     param([string]$message, $log=$USERDATA_LOG)
     
-    Format-Message $message | Out-File $log -Append -Force
+    Format-Message $message | Out-File $log -Append -Forc
 } # end function Write-Log
+
 
 function Write-LogSeparator
 {
       param([string]$message)
       Write-Log "#-------------------------------------------------------------------------------"
       Write-Log ("#        Script Executetion Step : " + $message)
-      Write-Log "#-------------------------------------------------------------------------------"
+      Write-Log "#-------------------------------------------------------------------------------"   
 } # end function Write-LogSeparator
 
-function Create-Directory
+
+function New-Directory
 {
     param([string]$dir)
 
@@ -65,30 +69,46 @@ function Create-Directory
         Write-Log "# Creating directory : $dir"
         New-Item -Path $dir -ItemType Directory -Force
     }
-} # end function Create-Directory
+} # end function New-Directory
 
-function Get-AMIInfo
+
+function Get-AmazonMachineImageInformation
 {
-    Set-Variable __AMIInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
+    Set-Variable AMIRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
 
-    if (Test-Path $__AMIInfoKey) {
-        $__AMIInfoRegistry = Get-ItemProperty -Path $__AMIInfoKey -ErrorAction SilentlyContinue
-        $AMI_OriginalVersion = $__AMIInfoRegistry.AMIVersion
-        $AMI_OriginalName = $__AMIInfoRegistry.AMIName
+    if (Test-Path $AMIRegistry) {
+        $AMIRegistryValue = Get-ItemProperty -Path $AMIRegistry -ErrorAction SilentlyContinue
+        $AmiOriginalVersion = $AMIRegistryValue.AMIVersion
+        $AmiOriginalName = $AMIRegistryValue.AMIName
 
         # Write the information to the Log Files
-        Write-Log "# [AMI] Windows - AMI Origin Version : $AMI_OriginalVersion"
-        Write-Log "# [AMI] Windows - AMI Origin Name : $AMI_OriginalName"
+        Write-Log "# [AMI] Windows - AMI Origin Version : $AmiOriginalVersion"
+        Write-Log "# [AMI] Windows - AMI Origin Name : $AmiOriginalName"
     }
-} # end function Get-AMIInfo
+} # end function Get-AmazonMachineImageInformation
+
+
+function Get-DotNetFrameworkVersion
+{
+    # Get Installed .NET Framework Version
+    $dotnet_versions = Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -Recurse | Get-ItemProperty -Name Version -EA 0 | Where-Object -FilterScript { $_.PSChildName -match '^(?!S)\p{L}' } | Select-Object -Property PSChildName, Version
+    foreach ($dotnet_version in $dotnet_versions)
+    {
+        # Write the information to the Log Files
+        Write-Log ("# [Windows] .NET Framework Information : v{0} - Profile : {1} " -f $dotnet_version.Version, $dotnet_version.PSChildName)
+    }    
+} # end function Get-DotNetFrameworkVersion
+
 
 function Get-Ec2ConfigVersion
 {
     $Ec2ConfigVersion = ""
-    
+
     # Get EC2Config Version
-    $__EC2Config_Infomation = $(Get-WmiObject -Class Win32_Product | Select-Object Name,Version | Where-Object { $_.Name -eq "EC2ConfigService" })
-    $Ec2ConfigVersion = $__EC2Config_Infomation.Version
+    $EC2ConfigInfomation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
+    if ($EC2ConfigInfomation) {
+        $Ec2ConfigVersion = $EC2ConfigInfomation.Version
+    }
 
     # Write the information to the Log Files
     if ($Ec2ConfigVersion) {
@@ -96,14 +116,17 @@ function Get-Ec2ConfigVersion
     }
 } # end Get-Ec2ConfigVersion
 
+
 function Get-Ec2LaunchVersion
 {
     Set-Variable Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
 
+    $Ec2LaunchVersion = ""
+
     # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
     if (Test-Path $Ec2LaunchModuleConfig) {
-        $__EC2Launch_ModuleVersion = Select-String -Path $Ec2LaunchModuleConfig -Pattern "ModuleVersion"
-        $Ec2LaunchVersion = $($__EC2Launch_ModuleVersion -match '(\d\.\d.\d)' | Out-Null; $Matches[1])
+        $EC2LaunchModuleVersion = Select-String -Path $Ec2LaunchModuleConfig -Pattern "ModuleVersion"
+        $Ec2LaunchVersion = $($EC2LaunchModuleVersion -match '(\d\.\d.\d)' | Out-Null; $Matches[1])
 
         # Write the information to the Log Files
         if ($Ec2LaunchVersion) {
@@ -112,30 +135,84 @@ function Get-Ec2LaunchVersion
     }
 } # end Get-Ec2LaunchVersion
 
-function Get-SSMAgentVersion
+
+function Get-Ec2SystemManagerAgentVersion
 {
-    Set-Variable __SSMAgentInfoRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
-    Set-Variable __SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
+    Set-Variable SSMAgentRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
+    Set-Variable SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
 
-    $SSM_AgentVersion = ""
+    $SsmAgentVersion = ""
 
-    if (Test-Path $__SSMAgentInfoRegistry) {
-        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentInfoRegistry -ErrorAction SilentlyContinue
-        $SSM_AgentVersion = $__SSMAgentService.Version
+    if (Test-Path $SSMAgentRegistry) {
+        $SSMAgentRegistryValue = Get-ItemProperty -Path $SSMAgentRegistry -ErrorAction SilentlyContinue
+        $SsmAgentVersion = $SSMAgentRegistryValue.Version
     }
 
-    if (-not $SSM_AgentVersion -and (Test-Path $__SSMAgentUninstallRegistry)) {
-        $__SSMAgentService = Get-ItemProperty -Path $__SSMAgentUninstallRegistry -ErrorAction SilentlyContinue
-        $SSM_AgentVersion = $__SSMAgentService.DisplayVersion
+    if (-not $SsmAgentVersion -and (Test-Path $SSMAgentUninstallRegistry)) {
+        $SSMAgentRegistryValue = Get-ItemProperty -Path $SSMAgentUninstallRegistry -ErrorAction SilentlyContinue
+        $SsmAgentVersion = $SSMAgentRegistryValue.DisplayVersion
     }
 
     # Write the information to the Log Files
-    if ($SSM_AgentVersion) {
-        Write-Log "# [Windows] Amazon SSM Agent Version : $SSM_AgentVersion"
+    if ($SsmAgentVersion) {
+        Write-Log "# [Windows] Amazon SSM Agent Version : $SsmAgentVersion"
     }
-} # end function Get-SSMAgentVersion
+} # end function Get-Ec2SystemManagerAgentVersion
 
-function Get-WindowsDriverInfo
+
+function Get-NetAdapterBindingInformation
+{
+    # Get NetAdapter Binding Component
+    $bindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled 
+    foreach ($binding in $bindings)
+    {
+        # Write the information to the Log Files
+        Write-Log ("# [Windows] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $binding.Name, $binding.DisplayName, $binding.ComponentID, $binding.Enabled)
+    }    
+} # end Get-NetAdapterBindingInformation
+
+
+function Get-ScriptExecuteByAccount
+{
+    # Get PowerShell Script Execution UserName
+    $ScriptExecuteByAccountInformation = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $ScriptExecuteByAccountName = ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | select -Index 1)
+
+    # Write the information to the Log Files
+    if ($ScriptExecuteByAccountName) {
+        Write-Log ("# [Windows] Powershell Script Execution Username : " + ($ScriptExecuteByAccountName))
+    }
+} # end Get-ScriptExecuteByAccount
+
+
+function Get-PageFileInformation
+{
+    # Get PageFile Information
+    $pagefiles = Get-WmiObject -Class Win32_PageFileusage | Select-Object -Property Name, CurrentUsage, AllocatedBaseSize, PeakUsage, InstallDate
+    foreach ($pagefile in $pagefiles)
+    {
+        # Write the information to the Log Files
+        Write-Log ("# [Windows] Page File : [Name - {0}] [CurrentUsage - {1}] [AllocatedBaseSize - {2}] [PeakUsage - {3}]" -f $pagefile.Name, $pagefile.CurrentUsage, $pagefile.AllocatedBaseSize, $pagefile.PeakUsage)
+    }    
+} # end Get-PageFileInformation
+
+
+function Get-PowerPlanInformation
+{
+    # Get PowerPlan Settings
+    $powerplans = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
+    foreach ($powerplan in $powerplans)
+    {
+        
+        if ($powerplan | Where-Object { $_.IsActive -eq $True }) {
+            # Write the information to the Log Files
+            Write-Log ("# [Windows] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
+        }
+    } 
+} # end Get-PowerPlanInformation
+
+
+function Get-WindowsDriverInformation
 {
     $win_drivers = Get-WindowsDriver -Online | Where-Object { $_.OriginalFileName -like '*xenvbd*' -or $_.ClassName -eq 'Net' -and `
          ($_.ProviderName -eq 'Amazon Inc.' -or $_.ProviderName -eq 'Citrix Systems, Inc.' -or $_.ProviderName -like 'Intel*' -or $_.ProviderName -eq 'Amazon Web Services, Inc.') }
@@ -153,9 +230,10 @@ function Get-WindowsDriverInfo
                 }
         }
     }    
-} # end function Get-WindowsDriverInfo
+} # end function Get-WindowsDriverInformation
 
-function Get-WindowsOSInfo
+
+function Get-WindowsServerInformation
 {
     #--------------------------------------------------------------------------------------
     #  Windows Server OS Version Tables (Windows NT Version Tables)
@@ -224,26 +302,32 @@ function Get-WindowsOSInfo
     Write-Log ("# [Windows] Windows Server OS TimeZone : {0}" -f ([TimeZoneInfo]::Local).StandardName)
     Write-Log ("# [Windows] Windows Server OS Offset : {0}" -f ([TimeZoneInfo]::Local).GetUtcOffset([DateTime]::Now))
 
-} # end function Get-WindowsOSInfo
+    # Get Windows OS Version and OS Language
+    $WindowsOSVersion = $osVersion.ToString()
+    $WindowsOSLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag)
+
+} # end function Get-WindowsServerInformation
+
 
 function Update-SysprepAnswerFile($SysprepAnswerFile)
 {
-    [xml] $__SysprepXMLDocument = Get-Content $SysprepAnswerFile -Encoding UTF8
+    [xml]$SysprepXMLDocument = Get-Content $SysprepAnswerFile -Encoding UTF8
 
-    $__SysprepNamespace = New-Object System.Xml.XmlNamespaceManager($__SysprepXMLDocument.NameTable)
-    $__SysprepNamespace.AddNamespace("u", $__SysprepXMLDocument.DocumentElement.NamespaceURI)
+    $SysprepNamespace = New-Object System.Xml.XmlNamespaceManager($SysprepXMLDocument.NameTable)
+    $SysprepNamespace.AddNamespace("u", $SysprepXMLDocument.DocumentElement.NamespaceURI)
 
-    $__SysprepSettings = $__SysprepXMLDocument.SelectSingleNode("//u:settings[@pass='oobeSystem']", $__SysprepNamespace)
+    $SysprepSettings = $SysprepXMLDocument.SelectSingleNode("//u:settings[@pass='oobeSystem']", $SysprepNamespace)
 
-    $__Sysprep_Node_International = $__SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-International-Core']", $__SysprepNamespace)
-    $__Sysprep_Node_Shell = $__SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-Shell-Setup']", $__SysprepNamespace)
+    $Sysprep_Node_International = $SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-International-Core']", $SysprepNamespace)
+    $Sysprep_Node_Shell = $SysprepSettings.SelectSingleNode("u:component[@name='Microsoft-Windows-Shell-Setup']", $SysprepNamespace)
 
-    $__Sysprep_Node_International.SystemLocale = "ja-JP"
-    $__Sysprep_Node_International.UserLocale = "ja-JP"
+    $Sysprep_Node_International.SystemLocale = "ja-JP"
+    $Sysprep_Node_International.UserLocale = "ja-JP"
 
-    $__Sysprep_Node_Shell.TimeZone = "Tokyo Standard Time"
+    $Sysprep_Node_Shell.TimeZone = "Tokyo Standard Time"
 
-    $__SysprepXMLDocument.Save($SysprepAnswerFile)
+    $SysprepXMLDocument.Save($SysprepAnswerFile)
+
 } # end function Update-SysprepAnswerFile
 
 
@@ -266,9 +350,9 @@ Get-TimeZone
 # Preparation for script execution
 #-----------------------------------------------------------------------------------------------------------------------
 
-Create-Directory $BASE_DIR
-Create-Directory $TOOL_DIR
-Create-Directory $LOGS_DIR
+New-Directory $BASE_DIR
+New-Directory $TOOL_DIR
+New-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
@@ -286,16 +370,16 @@ Get-ExecutionPolicy
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Set AWS Instance Metadata
-Set-Variable -Name AZ -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
-Set-Variable -Name Region -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
-Set-Variable -Name InstanceId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
-Set-Variable -Name InstanceType -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
-Set-Variable -Name PrivateIp -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
-Set-Variable -Name AmiId -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
+Set-Variable -Name AZ -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
+Set-Variable -Name Region -Option Constant -Scope Global -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
+Set-Variable -Name InstanceId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
+Set-Variable -Name InstanceType -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
+Set-Variable -Name PrivateIp -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+Set-Variable -Name AmiId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
 
 # Set IAM Role & STS Information
-Set-Variable -Name RoleArn -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
-Set-Variable -Name RoleName -Value ($RoleArn -split "/" | select -Index 1)
+Set-Variable -Name RoleArn -Option Constant -Scope Global -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+Set-Variable -Name RoleName -Option Constant -Scope Global -Value ($RoleArn -split "/" | select -Index 1)
 
 Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
 Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
@@ -303,7 +387,7 @@ Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
 Set-Variable -Name StsToken -Value $StsCredential.Token
 
 # Set AWS Account ID
-Set-Variable -Name AwsAccountId -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
+Set-Variable -Name AwsAccountId -Option Constant -Scope Global -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
 # Set Config File
 Set-Variable -Name SysprepFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
@@ -331,15 +415,22 @@ Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
 Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
 
 # Logging Windows Server OS Parameter [AMI]
-Get-AMIInfo
+Get-AmazonMachineImageInformation
 
-# Logging Windows Server OS Parameter [Windows OS Information]
-Get-WindowsOSInfo
-$WindowsOSVersion = $osVersion.ToString()
+# Logging PowerShell Script Execution UserName
+Get-ScriptExecuteByAccount
 
+# Logging Windows Server OS Parameter [Windows Server Information]
+Get-WindowsServerInformation
 
-# Logging Windows Server OS Parameter [Windows OS Driver Information]
-Get-WindowsDriverInfo
+# Logging Windows Server OS Parameter [Page File Information]
+Get-PageFileInformation
+
+# Logging Windows Server OS Parameter [.NET Framework Information]
+Get-DotNetFrameworkVersion
+
+# Logging Windows Server OS Parameter [Windows Driver Information]
+Get-WindowsDriverInformation
 
 # Logging Windows Server OS Parameter [EC2 Bootstrap Application Information]
 if ($WindowsOSVersion -match "^5.*|^6.*") {
@@ -351,7 +442,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
-Get-SSMAgentVersion
+Get-Ec2SystemManagerAgentVersion
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -363,8 +454,7 @@ Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
-$__DefaultAWSRegion = Get-DefaultAWSRegion
-Write-Log "# Display Default Region at AWS Tools for Windows Powershell : $__DefaultAWSRegion"
+Write-Log ("# Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - "  + (Get-DefaultAWSRegion).Region)
 
 # Get AMI Information
 if ($RoleName) {
@@ -420,27 +510,22 @@ if ($RoleName) {
 Write-LogSeparator "Windows Server OS Configuration"
 
 # Setting System Locale
-$__WinSystemLocale = Get-WinSystemLocale
-Write-Log "# Display Windows System Locale [Before] : $__WinSystemLocale"
+Write-Log ("# Display Windows System Locale [Before] : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 Set-WinSystemLocale -SystemLocale ja-JP
-Write-Log "# Display Windows System Locale [After] : $__WinSystemLocale"
+Write-Log ("# Display Windows System Locale [After] : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 
-$__WinHomeLocation = Get-WinHomeLocation
-Write-Log ("# Display Windows Home Location [Before] : " + $__WinHomeLocation.HomeLocation)
+Write-Log ("# Display Windows Home Location [Before] : " + (Get-WinHomeLocation).HomeLocation)
 Set-WinHomeLocation -GeoId 0x7A
-Write-Log ("# Display Windows Home Location [After] : " + $__WinHomeLocation.HomeLocation)
+Write-Log ("# Display Windows Home Location [After] : " + (Get-WinHomeLocation).HomeLocation)
 
-$__WinCultureFromLanguageListOptOut = Get-WinCultureFromLanguageListOptOut
-Write-Log "# Make the date and time [format] the same as the display language [Before] : $__WinCultureFromLanguageListOptOut"
+Write-Log ("# Make the date and time [format] the same as the display language [Before] : " + (Get-WinCultureFromLanguageListOptOut))
 Set-WinCultureFromLanguageListOptOut -OptOut $False
-Write-Log "# Make the date and time [format] the same as the display language [After] : $__WinCultureFromLanguageListOptOut"
+Write-Log ("# Make the date and time [format] the same as the display language [After] : " + (Get-WinCultureFromLanguageListOptOut))
 
 # Setting Japanese UI Language
-$__WinUILanguageOverride = Get-WinUILanguageOverride
-Write-Log ("# Override display language [Before] : " + $__WinUILanguageOverride.DisplayName)
+Write-Log ("# Override display language [Before] : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 Set-WinUILanguageOverride -Language ja-JP
-Write-Log ("# Override display language [After] : " + $__WinUILanguageOverride.DisplayName)
-
+Write-Log ("# Override display language [After] : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
 # Change Windows Update Policy
 #$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
@@ -470,24 +555,24 @@ if (Test-Path $SysprepFile) {
 }
 
 # Change Windows Folder Option Policy
-Set-Variable -Name RegistryFolderOption -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+Set-Variable -Name FolderOptionRegistry -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
-Set-ItemProperty -Path $RegistryFolderOption -name 'Hidden' -value '1' -force                                  # [Check] Show hidden files, folders, or drives
-Set-ItemProperty -Path $RegistryFolderOption -name 'HideFileExt' -value '0' -force                             # [UnCheck] Hide extensions for known file types
-New-ItemProperty -Path $RegistryFolderOption -name 'PersistBrowsers' -value '1' -propertyType "DWord" -force   # [Check] Restore previous folders windows
+Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force                                  # [Check] Show hidden files, folders, or drives
+Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force                             # [UnCheck] Hide extensions for known file types
+New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force   # [Check] Restore previous folders windows
 
 # Change Display Desktop Icon Policy
-Set-Variable -Name RegistryDesktopIcon -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
-Set-Variable -Name RegistryDesktopIconSetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+Set-Variable -Name DesktopIconRegistry -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
+Set-Variable -Name DesktopIconRegistrySetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
-New-Item -Path $RegistryDesktopIcon
-New-Item -Path $RegistryDesktopIconSetting
+New-Item -Path $DesktopIconRegistry
+New-Item -Path $DesktopIconRegistrySetting
 
-New-ItemProperty -Path $RegistryDesktopIconSetting -name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -value '0' -propertyType "DWord" -force  #[CLSID] : My Computer
-New-ItemProperty -Path $RegistryDesktopIconSetting -name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -value '0' -propertyType "DWord" -force  #[CLSID] : Control Panel
-New-ItemProperty -Path $RegistryDesktopIconSetting -name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -value '0' -propertyType "DWord" -force  #[CLSID] : User's Files
-New-ItemProperty -Path $RegistryDesktopIconSetting -name '{645FF040-5081-101B-9F08-00AA002F954E}' -value '0' -propertyType "DWord" -force  #[CLSID] : Recycle Bin
-New-ItemProperty -Path $RegistryDesktopIconSetting -name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -value '0' -propertyType "DWord" -force  #[CLSID] : Network
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : My Computer
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Control Panel
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : User's Files
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Recycle Bin
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Network
 
 # Test Connecting to the Internet (Google Public DNS:8.8.8.8)
 if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
@@ -498,8 +583,16 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
     Get-NetConnectionProfile -IPv4Connectivity Internet
 }
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [IPv6 Setting]
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [IPv6 Setting]"
+
 # Disable IPv6 Binding
-Get-NetAdapterBinding
+Get-NetAdapterBindingInformation
 
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
     Write-Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
@@ -517,19 +610,26 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic 
     Write-Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
 
-Get-NetAdapterBinding
+Get-NetAdapterBindingInformation
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [System PowerPlan]
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [System PowerPlan]"
 
 # Change System PowerPlan (High Performance)
 $HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                       # A string of "high performance" was Base64 encoded in Japanese
 $HighPowerByte = [System.Convert]::FromBase64String($HighPowerBase64)       # Conversion from base64 to byte sequence
 $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To convert a sequence of bytes into a string of UTF-8 encoding
 
-Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
+Get-PowerPlanInformation
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
     Write-Log "# Change System PowerPlan : $HighPowerString"
-    $HighPowerObject = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }
-    $HighPowerObject.Activate()
+    (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }).Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
     Write-Log "# Change System PowerPlan : High performance"
@@ -539,7 +639,7 @@ if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Obj
     Write-Log "# Change System PowerPlan : No change"
 }
 
-Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
+Get-PowerPlanInformation
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -555,7 +655,7 @@ Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
-Get-SSMAgentVersion
+Get-Ec2SystemManagerAgentVersion
 
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
@@ -569,7 +669,7 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
     Write-Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
-Get-SSMAgentVersion
+Get-Ec2SystemManagerAgentVersion
 
 # Clear Log File
 Clear-Content $SSMAgentLogFile
@@ -949,7 +1049,8 @@ Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Setting Hostname
-Rename-Computer $PrivateIp.Replace(".", "-") -Force
+$HostName = $PrivateIp.Replace(".", "-")
+Rename-Computer $HostName -Force
 
 # EC2 Instance Reboot
 Restart-Computer -Force
