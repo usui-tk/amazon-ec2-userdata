@@ -43,7 +43,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y bash-completion bind-utils dstat gdisk git lsof lzop iotop mtr nc nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y bash-completion bind-utils dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -175,7 +175,6 @@ else
 	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 	blockdev --report
 fi
-
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]

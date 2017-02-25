@@ -48,7 +48,7 @@ apt-get update -y && apt-get upgrade -y
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y bash-completion chrony curl dstat gdisk git jq lsof lzop iotop mtr nmap sysstat traceroute wget
+apt-get install -y bash-completion chrony curl dstat gdisk git hdparm jq lsof lzop iotop mtr nmap sysstat traceroute wget
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
