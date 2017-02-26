@@ -10,7 +10,7 @@
 #.NOTES
 #
 #   Target Windows Server OS Version
-#      - 10.0 : Windows Server 2016
+#      - 10.0 : Windows Server 2016 [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
 #
 ########################################################################################################################
 
@@ -28,6 +28,11 @@ Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp
 # Set Script Parameter for Log File Name (User Defined)
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
 Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
+
+# Set System & Application Config File (System Defined : Windows Server 2012 R2)
+# Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+# Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+# Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Set System & Application Config File (System Defined : Windows Server 2016)
 Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
@@ -83,7 +88,7 @@ function New-Directory
 
 ########################################################################################################################
 #
-# Windows Bootstrap Individual requirement function
+# Windows Bootstrap Individual requirement function - [Dependent on function Write-Log]
 #
 ########################################################################################################################
 
@@ -124,7 +129,7 @@ function Get-Ec2ConfigVersion
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
-    Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ""
+    Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ($Null)
 
     # Get EC2Config Version
     $EC2ConfigInfomation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
@@ -192,7 +197,7 @@ function Get-Ec2LaunchVersion
 
     # Set Initialize Parameter
     Set-Variable -Name Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
-    Set-Variable -Name Ec2LaunchVersion -Scope Script -Value ""
+    Set-Variable -Name Ec2LaunchVersion -Scope Script -Value ($Null)
 
     # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
     if (Test-Path $Ec2LaunchModuleConfig) {
@@ -217,7 +222,7 @@ function Get-Ec2SystemManagerAgentVersion
     # Set Initialize Parameter
     Set-Variable -Name SSMAgentRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
     Set-Variable -Name SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
-    Set-Variable -Name SsmAgentVersion -Scope Script -Value ""
+    Set-Variable -Name SsmAgentVersion -Scope Script -Value ($Null)
 
     if (Test-Path $SSMAgentRegistry) {
         $SSMAgentRegistryValue = Get-ItemProperty -Path $SSMAgentRegistry -ErrorAction SilentlyContinue
@@ -336,10 +341,10 @@ function Get-WindowsServerInformation
     #--------------------------------------------------------------------------------------
 
     # Initialize Parameter
-    Set-Variable -Name productName -Scope Script -Value ""
-    Set-Variable -Name installOption -Scope Script -Value ""
-    Set-Variable -Name osVersion -Scope Script -Value ""
-    Set-Variable -Name osBuildLabEx -Scope Script -Value ""
+    Set-Variable -Name productName -Scope Script -Value ($Null)
+    Set-Variable -Name installOption -Scope Script -Value ($Null)
+    Set-Variable -Name osVersion -Scope Script -Value ($Null)
+    Set-Variable -Name osBuildLabEx -Scope Script -Value ($Null)
 
     Set-Variable -Name windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
     Set-Variable -Name fullServer -Option Constant -Scope Local -Value "Full"
@@ -395,6 +400,13 @@ function Get-WindowsServerInformation
     Set-Variable -Name WindowsOSLanguage -Option Constant -Scope Script -Value (([CultureInfo]::CurrentCulture).IetfLanguageTag)
 
 } # end function Get-WindowsServerInformation
+
+
+########################################################################################################################
+#
+# Windows Bootstrap Individual requirement function - [Dependent on function Write-Log & Get-WindowsServerInformation]
+#
+########################################################################################################################
 
 
 function Update-SysprepAnswerFile($SysprepAnswerFile)
@@ -646,9 +658,10 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [IPv6 Setting]"
 
-# Disable IPv6 Binding
+# Logging Windows Server OS Parameter [NetAdapter Binding Information]
 Get-NetAdapterBindingInformation
 
+# Disable IPv6 Binding
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
     Write-Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
     Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
@@ -665,6 +678,7 @@ if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic 
     Write-Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
 
+# Logging Windows Server OS Parameter [NetAdapter Binding Information]
 Get-NetAdapterBindingInformation
 
 
@@ -680,6 +694,7 @@ $HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                       # A 
 $HighPowerByte = [System.Convert]::FromBase64String($HighPowerBase64)       # Conversion from base64 to byte sequence
 $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To convert a sequence of bytes into a string of UTF-8 encoding
 
+# Logging Windows Server OS Parameter [System Power Plan Information]
 Get-PowerPlanInformation
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
@@ -694,6 +709,7 @@ if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Obj
     Write-Log "# [Windows] PowerPlan : Change System PowerPlan - No change"
 }
 
+# Logging Windows Server OS Parameter [System Power Plan Information]
 Get-PowerPlanInformation
 
 
@@ -710,6 +726,7 @@ Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
+# Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
@@ -724,6 +741,7 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
     Write-Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
+# Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
 # Clear Log File
