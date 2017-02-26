@@ -70,9 +70,9 @@ function Write-Log
 function Write-LogSeparator
 {
       param([string]$message)
-      Write-Log "#-------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
       Write-Log ("#   Script Executetion Step : " + $message)
-      Write-Log "#-------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 } # end function Write-LogSeparator
 
 
@@ -89,7 +89,9 @@ function New-Directory
 
 ########################################################################################################################
 #
-# Windows Bootstrap Individual requirement function - [Dependent on function Write-Log]
+# Windows Bootstrap Individual requirement function
+#  [Dependent on function]
+#    - Write-Log
 #
 ########################################################################################################################
 
@@ -120,6 +122,91 @@ function Get-DotNetFrameworkVersion
         Write-Log ("# [Windows] .NET Framework Information : v{0} - Profile : {1} " -f $dotnet_version.Version, $dotnet_version.PSChildName)
     }    
 } # end function Get-DotNetFrameworkVersion
+
+
+function Get-EbsVolumesMappingInformation
+{
+    # List the Windows disks
+
+    # Create a hash table that maps each device to a SCSI target
+    $Map = @{"0" = '/dev/sda1'} 
+    for($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}",[char](97 + $x)))}
+    for($x = 78; $x -le 102; $x++) {$Map.add($x.ToString(), [String]::Format("xvdc{0}",[char](19 + $x)))}
+
+    Try {
+        # Use the metadata service to discover which instance the script is running on
+        $Local:InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+        $Local:AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+        $Local:Region = $AZ.Substring(0, $AZ.Length -1)
+
+        #Get the volumes attached to this instance
+        $Local:BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+
+        #Get OS Language
+        $Local:OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+
+    } Catch {
+        Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."  -ForegroundColor Yellow
+    }
+    
+    $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | % {
+        $Drive = $_
+        
+        # Find the partitions for this drive
+        Get-WmiObject -Class Win32_DiskDriveToDiskPartition | Where-Object {$_.Antecedent -eq $Drive.Path.Path} | %{
+            $D2P = $_
+            # Get details about each partition
+            $Partition = Get-WmiObject -Class Win32_DiskPartition | Where-Object {$_.Path.Path -eq $D2P.Dependent}
+            # Find the drive that this partition is linked to
+            $Disk = Get-WmiObject -Class Win32_LogicalDiskToPartition | Where-Object {$_.Antecedent -in $D2P.Dependent} | %{ 
+                $L2P = $_
+                #Get the drive letter for this partition, if there is one
+                Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.Path.Path -in $L2P.Dependent}
+            }
+            $BlockDeviceMapping = $BlockDeviceMappings | Where-Object {$_.DeviceName -eq $Map[$Drive.SCSITargetId.ToString()]}
+       
+            if ($OsLanguage -eq "ja-JP") {
+                # Display the information in a table (Japanese : ja-JP)
+                New-Object PSObject -Property @{
+                    Device = $Map[$Drive.SCSITargetId.ToString()];
+                    Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("ディスク #",""));
+                    Boot = $Partition.BootPartition;
+                    Partition = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" パーティション #",""));
+                    SCSITarget = $Drive.SCSITargetId;
+                    DriveLetter = if($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
+                    VolumeName = if($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
+                    VolumeId = if($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
+                }
+            } elseif ($OsLanguage -eq "en-US") {
+                # Display the information in a table (English : en-US)
+                New-Object PSObject -Property @{
+                    Device = $Map[$Drive.SCSITargetId.ToString()];
+                    Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #",""));
+                    Boot = $Partition.BootPartition;
+                    Partition = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" Partition #",""));
+                    SCSITarget = $Drive.SCSITargetId;
+                    DriveLetter = If($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
+                    VolumeName = If($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
+                    VolumeId = If($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
+                }
+            } else {
+                # [No Target Server OS]
+                Write-Log ("# [Information] [Amazon EC2 Attached EBS Volumes] No Target Server OS Language : " + $OsLanguage)
+            }
+
+        }
+
+    } | Sort-Object Disk, Partition | Select-Object Disk, Partition, SCSITarget, DriveLetter, Boot, VolumeId, Device, VolumeName
+    
+    foreach ($EBSVolumeList in $EBSVolumeLists)
+    {
+        if ($EBSVolumeList) {
+            # Write the information to the Log Files
+            Write-Log ("# [EBS] : [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
+        }
+    } 
+    
+} # end Get-EbsVolumesMappingInformation
 
 
 function Get-Ec2ConfigVersion
@@ -249,13 +336,16 @@ function Get-NetAdapterBindingInformation
     foreach ($binding in $bindings)
     {
         # Write the information to the Log Files
-        Write-Log ("# [Windows] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $binding.Name, $binding.DisplayName, $binding.ComponentID, $binding.Enabled)
+        Write-Log ("# [Windows - OS Settings] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $binding.Name, $binding.DisplayName, $binding.ComponentID, $binding.Enabled)
     }    
 } # end Get-NetAdapterBindingInformation
 
 
 function Get-ScriptExecuteByAccount
 {
+    # Test of administrative privileges
+    Set-Variable -Name CheckAdministrator -Scope Local -Value (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+
     # Get PowerShell Script Execution UserName
     $ScriptExecuteByAccountInformation = [Security.Principal.WindowsIdentity]::GetCurrent()
     $ScriptExecuteByAccountName = ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | select -Index 1)
@@ -263,6 +353,11 @@ function Get-ScriptExecuteByAccount
     # Write the information to the Log Files
     if ($ScriptExecuteByAccountName) {
         Write-Log ("# [Windows] Powershell Script Execution Username : " + ($ScriptExecuteByAccountName))
+        if ($CheckAdministrator -eq $true){
+            Write-Log "# [Windows] [Infomation] Bootstrap scripts run with the privileges of the administrator"
+        } else {
+            Write-Log "# [Windows] [Warning] Bootstrap scripts run with the privileges of the non-administrator"
+        }
     }
 } # end Get-ScriptExecuteByAccount
 
@@ -285,7 +380,6 @@ function Get-PowerPlanInformation
     $powerplans = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
     foreach ($powerplan in $powerplans)
     {
-        
         if ($powerplan | Where-Object { $_.IsActive -eq $True }) {
             # Write the information to the Log Files
             Write-Log ("# [Windows] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
@@ -319,7 +413,7 @@ function Get-WindowsDriverInformation
             if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) 
                 {
                     # Write the information to the Log Files
-                    Write-Log ("# [Windows] AWS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
+                    Write-Log ("# [Windows] Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
                 }
         }
     }    
@@ -405,7 +499,11 @@ function Get-WindowsServerInformation
 
 ########################################################################################################################
 #
-# Windows Bootstrap Individual requirement function - [Dependent on function Write-Log & Get-WindowsServerInformation]
+# Windows Bootstrap Individual requirement function
+#  [Dependent on function]
+#    - Write-Log
+#    - Get-Ec2InstanceMetadata
+#    - Get-WindowsServerInformation
 #
 ########################################################################################################################
 
@@ -432,12 +530,12 @@ function Update-SysprepAnswerFile($SysprepAnswerFile)
 } # end function Update-SysprepAnswerFile
 
 
+
 ########################################################################################################################
 #
 # Start of script
 #
 ########################################################################################################################
-
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Timezone Setting
@@ -464,6 +562,7 @@ Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 
 Set-Location -Path $BASE_DIR
 
+Get-ExecutionPolicy -List
 Set-StrictMode -Version Latest
 
 
@@ -476,6 +575,9 @@ Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 
 # Logging AWS Instance Metadata
 Get-Ec2InstanceMetadata
+
+# Logging Amazon EC2 attached EBS Volume List
+Get-EbsVolumesMappingInformation
 
 # Logging Windows Server OS Parameter [AMI : Amazon Machine Image]
 Get-AmazonMachineImageInformation
@@ -492,11 +594,6 @@ Get-DotNetFrameworkVersion
 # Logging Windows Server OS Parameter [PowerShell Environment Information]
 Get-PowerShellVerson
 
-# Logging Windows Server OS Parameter [OS Settings]
-Get-PageFileInformation
-Get-NetAdapterBindingInformation
-Get-PowerPlanInformation
-
 # Logging Windows Server OS Parameter [Windows Driver Information]
 Get-WindowsDriverInformation
 
@@ -512,6 +609,11 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
+# Logging Windows Server OS Parameter [OS Settings]
+Get-PageFileInformation
+Get-NetAdapterBindingInformation
+Get-PowerPlanInformation
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Amazon EC2 Information [AMI & Instance & EBS Volume]
@@ -522,23 +624,23 @@ Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
-Write-Log ("# Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - "  + (Get-DefaultAWSRegion).Region)
+Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - "  + (Get-DefaultAWSRegion).Region)
 
 # Get AMI Information
 if ($RoleName) {
-    Write-Log "# Get AMI Information"
+    Write-Log "# [Amazon EC2 - Windows] Get AMI Information"
     Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_AMI-Infomation.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
 if ($RoleName) {
-    Write-Log "# Get EC2 Instance Information"
+    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance attached EBS Volume Information
 if ($RoleName) {
-    Write-Log "# Get EC2 Instance attached EBS Volume Information"
+    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
     Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
 }
 
@@ -546,15 +648,15 @@ if ($RoleName) {
 if ($RoleName) {
     if ($InstanceType -match "^i3.*|^m4.16xlarge|^p2.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
-        Write-Log "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
     } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
         # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-        Write-Log "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport | Out-File "$LOGS_DIR\AWS-EC2_ENI-SRIOV-Information.txt" -Append -Force
     } else {
-        Write-Log "# Instance type of None [Network Interface Performance Attribute]"
+        Write-Log "# [Amazon EC2 - Windows] Instance type of None [Network Interface Performance Attribute]"
     }
 }
 
@@ -562,10 +664,10 @@ if ($RoleName) {
 if ($RoleName) {
     if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
-        Write-Log "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
+        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
     } else {
-        Write-Log "# Instance type of None [Storage Interface Performance Attribute]"
+        Write-Log "# [Amazon EC2 - Windows] Instance type of None [Storage Interface Performance Attribute]"
     }
 }
 
@@ -578,22 +680,22 @@ if ($RoleName) {
 Write-LogSeparator "Windows Server OS Configuration"
 
 # Setting System Locale
-Write-Log ("# Display Windows System Locale [Before] : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 Set-WinSystemLocale -SystemLocale ja-JP
-Write-Log ("# Display Windows System Locale [After] : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 
-Write-Log ("# Display Windows Home Location [Before] : " + (Get-WinHomeLocation).HomeLocation)
+Write-Log ("# [Windows - OS Settings] Display Windows Home Location (Before) : " + (Get-WinHomeLocation).HomeLocation)
 Set-WinHomeLocation -GeoId 0x7A
-Write-Log ("# Display Windows Home Location [After] : " + (Get-WinHomeLocation).HomeLocation)
+Write-Log ("# [Windows - OS Settings] Display Windows Home Location (After) : " + (Get-WinHomeLocation).HomeLocation)
 
-Write-Log ("# Make the date and time [format] the same as the display language [Before] : " + (Get-WinCultureFromLanguageListOptOut))
+Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (Before) : " + (Get-WinCultureFromLanguageListOptOut))
 Set-WinCultureFromLanguageListOptOut -OptOut $False
-Write-Log ("# Make the date and time [format] the same as the display language [After] : " + (Get-WinCultureFromLanguageListOptOut))
+Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (After) : " + (Get-WinCultureFromLanguageListOptOut))
 
 # Setting Japanese UI Language
-Write-Log ("# Override display language [Before] : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+Write-Log ("# [Windows - OS Settings] Override display language (Before) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 Set-WinUILanguageOverride -Language ja-JP
-Write-Log ("# Override display language [After] : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
 # Change Windows Update Policy
 #$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
@@ -613,14 +715,6 @@ $SMSettings.Services
 
 Start-Sleep -Seconds 5
 
-# Update Sysprep Answer Files
-if (Test-Path $SysprepFile) {
-    Get-Content $SysprepFile
-    
-    Update-SysprepAnswerFile $SysprepFile
-
-    Get-Content $SysprepFile
-}
 
 # Change Windows Folder Option Policy
 Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
@@ -633,8 +727,8 @@ New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' 
 Set-Variable -Name DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
 Set-Variable -Name DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
-New-Item -Path $DesktopIconRegistry
-New-Item -Path $DesktopIconRegistrySetting
+New-Item -Path $DesktopIconRegistry -Force 
+New-Item -Path $DesktopIconRegistrySetting -Force 
 
 New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : My Computer
 New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Control Panel
@@ -646,7 +740,7 @@ New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88
 if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
     # Write the information to the Log Files
     $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
-    Write-Log ("# [Windows] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+    Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
 
     # Change NetConnectionProfile
     Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
@@ -654,7 +748,24 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 
     # Write the information to the Log Files
     $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
-    Write-Log ("# [Windows] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+    Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Sysprep Answer File Setting]
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting]"
+
+# Update Sysprep Answer Files
+if (Test-Path $SysprepFile) {
+    Get-Content $SysprepFile
+    
+    Update-SysprepAnswerFile $SysprepFile
+
+    Get-Content $SysprepFile
 }
 
 
@@ -670,19 +781,19 @@ Get-NetAdapterBindingInformation
 
 # Disable IPv6 Binding
 if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
-    Write-Log "# Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
     Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
-    Write-Log "# Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
     Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
-    Write-Log "# Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
     Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
     Start-Sleep -Seconds 5
 } else {
-    Write-Log "# Disable-NetAdapterBinding(IPv6) : No Target Device"
+    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : No Target Device"
 }
 
 # Logging Windows Server OS Parameter [NetAdapter Binding Information]
@@ -705,15 +816,15 @@ $HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To
 Get-PowerPlanInformation
 
 if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
-    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - $HighPowerString"
+    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $HighPowerString"
     (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }).Activate()
     Start-Sleep -Seconds 5
 } elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
-    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - High performance"
+    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - High performance"
     (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
 } else {
-    Write-Log "# [Windows] PowerPlan : Change System PowerPlan - No change"
+    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - No change"
 }
 
 # Logging Windows Server OS Parameter [System Power Plan Information]
@@ -727,7 +838,7 @@ Get-PowerPlanInformation
 # Log Separator
 Write-LogSeparator "Package Update System Utility (Amazon EC2 Systems Manager Agent)"
 
-# Package Update System Utility (Amazon EC2 Systems Manager Agent)
+# Package Download System Utility (Amazon EC2 Systems Manager Agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
@@ -736,16 +847,19 @@ Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetu
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
+# Package Update System Utility (Amazon EC2 Systems Manager Agent)
+Write-Log "# Package Update System Utility (Amazon EC2 Systems Manager Agent)"
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
 Get-Service -Name AmazonSSMAgent
 
+# Service Automatic Startup Setting (Amazon EC2 Systems Manager Agent)
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
-    Write-Log "# Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
+    Write-Log "# [Windows - OS Settings] Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
-    Write-Log "# Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
+    Write-Log "# [Windows - OS Settings] Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
@@ -757,8 +871,11 @@ Clear-Content $SSMAgentLogFile
 # Get Amazon SSM Agent Service Status
 Restart-Service -Name AmazonSSMAgent
 Start-Sleep -Seconds 30
+
+# Get Service Status
 Get-Service -Name AmazonSSMAgent
 
+# View Log File
 Get-Content $SSMAgentLogFile
 
 
@@ -964,10 +1081,10 @@ Invoke-WebRequest -Uri 'https://scc.alertlogic.net/software/al_agent-LATEST.msi'
 # Log Separator
 Write-LogSeparator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
 
-# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)
+# Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^p2.*") {
-    Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for EC2 P2 Instance Family)"
+    Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)"
     if ($WindowsOSVersion) {
         if ($WindowsOSVersion -eq "6.1") {
             # [Windows Server 2008 R2]
@@ -998,10 +1115,10 @@ if ($InstanceType -match "^p2.*") {
 }
 
 
-# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)
+# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g2.*") {
-    Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for EC2 G2 Instance Family)"
+    Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)"
     if ($WindowsOSVersion) {
         if ($WindowsOSVersion -eq "6.1") {
             # [Windows Server 2008 R2]
@@ -1093,13 +1210,15 @@ Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -Ou
 Write-LogSeparator "Custom Package Installation (Application)"
 
 # Package Install Modern Web Browser (Google Chrome 64bit)
-Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
+Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_ChromeSetup.log") -Wait | Out-Null
 
 # Package Install Text Editor (Visual Studio Code)
-Write-Log "# Package Install Text Editor (Visual Studio Code)"
+Write-Log "# Package Download Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
+Write-Log "# Package Install Text Editor (Visual Studio Code)"
 Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 Start-Sleep -Seconds 120
 
@@ -1111,17 +1230,21 @@ Start-Sleep -Seconds 120
 # Log Separator
 Write-LogSeparator "Collect Script/Config Files & Logging Data Files"
 
+# Get System & User Variables
+Write-Log "# Get System & User Variables"
+Get-Variable | Export-Csv -Encoding default $BASE_DIR\Bootstrap-Variable.csv
+
 # Save Userdata Script, Bootstrap Script, Logging Data Files
 if ($WindowsOSVersion) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Server OS Version : " + $WindowsOSVersion)
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Windows NT OS Version : " + $WindowsOSVersion)
     } elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Server OS Version : " + $WindowsOSVersion)
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Windows NT OS Version : " + $WindowsOSVersion)
     } elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
 
         # Save Script Files
         Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
@@ -1139,7 +1262,7 @@ if ($WindowsOSVersion) {
 
     } elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
 
         # Save Script Files
         Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
@@ -1157,19 +1280,21 @@ if ($WindowsOSVersion) {
 
     } else {
         # [No Target Server OS]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] No Target Server OS Version : " + $WindowsOSVersion)
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
     }
 } else {
     # [Undefined Server OS]
-    Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Server OS"
+    Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Windows Server OS"
 }
 
+
+# Log Separator
+Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
 
 # Complete Logging
 Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
 # Save Logging Files(Write-Log Function LogFiles)
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
-
 
 # Stop Transcript Logging
 Stop-Transcript
