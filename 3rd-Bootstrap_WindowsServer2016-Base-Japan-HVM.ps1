@@ -39,7 +39,7 @@ Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program 
 Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
-# Set System & Application Log File (System Defined : Windows Server 2016)
+# Set System & Application Log File (System Defined : All Windows Server)
 Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 
@@ -1170,8 +1170,11 @@ Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
 # Save Logging Files(Write-Log Function LogFiles)
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
 
+
 # Stop Transcript Logging
 Stop-Transcript
+# Save Logging Files(Start-Transcript Function LogFiles)
+Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR 
 
 
 #-----------------------------------------------------------------------------------------------------------------------
