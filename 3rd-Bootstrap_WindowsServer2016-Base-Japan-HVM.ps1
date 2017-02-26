@@ -19,21 +19,21 @@
 # User Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Set Parameter
+# Set Script Parameter for Directory Name (User Defined)
 Set-Variable -Name BASE_DIR -Option Constant -Scope Script "$Env:SystemDrive\EC2-Bootstrap"
 Set-Variable -Name TOOL_DIR -Option Constant -Scope Script "$BASE_DIR\Tools"
 Set-Variable -Name LOGS_DIR -Option Constant -Scope Script "$BASE_DIR\Logs"
-
 Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp"
 
+# Set Script Parameter for Log File Name (User Defined)
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
 Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
 
-# Set Config File
+# Set System & Application Config File (System Defined : Windows Server 2016)
 Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
-# Set Log File
+# Set System & Application Log File (System Defined : Windows Server 2016)
 Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 
@@ -64,9 +64,9 @@ function Write-Log
 function Write-LogSeparator
 {
       param([string]$message)
-      Write-Log "#---------------------------------------------------------------------------------------------------------------------"
-      Write-Log ("#        Script Executetion Step : " + $message)
-      Write-Log "#---------------------------------------------------------------------------------------------------------------------"
+      Write-Log "#-------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+      Write-Log ("#   Script Executetion Step : " + $message)
+      Write-Log "#-------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 } # end function Write-LogSeparator
 
 
@@ -341,9 +341,6 @@ function Get-WindowsServerInformation
     Set-Variable -Name osVersion -Scope Script -Value ""
     Set-Variable -Name osBuildLabEx -Scope Script -Value ""
 
-    Set-Variable -Name WindowsOSVersion -Scope Script -Value ""
-    Set-Variable -Name WindowsOSLanguage -Scope Script -Value ""
-
     Set-Variable -Name windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
     Set-Variable -Name fullServer -Option Constant -Scope Local -Value "Full"
     Set-Variable -Name nanoServer -Option Constant -Scope Local -Value "Nano"
@@ -393,9 +390,9 @@ function Get-WindowsServerInformation
     Write-Log ("# [Windows] Windows Server OS TimeZone : {0}" -f ([TimeZoneInfo]::Local).StandardName)
     Write-Log ("# [Windows] Windows Server OS Offset : {0}" -f ([TimeZoneInfo]::Local).GetUtcOffset([DateTime]::Now))
 
-    # Get Windows OS Version and OS Language
-    $WindowsOSVersion = $osVersion.ToString()
-    $WindowsOSLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+    # Set Parameter 
+    Set-Variable -Name WindowsOSVersion -Option Constant -Scope Script -Value ($osVersion.ToString())
+    Set-Variable -Name WindowsOSLanguage -Option Constant -Scope Script -Value (([CultureInfo]::CurrentCulture).IetfLanguageTag)
 
 } # end function Get-WindowsServerInformation
 
@@ -778,7 +775,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Write-Log "# Package Download System Utility (EC2Config)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
 } else {
-    Write-Log ("# [Warning] No Target [EC2Config] - Windows NT Version Information : " + $osVersion)
+    Write-Log ("# [Warning] No Target [EC2Config] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (EC2Launch)
@@ -788,7 +785,7 @@ if ($WindowsOSVersion -match "^10.*") {
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
 } else {
-    Write-Log ("# [Warning] No Target [EC2Launch] - Windows NT Version Information : " + $osVersion)
+    Write-Log ("# [Warning] No Target [EC2Launch] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (AWS-CLI - 64bit)
@@ -967,11 +964,11 @@ if ($InstanceType -match "^p2.*") {
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
         } else {
             # [No Target Server OS]
-            Write-Log ("# [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+            Write-Log ("# [Warning] [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
     } else {
         # [Undefined Server OS]
-        Write-Log "# [NVIDIA Tesla K80 GPU Driver] Undefined Server OS"
+        Write-Log "# [Warning] [NVIDIA Tesla K80 GPU Driver] Undefined Server OS"
     }
 }
 
@@ -1001,11 +998,11 @@ if ($InstanceType -match "^g2.*") {
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
         } else {
             # [No Target Server OS]
-            Write-Log ("# [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+            Write-Log ("# [Warning] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
     } else {
         # [Undefined Server OS]
-        Write-Log "# [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
+        Write-Log "# [Warning] [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
     }
 }
 
@@ -1050,11 +1047,11 @@ if ($WindowsOSVersion) {
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
     } else {
         # [No Target Server OS]
-        Write-Log ("# [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        Write-Log ("# [Warning] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
     }
 } else {
     # [Undefined Server OS]
-    Write-Log "# [Intel Network Driver] Undefined Server OS"
+    Write-Log "# [Warning] [Intel Network Driver] Undefined Server OS"
 }
 
 # Package Download Amazon Elastic Network Adapter Driver
