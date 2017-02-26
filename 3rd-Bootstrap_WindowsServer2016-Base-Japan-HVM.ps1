@@ -18,14 +18,23 @@
 #-----------------------------------------------------------------------------------------------------------------------
 # User Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
-$BASE_DIR           = "$Env:SystemDrive\EC2-Bootstrap"
-$TOOL_DIR           = "$BASE_DIR\Tools"
-$LOGS_DIR           = "$BASE_DIR\Logs"
 
-$TEMP_DIR           = "$Env:SystemRoot\Temp"
+# Set Parameter
+Set-Variable -Name BASE_DIR -Option Constant -Scope Script "$Env:SystemDrive\EC2-Bootstrap"
+Set-Variable -Name TOOL_DIR -Option Constant -Scope Script "$BASE_DIR\Tools"
+Set-Variable -Name LOGS_DIR -Option Constant -Scope Script "$BASE_DIR\Logs"
 
-$USERDATA_LOG       = "$TEMP_DIR\userdata.log"
-$TRANSCRIPT_LOG     = "$LOGS_DIR\userdata-transcript-3rd.log"
+Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp"
+
+Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
+Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
+
+# Set Config File
+Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
+
+# Set Log File
+Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 
 ########################################################################################################################
@@ -81,7 +90,7 @@ function New-Directory
 
 function Get-AmazonMachineImageInformation
 {
-    Set-Variable AMIRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
+    Set-Variable -Name AMIRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
 
     if (Test-Path $AMIRegistry) {
         $AMIRegistryValue = Get-ItemProperty -Path $AMIRegistry -ErrorAction SilentlyContinue
@@ -114,7 +123,8 @@ function Get-Ec2ConfigVersion
     #   http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/UsingConfig_WinAMI.html
     #--------------------------------------------------------------------------------------
 
-    $Ec2ConfigVersion = ""
+    # Set Initialize Parameter
+    Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ""
 
     # Get EC2Config Version
     $EC2ConfigInfomation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
@@ -137,26 +147,26 @@ function Get-Ec2InstanceMetadata
     #--------------------------------------------------------------------------------------
 
     # Set AWS Instance Metadata
-    Set-Variable -Name AZ -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
-    Set-Variable -Name Region -Option Constant -Scope Global -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
-    Set-Variable -Name InstanceId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
-    Set-Variable -Name InstanceType -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
-    Set-Variable -Name PrivateIp -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
-    Set-Variable -Name AmiId -Option Constant -Scope Global -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
+    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
+    Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
+    Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
+    Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
+    Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
+    Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
 
     # Set IAM Role & STS Information
-    Set-Variable -Name RoleArn -Option Constant -Scope Global -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
-    Set-Variable -Name RoleName -Option Constant -Scope Global -Value ($RoleArn -split "/" | select -Index 1)
+    Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+    Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | select -Index 1)
     
     if ($RoleName) {
-        Set-Variable -Name StsCredential -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
-        Set-Variable -Name StsAccessKeyId -Value $StsCredential.AccessKeyId
-        Set-Variable -Name StsSecretAccessKey -Value $StsCredential.SecretAccessKey
-        Set-Variable -Name StsToken -Value $StsCredential.Token
+        Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
+        Set-Variable -Name StsAccessKeyId -Scope Script -Value $StsCredential.AccessKeyId
+        Set-Variable -Name StsSecretAccessKey -Scope Script -Value $StsCredential.SecretAccessKey
+        Set-Variable -Name StsToken -Scope Script -Value $StsCredential.Token
     }
 
     # Set AWS Account ID
-    Set-Variable -Name AwsAccountId -Option Constant -Scope Global -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
+    Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
     # Logging AWS Instance Metadata
     Write-Log "# [AWS] Region : $Region"
@@ -180,9 +190,9 @@ function Get-Ec2LaunchVersion
     #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch.html
     #--------------------------------------------------------------------------------------
 
-    Set-Variable Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
-
-    $Ec2LaunchVersion = ""
+    # Set Initialize Parameter
+    Set-Variable -Name Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
+    Set-Variable -Name Ec2LaunchVersion -Scope Script -Value ""
 
     # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
     if (Test-Path $Ec2LaunchModuleConfig) {
@@ -204,10 +214,10 @@ function Get-Ec2SystemManagerAgentVersion
     #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager.html
     #--------------------------------------------------------------------------------------
 
-    Set-Variable SSMAgentRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
-    Set-Variable SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
-
-    $SsmAgentVersion = ""
+    # Set Initialize Parameter
+    Set-Variable -Name SSMAgentRegistry -Option Constant -Scope Local -Value "HKLM:\SYSTEM\CurrentControlSet\Services\AmazonSSMAgent"
+    Set-Variable -Name SSMAgentUninstallRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{B1A3AC35-A431-4C8C-9D21-E2CA92047F76}"
+    Set-Variable -Name SsmAgentVersion -Scope Script -Value ""
 
     if (Test-Path $SSMAgentRegistry) {
         $SSMAgentRegistryValue = Get-ItemProperty -Path $SSMAgentRegistry -ErrorAction SilentlyContinue
@@ -325,19 +335,23 @@ function Get-WindowsServerInformation
     #   - Windows Server 2016    : 10.0
     #--------------------------------------------------------------------------------------
 
-    Set-Variable windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
-    Set-Variable fullServer -Option Constant -Scope Local -Value "Full"
-    Set-Variable nanoServer -Option Constant -Scope Local -Value "Nano"
-    Set-Variable serverCore -Option Constant -Scope Local -Value "Server Core"
-    Set-Variable serverOptions -Option Constant -Scope Local -Value @{ 0 = "Undefined"; 12 = $serverCore; 13 = $serverCore;
+    # Initialize Parameter
+    Set-Variable -Name productName -Scope Script -Value ""
+    Set-Variable -Name installOption -Scope Script -Value ""
+    Set-Variable -Name osVersion -Scope Script -Value ""
+    Set-Variable -Name osBuildLabEx -Scope Script -Value ""
+
+    Set-Variable -Name WindowsOSVersion -Scope Script -Value ""
+    Set-Variable -Name WindowsOSLanguage -Scope Script -Value ""
+
+    Set-Variable -Name windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+    Set-Variable -Name fullServer -Option Constant -Scope Local -Value "Full"
+    Set-Variable -Name nanoServer -Option Constant -Scope Local -Value "Nano"
+    Set-Variable -Name serverCore -Option Constant -Scope Local -Value "Server Core"
+    Set-Variable -Name serverOptions -Option Constant -Scope Local -Value @{ 0 = "Undefined"; 12 = $serverCore; 13 = $serverCore;
         14 = $serverCore; 29 = $serverCore; 39 = $serverCore; 40 = $serverCore; 41 = $serverCore; 43 = $serverCore;
         44 = $serverCore; 45 = $serverCore; 46 = $serverCore; 63 = $serverCore; 143 = $nanoServer; 144 = $nanoServer;
         147 = $serverCore; 148 = $serverCore; }
-    
-    $productName = ""
-    $installOption = ""
-    $osVersion = ""
-    $osBuildLabEx = ""
 
     # Get ProductName and BuildLabEx from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     if (Test-Path $windowInfoKey) {
@@ -435,26 +449,12 @@ New-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
-Set-Variable -Name ScriptFullPath -Value $MyInvocation.InvocationName
+Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
 Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 
 Set-Location -Path $BASE_DIR
 
 Set-StrictMode -Version Latest
-
-$WindowsOSVersion = ""
-
-
-#-----------------------------------------------------------------------------------------------------------------------
-# Setting Amazon EC2 Windows Server Parameter
-#-----------------------------------------------------------------------------------------------------------------------
-
-# Set Config File
-Set-Variable -Name SysprepFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-Set-Variable -Name EC2LaunchFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
-
-# Set Log File
-Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -613,15 +613,15 @@ if (Test-Path $SysprepFile) {
 }
 
 # Change Windows Folder Option Policy
-Set-Variable -Name FolderOptionRegistry -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
 
 Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force                                  # [Check] Show hidden files, folders, or drives
 Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force                             # [UnCheck] Hide extensions for known file types
 New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force   # [Check] Restore previous folders windows
 
 # Change Display Desktop Icon Policy
-Set-Variable -Name DesktopIconRegistry -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
-Set-Variable -Name DesktopIconRegistrySetting -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+Set-Variable -Name DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
+Set-Variable -Name DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
 New-Item -Path $DesktopIconRegistry
 New-Item -Path $DesktopIconRegistrySetting
@@ -1112,8 +1112,8 @@ Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Setting Hostname
-$HostName = $PrivateIp.Replace(".", "-")
-Rename-Computer $HostName -Force
+Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
+Rename-Computer $Hostname -Force
 
 # EC2 Instance Reboot
 Restart-Computer -Force
