@@ -10,7 +10,8 @@
 #.NOTES
 #
 #   Target Windows Server OS Version
-#      - 10.0 : Windows Server 2016 [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
+#      -  6.3 : Windows Server 2012 R2 : [Windows_Server-2012-R2_RTM-Japanese-64Bit-Base-YYYY.MM.DD]
+#      - 10.0 : Windows Server 2016    : [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
 #
 ########################################################################################################################
 
@@ -31,8 +32,8 @@ Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\user
 
 # Set System & Application Config File (System Defined : Windows Server 2012 R2)
 # Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-# Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-# Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
+Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Set System & Application Config File (System Defined : Windows Server 2016)
 Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
@@ -641,13 +642,19 @@ New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89
 New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Recycle Bin
 New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Network
 
-# Test Connecting to the Internet (Google Public DNS:8.8.8.8)
+# Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
 if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
+    # Write the information to the Log Files
+    $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
+    Write-Log ("# [Windows] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+
     # Change NetConnectionProfile
-    Get-NetConnectionProfile -IPv4Connectivity Internet
     Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
     Start-Sleep -Seconds 5
-    Get-NetConnectionProfile -IPv4Connectivity Internet
+
+    # Write the information to the Log Files
+    $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
+    Write-Log ("# [Windows] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
 }
 
 
@@ -793,7 +800,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Write-Log "# Package Download System Utility (EC2Config)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
 } else {
-    Write-Log ("# [Warning] No Target [EC2Config] - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Information] No Target [EC2Config] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (EC2Launch)
@@ -803,7 +810,7 @@ if ($WindowsOSVersion -match "^10.*") {
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
 } else {
-    Write-Log ("# [Warning] No Target [EC2Launch] - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Information] No Target [EC2Launch] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (AWS-CLI - 64bit)
@@ -982,7 +989,7 @@ if ($InstanceType -match "^p2.*") {
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
         } else {
             # [No Target Server OS]
-            Write-Log ("# [Warning] [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+            Write-Log ("# [Information] [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
     } else {
         # [Undefined Server OS]
@@ -1016,7 +1023,7 @@ if ($InstanceType -match "^g2.*") {
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
         } else {
             # [No Target Server OS]
-            Write-Log ("# [Warning] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+            Write-Log ("# [Information] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
     } else {
         # [Undefined Server OS]
@@ -1065,7 +1072,7 @@ if ($WindowsOSVersion) {
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
     } else {
         # [No Target Server OS]
-        Write-Log ("# [Warning] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        Write-Log ("# [Information] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
     }
 } else {
     # [Undefined Server OS]
@@ -1098,28 +1105,73 @@ Start-Sleep -Seconds 120
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Collect Logging Data Files
+# Collect Script/Config Files & Logging Data Files
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Collect Script/Config Files & Logging Data Files"
+
+# Save Userdata Script, Bootstrap Script, Logging Data Files
+if ($WindowsOSVersion) {
+    if ($WindowsOSVersion -eq "6.1") {
+        # [Windows Server 2008 R2]
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Server OS Version : " + $WindowsOSVersion)
+    } elseif ($WindowsOSVersion -eq "6.2") {
+        # [Windows Server 2012]
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Server OS Version : " + $WindowsOSVersion)
+    } elseif ($WindowsOSVersion -eq "6.3") {
+        # [Windows Server 2012 R2]
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : OS Version : " + $WindowsOSVersion)
+
+        # Save Script Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
+        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+        # Save Configuration Files
+        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
+        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
+        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
+    } elseif ($WindowsOSVersion -eq "10.0") {
+        # [Windows Server 2016]
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : OS Version : " + $WindowsOSVersion)
+
+        # Save Script Files
+        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+        # Save Configuration Files
+        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+        Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
+        Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
+        Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" -Destination $LOGS_DIR 
+        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
+    } else {
+        # [No Target Server OS]
+        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] No Target Server OS Version : " + $WindowsOSVersion)
+    }
+} else {
+    # [Undefined Server OS]
+    Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Server OS"
+}
+
+
+# Complete Logging
+Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
+# Save Logging Files(Write-Log Function LogFiles)
+Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
 
 # Stop Transcript Logging
 Stop-Transcript
-
-Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
-
-# Save Script Files
-Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
-
-# Save Configuration Files
-Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
-Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
-Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
-
-# Save Logging Files
-Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
-Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" -Destination $LOGS_DIR 
-Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
-Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
 
 #-----------------------------------------------------------------------------------------------------------------------
