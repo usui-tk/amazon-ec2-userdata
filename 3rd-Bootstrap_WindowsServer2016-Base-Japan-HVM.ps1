@@ -369,7 +369,7 @@ function Get-PageFileInformation
     foreach ($pagefile in $pagefiles)
     {
         # Write the information to the Log Files
-        Write-Log ("# [Windows] Page File : [Name - {0}] [CurrentUsage - {1}] [AllocatedBaseSize - {2}] [PeakUsage - {3}]" -f $pagefile.Name, $pagefile.CurrentUsage, $pagefile.AllocatedBaseSize, $pagefile.PeakUsage)
+        Write-Log ("# [Windows - OS Settings] Page File : [Name - {0}] [CurrentUsage - {1}] [AllocatedBaseSize - {2}] [PeakUsage - {3}]" -f $pagefile.Name, $pagefile.CurrentUsage, $pagefile.AllocatedBaseSize, $pagefile.PeakUsage)
     }    
 } # end Get-PageFileInformation
 
@@ -382,7 +382,7 @@ function Get-PowerPlanInformation
     {
         if ($powerplan | Where-Object { $_.IsActive -eq $True }) {
             # Write the information to the Log Files
-            Write-Log ("# [Windows] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
+            Write-Log ("# [Windows - OS Settings] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
         }
     } 
 } # end Get-PowerPlanInformation
