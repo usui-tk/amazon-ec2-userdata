@@ -8,7 +8,7 @@ exec > >(tee /var/log/user-data_1st-userdata.log || logger -t user-data -s 2> /d
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(Script)
-SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/2nd-Select_Linux.sh"
+SelectScript="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/2nd-Decision_Linux-Distribution.sh"
 
 # Parameter file Settings
 cat > /tmp/userdata-parameter << __EOF__
@@ -28,14 +28,14 @@ __EOF__
 
 cd /tmp
 
-# Download SelectScript
+# Download Decision_Linux-Distribution.sh
 if [ $(command -v curl) ]; then
-    curl --retry 5 --output SelectScript.sh ${SelectScript} 
+    curl --retry 5 --output Decision_Linux-Distribution.sh ${SelectScript} 
 else
-    wget --tries=5 --no-check-certificate --output-document=SelectScript.sh ${SelectScript} 
+    wget --tries=5 --no-check-certificate --output-document=Decision_Linux-Distribution.sh ${SelectScript} 
 fi
 
-# Execute SelectScript
-chmod 700 SelectScript.sh
+# Execute Decision_Linux-Distribution.sh
+chmod 700 Decision_Linux-Distribution.sh
 
-bash -x SelectScript.sh
+bash -x Decision_Linux-Distribution.sh

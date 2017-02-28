@@ -1,7 +1,7 @@
 #!/bin/bash -v
 
 # Logger
-exec > >(tee /var/log/user-data_2nd-select.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
 # Parameter Settings
