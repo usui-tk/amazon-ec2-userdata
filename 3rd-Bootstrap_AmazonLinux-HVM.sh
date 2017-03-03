@@ -308,7 +308,7 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	sysctl -p
 
 	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
-elif [ "${Timezone}" = "IPv6" ]; then
+elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IP Protocol Stack -> $VpcNetwork"
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
