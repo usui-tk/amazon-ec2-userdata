@@ -906,11 +906,6 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 Write-Log "# Package Download System Utility (Wireshark)"
 Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.4.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
 
-# Package Download System Utility (AWS Directory Service PortTest Application)
-# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
-Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
-Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
-
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 if ($WindowsOSVersion -match "^5.*|^6.*") {
@@ -944,6 +939,16 @@ Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSTools
 # http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+
+# Package Download System Utility (AWS Directory Service PortTest Application)
+# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
+Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
+Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+
+# Package Download System Utility (EC2Rescue)
+# https://aws.amazon.com/jp/premiumsupport/knowledge-center/ec2rescue-windows-troubleshoot/
+Write-Log "# Package Download System Utility (EC2Rescue)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
