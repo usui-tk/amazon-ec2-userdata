@@ -4,8 +4,8 @@
 # Custom Package Installation [Intel Network Driver(ixgbevf)]
 #
 # Target Linux Distribution
-#  - Red Hat Enterprise Linux v7.3
-#  - CentOS v7.3(1602)
+#  - Red Hat Enterprise Linux v7.3, v6.9
+#  - CentOS v7.3(1602), v6.9
 #
 # Target AWS EC2 Instance Type
 #  - General Purpose   [m4] (exclude m4.16xlarge)
@@ -29,7 +29,7 @@ PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
+if [[ "$InstanceType" =~ ^(i3.*|m4.16xlarge|p2.*|r4.*|x1.*)$ ]]; then
 	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -59,14 +59,14 @@ sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
 
 cd /usr/src
-wget -O ixgbevf-3.4.3.tar.gz "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/3.4.3/ixgbevf-3.4.3.tar.gz"
-tar xzf ixgbevf-3.4.3.tar.gz
-rm -fr ixgbevf-3.4.3.tar.gz
-cd ixgbevf-3.4.3
+wget -O ixgbevf-4.0.3.tar.gz "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.0.3/ixgbevf-4.0.3.tar.gz"
+tar xzf ixgbevf-4.0.3.tar.gz
+rm -fr ixgbevf-4.0.3.tar.gz
+cd ixgbevf-4.0.3
 
 cat > dkms.conf << "__EOF__"
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="3.4.3"
+PACKAGE_VERSION="4.0.3"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
@@ -80,9 +80,9 @@ __EOF__
 modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 3.4.3
-dkms build -m ixgbevf -v 3.4.3
-dkms install -m ixgbevf -v 3.4.3
+dkms add -m ixgbevf -v 4.0.3
+dkms build -m ixgbevf -v 4.0.3
+dkms install -m ixgbevf -v 4.0.3
 
 modinfo ixgbevf
 ethtool -i eth0
