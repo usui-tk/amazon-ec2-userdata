@@ -16,6 +16,7 @@
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/instance-types.html
 #  https://github.com/amzn/amzn-drivers
+#  https://github.com/amzn/amzn-drivers/blob/master/kernel/linux/rpm/README-rpm.txt
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
@@ -27,7 +28,7 @@ PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
 AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
-if [[ "$InstanceType" =~ ^(x1.*|p2.*|r4.*|m4.16xlarge)$ ]]; then
+if [[ "$InstanceType" =~ ^(i3.*|m4.16xlarge|p2.*|r4.*|x1.*)$ ]]; then
 	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 	echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 	aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
