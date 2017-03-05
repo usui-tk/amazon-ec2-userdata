@@ -44,13 +44,11 @@ Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
 Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
 
-# Set System & Application Config File (System Defined : Windows Server 2012 R2)
-# Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+# Set System & Application Config File (System Defined : Windows Server 2008 R2 - 2012 R2)
 Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Set System & Application Config File (System Defined : Windows Server 2016)
-Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
 # Set System & Application Log File (System Defined : All Windows Server)
@@ -304,7 +302,7 @@ function Get-Ec2LaunchVersion
     # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
     if (Test-Path $Ec2LaunchModuleConfig) {
         $EC2LaunchModuleVersion = Select-String -Path $Ec2LaunchModuleConfig -Pattern "ModuleVersion"
-        $Ec2LaunchVersion = $($EC2LaunchModuleVersion -match '(\d\.\d.\d)' | Out-Null; $Matches[1])
+        $Ec2LaunchVersion = $($EC2LaunchModuleVersion -match '(\d\.\d\.\d)' | Out-Null; $Matches[1])
 
         # Write the information to the Log Files
         if ($Ec2LaunchVersion) {
@@ -712,15 +710,33 @@ Set-WinUILanguageOverride -Language ja-JP
 Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
 # Change Windows Update Policy
-#$AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
-#$AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
-#$AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
-#$AUSettings.ScheduledInstallationTime = 3      # AM 3:00
-#$AUSettings.IncludeRecommendedUpdates = $True  # Enabled
-#$AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
-#$AUSettings.Save()
+if ($WindowsOSVersion -match "^5.*|^6.*") {
+    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
 
-Start-Sleep -Seconds 5
+    # Change Windows Update Policy 
+    $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+    $AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+    $AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
+    $AUSettings.ScheduledInstallationTime = 3      # AM 3:00
+    $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
+    $AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+    $AUSettings.Save()
+
+    Start-Sleep -Seconds 5
+
+    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
+} elseif ($WindowsOSVersion -match "^10.*") {
+    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
+
+    #----------------------------------------------------------------------------
+    # [Unimplemented]
+    #----------------------------------------------------------------------------
+
+    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
+} else {
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+}
+
 
 # Enable Microsoft Update
 $SMSettings = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
@@ -773,13 +789,35 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting]"
 
-# Update Sysprep Answer Files
-if (Test-Path $SysprepFile) {
-    Get-Content $SysprepFile
-    
-    Update-SysprepAnswerFile $SysprepFile
+# Update Sysprep Answer File
+if ($WindowsOSVersion -match "^5.*|^6.*") {
+    # Sysprep Answer File
+    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 
-    Get-Content $SysprepFile
+    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
+    if (Test-Path $SysprepFile) {
+        Get-Content $SysprepFile
+
+        Update-SysprepAnswerFile $SysprepFile
+
+        Get-Content $SysprepFile
+    }
+    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+} elseif ($WindowsOSVersion -match "^10.*") {
+    # Sysprep Answer File
+    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+
+    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
+    if (Test-Path $SysprepFile) {
+        Get-Content $SysprepFile
+
+        Update-SysprepAnswerFile $SysprepFile
+
+        Get-Content $SysprepFile
+    }
+    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+} else {
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 
@@ -1258,13 +1296,43 @@ Get-Variable | Export-Csv -Encoding default $BASE_DIR\Bootstrap-Variable.csv
 if ($WindowsOSVersion) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Windows NT OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+
+        # Save Script Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
+        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+        # Save Configuration Files
+        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
+        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
+        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     } elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] Not Support Windows NT OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
+
+        # Save Script Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
+        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+        # Save Configuration Files
+        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
+        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
+        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     } elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
 
         # Save Script Files
         Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
@@ -1282,7 +1350,7 @@ if ($WindowsOSVersion) {
 
     } elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
+        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
 
         # Save Script Files
         Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
