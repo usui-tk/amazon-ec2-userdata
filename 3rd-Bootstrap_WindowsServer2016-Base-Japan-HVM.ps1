@@ -9,9 +9,23 @@
 #
 #.NOTES
 #
-#   Target Windows Server OS Version
-#      -  6.3 : Windows Server 2012 R2 : [Windows_Server-2012-R2_RTM-Japanese-64Bit-Base-YYYY.MM.DD]
-#      - 10.0 : Windows Server 2016    : [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
+#   Target Windows Server OS Version and Processor Architecture (64bit Only)
+#
+#      -  6.1 : Windows Server 2008 R2 (Microsoft Windows Server 2008 R2 SP1 [Datacenter Edition])
+#               [Windows_Server-2008-R2_SP1-Japanese-64Bit-Base-YYYY.MM.DD]
+#               [Windows_Server-2008-R2_SP1-English-64Bit-Base-YYYY.MM.DD]
+#
+#      -  6.2 : Windows Server 2012 (Microsoft Windows Server 2012 [])
+#               [Windows_Server-2012-RTM-Japanese-64Bit-Base-YYYY.MM.DD]
+#               [Windows_Server-2012-RTM-English-64Bit-Base-YYYY.MM.DD]
+#
+#      -  6.3 : Windows Server 2012 R2 (Microsoft Windows Server 2012 R2 [])
+#               [Windows_Server-2012-R2_RTM-Japanese-64Bit-Base-YYYY.MM.DD]
+#               [Windows_Server-2012-R2_RTM-English-64Bit-Base-YYYY.MM.DD]
+#
+#      - 10.0 : Windows Server 2016 (Microsoft Windows Server 2016 [])
+#               [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
+#               [Windows_Server-2016-English-Full-Base-YYYY.MM.DD]
 #
 ########################################################################################################################
 
@@ -146,7 +160,7 @@ function Get-EbsVolumesMappingInformation
         $Local:OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 
     } Catch {
-        Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."  -ForegroundColor Yellow
+        Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
     }
     
     $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | % {
@@ -859,6 +873,7 @@ $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAge
 if ($AmazonSSMAgentStatus -ne "Auto") {
     Write-Log "# [Windows - OS Settings] Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
+    Start-Sleep -Seconds 5
     Write-Log "# [Windows - OS Settings] Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
 }
 
