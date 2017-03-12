@@ -19,11 +19,11 @@
 #               [Windows_Server-2012-RTM-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2012-RTM-English-64Bit-Base-YYYY.MM.DD]
 #
-#      -  6.3 : Windows Server 2012 R2 (Microsoft Windows Server 2012 R2 [])
+#      -  6.3 : Windows Server 2012 R2 (Microsoft Windows Server 2012 R2 [Standard Edition])
 #               [Windows_Server-2012-R2_RTM-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2012-R2_RTM-English-64Bit-Base-YYYY.MM.DD]
 #
-#      - 10.0 : Windows Server 2016 (Microsoft Windows Server 2016 [])
+#      - 10.0 : Windows Server 2016 (Microsoft Windows Server 2016 [Datacenter Edition])
 #               [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2016-English-Full-Base-YYYY.MM.DD]
 #
@@ -99,6 +99,25 @@ function New-Directory
 } # end function New-Directory
 
 
+function Set-TimeZoneCompatible
+{
+  [CmdletBinding(SupportsShouldProcess = $True)]
+  param( 
+    [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
+    [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
+    [ValidateNotNullOrEmpty()]
+    [string]$TimeZone = "Tokyo Standard Time"
+  ) 
+
+  $process = New-Object System.Diagnostics.Process 
+  $process.StartInfo.WindowStyle = "Hidden" 
+  $process.StartInfo.FileName = "tzutil.exe" 
+  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
+  $process.Start() | Out-Null 
+} # end function Set-TimeZoneCompatible
+
+
+
 ########################################################################################################################
 #
 # Windows Bootstrap Individual requirement function
@@ -147,15 +166,29 @@ function Get-EbsVolumesMappingInformation
 
     Try {
         # Use the metadata service to discover which instance the script is running on
-        $Local:InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
-        $Local:AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
-        $Local:Region = $AZ.Substring(0, $AZ.Length -1)
+        
+        # InstanceId
+        if ( [string]::IsNullOrEmpty($InstanceId) ) {
+            $Local:InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+        }
+
+        # AZ:Availability Zone
+        if ( [string]::IsNullOrEmpty($AZ) ) {
+            $Local:AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+        }
+
+        # Region
+        if ( [string]::IsNullOrEmpty($Region) ) {
+            $Local:Region = $AZ.Substring(0, $AZ.Length -1)
+        }
+
+        #Get OS Language
+        if ( [string]::IsNullOrEmpty($OsLanguage) ) {
+            $Local:OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+        }
 
         #Get the volumes attached to this instance
         $Local:BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
-
-        #Get OS Language
-        $Local:OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 
     } Catch {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
@@ -553,10 +586,27 @@ function Update-SysprepAnswerFile($SysprepAnswerFile)
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
 
-Get-TimeZone
-Set-TimeZone -Id "Tokyo Standard Time"
-Start-Sleep -Seconds 5
-Get-TimeZone
+#Get OS Infomation & Language
+$Local:TimezoneLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+$Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Object Version).Version
+
+if ($TimezoneLanguage -eq "ja-JP") {
+    if ($TimezoneOSversion -match "^5.*|^6.*") {
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+        Set-TimeZoneCompatible "Tokyo Standard Time"
+        Start-Sleep -Seconds 5
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+    } elseif ($TimezoneOSversion -match "^10.*") {
+        Get-TimeZone
+        Set-TimeZone -Id "Tokyo Standard Time"
+        Start-Sleep -Seconds 5
+        Get-TimeZone
+    } else {
+        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+    }
+} else {
+    Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -705,7 +755,6 @@ Set-WinCultureFromLanguageListOptOut -OptOut $False
 Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (After) : " + (Get-WinCultureFromLanguageListOptOut))
 
 # Setting Japanese UI Language
-Write-Log ("# [Windows - OS Settings] Override display language (Before) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 Set-WinUILanguageOverride -Language ja-JP
 Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
@@ -790,34 +839,44 @@ if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
 Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting]"
 
 # Update Sysprep Answer File
-if ($WindowsOSVersion -match "^5.*|^6.*") {
-    # Sysprep Answer File
-    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+if ($WindowsOSLanguage) {
+    if ($WindowsOSLanguage -eq "ja-JP") {
+        # Update Sysprep Answer File
+        if ($WindowsOSVersion -match "^5.*|^6.*") {
+            # Sysprep Answer File
+            Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+            
+            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
+            
+            if (Test-Path $SysprepFile) {
+                Get-Content $SysprepFile
+                Update-SysprepAnswerFile $SysprepFile
+                Get-Content $SysprepFile
+            }
 
-    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-    if (Test-Path $SysprepFile) {
-        Get-Content $SysprepFile
+            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
 
-        Update-SysprepAnswerFile $SysprepFile
+        } elseif ($WindowsOSVersion -match "^10.*") {
+            # Sysprep Answer File
+            Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+            
+            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
 
-        Get-Content $SysprepFile
+            if (Test-Path $SysprepFile) {
+                Get-Content $SysprepFile
+                Update-SysprepAnswerFile $SysprepFile
+                Get-Content $SysprepFile
+            }
+            
+            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+        } else {
+            Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
+        }
+    } else {
+        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
     }
-    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
-} elseif ($WindowsOSVersion -match "^10.*") {
-    # Sysprep Answer File
-    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-
-    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-    if (Test-Path $SysprepFile) {
-        Get-Content $SysprepFile
-
-        Update-SysprepAnswerFile $SysprepFile
-
-        Get-Content $SysprepFile
-    }
-    Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
 } else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log "# [Warning] No Target - Windows OS Language"
 }
 
 
@@ -1027,9 +1086,9 @@ Invoke-WebRequest -Uri $AWSCodeDeployAgentUrl -OutFile "$TOOL_DIR\AWSCodeDeployA
 # Log Separator
 Write-LogSeparator "Custom Package Download (Monitoring Service Agent)"
 
-# Package Download Monitoring Service Agent (Zabix Agent)
+# Package Download Monitoring Service Agent (Zabbix Agent)
 # http://www.zabbix.com/download
-Write-Log "# Package Download Monitoring Service Agent (Zabix Agent)"
+Write-Log "# Package Download Monitoring Service Agent (Zabbix Agent)"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/2.2.14/zabbix_agents_2.2.14.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v2.2-Latest-Windows.zip"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.0.4/zabbix_agents_3.0.4.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v3.0-Latest-Windows.zip"
 Invoke-WebRequest -Uri 'http://www.zabbix.com/downloads/3.2.0/zabbix_agents_3.2.0.win.zip' -OutFile "$TOOL_DIR\ZabbixAgent-v3.2-Latest-Windows.zip"
