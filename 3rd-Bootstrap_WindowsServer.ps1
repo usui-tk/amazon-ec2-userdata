@@ -617,14 +617,14 @@ if ($TimezoneLanguage -eq "ja-JP") {
 # Preparation for script execution
 #-----------------------------------------------------------------------------------------------------------------------
 
+Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
+Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
+
 New-Directory $BASE_DIR
 New-Directory $TOOL_DIR
 New-Directory $LOGS_DIR
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
-
-Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
-Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 
 Set-Location -Path $BASE_DIR
 
