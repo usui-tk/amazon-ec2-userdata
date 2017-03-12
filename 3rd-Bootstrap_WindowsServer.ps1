@@ -159,6 +159,12 @@ function Get-EbsVolumesMappingInformation
 {
     # List the Windows disks
 
+    # Set Initialize Parameter
+    Set-Variable -Name BlockDeviceMapping -Scope Script -Value ($Null)
+    Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
+    Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
+    Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
+
     # Create a hash table that maps each device to a SCSI target
     $Map = @{"0" = '/dev/sda1'} 
     for($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}",[char](97 + $x)))}
@@ -183,10 +189,8 @@ function Get-EbsVolumesMappingInformation
         }
 
         #Get OS Language
-        if ( [string]::IsNullOrEmpty($OsLanguage) ) {
-            $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
-        }
-
+        $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+        
         #Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
 
@@ -311,7 +315,7 @@ function Get-Ec2InstanceMetadata
     Write-Log "# [AWS] Availability Zone : $AZ"
     Write-Log "# [AWS] Instance ID : $InstanceId"
     Write-Log "# [AWS] Instance Type : $InstanceType"
-    Write-Log "# [AWS] VPC Private IP Address : $PrivateIp"
+    Write-Log "# [AWS] VPC Private IP Address(IPv4) : $PrivateIp"
     Write-Log "# [AWS] Amazon Machine Images ID : $AmiId"
     if ($RoleName) {
         Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
