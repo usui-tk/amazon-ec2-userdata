@@ -169,26 +169,26 @@ function Get-EbsVolumesMappingInformation
         
         # InstanceId
         if ( [string]::IsNullOrEmpty($InstanceId) ) {
-            $Local:InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+            $InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
         }
 
         # AZ:Availability Zone
         if ( [string]::IsNullOrEmpty($AZ) ) {
-            $Local:AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+            $AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
         }
 
         # Region
         if ( [string]::IsNullOrEmpty($Region) ) {
-            $Local:Region = $AZ.Substring(0, $AZ.Length -1)
+            $Region = $AZ.Substring(0, $AZ.Length -1)
         }
 
         #Get OS Language
         if ( [string]::IsNullOrEmpty($OsLanguage) ) {
-            $Local:OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
+            $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
         }
 
         #Get the volumes attached to this instance
-        $Local:BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+        $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
 
     } Catch {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."

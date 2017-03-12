@@ -117,6 +117,7 @@ Write-Log ("# [Windows Infomation] OS Version : " + ($OSversion) + " - OS Langua
 if ($OSversion -match "^6.*|^10.*") {
     Write-Log ("# [Bootstrap Script]  : " + ($BOOTSTRAP_URL))
     Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+    Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
 } else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $OSversion)
