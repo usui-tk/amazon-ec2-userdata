@@ -43,7 +43,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y dstat gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat traceroute vim-enhanced yum-plugin-versionlock wget
+yum install -y dstat gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion

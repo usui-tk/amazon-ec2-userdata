@@ -964,7 +964,7 @@ Get-Ec2SystemManagerAgentVersion
 
 # Package Update System Utility (Amazon EC2 Systems Manager Agent)
 Write-Log "# Package Update System Utility (Amazon EC2 Systems Manager Agent)"
-Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
 Get-Service -Name AmazonSSMAgent
 
@@ -1027,8 +1027,6 @@ Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.
 if ($WindowsOSVersion -match "^5.*|^6.*") {
     Write-Log "# Package Download System Utility (EC2Config)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
-} else {
-    Write-Log ("# [Information] No Target [EC2Config] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (EC2Launch)
@@ -1037,8 +1035,6 @@ if ($WindowsOSVersion -match "^10.*") {
     Write-Log "# Package Download System Utility (EC2Launch)"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
     Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
-} else {
-    Write-Log ("# [Information] No Target [EC2Launch] - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Package Download System Utility (AWS-CLI - 64bit)

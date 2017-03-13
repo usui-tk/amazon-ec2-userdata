@@ -57,7 +57,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y bash-completion bind-utils dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y bash-completion bind-utils dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
