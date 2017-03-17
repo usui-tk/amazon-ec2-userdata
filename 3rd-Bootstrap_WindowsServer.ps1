@@ -15,7 +15,7 @@
 #               [Windows_Server-2008-R2_SP1-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2008-R2_SP1-English-64Bit-Base-YYYY.MM.DD]
 #
-#      -  6.2 : Windows Server 2012 (Microsoft Windows Server 2012 [])
+#      -  6.2 : Windows Server 2012 (Microsoft Windows Server 2012 [Standard Edition])
 #               [Windows_Server-2012-RTM-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2012-RTM-English-64Bit-Base-YYYY.MM.DD]
 #
@@ -800,7 +800,7 @@ Start-Sleep -Seconds 5
 
 
 # Change Windows Folder Option Policy
-Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
 Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force                                  # [Check] Show hidden files, folders, or drives
 Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force                             # [UnCheck] Hide extensions for known file types
