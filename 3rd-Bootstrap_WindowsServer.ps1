@@ -298,7 +298,7 @@ function Get-Ec2InstanceMetadata
 
     # Set IAM Role & STS Information
     Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
-    Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | select -Index 1)
+    Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
     
     if ($RoleName) {
         Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
@@ -397,7 +397,7 @@ function Get-ScriptExecuteByAccount
 
     # Get PowerShell Script Execution UserName
     $ScriptExecuteByAccountInformation = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $ScriptExecuteByAccountName = ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | select -Index 1)
+    $ScriptExecuteByAccountName = ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | Select-Object -Index 1)
 
     # Write the information to the Log Files
     if ($ScriptExecuteByAccountName) {
@@ -596,20 +596,20 @@ $Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Objec
 
 if ($TimezoneLanguage -eq "ja-JP") {
     if ($TimezoneOSversion -match "^5.*|^6.*") {
-        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
         Set-TimeZoneCompatible "Tokyo Standard Time"
         Start-Sleep -Seconds 5
-        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     } elseif ($TimezoneOSversion -match "^10.*") {
         Get-TimeZone
         Set-TimeZone -Id "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-TimeZone
     } else {
-        Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     }
 } else {
-    Get-ItemProperty "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+    Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
 }
 
 
@@ -745,6 +745,7 @@ if ($RoleName) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration"
 
+
 # Setting System Locale
 Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 Set-WinSystemLocale -SystemLocale ja-JP
@@ -758,9 +759,11 @@ Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same a
 Set-WinCultureFromLanguageListOptOut -OptOut $False
 Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (After) : " + (Get-WinCultureFromLanguageListOptOut))
 
+
 # Setting Japanese UI Language
 Set-WinUILanguageOverride -Language ja-JP
 Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+
 
 # Change Windows Update Policy
 if ($WindowsOSVersion -match "^5.*|^6.*") {
@@ -802,9 +805,17 @@ Start-Sleep -Seconds 5
 # Change Windows Folder Option Policy
 Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
-Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force                                  # [Check] Show hidden files, folders, or drives
-Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force                             # [UnCheck] Hide extensions for known file types
-New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force   # [Check] Restore previous folders windows
+Get-ItemProperty -Path $FolderOptionRegistry
+
+# [Check] Show hidden files, folders, or drives
+Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+# [UnCheck] Hide extensions for known file types
+Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+# [Check] Restore previous folders windows
+New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+
+Get-ItemProperty -Path $FolderOptionRegistry
+
 
 # Change Display Desktop Icon Policy
 Set-Variable -Name DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
@@ -813,11 +824,19 @@ Set-Variable -Name DesktopIconRegistrySetting -Option Constant -Scope Local -Val
 New-Item -Path $DesktopIconRegistry -Force 
 New-Item -Path $DesktopIconRegistrySetting -Force 
 
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : My Computer
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Control Panel
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : User's Files
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Recycle Bin
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force  #[CLSID] : Network
+#[CLSID] : My Computer
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
+#[CLSID] : Control Panel
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
+#[CLSID] : User's Files
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
+#[CLSID] : Recycle Bin
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
+#[CLSID] : Network
+New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+
+Get-ItemProperty -Path $DesktopIconRegistrySetting
+
 
 # Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
 if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
