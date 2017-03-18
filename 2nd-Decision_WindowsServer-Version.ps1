@@ -15,7 +15,7 @@
 #               [Windows_Server-2008-R2_SP1-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2008-R2_SP1-English-64Bit-Base-YYYY.MM.DD]
 #
-#      -  6.2 : Windows Server 2012 (Microsoft Windows Server 2012 [])
+#      -  6.2 : Windows Server 2012 (Microsoft Windows Server 2012 [Standard Edition])
 #               [Windows_Server-2012-RTM-Japanese-64Bit-Base-YYYY.MM.DD]
 #               [Windows_Server-2012-RTM-English-64Bit-Base-YYYY.MM.DD]
 #
@@ -67,7 +67,7 @@ function Write-Log
 {
     param([string]$message, $log=$USERDATA_LOG)
     
-    Format-Message $message | Out-File $log -Append -Forc
+    Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
 
@@ -114,12 +114,42 @@ $Local:OSversion = (Get-CimInstance Win32_OperatingSystem | Select-Object Versio
 Write-Log ("# [Windows Infomation] OS Version : " + ($OSversion) + " - OS Language : "  + ($OSLanguage))
 
 # Bootstrap Script Executite
-if ($OSversion -match "^6.*|^10.*") {
-    Write-Log ("# [Bootstrap Script]  : " + ($BOOTSTRAP_URL))
+if ($OSversion -match "^6.1.*") {
+    # Log Separator
+    Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2008 R2"
+
+    Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
     Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
     Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
+
+} elseif ($OSversion -match "^6.2.*") {
+    # Log Separator
+    Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2012"
+
+    Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
+    Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+    Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
+    powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
+
+} elseif ($OSversion -match "^6.3.*") {
+    # Log Separator
+    Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2012 R2"
+
+    Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
+    Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+    Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
+    powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
+
+} elseif ($OSversion -match "^10.0.*") {
+    # Log Separator
+    Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2016"
+
+    Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
+    Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+    Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
+    powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
+
 } else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $OSversion)
 }
-

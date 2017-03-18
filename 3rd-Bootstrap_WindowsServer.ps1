@@ -75,7 +75,7 @@ function Write-Log
 {
     param([string]$message, $log=$USERDATA_LOG)
     
-    Format-Message $message | Out-File $log -Append -Forc
+    Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
 
@@ -106,13 +106,13 @@ function Set-TimeZoneCompatible
     [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
     [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
     [ValidateNotNullOrEmpty()]
-    [string]$TimeZone = "Tokyo Standard Time"
+    [string]$TimeZoneSetting
   ) 
 
   $process = New-Object System.Diagnostics.Process 
   $process.StartInfo.WindowStyle = "Hidden" 
   $process.StartInfo.FileName = "tzutil.exe" 
-  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
+  $process.StartInfo.Arguments = "/s `"$TimeZoneSetting`"" 
   $process.Start() | Out-Null 
 } # end function Set-TimeZoneCompatible
 
@@ -289,12 +289,12 @@ function Get-Ec2InstanceMetadata
     #--------------------------------------------------------------------------------------
 
     # Set AWS Instance Metadata
-    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/placement/availability-zone)
-    Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri http://169.254.169.254/latest/dynamic/instance-identity/document).region
-    Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-id)
-    Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/instance-type)
-    Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/local-ipv4)
-    Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri http://169.254.169.254/latest/meta-data/ami-id)
+    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+    Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document").region
+    Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+    Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
+    Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
+    Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
     # Set IAM Role & STS Information
     Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
@@ -559,7 +559,7 @@ function Get-WindowsServerInformation
 
 function Update-SysprepAnswerFile($SysprepAnswerFile)
 {
-    [xml]$SysprepXMLDocument = Get-Content $SysprepAnswerFile -Encoding UTF8
+    [xml]$SysprepXMLDocument = Get-Content -Path $SysprepAnswerFile -Encoding UTF8
 
     $SysprepNamespace = New-Object System.Xml.XmlNamespaceManager($SysprepXMLDocument.NameTable)
     $SysprepNamespace.AddNamespace("u", $SysprepXMLDocument.DocumentElement.NamespaceURI)
@@ -597,7 +597,7 @@ $Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Objec
 if ($TimezoneLanguage -eq "ja-JP") {
     if ($TimezoneOSversion -match "^5.*|^6.*") {
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-        Set-TimeZoneCompatible "Tokyo Standard Time"
+        Set-TimeZoneCompatible -TimeZoneSetting "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     } elseif ($TimezoneOSversion -match "^10.*") {
@@ -872,9 +872,9 @@ if ($WindowsOSLanguage) {
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
             
             if (Test-Path $SysprepFile) {
-                Get-Content $SysprepFile
+                Get-Content -Path $SysprepFile
                 Update-SysprepAnswerFile $SysprepFile
-                Get-Content $SysprepFile
+                Get-Content -Path $SysprepFile
             }
 
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
@@ -886,9 +886,9 @@ if ($WindowsOSLanguage) {
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
 
             if (Test-Path $SysprepFile) {
-                Get-Content $SysprepFile
+                Get-Content -Path $SysprepFile
                 Update-SysprepAnswerFile $SysprepFile
-                Get-Content $SysprepFile
+                Get-Content -Path $SysprepFile
             }
             
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
@@ -988,7 +988,7 @@ Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALL
 Get-Service -Name AmazonSSMAgent
 
 # Service Automatic Startup Setting (Amazon EC2 Systems Manager Agent)
-$AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -filter "Name='AmazonSSMAgent'").StartMode
+$AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
     Write-Log "# [Windows - OS Settings] Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
@@ -1001,7 +1001,7 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
 Get-Ec2SystemManagerAgentVersion
 
 # Clear Log File
-Clear-Content $SSMAgentLogFile
+Clear-Content -Path $SSMAgentLogFile
 
 # Get Amazon SSM Agent Service Status
 Restart-Service -Name AmazonSSMAgent
@@ -1011,7 +1011,7 @@ Start-Sleep -Seconds 30
 Get-Service -Name AmazonSSMAgent
 
 # View Log File
-Get-Content $SSMAgentLogFile
+Get-Content -Path $SSMAgentLogFile
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1295,7 +1295,7 @@ Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWSPVDriverSetup.zip"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-AWSPVDriverSetup.zip"
 
 # Package Download Intel Network Driver
 if ($WindowsOSVersion) {
@@ -1304,25 +1304,25 @@ if ($WindowsOSVersion) {
         # https://downloadcenter.intel.com/ja/download/18725/
         # Package Download Intel Network Driver (Windows Server 2008 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
     } elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
         # https://downloadcenter.intel.com/ja/download/21694/
         # Package Download Intel Network Driver (Windows Server 2012)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012.exe"
     } elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
         # https://downloadcenter.intel.com/ja/download/23073/
         # Package Download Intel Network Driver (Windows Server 2012 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012R2.exe"
     } elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
         # https://downloadcenter.intel.com/ja/download/26092/
         # Package Download Intel Network Driver (Windows Server 2016)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\PROWinx64.exe"
+        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2016.exe"
     } else {
         # [No Target Server OS]
         Write-Log ("# [Information] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
@@ -1335,7 +1335,7 @@ if ($WindowsOSVersion) {
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
-Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\ENA.zip"
+Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-ENA.zip"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1351,6 +1351,9 @@ Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechro
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_ChromeSetup.log") -Wait | Out-Null
 
+#---------------------------------------------------------------
+# [Caution : Finally the installation process]
+#---------------------------------------------------------------
 # Package Install Text Editor (Visual Studio Code)
 Write-Log "# Package Download Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
@@ -1459,11 +1462,13 @@ Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
 
 # Complete Logging
 Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
+
 # Save Logging Files(Write-Log Function LogFiles)
 Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
 
 # Stop Transcript Logging
 Stop-Transcript
+
 # Save Logging Files(Start-Transcript Function LogFiles)
 Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR 
 
