@@ -1015,10 +1015,13 @@ Get-Service -Name AmazonSSMAgent
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
-    Write-Log "# [Windows - OS Settings] Service Startup Type Change [AmazonSSMAgent] $AmazonSSMAgentStatus -> Auto"
+    Write-Log "# [Windows - OS Settings] [AmazonSSMAgent] Service Startup Type : $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
+
     Start-Sleep -Seconds 5
-    Write-Log "# [Windows - OS Settings] Service Startup Type Staus [AmazonSSMAgent] $AmazonSSMAgentStatus"
+
+    $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
+    Write-Log "# [Windows - OS Settings] [AmazonSSMAgent] Service Startup Type : $AmazonSSMAgentStatus"
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
