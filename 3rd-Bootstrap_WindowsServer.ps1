@@ -106,13 +106,13 @@ function Set-TimeZoneCompatible
     [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
     [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
     [ValidateNotNullOrEmpty()]
-    [string]$TimeZoneSetting
+    [string]$TimeZone = "Tokyo Standard Time"
   ) 
 
   $process = New-Object System.Diagnostics.Process 
   $process.StartInfo.WindowStyle = "Hidden" 
   $process.StartInfo.FileName = "tzutil.exe" 
-  $process.StartInfo.Arguments = "/s `"$TimeZoneSetting`"" 
+  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
   $process.Start() | Out-Null 
 } # end function Set-TimeZoneCompatible
 
@@ -597,7 +597,7 @@ $Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Objec
 if ($TimezoneLanguage -eq "ja-JP") {
     if ($TimezoneOSversion -match "^5.*|^6.*") {
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-        Set-TimeZoneCompatible -TimeZoneSetting "Tokyo Standard Time"
+        Set-TimeZoneCompatible "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     } elseif ($TimezoneOSversion -match "^10.*") {
@@ -766,8 +766,12 @@ Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (G
 
 
 # Change Windows Update Policy
+Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
+
 if ($WindowsOSVersion -match "^5.*|^6.*") {
-    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
+    
+    # Get Windows Update Policy
+    Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
 
     # Change Windows Update Policy 
     $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
@@ -782,9 +786,11 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
     Start-Sleep -Seconds 5
 
+    # Get Windows Update Policy
+    Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"  
+
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
 } elseif ($WindowsOSVersion -match "^10.*") {
-    Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
 
     #----------------------------------------------------------------------------
     # [Unimplemented]
@@ -797,11 +803,27 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
 
 # Enable Microsoft Update
-$SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict 
-$SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
-$SMSettings.Services
+Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (Before)"
 
-Start-Sleep -Seconds 5
+if ($WindowsOSVersion -match "^5.*|^6.*") {
+    # Enable Microsoft Update
+    $SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict 
+    $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+    $SMSettings.Services
+
+    Start-Sleep -Seconds 5
+
+    Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
+} elseif ($WindowsOSVersion -match "^10.*") {
+
+    #----------------------------------------------------------------------------
+    # [Unimplemented]
+    #----------------------------------------------------------------------------
+
+    Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
+} else {
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+}
 
 
 # Change Windows Folder Option Policy
