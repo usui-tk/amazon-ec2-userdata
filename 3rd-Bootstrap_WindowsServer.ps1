@@ -770,12 +770,14 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
 
     # Change Windows Update Policy 
-    $AUSettings = (New-Object -com "Microsoft.Update.AutoUpdate").Settings
+    $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
     $AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
     $AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
     $AUSettings.ScheduledInstallationTime = 3      # AM 3:00
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
     $AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+
+    # Save Windows Update Policy 
     $AUSettings.Save()
 
     Start-Sleep -Seconds 5
@@ -795,7 +797,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
 
 # Enable Microsoft Update
-$SMSettings = New-Object -ComObject Microsoft.Update.ServiceManager -Strict 
+$SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict 
 $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
 $SMSettings.Services
 
