@@ -85,7 +85,7 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
-        if [ $(echo ${REV} | grep -e '7.') ]; then
+        if [ "${REV}" = "7" ]; then
            # Bootstrap Script for CentOS v7.x
            BootstrapScript=${ScriptForCentOSv7}
         elif [ $(echo ${REV} | grep -e '6.') ]; then
