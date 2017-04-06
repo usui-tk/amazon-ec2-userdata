@@ -12,6 +12,7 @@ ScriptForAmazonLinux='https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Bo
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
+ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 
 #-------------------------------------------------------------------------------
@@ -84,9 +85,12 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
-        if [ "${REV}" = "7" ]; then
+        if [ $(echo ${REV} | grep -e '7') ]; then
            # Bootstrap Script for CentOS v7.x
            BootstrapScript=${ScriptForCentOSv7}
+        elif [ $(echo ${REV} | grep -e '6') ]; then
+           # Bootstrap Script for CentOS v6.x
+           BootstrapScript=${ScriptForCentOSv6}
         else
            BootstrapScript=""
         fi
