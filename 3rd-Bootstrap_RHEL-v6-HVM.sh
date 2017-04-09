@@ -9,10 +9,6 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 if [ -f /tmp/userdata-parameter ]; then
     source /tmp/userdata-parameter
-	# echo
-	echo $Language
-	echo $Timezone
-	echo $VpcNetwork
 fi
 
 if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
@@ -22,11 +18,12 @@ if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
 	Timezone="Asia/Tokyo"
 	# Default VPC Network
 	VpcNetwork="IPv4"
-	# echo
-	echo $Language
-	echo $Timezone
-	echo $VpcNetwork
 fi
+
+# echo
+echo $Language
+echo $Timezone
+echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
 # Default Package Update

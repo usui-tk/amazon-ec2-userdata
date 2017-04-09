@@ -745,7 +745,6 @@ if ($RoleName) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration"
 
-
 # Setting System Locale
 Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
 Set-WinSystemLocale -SystemLocale ja-JP
@@ -764,6 +763,9 @@ Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same a
 Set-WinUILanguageOverride -Language ja-JP
 Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [Windows & Microsoft Update Setting]"
 
 # Change Windows Update Policy
 Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
@@ -826,6 +828,9 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 }
 
 
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [Folder Option Setting]"
+
 # Change Windows Folder Option Policy
 Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
@@ -861,6 +866,9 @@ New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88
 
 Get-ItemProperty -Path $DesktopIconRegistrySetting
 
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [Network Connection Profile Setting]"
 
 # Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
 if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
