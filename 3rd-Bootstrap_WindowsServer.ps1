@@ -739,11 +739,11 @@ if ($RoleName) {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Windows Server OS Configuration
+# Windows Server OS Configuration [Windows OS Setting]
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Windows Server OS Configuration"
+Write-LogSeparator "Windows Server OS Configuration [Windows OS Setting]"
 
 # Setting System Locale
 Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
@@ -763,6 +763,10 @@ Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same a
 Set-WinUILanguageOverride -Language ja-JP
 Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Windows & Microsoft Update Setting]
+#-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Windows & Microsoft Update Setting]"
@@ -828,10 +832,15 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 }
 
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Folder Option Setting]
+#-----------------------------------------------------------------------------------------------------------------------
+
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Folder Option Setting]"
 
 # Change Windows Folder Option Policy
+Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (Before)"
 Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
 Get-ItemProperty -Path $FolderOptionRegistry
@@ -845,8 +854,11 @@ New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' 
 
 Get-ItemProperty -Path $FolderOptionRegistry
 
+Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (After)"
+
 
 # Change Display Desktop Icon Policy
+Write-Log "# [Windows - OS Settings] Change Display Desktop Icon Policy (Before)"
 Set-Variable -Name DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
 Set-Variable -Name DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
@@ -865,6 +877,8 @@ New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F
 New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
 
 Get-ItemProperty -Path $DesktopIconRegistrySetting
+
+Write-Log "# [Windows - OS Settings] Change Display Desktop Icon Policy (After)"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
