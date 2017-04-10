@@ -216,7 +216,7 @@ function Get-EbsVolumesMappingInformation
        
             if ($OsLanguage -eq "ja-JP") {
                 # Display the information in a table (Japanese : ja-JP)
-                New-Object PSObject -Property @{
+                New-Object -TypeName PSCustomObject -Property @{
                     Device = $Map[$Drive.SCSITargetId.ToString()];
                     Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("ディスク #",""));
                     Boot = $Partition.BootPartition;
@@ -228,7 +228,7 @@ function Get-EbsVolumesMappingInformation
                 }
             } elseif ($OsLanguage -eq "en-US") {
                 # Display the information in a table (English : en-US)
-                New-Object PSObject -Property @{
+                New-Object -TypeName PSCustomObject -Property @{
                     Device = $Map[$Drive.SCSITargetId.ToString()];
                     Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #",""));
                     Boot = $Partition.BootPartition;
@@ -870,19 +870,46 @@ Get-ItemProperty -Path $DesktopIconRegistrySetting
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Network Connection Profile Setting]"
 
-# Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
-if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
-    # Write the information to the Log Files
-    $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
-    Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+if ($WindowsOSVersion -match "^6.1") {
+    Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : START"
 
-    # Change NetConnectionProfile
-    Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
-    Start-Sleep -Seconds 5
+    # Skip network location setting for pre-Vista operating systems
+    if([environment]::OSVersion.version.Major -lt 6) { return }
 
-    # Write the information to the Log Files
-    $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
-    Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+    # Skip network location setting if local machine is joined to a domain.
+    if(1,3,4,5 -contains (Get-WmiObject win32_computersystem).DomainRole) { return }
+
+    # Get network connections
+    $networkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]"{DCB00C01-570F-4A9B-8D69-199FDBA5723B}"))
+    $connections = $networkListManager.GetNetworkConnections()
+
+    # Set network location to Private for all networks
+    $connections | % {$_.GetNetwork().SetCategory(1)}
+
+    Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
+} elseif ($WindowsOSVersion -match "^6.*|^10.*") {
+    Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : START"
+
+    # Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
+    if (Test-Connection -ComputerName 8.8.8.8 -Count 1) {
+        # Write the information to the Log Files
+        $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
+        Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+
+        # Change NetConnectionProfile
+        Set-NetConnectionProfile -InterfaceAlias (Get-NetConnectionProfile -IPv4Connectivity Internet).InterfaceAlias -NetworkCategory Private
+        Start-Sleep -Seconds 5
+
+        # Write the information to the Log Files
+        $netprofile = Get-NetConnectionProfile -IPv4Connectivity Internet
+        Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
+
+        Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
+    } else {
+        Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    }
+} else {
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 
