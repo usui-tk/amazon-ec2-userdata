@@ -867,6 +867,10 @@ New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88
 Get-ItemProperty -Path $DesktopIconRegistrySetting
 
 
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Network Connection Profile Setting]
+#-----------------------------------------------------------------------------------------------------------------------
+
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Network Connection Profile Setting]"
 
@@ -887,7 +891,7 @@ if ($WindowsOSVersion -match "^6.1") {
     $connections | % {$_.GetNetwork().SetCategory(1)}
 
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
-} elseif ($WindowsOSVersion -match "^6.*|^10.*") {
+} elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : START"
 
     # Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
@@ -969,28 +973,51 @@ if ($WindowsOSLanguage) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [IPv6 Setting]"
 
-# Logging Windows Server OS Parameter [NetAdapter Binding Information]
-Get-NetAdapterBindingInformation
+if ($WindowsOSVersion -match "^6.1") {
+    Write-Log "Windows Server OS Configuration [IPv6 Setting] : START"
 
-# Disable IPv6 Binding
-if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
-    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
-    Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
-    Start-Sleep -Seconds 5
-} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
-    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
-    Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
-    Start-Sleep -Seconds 5
-} elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
-    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
-    Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
-    Start-Sleep -Seconds 5
+    # Display IPv6 Binding
+    netsh interface ipv6 show interface | Out-Default
+
+    # Disable IPv6 Binding
+    netsh interface ipv6 isatap set state disabled | Out-Default
+    netsh interface ipv6 6to4 set state disabled | Out-Default
+    netsh interface teredo set state disabled | Out-Default
+
+    # Display IPv6 Binding
+    netsh interface ipv6 show interface | Out-Default
+
+    Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
+} elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+    Write-Log "Windows Server OS Configuration [IPv6 Setting] : START"
+
+    # Logging Windows Server OS Parameter [NetAdapter Binding Information]
+    Get-NetAdapterBindingInformation
+
+    # Disable IPv6 Binding
+    if (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Amazon Elastic Network Adapter" }) {
+        Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
+        Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
+        Start-Sleep -Seconds 5
+    } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
+        Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
+        Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
+        Start-Sleep -Seconds 5
+    } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
+        Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
+        Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
+        Start-Sleep -Seconds 5
+    } else {
+        Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : No Target Device"
+    }
+
+    # Logging Windows Server OS Parameter [NetAdapter Binding Information]
+    Get-NetAdapterBindingInformation
+
+    Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
 } else {
-    Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : No Target Device"
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
-
-# Logging Windows Server OS Parameter [NetAdapter Binding Information]
-Get-NetAdapterBindingInformation
 
 
 #-----------------------------------------------------------------------------------------------------------------------
