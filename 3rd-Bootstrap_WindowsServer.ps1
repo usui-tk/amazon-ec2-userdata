@@ -745,23 +745,46 @@ if ($RoleName) {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [Windows OS Setting]"
 
-# Setting System Locale
-Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
-Set-WinSystemLocale -SystemLocale ja-JP
-Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+if ($WindowsOSLanguage) {
+    if ($WindowsOSLanguage -eq "ja-JP") {
+        if ($WindowsOSVersion -match "^6.1") {
+            Write-Log "Windows Server OS Configuration [Windows OS Setting] : START"
 
-Write-Log ("# [Windows - OS Settings] Display Windows Home Location (Before) : " + (Get-WinHomeLocation).HomeLocation)
-Set-WinHomeLocation -GeoId 0x7A
-Write-Log ("# [Windows - OS Settings] Display Windows Home Location (After) : " + (Get-WinHomeLocation).HomeLocation)
+            #----------------------------------------------------------------------------
+            # [Unimplemented]
+            #----------------------------------------------------------------------------
 
-Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (Before) : " + (Get-WinCultureFromLanguageListOptOut))
-Set-WinCultureFromLanguageListOptOut -OptOut $False
-Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (After) : " + (Get-WinCultureFromLanguageListOptOut))
+            Write-Log "Windows Server OS Configuration [Windows OS Setting] : COMPLETE"
+        } elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+            Write-Log "Windows Server OS Configuration [Windows OS Setting] : START"
 
+            # Setting System Locale
+            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+            Set-WinSystemLocale -SystemLocale ja-JP
+            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+            
+            Write-Log ("# [Windows - OS Settings] Display Windows Home Location (Before) : " + (Get-WinHomeLocation).HomeLocation)
+            Set-WinHomeLocation -GeoId 0x7A
+            Write-Log ("# [Windows - OS Settings] Display Windows Home Location (After) : " + (Get-WinHomeLocation).HomeLocation)
 
-# Setting Japanese UI Language
-Set-WinUILanguageOverride -Language ja-JP
-Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+            Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (Before) : " + (Get-WinCultureFromLanguageListOptOut))
+            Set-WinCultureFromLanguageListOptOut -OptOut $False
+            Write-Log ("# [Windows - OS Settings] Make the date and time [format] the same as the display language (After) : " + (Get-WinCultureFromLanguageListOptOut))
+
+            # Setting Japanese UI Language
+            Set-WinUILanguageOverride -Language ja-JP
+            Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+
+            Write-Log "Windows Server OS Configuration [Windows OS Setting] : COMPLETE"
+        } else {
+            Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
+        }
+    } else {
+        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
+    }
+} else {
+    Write-Log "# [Warning] No Target - Windows OS Language"
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -973,7 +996,7 @@ if ($WindowsOSLanguage) {
             Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
         }
     } else {
-        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
+        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
     }
 } else {
     Write-Log "# [Warning] No Target - Windows OS Language"
@@ -990,16 +1013,24 @@ Write-LogSeparator "Windows Server OS Configuration [IPv6 Setting]"
 if ($WindowsOSVersion -match "^6.1") {
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : START"
 
-    # Display IPv6 Binding
+    # Display IPv6 Information
     netsh interface ipv6 show interface | Out-Default
+    netsh interface ipv6 show prefixpolicies | Out-Default
+    netsh interface ipv6 show global | Out-Default
 
-    # Disable IPv6 Binding
+    # Disable IPv6 Binding(ISATAP Interface)
     netsh interface ipv6 isatap set state disabled | Out-Default
-    netsh interface ipv6 6to4 set state disabled | Out-Default
-    netsh interface teredo set state disabled | Out-Default
 
-    # Display IPv6 Binding
+    # Disable IPv6 Binding(6to4 Interface)
+    netsh interface ipv6 6to4 set state disabled | Out-Default
+
+    # Disable IPv6 Binding(Teredo Interface)
+    netsh interface ipv6 set teredo disabled | Out-Default
+
+    # Display IPv6 Information
     netsh interface ipv6 show interface | Out-Default
+    netsh interface ipv6 show prefixpolicies | Out-Default
+    netsh interface ipv6 show global | Out-Default
 
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
 } elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
