@@ -71,6 +71,7 @@ function get_os_info () {
 }
 
 function get_bootstrap_script () {
+    # Select a Bootstrap script
     if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
         # Bootstrap Script for Amazon Linux
         BootstrapScript=${ScriptForAmazonLinux}
@@ -95,7 +96,7 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST_TYPE}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
-        if [ "${REV}" = "16.04" ]; then
+        if [ $(echo ${REV} | grep -e '16.04') ]; then
            # Bootstrap Script for Ubuntu 16.04 LTS
            BootstrapScript=${ScriptForUbuntu1604}
         else
@@ -105,10 +106,12 @@ function get_bootstrap_script () {
         BootstrapScript=""
     fi
 
+    # Bootstrap script determination
     if [ -z "${BootstrapScript}" ]; then
        echo "Unsupported Bootstrap Script Linux distribution"
        exit 1
     fi
+
 }
 
 
