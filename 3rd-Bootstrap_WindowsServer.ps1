@@ -1018,13 +1018,13 @@ if ($WindowsOSVersion -match "^6.1") {
     netsh interface ipv6 show prefixpolicies | Out-Default
     netsh interface ipv6 show global | Out-Default
 
-    # Disable IPv6 Binding(ISATAP Interface)
+    # Disable IPv6 Binding (ISATAP Interface)
     netsh interface ipv6 isatap set state disabled | Out-Default
 
-    # Disable IPv6 Binding(6to4 Interface)
+    # Disable IPv6 Binding (6to4 Interface)
     netsh interface ipv6 6to4 set state disabled | Out-Default
 
-    # Disable IPv6 Binding(Teredo Interface)
+    # Disable IPv6 Binding (Teredo Interface)
     netsh interface ipv6 set teredo disabled | Out-Default
 
     # Display IPv6 Information

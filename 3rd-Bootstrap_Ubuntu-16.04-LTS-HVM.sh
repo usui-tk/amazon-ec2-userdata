@@ -132,23 +132,15 @@ if [ -n "$RoleName" ]; then
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
 		echo "# Get Linux Kernel Module(modinfo ena)"
 		modinfo ena
-		echo "# Get Linux Network Interface Driver(ethtool -i ens3)"
-		ethtool -i ens3
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		modinfo ixgbevf
-		echo "# Get Linux Network Interface Driver(ethtool -i ens3)"
-		ethtool -i ens3
 	else
-		echo "# Get Linux Network Interface Driver(ethtool -i ens3)"
-		ethtool -i ens3
+		echo "# Not Target Instance Type :" $InstanceType
 	fi
-else
-	echo "# Get Linux Network Interface Driver(ethtool -i ens3)"
-	ethtool -i ens3
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
@@ -163,9 +155,6 @@ if [ -n "$RoleName" ]; then
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
-else
-	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
-	blockdev --report
 fi
 
 
