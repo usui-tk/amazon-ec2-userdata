@@ -35,17 +35,24 @@ echo $VpcNetwork
 export DEBIAN_FRONTEND=noninteractive
 
 # yum repository metadata Clean up
-apt-get -y clean
+apt-get clean -y
 
 # Default Package Update
-apt-get update -y && apt-get upgrade -y
+apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y bash-completion chrony curl dstat gdisk git hdparm jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute wget
+apt-get install -y bash-completion binutils chrony curl dstat gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip wget zip
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Special package for AWS]
+#-------------------------------------------------------------------------------
+
+# Package Install Special package for AWS (from Ubuntu Official Repository)
+apt-get install -y linux-aws linux-image-aws linux-tools-aws
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -206,7 +213,7 @@ systemctl status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-apt-get -y clean
+apt-get clean -y
 
 #-------------------------------------------------------------------------------
 # System Setting
@@ -270,21 +277,19 @@ chronyc sourcestats -v
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
 	timedatectl set-timezone Asia/Tokyo
 	date
-	# timedatectl status
+	dpkg-reconfigure --frontend noninteractive tzdata
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
 	timedatectl set-timezone UTC
 	date
-	# timedatectl status
+	dpkg-reconfigure --frontend noninteractive tzdata
 else
 	echo "# Default SystemClock and Timezone"
-	# timedatectl status
 	date
+	dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
 # Time synchronization with NTP server
@@ -303,27 +308,30 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# localectl status
 	localectl set-locale LANG=ja_JP.utf8
 	locale
-	# localectl status
-	cat /etc/locale.gen | grep -v "#"
+	strings /etc/default/locale
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
 	localectl set-locale LANG=en_US.utf8
 	locale
-	# localectl status
-	cat /etc/locale.gen | grep -v "#"
+	strings /etc/default/locale
 else
 	echo "# Default Language"
 	locale
-	cat /etc/locale.gen | grep -v "#"
+	strings /etc/default/locale
 fi
 
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
+	
+	# Disable IPv6 Uncomplicated Firewall (ufw)
+	sed -i "s/IPV6=yes/IPV6=no/g" /etc/default/ufw
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
