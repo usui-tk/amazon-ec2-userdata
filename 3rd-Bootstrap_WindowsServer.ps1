@@ -276,7 +276,7 @@ function Get-Ec2ConfigVersion
 
     # Write the information to the Log Files
     if ($Ec2ConfigVersion) {
-        Write-Log "# [Windows] Amazon EC2Config Version : $Ec2ConfigVersion"
+        Write-Log "# [Windows] Amazon EC2 Windows Utility Information - Amazon EC2Config Version : $Ec2ConfigVersion"
     }
 } # end Get-Ec2ConfigVersion
 
@@ -343,7 +343,7 @@ function Get-Ec2LaunchVersion
 
         # Write the information to the Log Files
         if ($Ec2LaunchVersion) {
-            Write-Log "# [Windows] Amazon EC2Launch Version : $Ec2LaunchVersion"
+            Write-Log "# [Windows] Amazon EC2 Windows Utility Information - Amazon EC2Launch Version : $Ec2LaunchVersion"
         }
     }
 } # end Get-Ec2LaunchVersion
@@ -373,7 +373,7 @@ function Get-Ec2SystemManagerAgentVersion
 
     # Write the information to the Log Files
     if ($SsmAgentVersion) {
-        Write-Log "# [Windows] Amazon SSM Agent Version : $SsmAgentVersion"
+        Write-Log "# [Windows] Amazon EC2 Windows Utility Information - Amazon SSM Agent Version : $SsmAgentVersion"
     }
 } # end function Get-Ec2SystemManagerAgentVersion
 
