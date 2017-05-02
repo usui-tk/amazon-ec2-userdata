@@ -137,10 +137,67 @@ function Get-AmazonMachineImageInformation
         $AmiOriginalName = $AMIRegistryValue.AMIName
 
         # Write the information to the Log Files
-        Write-Log "# [AMI] Windows - AMI Origin Version : $AmiOriginalVersion"
-        Write-Log "# [AMI] Windows - AMI Origin Name : $AmiOriginalName"
+        Write-Log "# [AWS - AMI] Windows - AMI Origin Version : $AmiOriginalVersion"
+        Write-Log "# [AWS - AMI] Windows - AMI Origin Name : $AmiOriginalName"
     }
 } # end function Get-AmazonMachineImageInformation
+
+
+function Get-AmazonMachineInformation
+{
+    # Get System BIOS Information
+    Set-Variable -Name BiosRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System"
+
+    if (Test-Path $BiosRegistry) {
+        $BiosRegistryValue = Get-ItemProperty -Path $BiosRegistry -ErrorAction SilentlyContinue
+        $SystemBiosVersion = $BiosRegistryValue.SystemBiosVersion
+
+        # Write the information to the Log Files
+        Write-Log "# [AWS - EC2] Hardware - System BIOS Revision : $SystemBiosVersion"
+    }
+
+    # Get System BIOS Details Information
+    Set-Variable -Name BiosDetailsRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System\BIOS"
+
+    if (Test-Path $BiosDetailsRegistry) {
+        $BiosDetailsRegistryValue = Get-ItemProperty -Path $BiosDetailsRegistry -ErrorAction SilentlyContinue
+        $BiosSystemManufacturer = $BiosDetailsRegistryValue.SystemManufacturer
+        $BiosSystemProductName = $BiosDetailsRegistryValue.SystemProductName
+        $BiosSystemVersion = $BiosDetailsRegistryValue.SystemVersion
+
+        # Write the information to the Log Files
+        Write-Log "# [AWS - EC2] Hardware - System BIOS Manufacturer : $BiosSystemManufacturer"
+        Write-Log "# [AWS - EC2] Hardware - System BIOS ProductName : $BiosSystemProductName"
+        Write-Log "# [AWS - EC2] Hardware - System BIOS Version : $BiosSystemVersion"        
+    }
+
+    # Get System CPU Information
+    Set-Variable -Name CpuRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+
+    if (Test-Path $CpuRegistry) {
+        $CpuRegistryValue = Get-ItemProperty -Path $CpuRegistry -ErrorAction SilentlyContinue
+        $CpuVendorIdentifier = $CpuRegistryValue.VendorIdentifier
+        $CpuProcessorName = $CpuRegistryValue.ProcessorNameString
+
+        # Write the information to the Log Files
+        Write-Log "# [AWS - EC2] Hardware - CPU Vendor Information : $CpuVendorIdentifier"
+        Write-Log "# [AWS - EC2] Hardware - CPU Model Information : $CpuProcessorName"
+    }
+
+    # Get Windows RegisteredOrganization & RegisteredOwner Information
+    Set-Variable -Name Ec2Registry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
+
+    if (Test-Path $Ec2Registry) {
+        $Ec2RegistryValue = Get-ItemProperty -Path $Ec2Registry -ErrorAction SilentlyContinue
+        $Ec2RegisteredOrganization = $Ec2RegistryValue.RegisteredOrganization
+        $Ec2RegisteredOwner = $Ec2RegistryValue.RegisteredOwner
+
+        # Write the information to the Log Files
+        Write-Log "# [AWS - EC2] Windows - RegisteredOrganization : $Ec2RegisteredOrganization"
+        Write-Log "# [AWS - EC2] Windows - RegisteredOwner : $Ec2RegisteredOwner"
+    }
+
+} # end function Get-AmazonMachineInformation
 
 
 function Get-DotNetFrameworkVersion
@@ -311,15 +368,15 @@ function Get-Ec2InstanceMetadata
     Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
 
     # Logging AWS Instance Metadata
-    Write-Log "# [AWS] Region : $Region"
-    Write-Log "# [AWS] Availability Zone : $AZ"
-    Write-Log "# [AWS] Instance ID : $InstanceId"
-    Write-Log "# [AWS] Instance Type : $InstanceType"
-    Write-Log "# [AWS] VPC Private IP Address(IPv4) : $PrivateIp"
-    Write-Log "# [AWS] Amazon Machine Images ID : $AmiId"
+    Write-Log "# [AWS - EC2] Region : $Region"
+    Write-Log "# [AWS - EC2] Availability Zone : $AZ"
+    Write-Log "# [AWS - EC2] Instance ID : $InstanceId"
+    Write-Log "# [AWS - EC2] Instance Type : $InstanceType"
+    Write-Log "# [AWS - EC2] VPC Private IP Address(IPv4) : $PrivateIp"
+    Write-Log "# [AWS - EC2] Amazon Machine Images ID : $AmiId"
     if ($RoleName) {
-        Write-Log "# [AWS] EC2 - Instance Profile ARN : $RoleArn"
-        Write-Log "# [AWS] EC2 - IAM Role Name : $RoleName"
+        Write-Log "# [AWS - EC2] Instance Profile ARN : $RoleArn"
+        Write-Log "# [AWS - EC2] IAM Role Name : $RoleName"
     }
 
 } # end function Get-Ec2InstanceMetadata
@@ -404,12 +461,12 @@ function Get-NetFirewallProfileInformation
 
 function Get-ScriptExecuteByAccount
 {
+    # Get PowerShell Script Execution UserName
+    Set-Variable -Name ScriptExecuteByAccountInformation -Scope Local -Value ([Security.Principal.WindowsIdentity]::GetCurrent())
+    Set-Variable -Name ScriptExecuteByAccountName -Scope Local -Value ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | Select-Object -Index 1)
+    
     # Test of administrative privileges
     Set-Variable -Name CheckAdministrator -Scope Local -Value (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
-
-    # Get PowerShell Script Execution UserName
-    $ScriptExecuteByAccountInformation = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $ScriptExecuteByAccountName = ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | Select-Object -Index 1)
 
     # Write the information to the Log Files
     if ($ScriptExecuteByAccountName) {
@@ -654,6 +711,9 @@ Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 # Logging AWS Instance Metadata
 Get-Ec2InstanceMetadata
 
+# Logging Amazon EC2 Hardware
+Get-AmazonMachineInformation
+
 # Logging Amazon EC2 attached EBS Volume List
 Get-EbsVolumesMappingInformation
 
@@ -818,8 +878,8 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     # Change Windows Update Policy 
     $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
     $AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
-    $AUSettings.ScheduledInstallationDay  = 1      # Every Sunday
-    $AUSettings.ScheduledInstallationTime = 3      # AM 3:00
+    # $AUSettings.ScheduledInstallationDay  = 1    # Every Sunday
+    # $AUSettings.ScheduledInstallationTime = 3    # AM 3:00
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
     $AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
 
@@ -829,13 +889,13 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Start-Sleep -Seconds 5
 
     # Get Windows Update Policy
-    Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"  
+    Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
 
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
 } elseif ($WindowsOSVersion -match "^10.*") {
 
     #----------------------------------------------------------------------------
-    # [Unimplemented]
+    # [not implemented yet]
     #----------------------------------------------------------------------------
 
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
@@ -859,7 +919,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 } elseif ($WindowsOSVersion -match "^10.*") {
 
     #----------------------------------------------------------------------------
-    # [Unimplemented]
+    # [not implemented yet]
     #----------------------------------------------------------------------------
 
     Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
