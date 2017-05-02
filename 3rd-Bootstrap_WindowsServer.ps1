@@ -381,13 +381,25 @@ function Get-Ec2SystemManagerAgentVersion
 function Get-NetAdapterBindingInformation
 {
     # Get NetAdapter Binding Component
-    $bindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled 
-    foreach ($binding in $bindings)
+    $NetAdapterBindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled 
+    foreach ($NetAdapterBinding in $NetAdapterBindings)
     {
         # Write the information to the Log Files
-        Write-Log ("# [Windows - OS Settings] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $binding.Name, $binding.DisplayName, $binding.ComponentID, $binding.Enabled)
+        Write-Log ("# [Windows - OS Settings] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $NetAdapterBinding.Name, $NetAdapterBinding.DisplayName, $NetAdapterBinding.ComponentID, $NetAdapterBinding.Enabled)
     }    
 } # end Get-NetAdapterBindingInformation
+
+
+function Get-NetFirewallProfileInformation
+{
+    # Get Net Firewall Profile
+    $FirewallProfiles = Get-NetFirewallProfile | Select-Object -Property Name, Enabled
+    foreach ($FirewallProfile in $FirewallProfiles)
+    {
+        # Write the information to the Log Files
+        Write-Log ("# [Windows - OS Settings] NetFirewallProfile : [Name - {0}] [Enabled - {1}]" -f $FirewallProfile.Name, $FirewallProfile.Enabled)
+    }    
+} # end Get-NetFirewallProfileInformation
 
 
 function Get-ScriptExecuteByAccount
@@ -676,6 +688,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 Get-Ec2SystemManagerAgentVersion
 
 # Logging Windows Server OS Parameter [OS Settings]
+Get-NetFirewallProfileInformation
 Get-PageFileInformation
 Get-NetAdapterBindingInformation
 Get-PowerPlanInformation
