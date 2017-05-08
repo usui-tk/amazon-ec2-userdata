@@ -1284,9 +1284,14 @@ Write-Log "# Package Download System Utility (AWS Directory Service PortTest App
 Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
 
 # Package Download System Utility (EC2Rescue)
-# https://aws.amazon.com/jp/premiumsupport/knowledge-center/ec2rescue-windows-troubleshoot/
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
 Write-Log "# Package Download System Utility (EC2Rescue)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+
+# Package Download System Utility (AWSLogCollector)
+# 
+Write-Log "# Package Download System Utility (AWSLogCollector)"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
