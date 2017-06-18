@@ -73,7 +73,7 @@ function get_os_info () {
 
 function get_bootstrap_script () {
     # Select a Bootstrap script
-    if [ "${DIST}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
+    if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST_TYPE}" = "amzn" ]; then
         # Bootstrap Script for Amazon Linux
         BootstrapScript=${ScriptForAmazonLinux}
     elif [ "${DIST}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then

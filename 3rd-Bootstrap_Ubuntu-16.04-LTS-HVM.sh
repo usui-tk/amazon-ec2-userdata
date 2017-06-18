@@ -243,9 +243,8 @@ if [ $(command -v ufw) ]; then
 fi
 
 # Linux Security Information(AppArmor)
-# 
-
-
+systemctl status -l apparmor
+aa-status
 
 #-------------------------------------------------------------------------------
 # System Setting

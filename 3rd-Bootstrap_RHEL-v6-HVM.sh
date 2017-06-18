@@ -267,6 +267,7 @@ chkconfig --list ip6tables
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]
 getenforce
+
 sestatus
 
 #-------------------------------------------------------------------------------

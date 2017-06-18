@@ -248,6 +248,7 @@ fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]
 getenforce
+
 sestatus
 
 #-------------------------------------------------------------------------------
