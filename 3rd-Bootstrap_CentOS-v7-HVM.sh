@@ -189,36 +189,18 @@ cd /tmp
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
-# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-# Workaround (https://github.com/aws/amazon-ssm-agent/pull/33)
-cat > /etc/systemd/system/amazon-ssm-agent.service << __EOF__
-[Unit]
-Description=amazon-ssm-agent
-After=network-online.target
-
-[Service]
-Type=simple
-WorkingDirectory=/usr/bin/
-ExecStart=/usr/bin/amazon-ssm-agent
-KillMode=process
-Restart=on-failure
-RestartSec=15min
-
-[Install]
-WantedBy=network-online.target
-__EOF__
-
 systemctl daemon-reload
 
-systemctl status amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 systemctl enable amazon-ssm-agent
 systemctl is-enabled amazon-ssm-agent
 
 systemctl restart amazon-ssm-agent
-systemctl status amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -258,11 +240,15 @@ ip route show
 
 # Network Information(Firewall Service) [firewalld]
 if [ $(command -v firewall-cmd) ]; then
-    # Network Information(Firewall Service) [systemctl status firewalld]
-    systemctl status firewalld
+    # Network Information(Firewall Service) [systemctl status -l firewalld]
+    systemctl status -l firewalld
     # Network Information(Firewall Service) [firewall-cmd --list-all]
     firewall-cmd --list-all
 fi
+
+# Linux Security Information(SELinux) [getenforce] [sestatus]
+getenforce
+sestatus
 
 #-------------------------------------------------------------------------------
 # System Setting

@@ -198,7 +198,7 @@ cd /tmp
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
-# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
@@ -247,6 +247,10 @@ chkconfig --list iptables
 
 # Network Information(Firewall Service) [service ip6tables stop]
 chkconfig --list ip6tables
+
+# Linux Security Information(SELinux) [getenforce] [sestatus]
+getenforce
+sestatus
 
 #-------------------------------------------------------------------------------
 # System Setting

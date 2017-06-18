@@ -183,32 +183,14 @@ cd /tmp
 curl https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb -o amazon-ssm-agent.deb
 dpkg -i amazon-ssm-agent.deb
 
-# Workaround (https://github.com/aws/amazon-ssm-agent/pull/33)
-cat > /lib/systemd/system/amazon-ssm-agent.service << __EOF__
-[Unit]
-Description=amazon-ssm-agent
-After=network-online.target
-
-[Service]
-Type=simple
-WorkingDirectory=/usr/bin/
-ExecStart=/usr/bin/amazon-ssm-agent
-KillMode=process
-Restart=on-failure
-RestartSec=15min
-
-[Install]
-WantedBy=network-online.target
-__EOF__
-
 systemctl daemon-reload
 
-systemctl status amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 systemctl enable amazon-ssm-agent
 systemctl is-enabled amazon-ssm-agent
 
 systemctl restart amazon-ssm-agent
-systemctl status amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -248,17 +230,22 @@ ip route show
 
 # Network Information(Firewall Service) [Uncomplicated firewall]
 if [ $(command -v ufw) ]; then
-    # Network Information(Firewall Service) [systemctl status ufw]
-    systemctl status ufw
+    # Network Information(Firewall Service) [systemctl status -l ufw]
+    systemctl status -l ufw
     # Network Information(Firewall Service Status) [ufw status]
     ufw status verbose
     # Network Information(Firewall Service Disabled) [ufw disable]
     ufw disable
-    # Network Information(Firewall Service Status) [systemctl status ufw]
-	systemctl status ufw
+    # Network Information(Firewall Service Status) [systemctl status -l ufw]
+	systemctl status -l ufw
 	systemctl disable ufw
-	systemctl status ufw
+	systemctl status -l ufw
 fi
+
+# Linux Security Information(AppArmor)
+# 
+
+
 
 #-------------------------------------------------------------------------------
 # System Setting

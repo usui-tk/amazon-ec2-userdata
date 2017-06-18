@@ -14,6 +14,7 @@ ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Bootstr
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
+ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -72,10 +73,10 @@ function get_os_info () {
 
 function get_bootstrap_script () {
     # Select a Bootstrap script
-    if [ "${DIST_TYPE}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
+    if [ "${DIST}" = "Amazon" ] || [ "${DIST_TYPE}" = "amzn" ]; then
         # Bootstrap Script for Amazon Linux
         BootstrapScript=${ScriptForAmazonLinux}
-    elif [ "${DIST_TYPE}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
+    elif [ "${DIST}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
         if [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Red Hat Enterprise Linux v7.x
            BootstrapScript=${ScriptForRHELv7}
@@ -85,7 +86,7 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
-    elif [ "${DIST_TYPE}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
+    elif [ "${DIST}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
         if [ "${REV}" = "7" ]; then
            # Bootstrap Script for CentOS v7.x
            BootstrapScript=${ScriptForCentOSv7}
@@ -95,10 +96,17 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
-    elif [ "${DIST_TYPE}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
+    elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
         if [ $(echo ${REV} | grep -e '16.04') ]; then
            # Bootstrap Script for Ubuntu 16.04 LTS
            BootstrapScript=${ScriptForUbuntu1604}
+        else
+           BootstrapScript=""
+        fi    
+    elif [ "${DIST}" = "SLES" ] || [ "${DIST_TYPE}" = "sles" ]; then
+        if [ $(echo ${REV} | grep -e '12.') ]; then
+           # Bootstrap Script for SUSE Linux Enterprise Server 12
+           BootstrapScript=${ScriptForSLESv12}
         else
            BootstrapScript=""
         fi    
@@ -127,6 +135,10 @@ if [ $(command -v yum) ]; then
 elif [ $(command -v apt-get) ]; then
     # Package Install curl Tools (Debian, Ubuntu)
     apt-get install -y curl
+
+elif [ $(command -v zypper) ]; then
+    # Package Install curl Tools (SUSE Linux Enterprise Server)
+    zypper --non-interactive install curl
 else
     echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
     exit 1

@@ -29,53 +29,51 @@ echo $VpcNetwork
 # Default Package Update
 #-------------------------------------------------------------------------------
 
-# Red Hat Update Infrastructure Client Package Update
-yum clean all
-yum update -y rh-amazon-rhui-client
+# SUSE Linux Enterprise Server Software repository metadata Clean up
+zypper clean --all
+zypper refresh
 
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases
-yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-yum-config-manager --enable rhui-REGION-client-config-server-6
+# Update default package
+zypper --non-interactive update
 
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
-yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
-
-# yum repository metadata Clean up
-yum clean all
-
-# Default Package Update
-yum update -y
+# Install recommended packages
+zypper --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
-yum install -y setroubleshoot-server
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
+zypper --non-interactive install dstat hdparm sdparm lzop iotop nmap
 
-# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
+#  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
+#  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
+#  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
+zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
 
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
+# Package Configure SUSE Package Hub Repository
+#   https://packagehub.suse.com/
+#   https://packagehub.suse.com/how-to-use/
+#
+SUSEConnect --status-text
 
-yum --enablerepo=epel -y install epel-release
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-yum clean all
+# Target version : SUSE Linux Enterprise 12 SP2
+SUSEConnect --product PackageHub/12.2/x86_64
+sleep 5
 
-# Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion jq
+SUSEConnect --status-text
+
+# Package Configure SLES Modules
+#   https://www.suse.com/products/server/features/modules/
+#
+SUSEConnect --list-extensions
+
+zypper clean --all
+zypper refresh
+
+# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+zypper --non-interactive install jq mtr
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -104,15 +102,6 @@ AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/d
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python-pip
-pip install --upgrade pip
-pip install awscli
-
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
 
 aws --version
 
@@ -189,44 +178,28 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudFormation Helper Scripts]
-#-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python-pip
-# pip install --upgrade pip
-
-pip install pystache
-pip install argparse
-pip install python-daemon
-pip install requests
-
-curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
-tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
-
-cd /tmp/aws-cfn-bootstrap-1.4/
-python setup.py build
-python setup.py install
-
-chmod 775 /usr/init/redhat/cfn-hup
-ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
-
-cd /tmp
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
-# yum localinstall -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+# zypper --non-interactive install https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+zypper --non-interactive install https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-status amazon-ssm-agent
-/sbin/restart amazon-ssm-agent
-status amazon-ssm-agent
+systemctl daemon-reload
+
+systemctl status -l amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+systemctl is-enabled amazon-ssm-agent
+
+systemctl restart amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-yum clean all
+zypper clean --all
+zypper refresh
+
+# zypper --non-interactive update
 
 #-------------------------------------------------------------------------------
 # System Setting
@@ -259,104 +232,103 @@ ip addr show
 # Network Information(Routing Table) [ip route show]
 ip route show
 
-# Network Information(Firewall Service) [chkconfig --list iptables]
-chkconfig --list iptables
+# Network Information(Firewall Service) [firewalld]
+if [ $(command -v SuSEfirewall2) ]; then
+    # Network Information(Firewall Service) [systemctl status SuSEfirewall2_init SuSEfirewall2]
+    systemctl status -l SuSEfirewall2_init SuSEfirewall2
+    # Network Information(Firewall Service) [SuSEfirewall2 status]
+	#   https://en.opensuse.org/SuSEfirewall2
+    SuSEfirewall2 status
+fi
 
-# Network Information(Firewall Service) [service ip6tables stop]
-chkconfig --list ip6tables
-
-# Linux Security Information(SELinux) [getenforce] [sestatus]
-getenforce
-sestatus
+# Linux Security Information(AppArmor) [rcapparmor status]
+rcapparmor status
 
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
-# NTP Service Enabled(ntpd)
-chkconfig --list ntpd
-chkconfig ntpd on
-chkconfig --list ntpd
+# Replace NTP Client software (Uninstall ntp Package)
+systemctl status -l ntpd
+systemctl stop ntpd
+systemctl status -l ntpd
+zypper --non-interactive remove ntp
 
-# Firewall Service Disabled (iptables/ip6tables)
-service iptables stop
-chkconfig --list iptables
-chkconfig iptables off
-chkconfig --list iptables
-
-service ip6tables stop
-chkconfig --list ip6tables
-chkconfig ip6tables off
-chkconfig --list ip6tables
+# Replace NTP Client software (Install chrony Package)
+zypper --non-interactive install chrony
+systemctl status -l chronyd
+systemctl restart chronyd
+systemctl enable chronyd
+systemctl is-enabled chronyd
+systemctl status -l chronyd
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
-	# Setting SystemClock
-	cat /dev/null > /etc/sysconfig/clock
-	echo 'ZONE="Asia/Tokyo"' >> /etc/sysconfig/clock
-	echo 'UTC=false' >> /etc/sysconfig/clock
-	cat /etc/sysconfig/clock
-	# Setting TimeZone
 	date
-	/bin/cp -fp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+	# timedatectl status
+	timedatectl set-timezone Asia/Tokyo
 	date
+	# timedatectl status
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
-	# Setting SystemClock
-	cat /dev/null > /etc/sysconfig/clock
-	echo 'ZONE="UTC"' >> /etc/sysconfig/clock
-	echo 'UTC=true' >> /etc/sysconfig/clock
-	cat /etc/sysconfig/clock
-	# Setting TimeZone
 	date
-	/bin/cp -fp /usr/share/zoneinfo/UTC /etc/localtime
+	# timedatectl status
+	timedatectl set-timezone UTC
 	date
+	# timedatectl status
 else
 	echo "# Default SystemClock and Timezone"
-	cat /etc/sysconfig/clock
-	cat /etc/localtime
+	# timedatectl status
+	date
 fi
 
 # Time synchronization with NTP server
 date
-ntpdate 0.rhel.pool.ntp.org
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
 date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
-	echo "# Setting System Language -> $Language"
-	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=ja_JP.UTF-8' >> /etc/sysconfig/i18n
-	cat /etc/sysconfig/i18n
+	# echo "# Setting System Language -> $Language"
+	# locale
+	# localectl status
+	# localectl set-locale LANG=ja_JP.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
-	echo "# Setting System Language -> $Language"
-	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=en_US.UTF-8' >> /etc/sysconfig/i18n
-	cat /etc/sysconfig/i18n
+	# echo "# Setting System Language -> $Language"
+	# locale
+	# localectl status
+	# localectl set-locale LANG=en_US.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
 else
 	echo "# Default Language"
-	cat /etc/sysconfig/i18n
+	locale
+	cat /etc/locale.conf
 fi
 
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-	service ntpd restart
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
-	DisableIPv6Conf="/etc/sysctl.d/99-ipv6-disable.conf"
+	DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
 
 	cat /dev/null > $DisableIPv6Conf
 	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
 	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
 	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
 
+	sysctl --system
 	sysctl -p
 
 	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
