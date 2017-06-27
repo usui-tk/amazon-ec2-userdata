@@ -240,6 +240,10 @@ yum --enablerepo=epel install -y ansible
 # https://access.redhat.com/articles/3050101
 # yum install -y ansible rhel-system-roles
 
+ansible --version
+
+ansible localhost -m setup 
+
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------

@@ -200,6 +200,10 @@ systemctl status -l amazon-ssm-agent
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 zypper --non-interactive install ansible
 
+ansible --version
+
+ansible localhost -m setup 
+
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------

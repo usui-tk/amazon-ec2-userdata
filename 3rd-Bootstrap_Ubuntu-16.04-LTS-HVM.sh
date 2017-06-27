@@ -201,6 +201,10 @@ apt-add-repository -y ppa:ansible/ansible
 apt-get update -y
 apt-get install -y ansible
 
+ansible --version
+
+ansible localhost -m setup 
+
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------

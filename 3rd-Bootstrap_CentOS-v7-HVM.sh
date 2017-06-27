@@ -209,6 +209,10 @@ systemctl status -l amazon-ssm-agent
 # Package Install Ansible (from EPEL Repository)
 yum --enablerepo=epel install -y ansible
 
+ansible --version
+
+ansible localhost -m setup 
+
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
