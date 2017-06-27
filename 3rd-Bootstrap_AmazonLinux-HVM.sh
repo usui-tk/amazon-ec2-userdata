@@ -148,7 +148,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon EC2 Systems Manager (SM) agent]
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
@@ -157,6 +157,11 @@ yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_a
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 status amazon-ssm-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+pip install ansible
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

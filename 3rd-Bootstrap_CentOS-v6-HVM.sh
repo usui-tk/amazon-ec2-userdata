@@ -207,6 +207,13 @@ status amazon-ssm-agent
 status amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+
+# Package Install Ansible (from EPEL Repository)
+yum --enablerepo=epel install -y ansible
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all

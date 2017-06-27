@@ -194,6 +194,13 @@ systemctl restart amazon-ssm-agent
 systemctl status -l amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Ansible]
+#-------------------------------------------------------------------------------
+
+# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+zypper --non-interactive install ansible
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 zypper clean --all
