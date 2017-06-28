@@ -163,9 +163,9 @@ status amazon-ssm-agent
 #-------------------------------------------------------------------------------
 pip install ansible
 
-ansible --version
+/usr/local/bin/ansible --version
 
-ansible localhost -m setup 
+/usr/local/bin/ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
