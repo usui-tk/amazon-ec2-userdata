@@ -154,9 +154,9 @@ fi
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-status amazon-ssm-agent
+/sbin/status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
-status amazon-ssm-agent
+/sbin/status amazon-ssm-agent
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
