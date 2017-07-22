@@ -1332,16 +1332,7 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 #
 #=======================================================================================================================
 #
-#  NVIDIA Tesla K80
-#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
-#    -> Tesla : 7
-#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
-#    -> [psid] K-Series : 91
-#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
-#    -> [pfid] Tesla K80 : 762
-#
-#=======================================================================================================================
-#
+#  [Amazon EC2 G2 Instance Family]
 #  NVIDIA GRID K520 GPU Parameter
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
 #    -> GRID : 9
@@ -1350,8 +1341,7 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=94
 #    -> [pfid] GRID K520 : 704
 #
-#=======================================================================================================================
-#
+#  [Amazon EC2 G3 Instance Family]
 #  NVIDIA Tesla M60
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
 #    -> Tesla : 7
@@ -1359,6 +1349,15 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 #    -> [psid] M-Class : 75
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=75
 #    -> [pfid] Tesla M60 : 783
+#
+#  [Amazon EC2 P2 Instance Family]
+#  NVIDIA Tesla K80
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] K-Series : 91
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
+#    -> [pfid] Tesla K80 : 762
 #
 #=======================================================================================================================
 #
