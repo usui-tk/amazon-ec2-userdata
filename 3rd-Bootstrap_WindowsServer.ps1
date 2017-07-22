@@ -785,7 +785,7 @@ if ($RoleName) {
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 if ($RoleName) {
-    if ($InstanceType -match "^i3.*|^m4.16xlarge|^p2.*|^r4.*|^x1.*") {
+    if ($InstanceType -match "^g3.*|^i3.*|^m4.16xlarge|^p2.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -801,7 +801,7 @@ if ($RoleName) {
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -1246,7 +1246,7 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
 Write-Log "# Package Download System Utility (Wireshark)"
-Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.2.5.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
+Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.0.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
@@ -1332,6 +1332,16 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 #
 #=======================================================================================================================
 #
+#  NVIDIA Tesla K80
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] K-Series : 91
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
+#    -> [pfid] Tesla K80 : 762
+#
+#=======================================================================================================================
+#
 #  NVIDIA GRID K520 GPU Parameter
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
 #    -> GRID : 9
@@ -1342,13 +1352,13 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 #
 #=======================================================================================================================
 #
-#  NVIDIA Tesla K80
+#  NVIDIA Tesla M60
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
 #    -> Tesla : 7
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
-#    -> [psid] K-Series : 91
-#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
-#    -> [pfid] Tesla K80 : 762
+#    -> [psid] M-Class : 75
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=75
+#    -> [pfid] Tesla M60 : 783
 #
 #=======================================================================================================================
 #
@@ -1374,6 +1384,80 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagno
 
 # Log Separator
 Write-LogSeparator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
+
+# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+if ($InstanceType -match "^g2.*") {
+    Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)"
+    if ($WindowsOSVersion) {
+        if ($WindowsOSVersion -eq "6.1") {
+            # [Windows Server 2008 R2]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
+        } elseif ($WindowsOSVersion -eq "6.2") {
+            # [Windows Server 2012]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
+        } elseif ($WindowsOSVersion -eq "6.3") {
+            # [Windows Server 2012 R2]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
+        } elseif ($WindowsOSVersion -eq "10.0") {
+            # [Windows Server 2016]
+            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-winserv-2016-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2016.exe"
+        } else {
+            # [No Target Server OS]
+            Write-Log ("# [Information] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        }
+    } else {
+        # [Undefined Server OS]
+        Write-Log "# [Warning] [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
+    }
+}
+
+
+# Package Download NVIDIA Tesla M60 GPU Driver (for Amazon EC2 G3 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+if ($InstanceType -match "^g3.*") {
+    Write-Log "# Package Download NVIDIA GRID M60 GPU Driver (for Amazon EC2 G3 Instance Family)"
+    if ($WindowsOSVersion) {
+        if ($WindowsOSVersion -eq "6.1") {
+            # [Windows Server 2008 R2]
+            $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
+            $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2008R2.exe"
+        } elseif ($WindowsOSVersion -eq "6.3") {
+            # [Windows Server 2012 R2]
+            $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
+        } elseif ($WindowsOSVersion -eq "10.0") {
+            # [Windows Server 2016]
+            $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+            $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
+            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
+        } else {
+            # [No Target Server OS]
+            Write-Log ("# [Information] [NVIDIA GRID M60 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        }
+    } else {
+        # [Undefined Server OS]
+        Write-Log "# [Warning] [NVIDIA GRID M60 GPU Driver] Undefined Server OS"
+    }
+}
+
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1405,40 +1489,6 @@ if ($InstanceType -match "^p2.*") {
     } else {
         # [Undefined Server OS]
         Write-Log "# [Warning] [NVIDIA Tesla K80 GPU Driver] Undefined Server OS"
-    }
-}
-
-
-# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
-if ($InstanceType -match "^g2.*") {
-    Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)"
-    if ($WindowsOSVersion) {
-        if ($WindowsOSVersion -eq "6.1") {
-            # [Windows Server 2008 R2]
-            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
-            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($WindowsOSVersion -eq "6.2") {
-            # [Windows Server 2012]
-            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
-            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
-        } elseif ($WindowsOSVersion -eq "6.3") {
-            # [Windows Server 2012 R2]
-            $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
-            $K520_driverversion = $($K520_drivers -match '<td class="gridItem">R.*\((.*)\)</td>' | Out-Null; $Matches[1])
-            $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
-        } else {
-            # [No Target Server OS]
-            Write-Log ("# [Information] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
-        }
-    } else {
-        # [Undefined Server OS]
-        Write-Log "# [Warning] [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
     }
 }
 
@@ -1517,7 +1567,7 @@ Write-Log "# Package Download Text Editor (Visual Studio Code)"
 Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
 Write-Log "# Package Install Text Editor (Visual Studio Code)"
 Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
-Start-Sleep -Seconds 120
+Start-Sleep -Seconds 180
 
 
 #-----------------------------------------------------------------------------------------------------------------------
