@@ -1394,24 +1394,28 @@ if ($InstanceType -match "^g2.*") {
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
         } elseif ($WindowsOSVersion -eq "6.2") {
             # [Windows Server 2012]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
         } elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
         } elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-winserv-2016-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2016.exe"
         } else {
             # [No Target Server OS]
@@ -1434,18 +1438,21 @@ if ($InstanceType -match "^g3.*") {
             $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2008R2.exe"
         } elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
         } elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
         } else {
             # [No Target Server OS]
@@ -1468,18 +1475,21 @@ if ($InstanceType -match "^p2.*") {
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=21&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
         } elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
         } elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
+            Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
         } else {
             # [No Target Server OS]
