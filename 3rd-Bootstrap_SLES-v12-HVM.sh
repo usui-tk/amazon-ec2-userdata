@@ -178,7 +178,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
 # zypper --non-interactive install https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
