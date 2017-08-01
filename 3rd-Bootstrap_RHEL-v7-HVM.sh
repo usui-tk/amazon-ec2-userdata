@@ -75,7 +75,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y jq
+yum --enablerepo=epel install -y fio jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -236,7 +236,7 @@ systemctl status -l amazon-ssm-agent
 yum --enablerepo=epel install -y ansible
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7-Beta/html/7.4_Release_Notes/new_features_ansible.html
+# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/7.4_Release_Notes/technology_previews_red_hat_enterprise_linux_system_roles_powered_by_ansible.html
 # https://access.redhat.com/articles/3050101
 # yum install -y ansible rhel-system-roles
 
