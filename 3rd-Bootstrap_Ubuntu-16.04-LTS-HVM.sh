@@ -45,7 +45,7 @@ apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y bash-completion binutils chrony curl dstat gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip wget zip
+apt-get install -y bash-completion binutils chrony curl dstat fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]

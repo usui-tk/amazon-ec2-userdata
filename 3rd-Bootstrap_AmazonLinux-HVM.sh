@@ -40,7 +40,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y dstat gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
+yum install -y dstat fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -161,11 +161,13 @@ yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_a
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
-pip install ansible
 
-/usr/local/bin/ansible --version
+# Package Install Amazon Linux System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y ansible
 
-/usr/local/bin/ansible localhost -m setup 
+ansible --version
+
+ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

@@ -40,7 +40,7 @@ zypper --non-interactive update
 zypper --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
@@ -52,7 +52,11 @@ zypper --non-interactive install dstat hdparm sdparm lzop iotop nmap
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
 
-# Package Configure SUSE Package Hub Repository
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Package Hub Repository)
+#-------------------------------------------------------------------------------
+
+# Repository Configure SUSE Package Hub Repository
 #   https://packagehub.suse.com/
 #   https://packagehub.suse.com/how-to-use/
 #

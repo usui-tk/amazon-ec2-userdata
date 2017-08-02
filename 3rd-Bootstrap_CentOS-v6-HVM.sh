@@ -58,7 +58,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot jq
+yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
