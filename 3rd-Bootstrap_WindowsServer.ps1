@@ -1453,7 +1453,7 @@ if ($InstanceType -match "^g3.*") {
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
-            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
+            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2016.exe"
         } else {
             # [No Target Server OS]
             Write-Log ("# [Information] [NVIDIA GRID M60 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
@@ -1562,20 +1562,21 @@ if ($WindowsOSVersion) {
 # Log Separator
 Write-LogSeparator "Custom Package Installation (Application)"
 
-# Package Install Modern Web Browser (Google Chrome 64bit)
-Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit)"
+# Package Install Modern Web Browser (Google Chrome 64bit Edition)
+Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
-Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit)"
+Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
 Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_ChromeSetup.log") -Wait | Out-Null
 
 #---------------------------------------------------------------
 # [Caution : Finally the installation process]
 #---------------------------------------------------------------
-# Package Install Text Editor (Visual Studio Code)
-Write-Log "# Package Download Text Editor (Visual Studio Code)"
-Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?LinkID=623230' -OutFile "$TOOL_DIR\VSCodeSetup-stable.exe"
-Write-Log "# Package Install Text Editor (Visual Studio Code)"
-Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-stable.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
+
+# Package Install Text Editor (Visual Studio Code 64bit Edition)
+Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
+Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
+Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
+Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 Start-Sleep -Seconds 180
 
 

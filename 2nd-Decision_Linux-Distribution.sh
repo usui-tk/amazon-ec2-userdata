@@ -135,7 +135,6 @@ if [ $(command -v yum) ]; then
 elif [ $(command -v apt-get) ]; then
     # Package Install curl Tools (Debian, Ubuntu)
     apt-get install -y curl
-
 elif [ $(command -v zypper) ]; then
     # Package Install curl Tools (SUSE Linux Enterprise Server)
     zypper --non-interactive install curl
