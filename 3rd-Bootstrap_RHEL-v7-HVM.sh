@@ -232,13 +232,8 @@ systemctl status -l amazon-ssm-agent
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible
-
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-# https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/7.4_Release_Notes/technology_previews_red_hat_enterprise_linux_system_roles_powered_by_ansible.html
-# https://access.redhat.com/articles/3050101
-# yum install -y ansible rhel-system-roles
+yum install -y ansible ansible-doc rhel-system-roles
 
 ansible --version
 
