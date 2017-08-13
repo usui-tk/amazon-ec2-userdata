@@ -54,8 +54,7 @@ Set-Variable -Name BOOTSTRAP_SCRIPT -Scope Script -Value "3rd-Bootstrap_WindowsS
 ########################################################################################################################
 
 
-function Format-Message
-{
+function Format-Message {
     param([string]$message)
     
     $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
@@ -63,20 +62,18 @@ function Format-Message
 } # end function Format-Message
 
 
-function Write-Log
-{
-    param([string]$message, $log=$USERDATA_LOG)
+function Write-Log {
+    param([string]$message, $log = $USERDATA_LOG)
     
     Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
 
-function Write-LogSeparator
-{
-      param([string]$message)
-      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-      Write-Log ("#   Script Executetion Step : " + $message)
-      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+function Write-LogSeparator {
+    param([string]$message)
+    Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    Write-Log ("#   Script Executetion Step : " + $message)
+    Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 } # end function Write-LogSeparator
 
 
@@ -111,7 +108,7 @@ Write-LogSeparator "Windows Server OS Decision"
 $Local:OSLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 $Local:OSversion = (Get-CimInstance Win32_OperatingSystem | Select-Object Version).Version
 
-Write-Log ("# [Windows Infomation] OS Version : " + ($OSversion) + " - OS Language : "  + ($OSLanguage))
+Write-Log ("# [Windows Infomation] OS Version : " + ($OSversion) + " - OS Language : " + ($OSLanguage))
 
 # Bootstrap Script Executite
 if ($OSversion -match "^6.1.*") {
@@ -123,7 +120,8 @@ if ($OSversion -match "^6.1.*") {
     Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
 
-} elseif ($OSversion -match "^6.2.*") {
+}
+elseif ($OSversion -match "^6.2.*") {
     # Log Separator
     Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2012"
 
@@ -132,7 +130,8 @@ if ($OSversion -match "^6.1.*") {
     Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
 
-} elseif ($OSversion -match "^6.3.*") {
+}
+elseif ($OSversion -match "^6.3.*") {
     # Log Separator
     Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2012 R2"
 
@@ -141,7 +140,8 @@ if ($OSversion -match "^6.1.*") {
     Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
 
-} elseif ($OSversion -match "^10.0.*") {
+}
+elseif ($OSversion -match "^10.0.*") {
     # Log Separator
     Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2016"
 
@@ -150,6 +150,7 @@ if ($OSversion -match "^6.1.*") {
     Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
     powershell.exe -ExecutionPolicy Bypass .\$BOOTSTRAP_SCRIPT -SkipNetworkProfileCheck
 
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $OSversion)
 }

@@ -62,8 +62,7 @@ Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\Pro
 ########################################################################################################################
 
 
-function Format-Message
-{
+function Format-Message {
     param([string]$message)
     
     $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
@@ -71,25 +70,22 @@ function Format-Message
 } # end function Format-Message
 
 
-function Write-Log
-{
-    param([string]$message, $log=$USERDATA_LOG)
+function Write-Log {
+    param([string]$message, $log = $USERDATA_LOG)
     
     Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
 
-function Write-LogSeparator
-{
-      param([string]$message)
-      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
-      Write-Log ("#   Script Executetion Step : " + $message)
-      Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+function Write-LogSeparator {
+    param([string]$message)
+    Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
+    Write-Log ("#   Script Executetion Step : " + $message)
+    Write-Log "#------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------"
 } # end function Write-LogSeparator
 
 
-function New-Directory
-{
+function New-Directory {
     param([string]$dir)
 
     if (!(Test-Path -Path $dir)) {
@@ -99,21 +95,20 @@ function New-Directory
 } # end function New-Directory
 
 
-function Set-TimeZoneCompatible
-{
-  [CmdletBinding(SupportsShouldProcess = $True)]
-  param( 
-    [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
-    [ValidateSet("Dateline Standard Time","UTC-11","Hawaiian Standard Time","Alaskan Standard Time","Pacific Standard Time (Mexico)","Pacific Standard Time","US Mountain Standard Time","Mountain Standard Time (Mexico)","Mountain Standard Time","Central America Standard Time","Central Standard Time","Central Standard Time (Mexico)","Canada Central Standard Time","SA Pacific Standard Time","Eastern Standard Time","US Eastern Standard Time","Venezuela Standard Time","Paraguay Standard Time","Atlantic Standard Time","Central Brazilian Standard Time","SA Western Standard Time","Pacific SA Standard Time","Newfoundland Standard Time","E. South America Standard Time","Argentina Standard Time","SA Eastern Standard Time","Greenland Standard Time","Montevideo Standard Time","Bahia Standard Time","UTC-02","Mid-Atlantic Standard Time","Azores Standard Time","Cape Verde Standard Time","Morocco Standard Time","UTC","GMT Standard Time","Greenwich Standard Time","W. Europe Standard Time","Central Europe Standard Time","Romance Standard Time","Central European Standard Time","W. Central Africa Standard Time","Namibia Standard Time","Jordan Standard Time","GTB&nbsp;Standard Time","Middle East Standard Time","Egypt Standard Time","Syria Standard Time","E. Europe Standard Time","South Africa Standard Time","FLE&nbsp;Standard Time","Turkey Standard Time","Israel Standard Time","Arabic Standard Time","Kaliningrad Standard Time","Arab Standard Time","E. Africa Standard Time","Iran Standard Time","Arabian Standard Time","Azerbaijan Standard Time","Russian Standard Time","Mauritius Standard Time","Georgian Standard Time","Caucasus Standard Time","Afghanistan Standard Time","Pakistan Standard Time","West Asia Standard Time","India Standard Time","Sri Lanka Standard Time","Nepal Standard Time","Central Asia Standard Time","Bangladesh Standard Time","Ekaterinburg Standard Time","Myanmar Standard Time","SE Asia Standard Time","N. Central Asia Standard Time","China Standard Time","North Asia Standard Time","Singapore Standard Time","W. Australia Standard Time","Taipei Standard Time","Ulaanbaatar Standard Time","North Asia East Standard Time","Tokyo Standard Time","Korea Standard Time","Cen. Australia Standard Time","AUS Central Standard Time","E. Australia Standard Time","AUS Eastern Standard Time","West Pacific Standard Time","Tasmania Standard Time","Yakutsk&nbsp;Standard Time","Central Pacific Standard Time","Vladivostok Standard Time","New Zealand Standard Time","UTC+12","Fiji Standard Time","Magadan&nbsp;Standard Time","Tonga Standard Time","Samoa Standard Time")]
-    [ValidateNotNullOrEmpty()]
-    [string]$TimeZone = "Tokyo Standard Time"
-  ) 
+function Set-TimeZoneCompatible {
+    [CmdletBinding(SupportsShouldProcess = $True)]
+    param( 
+        [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
+        [ValidateSet("Dateline Standard Time", "UTC-11", "Hawaiian Standard Time", "Alaskan Standard Time", "Pacific Standard Time (Mexico)", "Pacific Standard Time", "US Mountain Standard Time", "Mountain Standard Time (Mexico)", "Mountain Standard Time", "Central America Standard Time", "Central Standard Time", "Central Standard Time (Mexico)", "Canada Central Standard Time", "SA Pacific Standard Time", "Eastern Standard Time", "US Eastern Standard Time", "Venezuela Standard Time", "Paraguay Standard Time", "Atlantic Standard Time", "Central Brazilian Standard Time", "SA Western Standard Time", "Pacific SA Standard Time", "Newfoundland Standard Time", "E. South America Standard Time", "Argentina Standard Time", "SA Eastern Standard Time", "Greenland Standard Time", "Montevideo Standard Time", "Bahia Standard Time", "UTC-02", "Mid-Atlantic Standard Time", "Azores Standard Time", "Cape Verde Standard Time", "Morocco Standard Time", "UTC", "GMT Standard Time", "Greenwich Standard Time", "W. Europe Standard Time", "Central Europe Standard Time", "Romance Standard Time", "Central European Standard Time", "W. Central Africa Standard Time", "Namibia Standard Time", "Jordan Standard Time", "GTB&nbsp;Standard Time", "Middle East Standard Time", "Egypt Standard Time", "Syria Standard Time", "E. Europe Standard Time", "South Africa Standard Time", "FLE&nbsp;Standard Time", "Turkey Standard Time", "Israel Standard Time", "Arabic Standard Time", "Kaliningrad Standard Time", "Arab Standard Time", "E. Africa Standard Time", "Iran Standard Time", "Arabian Standard Time", "Azerbaijan Standard Time", "Russian Standard Time", "Mauritius Standard Time", "Georgian Standard Time", "Caucasus Standard Time", "Afghanistan Standard Time", "Pakistan Standard Time", "West Asia Standard Time", "India Standard Time", "Sri Lanka Standard Time", "Nepal Standard Time", "Central Asia Standard Time", "Bangladesh Standard Time", "Ekaterinburg Standard Time", "Myanmar Standard Time", "SE Asia Standard Time", "N. Central Asia Standard Time", "China Standard Time", "North Asia Standard Time", "Singapore Standard Time", "W. Australia Standard Time", "Taipei Standard Time", "Ulaanbaatar Standard Time", "North Asia East Standard Time", "Tokyo Standard Time", "Korea Standard Time", "Cen. Australia Standard Time", "AUS Central Standard Time", "E. Australia Standard Time", "AUS Eastern Standard Time", "West Pacific Standard Time", "Tasmania Standard Time", "Yakutsk&nbsp;Standard Time", "Central Pacific Standard Time", "Vladivostok Standard Time", "New Zealand Standard Time", "UTC+12", "Fiji Standard Time", "Magadan&nbsp;Standard Time", "Tonga Standard Time", "Samoa Standard Time")]
+        [ValidateNotNullOrEmpty()]
+        [string]$TimeZone = "Tokyo Standard Time"
+    ) 
 
-  $process = New-Object System.Diagnostics.Process 
-  $process.StartInfo.WindowStyle = "Hidden" 
-  $process.StartInfo.FileName = "tzutil.exe" 
-  $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
-  $process.Start() | Out-Null 
+    $process = New-Object System.Diagnostics.Process 
+    $process.StartInfo.WindowStyle = "Hidden" 
+    $process.StartInfo.FileName = "tzutil.exe" 
+    $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
+    $process.Start() | Out-Null 
 } # end function Set-TimeZoneCompatible
 
 
@@ -127,8 +122,7 @@ function Set-TimeZoneCompatible
 ########################################################################################################################
 
 
-function Get-AmazonMachineImageInformation
-{
+function Get-AmazonMachineImageInformation {
     Set-Variable -Name AMIRegistry -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Amazon\MachineImage"
 
     if (Test-Path $AMIRegistry) {
@@ -143,8 +137,7 @@ function Get-AmazonMachineImageInformation
 } # end function Get-AmazonMachineImageInformation
 
 
-function Get-AmazonMachineInformation
-{
+function Get-AmazonMachineInformation {
     # Get System BIOS Information
     Set-Variable -Name BiosRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System"
 
@@ -200,20 +193,17 @@ function Get-AmazonMachineInformation
 } # end function Get-AmazonMachineInformation
 
 
-function Get-DotNetFrameworkVersion
-{
+function Get-DotNetFrameworkVersion {
     # Get Installed .NET Framework Version
     $dotnet_versions = Get-ChildItem -Path 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP' -Recurse | Get-ItemProperty -Name Version -EA 0 | Where-Object -FilterScript { $_.PSChildName -match '^(?!S)\p{L}' } | Select-Object -Property PSChildName, Version
-    foreach ($dotnet_version in $dotnet_versions)
-    {
+    foreach ($dotnet_version in $dotnet_versions) {
         # Write the information to the Log Files
         Write-Log ("# [Windows] .NET Framework Information : v{0} - Profile : {1} " -f $dotnet_version.Version, $dotnet_version.PSChildName)
     }    
 } # end function Get-DotNetFrameworkVersion
 
 
-function Get-EbsVolumesMappingInformation
-{
+function Get-EbsVolumesMappingInformation {
     # List the Windows disks
 
     # Set Initialize Parameter
@@ -224,8 +214,8 @@ function Get-EbsVolumesMappingInformation
 
     # Create a hash table that maps each device to a SCSI target
     $Map = @{"0" = '/dev/sda1'} 
-    for($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}",[char](97 + $x)))}
-    for($x = 78; $x -le 102; $x++) {$Map.add($x.ToString(), [String]::Format("xvdc{0}",[char](19 + $x)))}
+    for ($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}", [char](97 + $x)))}
+    for ($x = 78; $x -le 102; $x++) {$Map.add($x.ToString(), [String]::Format("xvdc{0}", [char](19 + $x)))}
 
     Try {
         # Use the metadata service to discover which instance the script is running on
@@ -242,7 +232,7 @@ function Get-EbsVolumesMappingInformation
 
         # Region
         if ( [string]::IsNullOrEmpty($Region) ) {
-            $Region = $AZ.Substring(0, $AZ.Length -1)
+            $Region = $AZ.Substring(0, $AZ.Length - 1)
         }
 
         #Get OS Language
@@ -251,7 +241,8 @@ function Get-EbsVolumesMappingInformation
         #Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
 
-    } Catch {
+    }
+    Catch {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
     }
     
@@ -259,12 +250,12 @@ function Get-EbsVolumesMappingInformation
         $Drive = $_
         
         # Find the partitions for this drive
-        Get-WmiObject -Class Win32_DiskDriveToDiskPartition | Where-Object {$_.Antecedent -eq $Drive.Path.Path} | %{
+        Get-WmiObject -Class Win32_DiskDriveToDiskPartition | Where-Object {$_.Antecedent -eq $Drive.Path.Path} | % {
             $D2P = $_
             # Get details about each partition
             $Partition = Get-WmiObject -Class Win32_DiskPartition | Where-Object {$_.Path.Path -eq $D2P.Dependent}
             # Find the drive that this partition is linked to
-            $Disk = Get-WmiObject -Class Win32_LogicalDiskToPartition | Where-Object {$_.Antecedent -in $D2P.Dependent} | %{ 
+            $Disk = Get-WmiObject -Class Win32_LogicalDiskToPartition | Where-Object {$_.Antecedent -in $D2P.Dependent} | % { 
                 $L2P = $_
                 #Get the drive letter for this partition, if there is one
                 Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.Path.Path -in $L2P.Dependent}
@@ -274,28 +265,30 @@ function Get-EbsVolumesMappingInformation
             if ($OsLanguage -eq "ja-JP") {
                 # Display the information in a table (Japanese : ja-JP)
                 New-Object -TypeName PSCustomObject -Property @{
-                    Device = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("ディスク #",""));
-                    Boot = $Partition.BootPartition;
-                    Partition = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" パーティション #",""));
-                    SCSITarget = $Drive.SCSITargetId;
-                    DriveLetter = if($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName = if($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId = if($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
+                    Device      = $Map[$Drive.SCSITargetId.ToString()];
+                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("ディスク #", ""));
+                    Boot        = $Partition.BootPartition;
+                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" パーティション #", ""));
+                    SCSITarget  = $Drive.SCSITargetId;
+                    DriveLetter = if ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
+                    VolumeName  = if ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
+                    VolumeId    = if ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
                 }
-            } elseif ($OsLanguage -eq "en-US") {
+            }
+            elseif ($OsLanguage -eq "en-US") {
                 # Display the information in a table (English : en-US)
                 New-Object -TypeName PSCustomObject -Property @{
-                    Device = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #",""));
-                    Boot = $Partition.BootPartition;
-                    Partition = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" Partition #",""));
-                    SCSITarget = $Drive.SCSITargetId;
-                    DriveLetter = If($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName = If($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId = If($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
+                    Device      = $Map[$Drive.SCSITargetId.ToString()];
+                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #", ""));
+                    Boot        = $Partition.BootPartition;
+                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" Partition #", ""));
+                    SCSITarget  = $Drive.SCSITargetId;
+                    DriveLetter = If ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
+                    VolumeName  = If ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
+                    VolumeId    = If ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
                 }
-            } else {
+            }
+            else {
                 # [No Target Server OS]
                 Write-Log ("# [Information] [Amazon EC2 Attached EBS Volumes] No Target Server OS Language : " + $OsLanguage)
             }
@@ -304,8 +297,7 @@ function Get-EbsVolumesMappingInformation
 
     } | Sort-Object Disk, Partition | Select-Object Disk, Partition, SCSITarget, DriveLetter, Boot, VolumeId, Device, VolumeName
     
-    foreach ($EBSVolumeList in $EBSVolumeLists)
-    {
+    foreach ($EBSVolumeList in $EBSVolumeLists) {
         if ($EBSVolumeList) {
             # Write the information to the Log Files
             Write-Log ("# [EBS] : [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
@@ -315,8 +307,7 @@ function Get-EbsVolumesMappingInformation
 } # end Get-EbsVolumesMappingInformation
 
 
-function Get-Ec2ConfigVersion
-{
+function Get-Ec2ConfigVersion {
     #--------------------------------------------------------------------------------------
     #  Configuring a Windows Instance Using the EC2Config Service
     #   http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/UsingConfig_WinAMI.html
@@ -338,8 +329,7 @@ function Get-Ec2ConfigVersion
 } # end Get-Ec2ConfigVersion
 
 
-function Get-Ec2InstanceMetadata
-{
+function Get-Ec2InstanceMetadata {
     #--------------------------------------------------------------------------------------
     #  Instance Metadata and User Data (Windows)
     #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2-instance-metadata.html
@@ -382,8 +372,7 @@ function Get-Ec2InstanceMetadata
 } # end function Get-Ec2InstanceMetadata
 
 
-function Get-Ec2LaunchVersion
-{
+function Get-Ec2LaunchVersion {
     #--------------------------------------------------------------------------------------
     #  Configuring a Windows Instance Using EC2Launch
     #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch.html
@@ -406,8 +395,7 @@ function Get-Ec2LaunchVersion
 } # end Get-Ec2LaunchVersion
 
 
-function Get-Ec2SystemManagerAgentVersion
-{
+function Get-Ec2SystemManagerAgentVersion {
     #--------------------------------------------------------------------------------------
     #  Amazon EC2 Systems Manager
     #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager.html
@@ -435,32 +423,27 @@ function Get-Ec2SystemManagerAgentVersion
 } # end function Get-Ec2SystemManagerAgentVersion
 
 
-function Get-NetAdapterBindingInformation
-{
+function Get-NetAdapterBindingInformation {
     # Get NetAdapter Binding Component
     $NetAdapterBindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled 
-    foreach ($NetAdapterBinding in $NetAdapterBindings)
-    {
+    foreach ($NetAdapterBinding in $NetAdapterBindings) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $NetAdapterBinding.Name, $NetAdapterBinding.DisplayName, $NetAdapterBinding.ComponentID, $NetAdapterBinding.Enabled)
     }    
 } # end Get-NetAdapterBindingInformation
 
 
-function Get-NetFirewallProfileInformation
-{
+function Get-NetFirewallProfileInformation {
     # Get Net Firewall Profile
     $FirewallProfiles = Get-NetFirewallProfile | Select-Object -Property Name, Enabled
-    foreach ($FirewallProfile in $FirewallProfiles)
-    {
+    foreach ($FirewallProfile in $FirewallProfiles) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] NetFirewallProfile : [Name - {0}] [Enabled - {1}]" -f $FirewallProfile.Name, $FirewallProfile.Enabled)
     }    
 } # end Get-NetFirewallProfileInformation
 
 
-function Get-ScriptExecuteByAccount
-{
+function Get-ScriptExecuteByAccount {
     # Get PowerShell Script Execution UserName
     Set-Variable -Name ScriptExecuteByAccountInformation -Scope Local -Value ([Security.Principal.WindowsIdentity]::GetCurrent())
     Set-Variable -Name ScriptExecuteByAccountName -Scope Local -Value ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | Select-Object -Index 1)
@@ -471,33 +454,30 @@ function Get-ScriptExecuteByAccount
     # Write the information to the Log Files
     if ($ScriptExecuteByAccountName) {
         Write-Log ("# [Windows] Powershell Script Execution Username : " + ($ScriptExecuteByAccountName))
-        if ($CheckAdministrator -eq $true){
+        if ($CheckAdministrator -eq $true) {
             Write-Log "# [Windows] [Infomation] Bootstrap scripts run with the privileges of the administrator"
-        } else {
+        }
+        else {
             Write-Log "# [Windows] [Warning] Bootstrap scripts run with the privileges of the non-administrator"
         }
     }
 } # end Get-ScriptExecuteByAccount
 
 
-function Get-PageFileInformation
-{
+function Get-PageFileInformation {
     # Get PageFile Information
     $pagefiles = Get-WmiObject -Class Win32_PageFileusage | Select-Object -Property Name, CurrentUsage, AllocatedBaseSize, PeakUsage, InstallDate
-    foreach ($pagefile in $pagefiles)
-    {
+    foreach ($pagefile in $pagefiles) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] Page File : [Name - {0}] [CurrentUsage - {1}] [AllocatedBaseSize - {2}] [PeakUsage - {3}]" -f $pagefile.Name, $pagefile.CurrentUsage, $pagefile.AllocatedBaseSize, $pagefile.PeakUsage)
     }    
 } # end Get-PageFileInformation
 
 
-function Get-PowerPlanInformation
-{
+function Get-PowerPlanInformation {
     # Get PowerPlan Settings
     $powerplans = Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Select-Object ElementName, IsActive, Description
-    foreach ($powerplan in $powerplans)
-    {
+    foreach ($powerplan in $powerplans) {
         if ($powerplan | Where-Object { $_.IsActive -eq $True }) {
             # Write the information to the Log Files
             Write-Log ("# [Windows - OS Settings] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
@@ -506,8 +486,7 @@ function Get-PowerPlanInformation
 } # end Get-PowerPlanInformation
 
 
-function Get-PowerShellVerson
-{
+function Get-PowerShellVerson {
     # Get PowerShell Environment Information
     $PowerShellVersion = $PSVersionTable.PSVersion.ToString()
     $PowerShellClrVersion = $PSVersionTable.CLRVersion.ToString()
@@ -517,29 +496,24 @@ function Get-PowerShellVerson
 } # end Get-PowerShellVerson
 
 
-function Get-WindowsDriverInformation
-{
+function Get-WindowsDriverInformation {
     $win_drivers = Get-WindowsDriver -Online | Where-Object { $_.OriginalFileName -like '*xenvbd*' -or $_.ClassName -eq 'Net' -and `
-         ($_.ProviderName -eq 'Amazon Inc.' -or $_.ProviderName -eq 'Citrix Systems, Inc.' -or $_.ProviderName -like 'Intel*' -or $_.ProviderName -eq 'Amazon Web Services, Inc.') }
+        ($_.ProviderName -eq 'Amazon Inc.' -or $_.ProviderName -eq 'Citrix Systems, Inc.' -or $_.ProviderName -like 'Intel*' -or $_.ProviderName -eq 'Amazon Web Services, Inc.') }
     $pnp_drivers = Get-CimInstance -ClassName Win32_PnPEntity | Where-Object { $_.Service -eq 'xenvbd' -or `
-         $_.Manufacturer -like 'Intel*' -or $_.Manufacturer -eq 'Citrix Systems, Inc.' -or $_.Manufacturer -eq 'Amazon Inc.' -or $_.Manufacturer -eq 'Amazon Web Services, Inc.' }
+            $_.Manufacturer -like 'Intel*' -or $_.Manufacturer -eq 'Citrix Systems, Inc.' -or $_.Manufacturer -eq 'Amazon Inc.' -or $_.Manufacturer -eq 'Amazon Web Services, Inc.' }
     
-    foreach ($win_driver in $win_drivers)
-    {
-        foreach ($pnp_driver in $pnp_drivers)
-        {
-            if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) 
-                {
-                    # Write the information to the Log Files
-                    Write-Log ("# [Windows] Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
-                }
+    foreach ($win_driver in $win_drivers) {
+        foreach ($pnp_driver in $pnp_drivers) {
+            if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) {
+                # Write the information to the Log Files
+                Write-Log ("# [Windows] Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
+            }
         }
     }    
 } # end function Get-WindowsDriverInformation
 
 
-function Get-WindowsServerInformation
-{
+function Get-WindowsServerInformation {
     #--------------------------------------------------------------------------------------
     #  Windows Server OS Version Tables (Windows NT Version Tables)
     #   https://msdn.microsoft.com/ja-jp/library/windows/desktop/ms724832(v=vs.85).aspx
@@ -566,7 +540,8 @@ function Get-WindowsServerInformation
     Set-Variable -Name serverOptions -Option Constant -Scope Local -Value @{ 0 = "Undefined"; 12 = $serverCore; 13 = $serverCore;
         14 = $serverCore; 29 = $serverCore; 39 = $serverCore; 40 = $serverCore; 41 = $serverCore; 43 = $serverCore;
         44 = $serverCore; 45 = $serverCore; 46 = $serverCore; 63 = $serverCore; 143 = $nanoServer; 144 = $nanoServer;
-        147 = $serverCore; 148 = $serverCore; }
+        147 = $serverCore; 148 = $serverCore; 
+    }
 
     # Get ProductName and BuildLabEx from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
     if (Test-Path $windowInfoKey) {
@@ -586,14 +561,16 @@ function Get-WindowsServerInformation
         $osVersionSplit = $osInfo.Version.Split(".")
         if ($osVersionSplit.Count -gt 1) {
             $osVersion = ("{0}.{1}" -f $osVersionSplit[0], $osVersionSplit[1])
-        } elseif ($osVersionSplit.Count -eq 1) {
+        }
+        elseif ($osVersionSplit.Count -eq 1) {
             $osVersion = ("{0}.0" -f $osVersionSplit[0])
         }
     }
 
     if ($serverOptions[$osSkuNumber]) {
         $installOption = $serverOptions[$osSkuNumber]
-    } else {
+    }
+    else {
         $installOption = $fullServer
     }
 
@@ -626,8 +603,7 @@ function Get-WindowsServerInformation
 ########################################################################################################################
 
 
-function Update-SysprepAnswerFile($SysprepAnswerFile)
-{
+function Update-SysprepAnswerFile($SysprepAnswerFile) {
     [xml]$SysprepXMLDocument = Get-Content -Path $SysprepAnswerFile -Encoding UTF8
 
     $SysprepNamespace = New-Object System.Xml.XmlNamespaceManager($SysprepXMLDocument.NameTable)
@@ -669,15 +645,18 @@ if ($TimezoneLanguage -eq "ja-JP") {
         Set-TimeZoneCompatible "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-    } elseif ($TimezoneOSversion -match "^10.*") {
+    }
+    elseif ($TimezoneOSversion -match "^10.*") {
         Get-TimeZone
         Set-TimeZone -Id "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-TimeZone
-    } else {
+    }
+    else {
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     }
-} else {
+}
+else {
     Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
 }
 
@@ -738,9 +717,11 @@ Get-WindowsDriverInformation
 # Logging Windows Server OS Parameter [EC2 Bootstrap Application Information]
 if ($WindowsOSVersion -match "^5.*|^6.*") {
     Get-Ec2ConfigVersion
-} elseif ($WindowsOSVersion -match "^10.*") {
+}
+elseif ($WindowsOSVersion -match "^10.*") {
     Get-Ec2LaunchVersion
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
@@ -763,7 +744,7 @@ Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
 # Setting AWS Tools for Windows PowerShell
 Set-DefaultAWSRegion -Region $Region
-Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - "  + (Get-DefaultAWSRegion).Region)
+Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
 
 # Get AMI Information
 if ($RoleName) {
@@ -790,11 +771,13 @@ if ($RoleName) {
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
-    } elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
+    }
+    elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
         # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport | Out-File "$LOGS_DIR\AWS-EC2_ENI-SRIOV-Information.txt" -Append -Force
-    } else {
+    }
+    else {
         Write-Log "# [Amazon EC2 - Windows] Instance type of None [Network Interface Performance Attribute]"
     }
 }
@@ -805,7 +788,8 @@ if ($RoleName) {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
-    } else {
+    }
+    else {
         Write-Log "# [Amazon EC2 - Windows] Instance type of None [Storage Interface Performance Attribute]"
     }
 }
@@ -828,13 +812,14 @@ if ($WindowsOSLanguage) {
             #----------------------------------------------------------------------------
 
             Write-Log "Windows Server OS Configuration [Windows OS Setting] : COMPLETE"
-        } elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+        }
+        elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
             Write-Log "Windows Server OS Configuration [Windows OS Setting] : START"
 
             # Setting System Locale
-            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - " + (Get-WinSystemLocale).Name)
             Set-WinSystemLocale -SystemLocale ja-JP
-            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - "  + (Get-WinSystemLocale).Name)
+            Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - " + (Get-WinSystemLocale).Name)
             
             Write-Log ("# [Windows - OS Settings] Display Windows Home Location (Before) : " + (Get-WinHomeLocation).HomeLocation)
             Set-WinHomeLocation -GeoId 0x7A
@@ -846,16 +831,19 @@ if ($WindowsOSLanguage) {
 
             # Setting Japanese UI Language
             Set-WinUILanguageOverride -Language ja-JP
-            Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - "  + (Get-WinUILanguageOverride).Name)
+            Write-Log ("# [Windows - OS Settings] Override display language (After) : " + (Get-WinUILanguageOverride).DisplayName + " - " + (Get-WinUILanguageOverride).Name)
 
             Write-Log "Windows Server OS Configuration [Windows OS Setting] : COMPLETE"
-        } else {
+        }
+        else {
             Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
         }
-    } else {
+    }
+    else {
         Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
     }
-} else {
+}
+else {
     Write-Log "# [Warning] No Target - Windows OS Language"
 }
 
@@ -877,11 +865,11 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
     # Change Windows Update Policy 
     $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
-    $AUSettings.NotificationLevel         = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+    $AUSettings.NotificationLevel = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
     # $AUSettings.ScheduledInstallationDay  = 1    # Every Sunday
     # $AUSettings.ScheduledInstallationTime = 3    # AM 3:00
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
-    $AUSettings.FeaturedUpdatesEnabled    = $True  # Enabled
+    $AUSettings.FeaturedUpdatesEnabled = $True  # Enabled
 
     # Save Windows Update Policy 
     $AUSettings.Save()
@@ -893,13 +881,15 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
 } elseif ($WindowsOSVersion -match "^10.*") {
+elseif ($WindowsOSVersion -match "^10.*") {
 
     #----------------------------------------------------------------------------
     # [not implemented yet]
     #----------------------------------------------------------------------------
 
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
@@ -910,20 +900,22 @@ Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (Before)"
 if ($WindowsOSVersion -match "^5.*|^6.*") {
     # Enable Microsoft Update
     $SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict 
-    $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d",7,"")
+    $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d", 7, "")
     $SMSettings.Services
 
     Start-Sleep -Seconds 5
 
     Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
-} elseif ($WindowsOSVersion -match "^10.*") {
+}
+elseif ($WindowsOSVersion -match "^10.*") {
 
     #----------------------------------------------------------------------------
     # [not implemented yet]
     #----------------------------------------------------------------------------
 
     Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
@@ -988,10 +980,10 @@ if ($WindowsOSVersion -match "^6.1") {
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : START"
 
     # Skip network location setting for pre-Vista operating systems
-    if([environment]::OSVersion.version.Major -lt 6) { return }
+    if ([environment]::OSVersion.version.Major -lt 6) { return }
 
     # Skip network location setting if local machine is joined to a domain.
-    if(1,3,4,5 -contains (Get-WmiObject win32_computersystem).DomainRole) { return }
+    if (1, 3, 4, 5 -contains (Get-WmiObject win32_computersystem).DomainRole) { return }
 
     # Get network connections
     $networkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([Guid]"{DCB00C01-570F-4A9B-8D69-199FDBA5723B}"))
@@ -1001,7 +993,8 @@ if ($WindowsOSVersion -match "^6.1") {
     $connections | % {$_.GetNetwork().SetCategory(1)}
 
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
-} elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+}
+elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : START"
 
     # Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
@@ -1019,10 +1012,12 @@ if ($WindowsOSVersion -match "^6.1") {
         Write-Log ("# [Windows - OS Settings] NetProfile : [Name - {0}] [InterfaceAlias - {1}] [NetworkCategory - {2}] [IPv4Connectivity - {3}] [IPv6Connectivity - {4}]" -f $netprofile.Name, $netprofile.InterfaceAlias, $netprofile.NetworkCategory, $netprofile.IPv4Connectivity, $netprofile.IPv6Connectivity)
 
         Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
-    } else {
+    }
+    else {
         Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
     }
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
@@ -1052,7 +1047,8 @@ if ($WindowsOSLanguage) {
 
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
 
-        } elseif ($WindowsOSVersion -match "^10.*") {
+        }
+        elseif ($WindowsOSVersion -match "^10.*") {
             # Sysprep Answer File
             Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
             
@@ -1065,13 +1061,16 @@ if ($WindowsOSLanguage) {
             }
             
             Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
-        } else {
+        }
+        else {
             Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
         }
-    } else {
+    }
+    else {
         Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
     }
-} else {
+}
+else {
     Write-Log "# [Warning] No Target - Windows OS Language"
 }
 
@@ -1106,7 +1105,8 @@ if ($WindowsOSVersion -match "^6.1") {
     netsh interface ipv6 show global | Out-Default
 
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
-} elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+}
+elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : START"
 
     # Logging Windows Server OS Parameter [NetAdapter Binding Information]
@@ -1117,15 +1117,18 @@ if ($WindowsOSVersion -match "^6.1") {
         Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Amazon Elastic Network Adapter"
         Disable-NetAdapterBinding -InterfaceDescription "Amazon Elastic Network Adapter" -ComponentID ms_tcpip6 -Confirm:$false
         Start-Sleep -Seconds 5
-    } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
+    }
+    elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "Intel(R) 82599 Virtual Function" }) {
         Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : Intel(R) 82599 Virtual Function"
         Disable-NetAdapterBinding -InterfaceDescription "Intel(R) 82599 Virtual Function" -ComponentID ms_tcpip6 -Confirm:$false
         Start-Sleep -Seconds 5
-    } elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
+    }
+    elseif (Get-NetAdapter | Where-Object { $_.InterfaceDescription -eq "AWS PV Network Device #0" }) {
         Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : AWS PV Network Device"
         Disable-NetAdapterBinding -InterfaceDescription "AWS PV Network Device #0" -ComponentID ms_tcpip6 -Confirm:$false
         Start-Sleep -Seconds 5
-    } else {
+    }
+    else {
         Write-Log "# [Windows - OS Settings] Disable-NetAdapterBinding(IPv6) : No Target Device"
     }
 
@@ -1133,7 +1136,8 @@ if ($WindowsOSVersion -match "^6.1") {
     Get-NetAdapterBindingInformation
 
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
-} else {
+}
+else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
@@ -1157,11 +1161,13 @@ if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Obj
     Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $HighPowerString"
     (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }).Activate()
     Start-Sleep -Seconds 5
-} elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+}
+elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
     Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - High performance"
     (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
     Start-Sleep -Seconds 5
-} else {
+}
+else {
     Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - No change"
 }
 
@@ -1396,32 +1402,37 @@ if ($InstanceType -match "^g2.*") {
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($WindowsOSVersion -eq "6.2") {
+        }
+        elseif ($WindowsOSVersion -eq "6.2") {
             # [Windows Server 2012]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=32&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
-        } elseif ($WindowsOSVersion -eq "6.3") {
+        }
+        elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
-        } elseif ($WindowsOSVersion -eq "10.0") {
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $K520_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=94&pfid=704&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-winserv-2016-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
             Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2016.exe"
-        } else {
+        }
+        else {
             # [No Target Server OS]
             Write-Log ("# [Information] [NVIDIA GRID K520 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
-    } else {
+    }
+    else {
         # [Undefined Server OS]
         Write-Log "# [Warning] [NVIDIA GRID K520 GPU Driver] Undefined Server OS"
     }
@@ -1440,25 +1451,29 @@ if ($InstanceType -match "^g3.*") {
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($WindowsOSVersion -eq "6.3") {
+        }
+        elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
-        } elseif ($WindowsOSVersion -eq "10.0") {
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $M60_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=75&pfid=783&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
             Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2016.exe"
-        } else {
+        }
+        else {
             # [No Target Server OS]
             Write-Log ("# [Information] [NVIDIA GRID M60 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
-    } else {
+    }
+    else {
         # [Undefined Server OS]
         Write-Log "# [Warning] [NVIDIA GRID M60 GPU Driver] Undefined Server OS"
     }
@@ -1477,25 +1492,29 @@ if ($InstanceType -match "^p2.*") {
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
-        } elseif ($WindowsOSVersion -eq "6.3") {
+        }
+        elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
-        } elseif ($WindowsOSVersion -eq "10.0") {
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $K80_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=91&pfid=762&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
             Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
-        } else {
+        }
+        else {
             # [No Target Server OS]
             Write-Log ("# [Information] [NVIDIA Tesla K80 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
         }
-    } else {
+    }
+    else {
         # [Undefined Server OS]
         Write-Log "# [Warning] [NVIDIA Tesla K80 GPU Driver] Undefined Server OS"
     }
@@ -1527,29 +1546,34 @@ if ($WindowsOSVersion) {
         # Package Download Intel Network Driver (Windows Server 2008 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
-    } elseif ($WindowsOSVersion -eq "6.2") {
+    }
+    elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
         # https://downloadcenter.intel.com/ja/download/21694/
         # Package Download Intel Network Driver (Windows Server 2012)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012.exe"
-    } elseif ($WindowsOSVersion -eq "6.3") {
+    }
+    elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
         # https://downloadcenter.intel.com/ja/download/23073/
         # Package Download Intel Network Driver (Windows Server 2012 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012R2.exe"
-    } elseif ($WindowsOSVersion -eq "10.0") {
+    }
+    elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
         # https://downloadcenter.intel.com/ja/download/26092/
         # Package Download Intel Network Driver (Windows Server 2016)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
         Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2016.exe"
-    } else {
+    }
+    else {
         # [No Target Server OS]
         Write-Log ("# [Information] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
     }
-} else {
+}
+else {
     # [Undefined Server OS]
     Write-Log "# [Warning] [Intel Network Driver] Undefined Server OS"
 }
@@ -1611,7 +1635,8 @@ if ($WindowsOSVersion) {
         Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
         Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
-    } elseif ($WindowsOSVersion -eq "6.2") {
+    }
+    elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
         Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
 
@@ -1629,7 +1654,8 @@ if ($WindowsOSVersion) {
         Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
         Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
-    } elseif ($WindowsOSVersion -eq "6.3") {
+    }
+    elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
         Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
 
@@ -1647,7 +1673,8 @@ if ($WindowsOSVersion) {
         Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
         Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
-    } elseif ($WindowsOSVersion -eq "10.0") {
+    }
+    elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
         Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
 
@@ -1665,11 +1692,13 @@ if ($WindowsOSVersion) {
         Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
         Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
 
-    } else {
+    }
+    else {
         # [No Target Server OS]
         Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
     }
-} else {
+}
+else {
     # [Undefined Server OS]
     Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Windows Server OS"
 }
