@@ -880,7 +880,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
 
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
-} elseif ($WindowsOSVersion -match "^10.*") {
+}
 elseif ($WindowsOSVersion -match "^10.*") {
 
     #----------------------------------------------------------------------------
