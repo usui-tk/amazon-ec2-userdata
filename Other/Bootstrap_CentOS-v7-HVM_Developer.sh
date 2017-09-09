@@ -39,11 +39,17 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y curl dstat fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
+# Package Install CentOS System Administration Tools (from CentOS Community Repository)
+yum install -y bash-completion bind-utils curl dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y setroubleshoot-server
 
-# Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
+yum install -y epel-release
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+yum clean all
+
+# Package Install RHEL System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y fio jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -72,6 +78,16 @@ AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/d
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
+yum --enablerepo=epel install -y python2-pip
+pip install --upgrade pip
+pip install awscli
+
+cat > /etc/profile.d/aws-cli.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/aws_completer aws
+fi
+__EOF__
+
 aws --version
 
 # Setting AWS-CLI default Region & Output format
@@ -88,7 +104,6 @@ sleep 3
 # Getting AWS-CLI default Region & Output format
 aws configure list
 cat ~/.aws/config
-
 
 # Get AWS Region Information
 if [ -n "$RoleName" ]; then
@@ -148,15 +163,44 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [AWS CloudFormation Helper Scripts]
+#-------------------------------------------------------------------------------
+# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo=epel install -y python2-pip
+# pip install --upgrade pip
+
+pip install pystache
+pip install argparse
+pip install python-daemon
+pip install requests
+
+curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
+tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
+
+cd /tmp/aws-cfn-bootstrap-1.4/
+python setup.py build
+python setup.py install
+
+chmod 775 /usr/init/redhat/cfn-hup
+ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+cd /tmp
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
-# yum localinstall -y https://amazon-ssm-ap-northeast-1.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
 
 yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-/sbin/status amazon-ssm-agent
-/sbin/restart amazon-ssm-agent
-/sbin/status amazon-ssm-agent
+systemctl daemon-reload
+
+systemctl status -l amazon-ssm-agent
+systemctl enable amazon-ssm-agent
+systemctl is-enabled amazon-ssm-agent
+
+systemctl restart amazon-ssm-agent
+systemctl status -l amazon-ssm-agent
 
 ssm-cli get-instance-information
 
@@ -164,26 +208,41 @@ ssm-cli get-instance-information
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+# Package Install Ansible (from EPEL Repository)
+yum --enablerepo=epel install -y ansible
 
 ansible --version
 
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Docker - Amazon Linux Repository]
+# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
 #-------------------------------------------------------------------------------
 
-# Package Install Docker Enviroment Tools (from Amazon Linux Official Repository)
-yum install -y docker docker-storage-setup
+# Package Uninstall Docker Enviroment Tools (from CentOS Official Repository)
+yum remove -y docker docker-common docker-selinux docker-engine
 
-service docker status
-chkconfig --list docker
-chkconfig docker on
-chkconfig --list docker
-service docker restart
-service docker status
+# Package Install Docker Enviroment Tools (from CentOS Official Repository)
+yum install -y yum-utils device-mapper-persistent-data lvm2
+
+# Package Install Docker Enviroment Tools (from Docker Community Edition Official Repository)
+yum repolist
+yum-config-manager --add-repo "https://download.docker.com/linux/centos/docker-ce.repo"
+yum repolist
+yum-config-manager --enable docker-ce-edge
+yum repolist
+yum makecache fast
+
+yum install -y docker-ce
+
+systemctl daemon-reload
+
+systemctl status -l docker
+systemctl enable docker
+systemctl is-enabled docker
+
+systemctl restart docker
+systemctl status -l docker
 
 # Docker Deamon Information
 docker --version
@@ -191,7 +250,7 @@ docker --version
 docker info
 
 # Docker Configuration
-usermod -a -G docker ec2-user
+usermod -a -G docker centos
 
 # Docker Pull Image (from Docker Hub)
 docker pull amazonlinux:latest
@@ -216,12 +275,14 @@ rpm -qi td-agent
 
 # cat /etc/td-agent/td-agent.conf
 
-service td-agent status
-chkconfig --list td-agent
-chkconfig td-agent on
-chkconfig --list td-agent
-service td-agent restart
-service td-agent status
+systemctl daemon-reload
+
+systemctl status -l td-agent
+systemctl enable td-agent
+systemctl is-enabled td-agent
+
+systemctl restart td-agent
+systemctl status -l td-agent
 
 # Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
 /opt/td-agent/usr/sbin/td-agent-gem list
@@ -240,8 +301,6 @@ service td-agent status
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Node.js & Serverless Application Framework]
 #-------------------------------------------------------------------------------
-# yum install -y gcc-c++ make
-# yum groupinstall -y "Development tools" "Development Libraries"
 
 # Package Install Node.js Development Tools (from Node.js Foundation Official Repository)
 curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
@@ -256,45 +315,66 @@ npm install -g serverless
 sls -v
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Python 3.6 - Software Collections(SCL) Repository]
+#-------------------------------------------------------------------------------
+# yum repolist
+# yum install -y centos-release-scl
+# yum repolist
+
+# yum install -y rh-python36 rh-python36-runtime rh-python36-scldevel rh-python36-build
+# scl enable rh-python36 bash
+# python --version
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python 3.6 - IUS Community Repository]
+#-------------------------------------------------------------------------------
+yum repolist
+yum localinstall -y https://centos7.iuscommunity.org/ius-release.rpm
+yum repolist
+
+yum install -y python36u python36u-libs python36u-devel python36u-pip
+python3.6 --version
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6 - Python Software Foundation]
 #-------------------------------------------------------------------------------
-yum install -y openssl-devel sqlite-devel zkib-devel
-yum groupinstall -y "Development tools" "Development Libraries"
+# yum -y install openssl-devel sqlite-devel zkib-devel
+# yum groupinstall -y "Development tools"
 
 # Source Code Build Python 3.6.2 (from Python Software Foundation Official WebSite)
-mkdir ~/src
-cd ~/src
-wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tgz
-tar zxvf Python-3.6.2.tgz
-cd Python-3.6.2
-./configure --enable-optimizations
-make -j4
-make altinstall
+# mkdir ~/src
+# cd ~/src
+# wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tgz
+# tar zxvf Python-3.6.2.tgz
+# cd Python-3.6.2
+# ./configure --enable-optimizations
+# make -j4
+# make altinstall
 
-/usr/local/bin/python3.6 --version
+# /usr/local/bin/python3.6 --version
 
 # Create virtualenv running Python 3.6
-pip install virtualenv virtualenvwrapper
-virtualenv --version
+# pip install virtualenv virtualenvwrapper
+# virtualenv --version
 
 # Add bash_profile
-cat >> ~/.bash_profile << __EOF__
+# cat >> ~/.bash_profile << __EOF__
 
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.6
-### Virtualenvwrapper
-if [ -f /usr/bin/virtualenvwrapper.sh ]; then
-    export WORKON_HOME=\$HOME/.virtualenvs
-    source /usr/bin/virtualenvwrapper.sh
-fi
-__EOF__
+# export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.6
+# ### Virtualenvwrapper
+# if [ -f /usr/bin/virtualenvwrapper.sh ]; then
+#     export WORKON_HOME=\$HOME/.virtualenvs
+#     source /usr/bin/virtualenvwrapper.sh
+# fi
+# __EOF__
 
-cat ~/.bash_profile
-source ~/.bash_profile
+# cat ~/.bash_profile
+# source ~/.bash_profile
 
 # Setting for Python 3.6 Environment
-/usr/local/bin/virtualenv --python=/usr/local/bin/python3.6 py3.6
-source py3.6/bin/activate
-python --version
+# virtualenv  --python=/usr/local/bin/python3.6 py3.6
+# source py3.6/bin/activate
+# python --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -332,91 +412,89 @@ ip addr show
 # Network Information(Routing Table) [ip route show]
 ip route show
 
-# Network Information(Firewall Service) [chkconfig --list iptables]
-chkconfig --list iptables
+# Network Information(Firewall Service) [firewalld]
+if [ $(command -v firewall-cmd) ]; then
+    # Network Information(Firewall Service) [systemctl status -l firewalld]
+    systemctl status -l firewalld
+    # Network Information(Firewall Service) [firewall-cmd --list-all]
+    firewall-cmd --list-all
+fi
 
-# Network Information(Firewall Service) [service ip6tables stop]
-chkconfig --list ip6tables
+# Linux Security Information(SELinux) [getenforce] [sestatus]
+getenforce
+
+sestatus
 
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Ephemeral-Disk Auto Mount Disabled (cloud-init)
-sed -i '/ephemeral0/d' /etc/cloud/cloud.cfg
-
-# NTP Service Enabled(ntpd)
-chkconfig --list ntpd
-chkconfig ntpd on
-chkconfig --list ntpd
-
-# Firewall Service Disabled (iptables/ip6tables)
-service iptables stop
-chkconfig --list iptables
-chkconfig iptables off
-chkconfig --list iptables
-
-service ip6tables stop
-chkconfig --list ip6tables
-chkconfig ip6tables off
-chkconfig --list ip6tables
+# NTP Service Enabled(chronyd)
+systemctl restart chronyd
+systemctl enable chronyd
+systemctl is-enabled chronyd
+sleep 3
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
-	# Setting SystemClock
-	cat /dev/null > /etc/sysconfig/clock
-	echo 'ZONE="Asia/Tokyo"' >> /etc/sysconfig/clock
-	echo 'UTC=false' >> /etc/sysconfig/clock
-	cat /etc/sysconfig/clock
-	# Setting TimeZone
 	date
-	/bin/cp -fp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+	# timedatectl status
+	timedatectl set-timezone Asia/Tokyo
 	date
+	# timedatectl status
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
-	# Setting SystemClock
-	cat /dev/null > /etc/sysconfig/clock
-	echo 'ZONE="UTC"' >> /etc/sysconfig/clock
-	echo 'UTC=true' >> /etc/sysconfig/clock
-	cat /etc/sysconfig/clock
-	# Setting TimeZone
 	date
-	/bin/cp -fp /usr/share/zoneinfo/UTC /etc/localtime
+	# timedatectl status
+	timedatectl set-timezone UTC
 	date
+	# timedatectl status
 else
 	echo "# Default SystemClock and Timezone"
-	cat /etc/sysconfig/clock
-	cat /etc/localtime
+	# timedatectl status
+	date
 fi
 
 # Time synchronization with NTP server
 date
-ntpdate 0.amazon.pool.ntp.org
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
 date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
-	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=ja_JP.UTF-8' >> /etc/sysconfig/i18n
-	cat /etc/sysconfig/i18n
+	locale
+	# localectl status
+	localectl set-locale LANG=ja_JP.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
-	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=en_US.UTF-8' >> /etc/sysconfig/i18n
-	cat /etc/sysconfig/i18n
+	locale
+	# localectl status
+	localectl set-locale LANG=en_US.utf8
+	locale
+	# localectl status
+	cat /etc/locale.conf
 else
 	echo "# Default Language"
-	cat /etc/sysconfig/i18n
+	locale
+	cat /etc/locale.conf
 fi
 
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
 	# Setting NTP Deamon
-	sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-	service ntpd restart
+	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
+	systemctl restart chronyd
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 	# Disable IPv6 Kernel Parameter
@@ -429,6 +507,7 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
 	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
 
+	sysctl --system
 	sysctl -p
 
 	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort

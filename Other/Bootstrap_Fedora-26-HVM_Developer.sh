@@ -291,7 +291,6 @@ echo '{"json":"message"}' | /usr/local/bin/fluent-cat debug.test
 
 /usr/local/bin/fluent-gem list
 
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Node.js & Serverless Application Framework]
 #-------------------------------------------------------------------------------

@@ -179,6 +179,8 @@ systemctl is-enabled amazon-ssm-agent
 systemctl restart amazon-ssm-agent
 systemctl status amazon-ssm-agent
 
+ssm-cli get-instance-information
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
@@ -370,6 +372,8 @@ resize2fs /dev/xvda1
 
 df -h
 
-
+#-------------------------------------------------------------------------------
+# System Reboot
+#-------------------------------------------------------------------------------
 # Instance Reboot
 reboot
