@@ -206,6 +206,8 @@ status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 status amazon-ssm-agent
 
+ssm-cli get-instance-information
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------

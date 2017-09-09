@@ -202,6 +202,8 @@ systemctl is-enabled amazon-ssm-agent
 systemctl restart amazon-ssm-agent
 systemctl status -l amazon-ssm-agent
 
+ssm-cli get-instance-information
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
