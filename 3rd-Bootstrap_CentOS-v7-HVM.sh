@@ -230,6 +230,8 @@ cat /proc/cpuinfo
 # CPU Information [lscpu]
 lscpu
 
+lscpu --extended
+
 # Memory Information [cat /proc/meminfo]
 cat /proc/meminfo
 
