@@ -65,15 +65,15 @@ yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
-AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
 Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
+InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
+PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
+RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
 StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
@@ -82,7 +82,7 @@ StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 StsToken=$(echo $StsCredential | jq -r '.Token')
 
 # AWS Account ID
-AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.accountId')
+AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -198,9 +198,9 @@ cd /tmp
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
-# yum localinstall -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+# yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent

@@ -59,15 +59,15 @@ apt-get install -y linux-aws linux-image-aws linux-tools-aws
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
-AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
 Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
-InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
-AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
+InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
+PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
+RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
 StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
@@ -76,7 +76,7 @@ StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 StsToken=$(echo $StsCredential | jq -r '.Token')
 
 # AWS Account ID
-AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.accountId')
+AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -180,7 +180,7 @@ service cfn-hup start
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
 cd /tmp			
-curl https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb -o amazon-ssm-agent.deb
+curl -s "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o amazon-ssm-agent.deb
 dpkg -i amazon-ssm-agent.deb
 
 systemctl daemon-reload
