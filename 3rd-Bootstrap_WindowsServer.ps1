@@ -239,7 +239,7 @@ function Get-EbsVolumesMappingInformation {
         $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
         
         #Get the volumes attached to this instance
-        $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+        $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings | Sort-Object | Get-Unique
 
     }
     Catch {
@@ -1294,11 +1294,6 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 # https://ja.osdn.net/projects/ttssh2/
 Write-Log "# Package Download System Utility (Tera Term)"
 Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
-
-# Package Download System Utility (MobaXterm Home Edition)
-# http://mobaxterm.mobatek.net/
-Write-Log "# Package Download System Utility (MobaXterm Home Edition)"
-Invoke-WebRequest -Uri 'http://download.mobatek.net/10420170816103227/MobaXterm_Installer_v10.4.zip' -OutFile "$TOOL_DIR\MobaXterm_Installer_v10.4.zip"
 
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
