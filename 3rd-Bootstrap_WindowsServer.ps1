@@ -1331,11 +1331,13 @@ else {
 # Check Amazon EC2 Elastic GPU ID
 $ElasticGpuResponseError = try { $ElasticGpuResponse = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
 if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
+    # The Amazon EC2 Elastic GPU is attached
+    Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"
     Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
 }
 else {
-    # Amazon EC2 Elastic GPUs Support InstanceType (None)
-    Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
+    # The Amazon EC2 Elastic GPU is not attached
+    Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is not attached"
 }
 
 # Check Amazon EC2 Elastic GPU Information
@@ -1736,7 +1738,7 @@ Invoke-WebRequest -Uri 'http://dforest.watch.impress.co.jp/library/u/utf8terater
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
 Write-Log "# Package Download System Utility (Wireshark)"
-Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.0.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
+Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.1.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
