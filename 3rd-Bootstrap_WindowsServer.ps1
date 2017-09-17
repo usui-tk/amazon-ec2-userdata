@@ -300,7 +300,7 @@ function Get-EbsVolumesMappingInformation {
     foreach ($EBSVolumeList in $EBSVolumeLists) {
         if ($EBSVolumeList) {
             # Write the information to the Log Files
-            Write-Log ("# [EBS] : [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
+            Write-Log ("# [AWS - EBS] : [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
         }
     } 
     
@@ -1230,11 +1230,11 @@ Get-Content -Path $SSMAgentLogFile
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Update (Amazon Inspector Agent)
+# Custom Package Install (Amazon Inspector Agent)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Update System Utility (Amazon Inspector Agent)"
+Write-LogSeparator "Package Install System Utility (Amazon Inspector Agent)"
 
 # Package Download System Utility (Amazon Inspector Agent)
 # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_agents-on-win.html
@@ -1269,86 +1269,75 @@ Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgent
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Download (System Utility)
+# Custom Package Install (Amazon EC2 Elastic GPU Software)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Custom Package Download (System Utility)"
+Write-LogSeparator "Package Install System Utility (Amazon EC2 Elastic GPU Software)"
 
-# Package Download System Utility (Sysinternals Suite)
-# https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
-Write-Log "# Package Download System Utility (Sysinternals Suite)"
-Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
+# Check Amazon EC2 Elastic GPUs Support InstanceType
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
 
-# Package Download System Utility (System Explorer)
-# http://systemexplorer.net/
-Write-Log "# Package Download System Utility (System Explorer)"
-Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
-
-# Package Download System Utility (7-zip)
-# http://www.7-zip.org/
-Write-Log "# Package Download System Utility (7-zip)"
-Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
-
-# Package Download System Utility (Tera Term)
-# https://ja.osdn.net/projects/ttssh2/
-Write-Log "# Package Download System Utility (Tera Term)"
-Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
-
-# Package Download System Utility (Wireshark)
-# https://www.wireshark.org/download.html
-Write-Log "# Package Download System Utility (Wireshark)"
-Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.0.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
-
-# Package Download System Utility (EC2Config)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-if ($WindowsOSVersion -match "^5.*|^6.*") {
-    Write-Log "# Package Download System Utility (EC2Config)"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+# Amazon EC2 Elastic GPUs Support InstanceType
+if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*") {
+    # Amazon EC2 Elastic GPUs Support InstanceType (Production)
+    Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
+    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations") 
+}
+elseif ($InstanceType -match "^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
+    # Amazon EC2 Elastic GPUs Support InstanceType (Test)
+    Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
+    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")   
+}
+else {
+    # Amazon EC2 Elastic GPUs Support InstanceType (None)
+    Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
 }
 
-# Package Download System Utility (EC2Launch)
-# http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-if ($WindowsOSVersion -match "^10.*") {
-    Write-Log "# Package Download System Utility (EC2Launch)"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
-}
+# Check Amazon EC2 Elastic GPU ID
+if ($ElasticGpuId -match "^egpu-*") {
 
-# Package Download System Utility (AWS-CLI - 64bit)
-# https://aws.amazon.com/jp/cli/
-Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+    # Logging AWS Instance Metadata
+    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
 
-# Package Download System Utility (AWS Tools for Windows PowerShell)
-# https://aws.amazon.com/jp/powershell/
-Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+    # Get EC2 Instance attached Elastic GPU Information
+    Set-Variable -Name ElasticGpuInformation -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
+    Set-Variable -Name ElasticGpuType -Option Constant -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
+    
+    $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Infomation.txt" -Append -Force
 
-# Package Download System Utility (AWS CloudFormation Helper Scripts)
-# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
-Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+    # Package Download System Utility (Amazon EC2 Elastic GPU Software)
+    # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/working-with-elastic-gpus.html
+    Write-Log "# Package Download System Utility (Amazon EC2 Elastic GPU Software)"
+    Invoke-WebRequest -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
 
-# Package Download System Utility (AWS Directory Service PortTest Application)
-# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
-Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
-Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+    # Package Install System Utility (Amazon EC2 Elastic GPU Software)
+    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
+    Start-Sleep -Seconds 10
 
-# Package Download System Utility (EC2Rescue)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
-Write-Log "# Package Download System Utility (EC2Rescue)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+    # Setting Application Path (Amazon EC2 Elastic GPU Software)
+    [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Amazon\EC2ElasticGPUs\manager\", [EnvironmentVariableTarget]::Machine)
+ 
+    # Service Automatic Startup Setting (Amazon EC2 Elastic GPU Manager)
+    Get-Service -Name EC2ElasticGPUs_Manager
 
-# Package Download System Utility (AWSLogCollector)
-# 
-Write-Log "# Package Download System Utility (AWSLogCollector)"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
+    $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
 
-# Package Download System Utility (AWS Diagnostics for Windows Server)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
-Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+    if ($EC2ElasticGPUs_ManagerStatus -ne "Auto") {
+        Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus -> Auto"
+        Set-Service -Name "EC2ElasticGPUs_Manager" -StartupType Automatic
+
+        Start-Sleep -Seconds 5
+
+        $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
+        Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus"
+    }
+
+    # Display Windows Server OS Parameter [Amazon EC2 Elastic GPU Manager Information]
+    cmd.exe /c "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" 2>&1
+
+    Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
+}    
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1648,6 +1637,89 @@ Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile
 Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
 Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 Start-Sleep -Seconds 180
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Download (System Utility)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Custom Package Download (System Utility)"
+
+# Package Download System Utility (Sysinternals Suite)
+# https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
+Write-Log "# Package Download System Utility (Sysinternals Suite)"
+Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
+
+# Package Download System Utility (System Explorer)
+# http://systemexplorer.net/
+Write-Log "# Package Download System Utility (System Explorer)"
+Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
+
+# Package Download System Utility (7-zip)
+# http://www.7-zip.org/
+Write-Log "# Package Download System Utility (7-zip)"
+Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+
+# Package Download System Utility (Tera Term)
+# https://ja.osdn.net/projects/ttssh2/
+Write-Log "# Package Download System Utility (Tera Term)"
+Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
+
+# Package Download System Utility (Wireshark)
+# https://www.wireshark.org/download.html
+Write-Log "# Package Download System Utility (Wireshark)"
+Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.0.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
+
+# Package Download System Utility (EC2Config)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
+if ($WindowsOSVersion -match "^5.*|^6.*") {
+    Write-Log "# Package Download System Utility (EC2Config)"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+}
+
+# Package Download System Utility (EC2Launch)
+# http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
+if ($WindowsOSVersion -match "^10.*") {
+    Write-Log "# Package Download System Utility (EC2Launch)"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+}
+
+# Package Download System Utility (AWS-CLI - 64bit)
+# https://aws.amazon.com/jp/cli/
+Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+
+# Package Download System Utility (AWS Tools for Windows PowerShell)
+# https://aws.amazon.com/jp/powershell/
+Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
+Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+
+# Package Download System Utility (AWS CloudFormation Helper Scripts)
+# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+
+# Package Download System Utility (AWS Directory Service PortTest Application)
+# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
+Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
+Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+
+# Package Download System Utility (EC2Rescue)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
+Write-Log "# Package Download System Utility (EC2Rescue)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+
+# Package Download System Utility (AWSLogCollector)
+# 
+Write-Log "# Package Download System Utility (AWSLogCollector)"
+Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
+
+# Package Download System Utility (AWS Diagnostics for Windows Server)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
+Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
