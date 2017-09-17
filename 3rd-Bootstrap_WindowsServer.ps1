@@ -1195,19 +1195,21 @@ Get-Ec2SystemManagerAgentVersion
 Write-Log "# Package Update System Utility (Amazon EC2 Systems Manager Agent)"
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
+Start-Sleep -Seconds 10
+
 Get-Service -Name AmazonSSMAgent
 
 # Service Automatic Startup Setting (Amazon EC2 Systems Manager Agent)
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
-    Write-Log "# [Windows - OS Settings] [AmazonSSMAgent] Service Startup Type : $AmazonSSMAgentStatus -> Auto"
+    Write-Log "# [Windows - OS Settings] [Amazon EC2 Systems Manager Agent] Service Startup Type : $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
 
     Start-Sleep -Seconds 5
 
     $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
-    Write-Log "# [Windows - OS Settings] [AmazonSSMAgent] Service Startup Type : $AmazonSSMAgentStatus"
+    Write-Log "# [Windows - OS Settings] [Amazon EC2 Systems Manager Agent] Service Startup Type : $AmazonSSMAgentStatus"
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
@@ -1225,6 +1227,45 @@ Get-Service -Name AmazonSSMAgent
 
 # View Log File
 Get-Content -Path $SSMAgentLogFile
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Update (Amazon Inspector Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Update System Utility (Amazon Inspector Agent)"
+
+# Package Download System Utility (Amazon Inspector Agent)
+# https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_agents-on-win.html
+Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
+Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
+
+# Package Install System Utility (Amazon Inspector Agent)
+Write-Log "# Package Install System Utility (Amazon Inspector Agent)"
+Start-Process -FilePath "$TOOL_DIR\AWSAgentInstall.exe" -ArgumentList @('/install', '/quiet', '/norestart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonInspecterAgentSetup.log') -Wait | Out-Null
+
+Start-Sleep -Seconds 10
+
+Get-Service -Name AWSAgent
+
+# Service Automatic Startup Setting (Amazon Inspector Agent)
+$AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
+
+if ($AmazonInspectorAgentStatus -ne "Auto") {
+    Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus -> Auto"
+    Set-Service -Name "AWSAgent" -StartupType Automatic
+
+    Start-Sleep -Seconds 5
+
+    $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
+    Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus"
+}
+
+# Display Windows Server OS Parameter [Amazon Inspector Agent Information]
+cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
+
+Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1248,6 +1289,16 @@ Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.e
 # http://www.7-zip.org/
 Write-Log "# Package Download System Utility (7-zip)"
 Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+
+# Package Download System Utility (Tera Term)
+# https://ja.osdn.net/projects/ttssh2/
+Write-Log "# Package Download System Utility (Tera Term)"
+Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
+
+# Package Download System Utility (MobaXterm Home Edition)
+# http://mobaxterm.mobatek.net/
+Write-Log "# Package Download System Utility (MobaXterm Home Edition)"
+Invoke-WebRequest -Uri 'http://download.mobatek.net/10420170816103227/MobaXterm_Installer_v10.4.zip' -OutFile "$TOOL_DIR\MobaXterm_Installer_v10.4.zip"
 
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
@@ -1590,7 +1641,7 @@ Write-LogSeparator "Custom Package Installation (Application)"
 Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
 Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-Start-Process -FilePath "$TOOL_DIR\googlechrome.msi" -ArgumentList @("/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_ChromeSetup.log") -Wait | Out-Null
+Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
 
 #---------------------------------------------------------------
 # [Caution : Finally the installation process]
