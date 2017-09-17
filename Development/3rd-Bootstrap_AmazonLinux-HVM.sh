@@ -115,14 +115,20 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
+#
+# - ENA (Elastic Network Adapter)
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
+# - SR-IOV
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
+#
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(g3.*|i3.*|m4.16xlarge|p2.*|r4.*|x1.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(e3.*|f1.*|g3.*|i3.*|p2.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
 		echo "# Get Linux Kernel Module(modinfo ena)"
 		modinfo ena
-	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|m4.*|r3.*)$ ]]; then
+	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
@@ -134,8 +140,12 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+#
+# - EBS Optimized Instance
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSOptimized.html
+#
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|r3.*|r4.*|x1.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}

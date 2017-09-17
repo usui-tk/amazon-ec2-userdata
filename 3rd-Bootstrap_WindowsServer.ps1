@@ -800,6 +800,10 @@ if ($RoleName) {
 }
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+#
+# - EBS Optimized Instance
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
+#
 if ($RoleName) {
     if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
