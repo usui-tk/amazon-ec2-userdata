@@ -263,12 +263,22 @@ function Get-EbsVolumesMappingInformation {
             $BlockDeviceMapping = $BlockDeviceMappings | Where-Object {$_.DeviceName -eq $Map[$Drive.SCSITargetId.ToString()]}
        
             if ($OsLanguage -eq "ja-JP") {
+                # Setting Paramter ["Disk #" in Japanese]
+                $Word_Disk_Base64 = "44OH44Kj44K544KvICM="                                    # A string of "Disk #" was Base64 encoded in Japanese
+                $Word_Disk_Byte = [System.Convert]::FromBase64String($Word_Disk_Base64)       # Conversion from base64 to byte sequence
+                $Word_Disk_String = [System.Text.Encoding]::UTF8.GetString($Word_Disk_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
+
+                # Setting Paramter [" Partition #" in Japanese]
+                $Word_Partition_Base64 = "IOODkeODvOODhuOCo+OCt+ODp+ODsyAj"                             # A string of " Partition #" was Base64 encoded in Japanese
+                $Word_Partition_Byte = [System.Convert]::FromBase64String($Word_Partition_Base64)       # Conversion from base64 to byte sequence
+                $Word_Partition_String = [System.Text.Encoding]::UTF8.GetString($Word_Partition_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
+
                 # Display the information in a table (Japanese : ja-JP)
                 New-Object -TypeName PSCustomObject -Property @{
                     Device      = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("ディスク #", ""));
+                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("${Word_Disk_String}", ""));
                     Boot        = $Partition.BootPartition;
-                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" パーティション #", ""));
+                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace("${Word_Partition_String}", ""));
                     SCSITarget  = $Drive.SCSITargetId;
                     DriveLetter = if ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
                     VolumeName  = if ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
@@ -300,7 +310,7 @@ function Get-EbsVolumesMappingInformation {
     foreach ($EBSVolumeList in $EBSVolumeLists) {
         if ($EBSVolumeList) {
             # Write the information to the Log Files
-            Write-Log ("# [AWS - EBS] : [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
+            Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
         }
     } 
     
@@ -1170,17 +1180,18 @@ else {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [System PowerPlan]"
 
-# Change System PowerPlan (High Performance)
-$HighPowerBase64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                       # A string of "high performance" was Base64 encoded in Japanese
-$HighPowerByte = [System.Convert]::FromBase64String($HighPowerBase64)       # Conversion from base64 to byte sequence
-$HighPowerString = [System.Text.Encoding]::UTF8.GetString($HighPowerByte)   # To convert a sequence of bytes into a string of UTF-8 encoding
+# Setting Paramter ["high performance" in Japanese]
+$Word_HighPower_Base64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                             # A string of "high performance" was Base64 encoded in Japanese
+$Word_HighPower_Byte = [System.Convert]::FromBase64String($Word_HighPower_Base64)       # Conversion from base64 to byte sequence
+$Word_HighPower_String = [System.Text.Encoding]::UTF8.GetString($Word_HighPower_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
 
 # Logging Windows Server OS Parameter [System Power Plan Information]
 Get-PowerPlanInformation
 
-if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }) {
-    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $HighPowerString"
-    (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $HighPowerString }).Activate()
+# Change System PowerPlan (High Performance)
+if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }) {
+    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $Word_HighPower_String"
+    (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }).Activate()
     Start-Sleep -Seconds 5
 }
 elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
