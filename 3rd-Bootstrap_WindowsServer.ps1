@@ -317,9 +317,9 @@ function Get-Ec2ConfigVersion {
     Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ($Null)
 
     # Get EC2Config Version
-    $EC2ConfigInfomation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
-    if ($EC2ConfigInfomation) {
-        $Ec2ConfigVersion = $EC2ConfigInfomation.Version
+    $EC2ConfigInformation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
+    if ($EC2ConfigInformation) {
+        $Ec2ConfigVersion = $EC2ConfigInformation.Version
     }
 
     # Write the information to the Log Files
@@ -455,7 +455,7 @@ function Get-ScriptExecuteByAccount {
     if ($ScriptExecuteByAccountName) {
         Write-Log ("# [Windows] Powershell Script Execution Username : " + ($ScriptExecuteByAccountName))
         if ($CheckAdministrator -eq $true) {
-            Write-Log "# [Windows] [Infomation] Bootstrap scripts run with the privileges of the administrator"
+            Write-Log "# [Windows] [Information] Bootstrap scripts run with the privileges of the administrator"
         }
         else {
             Write-Log "# [Windows] [Warning] Bootstrap scripts run with the privileges of the non-administrator"
@@ -635,7 +635,7 @@ function Update-SysprepAnswerFile($SysprepAnswerFile) {
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
 
-#Get OS Infomation & Language
+#Get OS Information & Language
 $Local:TimezoneLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 $Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Object Version).Version
 
@@ -758,7 +758,7 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 # Get AMI Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AMI Information"
-    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_AMI-Infomation.txt" -Append -Force
+    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_AMI-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
@@ -861,7 +861,7 @@ if ($WindowsOSLanguage) {
         }
     }
     else {
-        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
+        Write-Log ("# [Information] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
     }
 }
 else {
@@ -1088,7 +1088,7 @@ if ($WindowsOSLanguage) {
         }
     }
     else {
-        Write-Log ("# [Infomation] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
+        Write-Log ("# [Information] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
     }
 }
 else {
@@ -1340,7 +1340,7 @@ if ($ElasticGpuId -match "^egpu-*") {
     Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
     Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
 
-    $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Infomation.txt" -Append -Force
+    $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
 
     if ($RoleName) {
         Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.RequesterId -eq "amazon-elasticgpus" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
@@ -1348,7 +1348,7 @@ if ($ElasticGpuId -match "^egpu-*") {
 
         Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
 
-        $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Infomation.txt" -Append -Force
+        $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Information.txt" -Append -Force
     }
 
     # Package Download System Utility (Amazon EC2 Elastic GPU Software)
@@ -1886,12 +1886,17 @@ Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Hostname rename & Instance Reboot
+# Hostname rename [#Exclude Amazon WorkSpaces, Amazon AppStream 2.0]
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Setting Hostname
 Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
 Rename-Computer $Hostname -Force
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Instance Reboot
+#-----------------------------------------------------------------------------------------------------------------------
 
 # EC2 Instance Reboot
 Restart-Computer -Force
