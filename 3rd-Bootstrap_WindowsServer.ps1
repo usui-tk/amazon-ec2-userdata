@@ -1304,6 +1304,7 @@ Set-Variable -Name ElasticGpuId -Scope Script -Value ($Null)
 
 # Check Amazon EC2 Elastic GPUs Support InstanceType
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
+Write-Log "# Check Amazon EC2 Elastic GPUs Support InstanceType"
 if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*") {
     # Amazon EC2 Elastic GPUs Support InstanceType (Production)
     Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
@@ -1319,17 +1320,32 @@ else {
     Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
 }
 
-# Check Amazon EC2 Elastic GPU ID
+# Check Amazon EC2 Elastic GPU Information
+Write-Log "# Check Amazon EC2 Elastic GPU Information"
 if ($ElasticGpuId -match "^egpu-*") {
 
     # Logging AWS Instance Metadata
     Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
 
     # Get EC2 Instance attached Elastic GPU Information
-    Set-Variable -Name ElasticGpuInformation -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
-    Set-Variable -Name ElasticGpuType -Option Constant -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
-    
+    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")   
+    Set-Variable -Name ElasticGpuInformation -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
+    Set-Variable -Name ElasticGpuType -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
+    Set-Variable -Name ElasticGpuEniIpAddress -Scope Script -Value ($ElasticGpuInformation.connectionConfig.ipv4Address)
+
+    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
+    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
+
     $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Infomation.txt" -Append -Force
+
+    if ($RoleName) {
+        Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.RequesterId -eq "amazon-elasticgpus" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
+        Set-Variable -Name ElasticGpuEniId -Scope Script -Value ($ElasticGpuEniInsterface.NetworkInterfaceId)
+
+        Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
+
+        $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Infomation.txt" -Append -Force
+    }
 
     # Package Download System Utility (Amazon EC2 Elastic GPU Software)
     # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/working-with-elastic-gpus.html
@@ -1337,6 +1353,7 @@ if ($ElasticGpuId -match "^egpu-*") {
     Invoke-WebRequest -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
 
     # Package Install System Utility (Amazon EC2 Elastic GPU Software)
+    Write-Log "# Package Install System Utility (Amazon EC2 Elastic GPU Software)"
     Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
     Start-Sleep -Seconds 10
 
@@ -1362,7 +1379,7 @@ if ($ElasticGpuId -match "^egpu-*") {
     cmd.exe /c "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" 2>&1
 
     Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
-}    
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1689,7 +1706,8 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 # Package Download System Utility (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
 Write-Log "# Package Download System Utility (Tera Term)"
-Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
+Invoke-WebRequest -Uri 'http://dforest.watch.impress.co.jp/library/u/utf8teraterm/10868/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
+# Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
 
 # Package Download System Utility (Wireshark)
 # https://www.wireshark.org/download.html
