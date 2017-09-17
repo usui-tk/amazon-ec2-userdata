@@ -746,6 +746,11 @@ Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 Set-DefaultAWSRegion -Region $Region
 Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
 
+# Setting AWS Tools for Windows PowerShell (Additional)
+#  Clear-AWSHistory
+#  Set-AWSHistoryConfiguration -MaxCmdletHistory 512 -MaxServiceCallHistory 512 -RecordServiceRequests
+#  Set-AWSResponseLogging -Level Always
+
 # Get AMI Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AMI Information"
@@ -765,14 +770,22 @@ if ($RoleName) {
 }
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
+#
+# - ENA (Elastic Network Adapter)
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
+# - SR-IOV
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/sriov-networking.html
+# - Xen(PV)
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
+#
 if ($RoleName) {
-    if ($InstanceType -match "^g3.*|^i3.*|^m4.16xlarge|^p2.*|^r4.*|^x1.*") {
+    if ($InstanceType -match "^e3.*|^f1.*|^g3.*|^i3.*|^p2.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
     }
-    elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^m4.*|^r3.*") {
+    elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^r3.*|^m4.*") {
         # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport | Out-File "$LOGS_DIR\AWS-EC2_ENI-SRIOV-Information.txt" -Append -Force
@@ -784,7 +797,7 @@ if ($RoleName) {
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -1228,6 +1241,10 @@ Get-Service -Name AmazonSSMAgent
 # View Log File
 Get-Content -Path $SSMAgentLogFile
 
+# Display Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
+cmd.exe /c "C:\Program Files\Amazon\SSM\ssm-cli.exe" get-instance-information 2>&1
+
+Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Install (Amazon Inspector Agent)
