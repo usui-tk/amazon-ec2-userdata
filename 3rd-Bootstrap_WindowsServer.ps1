@@ -1341,18 +1341,16 @@ else {
 }
 
 # Check Amazon EC2 Elastic GPU Information
-Write-Log "# Check Amazon EC2 Elastic GPU Information"
 if ($ElasticGpuId -match "^egpu-*") {
-
-    # Logging AWS Instance Metadata
-    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
+    Write-Log "# Check Amazon EC2 Elastic GPU Information"
 
     # Get EC2 Instance attached Elastic GPU Information
-    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")   
     Set-Variable -Name ElasticGpuInformation -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
     Set-Variable -Name ElasticGpuType -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
     Set-Variable -Name ElasticGpuEniIpAddress -Scope Script -Value ($ElasticGpuInformation.connectionConfig.ipv4Address)
-
+    
+    # Logging Amazon EC2 Elastic GPU Information
+    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
     Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
     Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
 
