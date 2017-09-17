@@ -694,10 +694,14 @@ Get-Ec2InstanceMetadata
 Get-AmazonMachineInformation
 
 # Logging Amazon EC2 attached EBS Volume List
-Get-EbsVolumesMappingInformation
+if ($RoleName) {
+    Get-EbsVolumesMappingInformation
+}
 
 # Logging Windows Server OS Parameter [AMI : Amazon Machine Image]
-Get-AmazonMachineImageInformation
+if ($RoleName) {
+    Get-AmazonMachineImageInformation
+}
 
 # Logging PowerShell Script Execution UserName
 Get-ScriptExecuteByAccount
@@ -1242,9 +1246,12 @@ Get-Service -Name AmazonSSMAgent
 Get-Content -Path $SSMAgentLogFile
 
 # Display Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
-cmd.exe /c "C:\Program Files\Amazon\SSM\ssm-cli.exe" get-instance-information 2>&1
+if ($RoleName) {
+    cmd.exe /c "C:\Program Files\Amazon\SSM\ssm-cli.exe" get-instance-information 2>&1
 
-Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
+    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
+}
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Install (Amazon Inspector Agent)
@@ -1292,10 +1299,11 @@ Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgent
 # Log Separator
 Write-LogSeparator "Package Install System Utility (Amazon EC2 Elastic GPU Software)"
 
+# Initialize Parameter
+Set-Variable -Name ElasticGpuId -Scope Script -Value ($Null)
+
 # Check Amazon EC2 Elastic GPUs Support InstanceType
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
-
-# Amazon EC2 Elastic GPUs Support InstanceType
 if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*") {
     # Amazon EC2 Elastic GPUs Support InstanceType (Production)
     Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
