@@ -1247,9 +1247,6 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
-# Clear Log File
-Clear-Content -Path $SSMAgentLogFile
-
 # Get Amazon SSM Agent Service Status
 Restart-Service -Name AmazonSSMAgent
 Start-Sleep -Seconds 30
@@ -1262,8 +1259,6 @@ Get-Content -Path $SSMAgentLogFile
 
 # Display Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 if ($RoleName) {
-    cmd.exe /c "C:\Program Files\Amazon\SSM\ssm-cli.exe" get-instance-information 2>&1
-
     Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
 }
 
@@ -1302,9 +1297,11 @@ if ($AmazonInspectorAgentStatus -ne "Auto") {
 }
 
 # Display Windows Server OS Parameter [Amazon Inspector Agent Information]
-cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
+if ($RoleName) {
+    cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
 
-Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+    Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1316,19 +1313,25 @@ Write-LogSeparator "Package Install System Utility (Amazon EC2 Elastic GPU Softw
 
 # Initialize Parameter
 Set-Variable -Name ElasticGpuId -Scope Script -Value ($Null)
+Set-Variable -Name ElasticGpuResponse -Scope Script -Value ($Null)
+Set-Variable -Name ElasticGpuResponseError -Scope Script -Value ($Null)
 
 # Check Amazon EC2 Elastic GPUs Support InstanceType
 # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
 Write-Log "# Check Amazon EC2 Elastic GPUs Support InstanceType"
-if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*") {
-    # Amazon EC2 Elastic GPUs Support InstanceType (Production)
+if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*|^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
+    # Amazon EC2 Elastic GPUs Support InstanceType
     Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
-    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations") 
 }
-elseif ($InstanceType -match "^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
-    # Amazon EC2 Elastic GPUs Support InstanceType (Test)
-    Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
-    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")   
+else {
+    # Amazon EC2 Elastic GPUs Support InstanceType (None)
+    Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
+}
+
+# Check Amazon EC2 Elastic GPU ID
+$ElasticGpuResponseError = try { $ElasticGpuResponse = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
+if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
+    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
 }
 else {
     # Amazon EC2 Elastic GPUs Support InstanceType (None)
@@ -1482,6 +1485,8 @@ if ($ElasticGpuId -match "^egpu-*") {
 # Log Separator
 Write-LogSeparator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
 
+Write-Log "# Check Amazon EC2 G2 Instance Family"
+
 # Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g2.*") {
@@ -1531,6 +1536,8 @@ if ($InstanceType -match "^g2.*") {
 }
 
 
+Write-Log "# Check Amazon EC2 G3 Instance Family"
+
 # Package Download NVIDIA Tesla M60 GPU Driver (for Amazon EC2 G3 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g3.*") {
@@ -1571,6 +1578,8 @@ if ($InstanceType -match "^g3.*") {
     }
 }
 
+
+Write-Log "# Check Amazon EC2 P2 Instance Family"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
