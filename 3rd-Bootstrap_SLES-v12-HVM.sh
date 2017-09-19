@@ -37,7 +37,7 @@ zypper refresh
 zypper --non-interactive update
 
 # Install recommended packages
-zypper --non-interactive install-new-recommends
+# zypper --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
@@ -65,6 +65,10 @@ SUSEConnect --status-text
 # Target version : SUSE Linux Enterprise 12 SP2
 SUSEConnect --product PackageHub/12.2/x86_64
 sleep 5
+
+# Target version : SUSE Linux Enterprise 12 SP3
+# SUSEConnect --product PackageHub/12.3/x86_64
+# sleep 5
 
 SUSEConnect --status-text
 
