@@ -40,7 +40,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y dstat fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
+yum install -y arptables_jf collectl dstat ebtables fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -191,6 +191,29 @@ service awsagent status
 /opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+
+mkdir -p "/opt/aws"
+
+tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+
+# Check Version
+/opt/aws/ec2rl/ec2rl version
+
+/opt/aws/ec2rl/ec2rl version-check
+
+# Required Software Package
+/opt/aws/ec2rl/ec2rl software-check
+
+# Diagnosis [dig modules]
+# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudWatchLogs Agent] from RPM
 #-------------------------------------------------------------------------------
 yum install -y awslogs aws-cli-plugin-cloudwatch-logs
@@ -280,7 +303,7 @@ service codedeploy-agent status
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y ansible
+yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 

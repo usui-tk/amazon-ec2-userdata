@@ -40,16 +40,19 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y bash-completion bind-utils curl dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y arptables bash-completion bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
+
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+# yum-config-manager --disable epel epel-debuginfo epel-source
+
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y fio jq
+yum --enablerepo=epel install -y atop collectl fio jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -215,11 +218,34 @@ systemctl status -l amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+
+mkdir -p "/opt/aws"
+
+tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+
+# Check Version
+/opt/aws/ec2rl/ec2rl version
+
+/opt/aws/ec2rl/ec2rl version-check
+
+# Required Software Package
+/opt/aws/ec2rl/ec2rl software-check
+
+# Diagnosis [dig modules]
+# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible
+yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 

@@ -44,7 +44,7 @@ zypper --non-interactive update
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install dstat hdparm sdparm lzop iotop nmap
+zypper --non-interactive install arptables collectl dstat ebtables hdparm sdparm lzop iotop nmap
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
@@ -198,9 +198,9 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
-# zypper --non-interactive install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-zypper --non-interactive install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 systemctl daemon-reload
 
@@ -212,6 +212,32 @@ systemctl restart amazon-ssm-agent
 systemctl status -l amazon-ssm-agent
 
 ssm-cli get-instance-information
+
+
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+
+mkdir -p "/opt/aws"
+
+tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+
+# Check Version
+/opt/aws/ec2rl/ec2rl version
+
+/opt/aws/ec2rl/ec2rl version-check
+
+# Required Software Package
+/opt/aws/ec2rl/ec2rl software-check
+
+# Diagnosis [dig modules]
+# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
