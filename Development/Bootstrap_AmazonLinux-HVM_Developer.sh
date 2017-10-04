@@ -40,7 +40,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y curl dstat fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
+yum install -y arptables_jf collectl dstat ebtables fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock wget
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -158,18 +158,40 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
+# Custom Package Update [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
-# yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
 
-yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
+yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 /sbin/status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 /sbin/status amazon-ssm-agent
 
 ssm-cli get-instance-information
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+
+mkdir -p "/opt/aws"
+
+tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+
+# Check Version
+/opt/aws/ec2rl/ec2rl version
+
+/opt/aws/ec2rl/ec2rl version-check
+
+# Required Software Package
+/opt/aws/ec2rl/ec2rl software-check
+
+# Diagnosis [dig modules]
+# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
@@ -269,43 +291,11 @@ sls -v
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6 - Python Software Foundation]
 #-------------------------------------------------------------------------------
-yum install -y openssl-devel sqlite-devel zkib-devel
-yum groupinstall -y "Development tools" "Development Libraries"
 
-# Source Code Build Python 3.6.2 (from Python Software Foundation Official WebSite)
-mkdir ~/src
-cd ~/src
-wget https://www.python.org/ftp/python/3.6.2/Python-3.6.2.tgz
-tar zxvf Python-3.6.2.tgz
-cd Python-3.6.2
-./configure --enable-optimizations
-make -j4
-make altinstall
+# Package Install Python 3.6 Development Tools (from Amazon Linux Official Repository)
+yum install -y python36 python36-tools python36-virtualenv python36-pip
 
-/usr/local/bin/python3.6 --version
-
-# Create virtualenv running Python 3.6
-pip install virtualenv virtualenvwrapper
-virtualenv --version
-
-# Add bash_profile
-cat >> ~/.bash_profile << __EOF__
-
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.6
-### Virtualenvwrapper
-if [ -f /usr/bin/virtualenvwrapper.sh ]; then
-    export WORKON_HOME=\$HOME/.virtualenvs
-    source /usr/bin/virtualenvwrapper.sh
-fi
-__EOF__
-
-cat ~/.bash_profile
-source ~/.bash_profile
-
-# Setting for Python 3.6 Environment
-/usr/local/bin/virtualenv --python=/usr/local/bin/python3.6 py3.6
-source py3.6/bin/activate
-python --version
+python36 --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
