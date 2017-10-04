@@ -54,7 +54,10 @@ yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
+
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+# yum-config-manager --disable epel epel-debuginfo epel-source
+
 yum clean all
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
@@ -223,7 +226,7 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible
+yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 

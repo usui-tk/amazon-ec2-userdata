@@ -71,7 +71,10 @@ __EOF__
 
 yum --enablerepo=epel -y install epel-release
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+# yum-config-manager --disable epel epel-debuginfo epel-source
+
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
@@ -240,7 +243,7 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible
+yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 
