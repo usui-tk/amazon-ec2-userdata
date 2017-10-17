@@ -205,6 +205,33 @@ systemctl status -l amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
+# http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+
+mkdir -p "/opt/aws"
+
+tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+
+cat > /etc/profile.d/ec2rl.sh << __EOF__
+export PATH=\$PATH:/opt/aws/ec2rl
+__EOF__
+
+# Check Version
+/opt/aws/ec2rl/ec2rl version
+
+/opt/aws/ec2rl/ec2rl version-check
+
+# Required Software Package
+/opt/aws/ec2rl/ec2rl software-check
+
+# Diagnosis [dig modules]
+# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 

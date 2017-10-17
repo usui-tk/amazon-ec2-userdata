@@ -202,6 +202,10 @@ mkdir -p "/opt/aws"
 
 tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
 
+cat > /etc/profile.d/ec2rl.sh << __EOF__
+export PATH=\$PATH:/opt/aws/ec2rl
+__EOF__
+
 # Check Version
 /opt/aws/ec2rl/ec2rl version
 
