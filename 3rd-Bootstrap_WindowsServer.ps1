@@ -1749,6 +1749,11 @@ Invoke-WebRequest -Uri 'http://dforest.watch.impress.co.jp/library/u/utf8terater
 Write-Log "# Package Download System Utility (Wireshark)"
 Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.2.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
 
+# Package Download System Utility (SQL Server Management Studio [SSMS])
+# https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
+# Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
+# Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
+
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 if ($WindowsOSVersion -match "^5.*|^6.*") {
