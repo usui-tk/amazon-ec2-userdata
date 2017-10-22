@@ -101,8 +101,8 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
-    elif [ $(echo ${DIST} | grep -e 'Oracle') ] || [ "${DIST_TYPE}" = "ol" ]; then
-        if [ "${REV}" = "7" ]; then
+    elif [ "${DIST}" = "Oracle Linux Server" ] || [ "${DIST_TYPE}" = "ol" ]; then
+        if [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Oracle Linux v7.x
            BootstrapScript=${ScriptForOracleLinuxv7}
         else
@@ -140,19 +140,21 @@ function get_bootstrap_script () {
 #-------------------------------------------------------------------------------
 
 # Install curl Command
-if [ $(command -v yum) ]; then
-    # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
-    yum clean all
-    yum install -y curl
-elif [ $(command -v apt-get) ]; then
-    # Package Install curl Tools (Debian, Ubuntu)
-    apt-get install -y curl
-elif [ $(command -v zypper) ]; then
-    # Package Install curl Tools (SUSE Linux Enterprise Server)
-    zypper --non-interactive install curl
-else
-    echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-    exit 1
+if [ $(command -v curl) ]; then
+    if [ $(command -v yum) ]; then
+        # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
+        yum clean all
+        yum install -y curl
+    elif [ $(command -v apt-get) ]; then
+        # Package Install curl Tools (Debian, Ubuntu)
+        apt-get install -y curl
+    elif [ $(command -v zypper) ]; then
+        # Package Install curl Tools (SUSE Linux Enterprise Server)
+        zypper --non-interactive install curl
+    else
+        echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+        exit 1
+    fi
 fi
 
 # call the os info function to get details
