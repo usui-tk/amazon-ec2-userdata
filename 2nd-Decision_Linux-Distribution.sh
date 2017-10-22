@@ -13,6 +13,7 @@ ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_Bootstr
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
+ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 
@@ -44,6 +45,10 @@ function get_os_info () {
           DIST_TYPE='CentOS'
           DIST=`cat /etc/centos-release | sed s/\ release.*//`
           REV=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
+      elif [ -f /etc/oracle-release ]; then
+          DIST_TYPE='Oracle'
+          DIST=`cat /etc/oracle-release | sed s/\ release.*//`
+          REV=`cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/redhat-release ]; then
           DIST_TYPE='RHEL'
           DIST=`cat /etc/redhat-release | sed s/\ release.*//`
@@ -96,6 +101,13 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
+    elif [ $(echo ${DIST} | grep -e 'Oracle') ] || [ "${DIST_TYPE}" = "ol" ]; then
+        if [ "${REV}" = "7" ]; then
+           # Bootstrap Script for Oracle Linux v7.x
+           BootstrapScript=${ScriptForOracleLinuxv7}
+        else
+           BootstrapScript=""
+        fi
     elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
         if [ $(echo ${REV} | grep -e '16.04') ]; then
            # Bootstrap Script for Ubuntu 16.04 LTS
@@ -129,7 +141,7 @@ function get_bootstrap_script () {
 
 # Install curl Command
 if [ $(command -v yum) ]; then
-    # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS)
+    # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
     yum clean all
     yum install -y curl
 elif [ $(command -v apt-get) ]; then
