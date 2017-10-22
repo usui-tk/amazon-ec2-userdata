@@ -140,7 +140,7 @@ function get_bootstrap_script () {
 #-------------------------------------------------------------------------------
 
 # Install curl Command
-if [ $(command -v curl) ]; then
+if [ $(curl --version) ]; then
     if [ $(command -v yum) ]; then
         # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
         yum clean all
