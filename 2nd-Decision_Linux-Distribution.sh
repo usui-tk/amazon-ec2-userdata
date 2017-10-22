@@ -140,7 +140,7 @@ function get_bootstrap_script () {
 #-------------------------------------------------------------------------------
 
 # Install curl Command
-if [ $(which curl) ]; then
+if [ $(command -v curl) ]; then
     echo "Preinstalled curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
 else 
     if [ $(command -v yum) ]; then
