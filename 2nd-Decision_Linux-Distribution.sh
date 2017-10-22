@@ -140,7 +140,9 @@ function get_bootstrap_script () {
 #-------------------------------------------------------------------------------
 
 # Install curl Command
-if [ $(curl --version) ]; then
+if [ $(which curl) ]; then
+    echo "Preinstalled curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+else 
     if [ $(command -v yum) ]; then
         # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
         yum clean all
