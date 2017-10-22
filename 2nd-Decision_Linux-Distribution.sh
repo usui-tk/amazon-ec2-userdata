@@ -134,10 +134,27 @@ function get_bootstrap_script () {
 
 }
 
-
 #-------------------------------------------------------------------------------
 # Main Routine
 #-------------------------------------------------------------------------------
+
+# call the os info function to get details
+get_os_info
+
+# call the bootstrap script function to get details
+get_bootstrap_script
+
+# Information Linux Distribution
+KERNEL_VERSION=$(uname -r )
+KERNEL_GROUP=$(echo "${KERNEL_VERSION}" | cut -f 1-2 -d'.')
+KERNEL_VERSION_WO_ARCH=$(basename ${KERNEL_VERSION} .x86_64)
+
+echo "Distribution of the machine is ${DIST}." 
+echo "Distribution type of the machine is ${DIST_TYPE}."
+echo "Revision of the distro is ${REV}."
+echo "Kernel version of the machine is ${KERNEL_VERSION}."
+
+echo "BootstrapScript of the distro is ${BootstrapScript}."
 
 # Install curl Command
 if [ $(command -v curl) ]; then
@@ -158,24 +175,6 @@ else
         exit 1
     fi
 fi
-
-# call the os info function to get details
-get_os_info
-
-# call the bootstrap script function to get details
-get_bootstrap_script
-
-# Information Linux Distribution
-KERNEL_VERSION=$(uname -r )
-KERNEL_GROUP=$(echo "${KERNEL_VERSION}" | cut -f 1-2 -d'.')
-KERNEL_VERSION_WO_ARCH=$(basename ${KERNEL_VERSION} .x86_64)
-
-echo "Distribution of the machine is ${DIST}." 
-echo "Distribution type of the machine is ${DIST_TYPE}."
-echo "Revision of the distro is ${REV}."
-echo "Kernel version of the machine is ${KERNEL_VERSION}."
-
-echo "BootstrapScript of the distro is ${BootstrapScript}."
 
 #-------------------------------------------------------------------------------
 # Bootstrap Script Executite
