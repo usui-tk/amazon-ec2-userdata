@@ -29,17 +29,17 @@ echo $VpcNetwork
 # Yum Configuration
 #-------------------------------------------------------------------------------
 yum clean all
-yum install -y yum-utils
+yum install -y rhn-client-tools yum-utils
 yum clean all
 
 # Delete AMI Defalut YUM Repositories File
-rm -rf /etc/yum.repos.d/public-yum-ol7.repo
+rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
 
 # Add Oralce Linux v7 Public YUM Repositories File
 yum-config-manager --add-repo http://public-yum.oracle.com/public-yum-ol7.repo
 
 #-------------------------------------------------------------------------------
-# Enable Repositories (Oracle Linux v7) - [Default Enable]
+# Enable Repositories (Oracle Linux v7)
 #  http://yum.oracle.com/oracle-linux-7.html
 #-------------------------------------------------------------------------------
 
@@ -50,11 +50,6 @@ yum-config-manager --enable ol7_latest
 # Latest Unbreakable Enterprise Kernel Release 4 packages for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/UEKR4/x86_64/index.html
 yum-config-manager --enable ol7_UEKR4
-
-#-------------------------------------------------------------------------------
-# Enable Repositories (Oracle Linux v7) - [Default Disable]
-#  http://yum.oracle.com/oracle-linux-7.html
-#-------------------------------------------------------------------------------
 
 # Latest packages released for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/optional/latest/x86_64/index.html
