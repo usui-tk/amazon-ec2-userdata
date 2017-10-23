@@ -158,37 +158,17 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
+# Custom Package Update [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
-# yum localinstall -y https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm
-yum update -y amazon-ssm-agent
+
+yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 /sbin/status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 /sbin/status amazon-ssm-agent
 
 ssm-cli get-instance-information
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon Inspector Agent]
-#-------------------------------------------------------------------------------
-
-# Listup for Amazon Linux supported_kernels
-curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | grep "amzn" | sort
-
-# Install AWS Agent (Amazon Inspector Agent)
-curl -s "https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install" | bash -e
-
-service awsagent status
-chkconfig --list awsagent
-chkconfig awsagent on
-chkconfig --list awsagent
-service awsagent restart
-service awsagent status
-
-# Check AWS Agent (Amazon Inspector Agent)
-/opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -218,91 +198,6 @@ __EOF__
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudWatchLogs Agent] from RPM
-#-------------------------------------------------------------------------------
-yum install -y awslogs aws-cli-plugin-cloudwatch-logs
-
-sed -i "s/region = us-east-1/region = ${region}/g" /etc/awslogs/awscli.conf
-
-# CloudWatchLogs Agent Sample Config
-cat > /etc/awslogs/awslogs.conf << __EOF__
-[general]
-state_file = /var/awslogs/state/agent-state
-use_gzip_http_content_encoding = true
-
-[SYSTEM-sample-Linux-OS-var-log-messages]
-log_group_name = SYSTEM-sample-Linux-OS-var-log-messages
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/messages
-initial_position = start_of_file
-encoding = utf-8
-buffer_duration = 5000
-
-[SYSTEM-sample-Linux-OS-var-log-secure]
-log_group_name = SYSTEM-sample-Linux-OS-var-log-secure
-log_stream_name = {instance_id}
-datetime_format = %b %d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/secure
-initial_position = start_of_file
-encoding = utf-8
-buffer_duration = 5000
-
-[SYSTEM-sample-Linux-SSM-Agent-Logs]
-log_group_name = SYSTEM-sample-Linux-SSM-Agent-Logs
-log_stream_name = {instance_id}
-datetime_format = %Y-%m-%d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/amazon/ssm/amazon-ssm-agent.log
-initial_position = start_of_file
-encoding = ascii
-buffer_duration = 5000
-
-[SYSTEM-sample-Linux-CodeDeploy-Agent-Logs]
-log_group_name = SYSTEM-sample-Linux-CodeDeploy-Agent-Logs
-log_stream_name = {instance_id}
-datetime_format = %Y-%m-%d %H:%M:%S
-time_zone = LOCAL
-file = /var/log/aws/codedeploy-agent/codedeploy-agent.log
-initial_position = start_of_file
-encoding = ascii
-buffer_duration = 5000
-
-__EOF__
-
-service awslogs status
-chkconfig --list awslogs
-chkconfig awslogs on
-chkconfig --list awslogs
-service awslogs restart
-service awslogs status
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CodeDeploy Agent]
-#-------------------------------------------------------------------------------
-
-# Listup for CodeDeploy Agent S3 Backet [Regional]
-aws s3 ls --recursive "s3://aws-codedeploy-${Region}"
-
-# Listup for Agent Package Information
-curl -s "https://aws-codedeploy-${Region}.s3.amazonaws.com/latest/VERSION" | jq "."
-
-# Install AWS CodeDeploy Agent
-yum localinstall -y "https://aws-codedeploy-${Region}.s3.amazonaws.com/latest/codedeploy-agent.noarch.rpm"
-
-# Check AWS CodeDeploy Agent Version
-cat /opt/codedeploy-agent/.version
-
-service codedeploy-agent status
-chkconfig --list codedeploy-agent
-chkconfig codedeploy-agent on
-chkconfig --list codedeploy-agent
-service codedeploy-agent restart
-service codedeploy-agent status
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
@@ -316,6 +211,184 @@ pip install ansible
 
 /usr/local/bin/ansible --version
 /usr/local/bin/ansible localhost -m setup
+
+
+################################################################################
+#    Bastion Server Configuration - START
+################################################################################
+
+#-------------------------------------------------------------------------------
+# BANNER CONFIGURATION - Amazon Linux (motd)
+#-------------------------------------------------------------------------------
+ls -al /etc/update-motd.d/
+
+cat > /etc/update-motd.d/90-Bastion-Server-Message << __EOF__
+#!/bin/bash
+
+cat << EOF
+
+###############################################################################
+#                                                                             #
+#         ----------              CAUTION                  ----------         #
+#                                                                             #
+###############################################################################
+#                           Authorized access only!                           #
+#         Disconnect IMMEDIATELY if you are not an authorized user!!!         #
+#                All actions will be monitored and recorded.                  #
+###############################################################################
+
+EOF
+__EOF__
+
+chmod 755 /etc/update-motd.d/90-Bastion-Server-Message
+
+bash -ex /usr/sbin/update-motd
+
+#-------------------------------------------------------------------------------
+# LOGGING CONFIGURATION - Amazon Linux (sshd logging)
+#-------------------------------------------------------------------------------
+declare -rx BASTION_MNT="/var/log/bastion"
+declare -rx BASTION_LOG="bastion.log"
+echo "Setting up bastion session log in ${BASTION_MNT}/${BASTION_LOG}"
+mkdir -p ${BASTION_MNT}
+declare -rx BASTION_LOGFILE="${BASTION_MNT}/${BASTION_LOG}"
+declare -rx BASTION_LOGFILE_SHADOW="${BASTION_MNT}/.${BASTION_LOG}"
+touch ${BASTION_LOGFILE}
+ln ${BASTION_LOGFILE} ${BASTION_LOGFILE_SHADOW}
+
+chown root:ec2-user  ${BASTION_MNT}
+chown root:ec2-user  ${BASTION_LOGFILE}
+chown root:ec2-user  ${BASTION_LOGFILE_SHADOW}
+chmod 662 ${BASTION_LOGFILE}
+chmod 662 ${BASTION_LOGFILE_SHADOW}
+chattr +a ${BASTION_LOGFILE}
+chattr +a ${BASTION_LOGFILE_SHADOW}
+touch /tmp/messages
+chown root:ec2-user /tmp/messages
+
+chown root:ec2-user /usr/bin/script
+service sshd restart
+echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
+
+cat >> /etc/bashrc << __EOF__
+
+# Added by linux bastion bootstrap
+declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
+
+declare -rx BASTION_LOG=${BASTION_LOGFILE}
+
+declare -rx PROMPT_COMMAND='history -a >(logger -t "\$(date +"%Y/%m/%d %H:%M:%S.%3N %:z") [BASTION] [FROM]:\${IP} [USER]:\${USER} [PWD]:\${PWD} " -s 2>>\${BASTION_LOG})'
+
+__EOF__
+
+#-------------------------------------------------------------------------------
+# LOGGING CONFIGURATION - Amazon Linux (ntpd logging)
+#-------------------------------------------------------------------------------
+sed -i 's/logconfig =clockall =peerall =sysall =syncall/logconfig =all/g' /etc/ntp.conf
+sed -i "/logconfig/a logfile /var/log/ntpstats/ntpd.log" /etc/ntp.conf
+
+ls -al /etc/logrotate.d/
+
+cat >> /etc/logrotate.d/ntpd << __EOF__
+/var/log/ntpstats/ntpd.log {
+    missingok
+    notifempty
+    copytruncate
+}
+__EOF__
+
+ls -al /etc/logrotate.d/
+
+#-------------------------------------------------------------------------------
+# AUTOMATICALLY UPDATE CONFIGURATION - Amazon Linux (yum update - security)
+#-------------------------------------------------------------------------------
+yum install -y yum-cron-security
+
+cat /etc/yum/yum-cron-security.conf
+
+service yum-cron status
+chkconfig --list yum-cron
+chkconfig yum-cron on
+chkconfig --list yum-cron
+service yum-cron restart
+service yum-cron status
+
+#-------------------------------------------------------------------------------
+# LOGGING CONFIGURATION - Amazon Linux (AWS CloudWatchLogs Agent)
+#-------------------------------------------------------------------------------
+yum install -y awslogs aws-cli-plugin-cloudwatch-logs
+
+sed -i "s/region = us-east-1/region = ${region}/g" /etc/awslogs/awscli.conf
+
+cat >> /etc/awslogs/awslogs.conf << __EOF__
+
+# ----------------------------------------------------------------------------------------------------------------------
+#  Added by linux bastion bootstrap
+# ----------------------------------------------------------------------------------------------------------------------
+
+[SYSTEM-Linux-OS-var-log-messages]
+log_group_name = SYSTEM-Linux-OS-var-log-messages
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/messages
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+[SYSTEM-Linux-OS-var-log-secure]
+log_group_name = SYSTEM-Linux-OS-var-log-secure
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/secure
+initial_position = start_of_file
+encoding = utf-8
+buffer_duration = 5000
+
+[SYSTEM-Linux-OS-var-log-yum]
+log_group_name = SYSTEM-Linux-OS-var-log-yum
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/yum.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+[SYSTEM-Linux-OS-var-log-bastion]
+log_group_name = SYSTEM-Linux-OS-var-log-bastion
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/bastion/.bastion.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+[SYSTEM-Linux-OS-var-log-ntpd]
+log_group_name = SYSTEM-Linux-OS-var-log-ntpd
+log_stream_name = {instance_id}
+datetime_format = %b %d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/ntpstats/ntpd.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+__EOF__
+
+service awslogs status
+chkconfig --list awslogs
+chkconfig awslogs on
+chkconfig --list awslogs
+service awslogs restart
+service awslogs status
+
+################################################################################
+#    Bastion Server Configuration - FINISH
+################################################################################
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

@@ -202,11 +202,15 @@ __EOF__
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+# yum --enablerepo=epel install -y ansible ansible-doc
+# ansible --version
+# ansible localhost -m setup
 
-ansible --version
+# Package Install Amazon Linux System Administration Tools (from PIP)
+pip install ansible
 
-ansible localhost -m setup 
+/usr/local/bin/ansible --version
+/usr/local/bin/ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
