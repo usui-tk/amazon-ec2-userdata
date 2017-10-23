@@ -222,7 +222,7 @@ __EOF__
 #-------------------------------------------------------------------------------
 yum install -y awslogs aws-cli-plugin-cloudwatch-logs
 
-sed -i "s/region = us-east-1/region = ${region}/g" /etc/awslogs/awscli.conf
+sed -i "s/region = us-east-1/region = ${Region}/g" /etc/awslogs/awscli.conf
 
 # CloudWatchLogs Agent Sample Config
 cat > /etc/awslogs/awslogs.conf << __EOF__

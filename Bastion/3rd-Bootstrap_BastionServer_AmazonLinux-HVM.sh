@@ -277,9 +277,11 @@ declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
 
 declare -rx BASTION_LOG=${BASTION_LOGFILE}
 
-declare -rx PROMPT_COMMAND='history -a >(logger -t "\$(date +"%Y/%m/%d %H:%M:%S.%3N %:z") [BASTION] [FROM]:\${IP} [USER]:\${USER} [PWD]:\${PWD} " -s 2>>\${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "\$(date +"%Y/%m/%d %H:%M:%S.%3N %:z") [BASTION] [FROM]:\${IP} [USER]:\${USER} [DIRECTORY]:\${PWD} [COMMAND]: " -s 2>>\${BASTION_LOG})'
 
 __EOF__
+
+service sshd restart
 
 #-------------------------------------------------------------------------------
 # LOGGING CONFIGURATION - Amazon Linux (ntpd logging)
@@ -298,6 +300,8 @@ cat >> /etc/logrotate.d/ntpd << __EOF__
 __EOF__
 
 ls -al /etc/logrotate.d/
+
+service ntpd restart
 
 #-------------------------------------------------------------------------------
 # AUTOMATICALLY UPDATE CONFIGURATION - Amazon Linux (yum update - security)
@@ -318,7 +322,7 @@ service yum-cron status
 #-------------------------------------------------------------------------------
 yum install -y awslogs aws-cli-plugin-cloudwatch-logs
 
-sed -i "s/region = us-east-1/region = ${region}/g" /etc/awslogs/awscli.conf
+sed -i "s/region = us-east-1/region = ${Region}/g" /etc/awslogs/awscli.conf
 
 cat >> /etc/awslogs/awslogs.conf << __EOF__
 
@@ -549,6 +553,13 @@ else
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
+
+# Check Restart Processes and Services
+needs-restarting -s | sort
+
+needs-restarting | sort -g
+
+needs-restarting -r
 
 # Instance Reboot
 reboot
