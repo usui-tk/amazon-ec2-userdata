@@ -40,7 +40,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y arptables bash-completion bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y arptables bash-completion bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
