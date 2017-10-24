@@ -222,7 +222,7 @@ pip install ansible
 #-------------------------------------------------------------------------------
 ls -al /etc/update-motd.d/
 
-cat > /etc/update-motd.d/90-Bastion-Server-Message << __EOF__
+cat > /etc/update-motd.d/99-bastion-server-message << __EOF__
 #!/bin/bash
 
 cat << EOF
@@ -240,7 +240,7 @@ cat << EOF
 EOF
 __EOF__
 
-chmod 755 /etc/update-motd.d/90-Bastion-Server-Message
+chmod 755 /etc/update-motd.d/99-bastion-server-message
 
 bash -ex /usr/sbin/update-motd
 
