@@ -391,7 +391,7 @@ logging_config_file = /var/awslogs/etc/awslogs.conf
 
 [BastionServer-Linux-OS-var-log-messages]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-message
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-message
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/messages
@@ -401,7 +401,7 @@ buffer_duration = 5000
 
 [BastionServer-Linux-OS-var-log-secure]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-secure
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-secure
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/secure
@@ -411,7 +411,7 @@ buffer_duration = 5000
 
 [BastionServer-Linux-OS-var-log-yum]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-yum.log
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-yum.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/yum.log
@@ -421,7 +421,7 @@ buffer_duration = 5000
 
 [BastionServer-Linux-OS-var-log-bastion]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-bastion.log
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-bastion.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/bastion/.bastion.log
@@ -431,7 +431,7 @@ buffer_duration = 5000
 
 [BastionServer-Linux-OS-var-log-chronyd]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-chrony-statistics.log
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-chrony-statistics.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/chrony/statistics.log
@@ -441,7 +441,7 @@ buffer_duration = 5000
 
 [BastionServer-Linux-Amazon-SSM-Agent-Logs]
 log_group_name = BastionServer-Linux-LogGroupName
-log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-amazon-ssm-agent.log
+log_stream_name = {instance_id}_{hostname}_{ip_address}_LogFile-amazon-ssm-agent.log
 datetime_format = %Y-%m-%d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/amazon/ssm/amazon-ssm-agent.log
@@ -628,8 +628,6 @@ fi
 
 # Check Restart Processes and Services
 needs-restarting -s | sort
-
-needs-restarting | sort -g
 
 needs-restarting -r
 
