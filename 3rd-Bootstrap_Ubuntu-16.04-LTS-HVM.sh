@@ -45,7 +45,7 @@ apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y bash-completion binutils chrony curl dstat fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip wget zip
+apt-get install -y bash-completion binutils chrony curl dstat fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip update-motd wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
@@ -189,9 +189,8 @@ service cfn-hup start
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
-cd /tmp			
-curl -s "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o amazon-ssm-agent.deb
-dpkg -i amazon-ssm-agent.deb
+curl -sS "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o "/tmp/amazon-ssm-agent.deb"
+dpkg -i "/tmp/amazon-ssm-agent.deb"
 
 systemctl daemon-reload
 
@@ -305,9 +304,15 @@ aa-status
 #-------------------------------------------------------------------------------
 
 # NTP Service Enabled(chrony)
-systemctl restart chrony
+systemctl daemon-reload
+
+systemctl status -l chrony
 systemctl enable chrony
 systemctl is-enabled chrony
+
+systemctl restart chrony
+systemctl status -l chrony
+
 sleep 3
 chronyc tracking
 chronyc sources -v

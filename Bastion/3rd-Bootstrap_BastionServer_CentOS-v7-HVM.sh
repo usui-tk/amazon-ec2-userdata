@@ -296,7 +296,7 @@ chmod 662 ${BASTION_LOGFILE_SHADOW}
 chattr +a ${BASTION_LOGFILE}
 chattr +a ${BASTION_LOGFILE_SHADOW}
 touch /tmp/messages
-hown root:centos /tmp/messages
+chown root:centos /tmp/messages
 
 chown root:centos /usr/bin/script
 
