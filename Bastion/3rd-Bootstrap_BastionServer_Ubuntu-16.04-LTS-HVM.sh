@@ -45,7 +45,7 @@ apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y bash-completion binutils chrony curl dstat fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr nmap sysstat tcpdump traceroute unzip update-motd wget zip
+apt-get install -y arptables atop bash-completion binutils chrony collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap sysstat tcpdump traceroute unzip update-motd wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
@@ -626,7 +626,9 @@ else
 fi
 
 # Check Restart Processes and Services
+checkrestart -a
 
+needrestart -v
 
 # Instance Reboot
 reboot
