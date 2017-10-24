@@ -267,7 +267,9 @@ touch /tmp/messages
 chown root:ec2-user /tmp/messages
 
 chown root:ec2-user /usr/bin/script
+
 service sshd restart
+
 echo -e "\nDefaults env_keep += \"SSH_CLIENT\"" >> /etc/sudoers
 
 cat >> /etc/bashrc << __EOF__
@@ -277,7 +279,7 @@ declare -rx IP=\$(echo \$SSH_CLIENT | awk '{print \$1}')
 
 declare -rx BASTION_LOG=${BASTION_LOGFILE}
 
-declare -rx PROMPT_COMMAND='history -a >(logger -t "\$(date +"%Y/%m/%d %H:%M:%S.%3N %:z") [BASTION] [FROM]:\${IP} [USER]:\${USER} [DIRECTORY]:\${PWD} [COMMAND]: " -s 2>>\${BASTION_LOG})'
+declare -rx PROMPT_COMMAND='history -a >(logger -t "\$(date +"%Y/%m/%d %H:%M:%S.%3N %:z") [BASTION] [FROM]:\${IP} [USER]:\${USER} [DIRECTORY]:\${PWD} [COMMAND]" -s 2>>\${BASTION_LOG})'
 
 __EOF__
 
@@ -330,9 +332,9 @@ cat >> /etc/awslogs/awslogs.conf << __EOF__
 #  Added by linux bastion bootstrap
 # ----------------------------------------------------------------------------------------------------------------------
 
-[SYSTEM-Linux-OS-var-log-messages]
-log_group_name = SYSTEM-Linux-OS-var-log-messages
-log_stream_name = {instance_id}
+[BastionServer-Linux-OS-var-log-messages]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-message
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/messages
@@ -340,9 +342,9 @@ initial_position = start_of_file
 encoding = utf-8
 buffer_duration = 5000
 
-[SYSTEM-Linux-OS-var-log-secure]
-log_group_name = SYSTEM-Linux-OS-var-log-secure
-log_stream_name = {instance_id}
+[BastionServer-Linux-OS-var-log-secure]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-secure
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/secure
@@ -350,9 +352,9 @@ initial_position = start_of_file
 encoding = utf-8
 buffer_duration = 5000
 
-[SYSTEM-Linux-OS-var-log-yum]
-log_group_name = SYSTEM-Linux-OS-var-log-yum
-log_stream_name = {instance_id}
+[BastionServer-Linux-OS-var-log-yum]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-yum.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/yum.log
@@ -360,9 +362,9 @@ initial_position = start_of_file
 encoding = ascii
 buffer_duration = 5000
 
-[SYSTEM-Linux-OS-var-log-bastion]
-log_group_name = SYSTEM-Linux-OS-var-log-bastion
-log_stream_name = {instance_id}
+[BastionServer-Linux-OS-var-log-bastion]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-bastion.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/bastion/.bastion.log
@@ -370,12 +372,22 @@ initial_position = start_of_file
 encoding = ascii
 buffer_duration = 5000
 
-[SYSTEM-Linux-OS-var-log-ntpd]
-log_group_name = SYSTEM-Linux-OS-var-log-ntpd
-log_stream_name = {instance_id}
+[BastionServer-Linux-OS-var-log-ntpd]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-ntpd.log
 datetime_format = %b %d %H:%M:%S
 time_zone = LOCAL
 file = /var/log/ntpstats/ntpd.log
+initial_position = start_of_file
+encoding = ascii
+buffer_duration = 5000
+
+[BastionServer-Linux-Amazon-SSM-Agent-Logs]
+log_group_name = BastionServer-Linux-LogGroupName
+log_stream_name = {instance_id}-{hostname}-{ip_address}-LogFile-amazon-ssm-agent.log
+datetime_format = %Y-%m-%d %H:%M:%S
+time_zone = LOCAL
+file = /var/log/amazon/ssm/amazon-ssm-agent.log
 initial_position = start_of_file
 encoding = ascii
 buffer_duration = 5000
