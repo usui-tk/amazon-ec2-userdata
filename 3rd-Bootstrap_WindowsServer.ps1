@@ -793,7 +793,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^e3.*|^f1.*|^g3.*|^i3.*|^p2.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
+    if ($InstanceType -match "^e3.*|^f1.*|^g3.*|^i3.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -815,7 +815,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^p2.*|^p3.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -1460,6 +1460,15 @@ if ($ElasticGpuId -match "^egpu-*") {
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=91
 #    -> [pfid] Tesla K80 : 762
 #
+#  [Amazon EC2 P3 Instance Family]
+#  NVIDIA Tesla V100
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] V-Series : 105
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=105
+#    -> [pfid] Tesla V100 : 857
+#
 #=======================================================================================================================
 #
 #  Windows Server OS [osid]
@@ -1622,11 +1631,46 @@ if ($InstanceType -match "^p2.*") {
 }
 
 
-Write-Log "# Check Amazon EC2 G2 & G3 & P2 Instance Family"
+Write-Log "# Check Amazon EC2 P3 Instance Family"
 
-# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)
+# Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+if ($InstanceType -match "^p3.*") {
+    Write-Log "# Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)"
+    if ($WindowsOSVersion) {
+        if ($WindowsOSVersion -eq "6.3") {
+            # [Windows Server 2012 R2]
+            $V100_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=105&pfid=857&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $V100_driverversion = $($V100_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $V100_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${V100_driverversion} + "/" + ${V100_driverversion} + "-tesla-desktop-2012r2-64bit-international.exe"
+            Write-Log ("# [Information] Package Download NVIDIA Tesla V100 GPU Driver URL : " + $V100_driverurl)
+            Invoke-WebRequest -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2012R2.exe"
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
+            # [Windows Server 2016]
+            $V100_drivers = Invoke-RestMethod -Uri 'http://www.nvidia.com/Download/processFind.aspx?psid=105&pfid=857&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+            $V100_driverversion = $($V100_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $V100_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${V100_driverversion} + "/" + ${V100_driverversion} + "-tesla-desktop-winserver2016-international.exe"
+            Write-Log ("# [Information] Package Download NVIDIA Tesla V100 GPU Driver URL : " + $V100_driverurl)
+            Invoke-WebRequest -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2016.exe"
+        }
+        else {
+            # [No Target Server OS]
+            Write-Log ("# [Information] [NVIDIA Tesla V100 GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        }
+    }
+    else {
+        # [Undefined Server OS]
+        Write-Log "# [Warning] [NVIDIA Tesla V100 GPU Driver] Undefined Server OS"
+    }
+}
+
+
+Write-Log "# Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
+
+# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2/P3 Instance Family)
 # https://github.com/JeremyMain/GPUProfiler
-if ($InstanceType -match "^^g2.*|^g3.*|^p2.*") {
+if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)"
     Invoke-WebRequest -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.05/GPUProfiler_1.05-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.05-x64.zip"
 }
