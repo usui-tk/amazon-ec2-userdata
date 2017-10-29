@@ -1788,11 +1788,6 @@ Write-Log "# Package Download System Utility (Tera Term)"
 Invoke-WebRequest -Uri 'http://dforest.watch.impress.co.jp/library/u/utf8teraterm/10868/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
 # Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
 
-# Package Download System Utility (Wireshark)
-# https://www.wireshark.org/download.html
-Write-Log "# Package Download System Utility (Wireshark)"
-Invoke-WebRequest -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-2.4.2.exe' -OutFile "$TOOL_DIR\Wireshark-win64.exe"
-
 # Package Download System Utility (SQL Server Management Studio [SSMS])
 # https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
 # Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
