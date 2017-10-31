@@ -43,7 +43,7 @@ Set-Variable -Name TRANSCRIPT_LOG -Scope Script "$TEMP_DIR\userdata-transcript-2
 
 # Set Script Parameter for 3rd-Bootstrap Script (User Defined)
 
-Set-Variable -Name BOOTSTRAP_URL -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/AWS-CloudInit_BootstrapScript/master/3rd-Bootstrap_WindowsServer.ps1"
+Set-Variable -Name BOOTSTRAP_URL -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_WindowsServer.ps1"
 Set-Variable -Name BOOTSTRAP_SCRIPT -Scope Script -Value "3rd-Bootstrap_WindowsServer.ps1"
 
 
