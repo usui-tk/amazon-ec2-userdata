@@ -756,8 +756,18 @@ Get-PowerPlanInformation
 # Log Separator
 Write-LogSeparator "Amazon EC2 Information [AMI & Instance & EBS Volume]"
 
+# View AWS Tools for Windows PowerShell Version
+Get-AWSPowerShellVersion
+# Get-AWSPowerShellVersion -ListServiceVersionInfo
+
 # Setting AWS Tools for Windows PowerShell
+Initialize-AWSDefaults -ProfileName Default -Region $Region
 Set-DefaultAWSRegion -Region $Region
+
+# View Setting File [Initialize-AWSDefaults]
+Get-Content -Path "C:\Users\Administrator\AppData\Local\AWSToolkit\RegisteredAccounts.json"
+
+# Log Setting Information [Set-DefaultAWSRegion]
 Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
 
 # Setting AWS Tools for Windows PowerShell (Additional)
@@ -1247,8 +1257,12 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
 
-# Get Amazon SSM Agent Service Status
-Restart-Service -Name AmazonSSMAgent
+# Forced cleanup of Amazon SSM Agent's local data
+Stop-Service -Name AmazonSSMAgent
+
+Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
+
+Start-Service -Name AmazonSSMAgent
 Start-Sleep -Seconds 30
 
 # Get Service Status
@@ -1494,7 +1508,41 @@ if ($ElasticGpuId -match "^egpu-*") {
 # Log Separator
 Write-LogSeparator "Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)"
 
-Write-Log "# Check Amazon EC2 G2 Instance Family"
+Write-Log "# [CUDA] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
+
+# Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/P2/P3 Instance Family)
+# http://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html
+# https://developer.nvidia.com/cuda-downloads
+if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
+    Write-Log "# Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/P2/P3 Instance Family)"
+    if ($WindowsOSVersion) {
+        if ($WindowsOSVersion -eq "6.3") {
+            # [Windows Server 2012 R2]
+            $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2012R2&target_type=exelocal'
+            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_windows-exe"
+            Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
+            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_for_WindowsServer2012R2.exe"
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
+            # [Windows Server 2016]
+            $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
+            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_win10-exe"
+            Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
+            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_for_WindowsServer2016.exe"
+        }
+        else {
+            # [No Target Server OS]
+            Write-Log ("# [Information] [NVIDIA CUDA Toolkit] No Target Server OS Version : " + $WindowsOSVersion)
+        }
+    }
+    else {
+        # [Undefined Server OS]
+        Write-Log "# [Warning] [NVIDIA CUDA Toolkit] Undefined Server OS"
+    }
+}
+
+
+Write-Log "# [GPU Driver] Check Amazon EC2 G2 Instance Family"
 
 # Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1545,7 +1593,7 @@ if ($InstanceType -match "^g2.*") {
 }
 
 
-Write-Log "# Check Amazon EC2 G3 Instance Family"
+Write-Log "# [GPU Driver] Check Amazon EC2 G3 Instance Family"
 
 # Package Download NVIDIA Tesla M60 GPU Driver (for Amazon EC2 G3 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1588,7 +1636,7 @@ if ($InstanceType -match "^g3.*") {
 }
 
 
-Write-Log "# Check Amazon EC2 P2 Instance Family"
+Write-Log "# [GPU Driver] Check Amazon EC2 P2 Instance Family"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1631,7 +1679,7 @@ if ($InstanceType -match "^p2.*") {
 }
 
 
-Write-Log "# Check Amazon EC2 P3 Instance Family"
+Write-Log "# [GPU Driver] Check Amazon EC2 P3 Instance Family"
 
 # Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1666,7 +1714,7 @@ if ($InstanceType -match "^p3.*") {
 }
 
 
-Write-Log "# Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
+Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 
 # Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2/P3 Instance Family)
 # https://github.com/JeremyMain/GPUProfiler
