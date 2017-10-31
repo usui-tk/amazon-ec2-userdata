@@ -761,7 +761,7 @@ Get-AWSPowerShellVersion
 # Get-AWSPowerShellVersion -ListServiceVersionInfo
 
 # Setting AWS Tools for Windows PowerShell
-Initialize-AWSDefaults -ProfileName Default -Region $Region
+Initialize-AWSDefaultConfiguration -Region $Region
 Set-DefaultAWSRegion -Region $Region
 
 # View Setting File [Initialize-AWSDefaults]
