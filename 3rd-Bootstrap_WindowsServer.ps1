@@ -1542,7 +1542,7 @@ if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
 }
 
 
-Write-Log "# [GPU Driver] Check Amazon EC2 G2 Instance Family"
+Write-Log "# [GPU Driver:NVIDIA GRID K520] Check Amazon EC2 G2 Instance Family"
 
 # Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1593,7 +1593,7 @@ if ($InstanceType -match "^g2.*") {
 }
 
 
-Write-Log "# [GPU Driver] Check Amazon EC2 G3 Instance Family"
+Write-Log "# [GPU Driver:NVIDIA GRID M60] Check Amazon EC2 G3 Instance Family"
 
 # Package Download NVIDIA Tesla M60 GPU Driver (for Amazon EC2 G3 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1636,7 +1636,7 @@ if ($InstanceType -match "^g3.*") {
 }
 
 
-Write-Log "# [GPU Driver] Check Amazon EC2 P2 Instance Family"
+Write-Log "# [GPU Driver:NVIDIA Tesla K80] Check Amazon EC2 P2 Instance Family"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
@@ -1679,7 +1679,7 @@ if ($InstanceType -match "^p2.*") {
 }
 
 
-Write-Log "# [GPU Driver] Check Amazon EC2 P3 Instance Family"
+Write-Log "# [GPU Driver:NVIDIA Tesla V100] Check Amazon EC2 P3 Instance Family"
 
 # Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
