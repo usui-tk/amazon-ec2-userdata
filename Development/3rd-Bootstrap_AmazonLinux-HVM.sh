@@ -172,10 +172,24 @@ ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
+# http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+# task:support kernel, region check
 #-------------------------------------------------------------------------------
 
 # Listup for Amazon Linux supported_kernels
-curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | grep "amzn" | sort
+curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | jq '.[] | select(.distribution == "AMZN")'
+
+# Listup for RHEL v6 supported_kernels
+curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | jq '.[] | select(.distribution == "REDHAT")'
+
+# Listup for RHEL v7 supported_kernels
+curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | jq '.[] | select(.distribution == "RHEL")'
+
+# Listup for CentOS v6,v7 supported_kernels
+curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | jq '.[] | select(.distribution == "CENTOS")'
+
+# Listup for Ubuntu 14.04LTS, 16.04LTS supported_kernels
+curl -s "https://s3.amazonaws.com/aws-agent.us-east-1/linux/support/supported_versions.json" | jq '.[] | select(.distribution == "CENTOS")'
 
 # Install AWS Agent (Amazon Inspector Agent)
 curl -s "https://d1wk0tztpsntt1.cloudfront.net/linux/latest/install" | bash -e
