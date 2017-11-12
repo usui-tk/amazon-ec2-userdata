@@ -86,7 +86,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y arptables bash-completion bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mtr nc nmap nvme-cli sos sysstat tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl sos strace sysstat tcpdump tree traceroute vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
@@ -223,6 +223,7 @@ fi
 #
 # - EBS Optimized Instance
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSOptimized.html
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then

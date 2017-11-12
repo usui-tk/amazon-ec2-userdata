@@ -40,7 +40,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y arptables_jf collectl dstat ebtables fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos sysstat tcpdump traceroute vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y arptables_jf bc collectl dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -89,7 +89,6 @@ sleep 3
 aws configure list
 cat ~/.aws/config
 
-
 # Get AWS Region Information
 if [ -n "$RoleName" ]; then
 	echo "# Get AWS Region Infomation"
@@ -122,7 +121,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(e3.*|f1.*|g3.*|i3.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|e3.*|f1.*|g3.*|i3.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -143,9 +142,10 @@ fi
 #
 # - EBS Optimized Instance
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSOptimized.html
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -157,8 +157,58 @@ if [ -n "$RoleName" ]; then
 	fi
 fi
 
+# Get EC2 Hypervisor Information[Linux-KVM Hypervisor]
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c5.*)$ ]]; then
+
+		# Hardware(CPU, BIOS) Information
+		dmidecode
+
+		cat /proc/cpuinfo
+
+		grep -cw vmx /proc/cpuinfo
+
+		# Numa Node Information
+		numactl --hardware
+		numastat -v
+
+		# Linux Kernel Information
+		dmesg | grep -ie kvm -ie nvme
+	else
+		echo "# Not Target Instance Type :" $InstanceType
+	fi
+fi
+
+# Get EC2 Instance attached NVMe Device Information
+#
+# - Amazon EBS and NVMe Volumes [c5]
+#   http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
+# - SSD Instance Store Volumes [f1, i3]
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ssd-instance-store.html
+#
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c5.*|f1.*|i3.*)$ ]]; then
+		# Get NVMe Device(nvme list)
+		# http://www.spdk.io/doc/nvme-cli.html
+		# https://github.com/linux-nvme/nvme-cli
+		echo "# Get NVMe Device(nvme list)"
+		nvme list
+
+		# Get PCI-Express Device(lspci -v)
+		echo "# Get PCI-Express Device(lspci -v)"
+		lspci -v
+
+		# Disk Information(MountPoint) [lsblk]
+		lsblk
+	else
+		echo "# Not Target Instance Type :" $InstanceType
+	fi
+fi
+
 #-------------------------------------------------------------------------------
 # Custom Package Update [AWS Systems Service Manager (aka SSM) agent]
+# http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
+# https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
@@ -173,6 +223,7 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
 # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+# https://github.com/awslabs/aws-ec2rescue-linux
 #-------------------------------------------------------------------------------
 
 # Package Download Amazon Linux System Administration Tools (from S3 Bucket)
