@@ -34,25 +34,25 @@ echo $VpcNetwork
 # Command Non-Interactive Mode
 export DEBIAN_FRONTEND=noninteractive
 
-# yum repository metadata Clean up
-apt-get clean -y
+# apt repository metadata Clean up
+apt clean -y
 
 # Default Package Update
-apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
+apt update -y && apt upgrade -y && apt dist-upgrade -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt-get install -y arptables atop bash-completion binutils chrony collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sysstat tcpdump traceroute unzip update-motd wget zip
+apt install -y arptables atop bash-completion binutils chrony collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sysstat tcpdump traceroute unzip update-motd wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
 #-------------------------------------------------------------------------------
 
 # Package Install Special package for AWS (from Ubuntu Official Repository)
-apt-get install -y linux-aws linux-image-aws linux-tools-aws
+apt install -y linux-aws linux-image-aws linux-tools-aws
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -81,8 +81,7 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-# apt-get install -y python3-pip
-apt-get install -y awscli
+apt install -y awscli
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -179,7 +178,7 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 #-------------------------------------------------------------------------------
-apt-get install -y python-setuptools
+apt install -y python-setuptools
 easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
 ln -s /usr/local/lib/python2.7/dist-packages/aws_cfn_bootstrap-1.4-py2.7.egg/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
@@ -238,10 +237,14 @@ __EOF__
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-apt-get install -y software-properties-common
+apt install -y software-properties-common
+
 apt-add-repository -y ppa:ansible/ansible
-apt-get update -y
-apt-get install -y ansible
+apt-key list
+
+apt update -y
+
+apt install -y ansible
 
 ansible --version
 
@@ -250,7 +253,7 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-apt-get clean -y
+apt clean -y
 
 #-------------------------------------------------------------------------------
 # System Setting
@@ -351,7 +354,7 @@ date
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation [language-pack-ja]
-	apt-get install -y language-pack-ja fonts-ipafont
+	apt install -y language-pack-ja fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
