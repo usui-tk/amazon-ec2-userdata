@@ -1,7 +1,9 @@
 #!/bin/bash -v
 
+set -e -x
+
 # Logger
-exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
+exec > >(tee /var/log/user-data-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
 #-------------------------------------------------------------------------------
 # Set UserData Parameter
@@ -29,42 +31,44 @@ echo $VpcNetwork
 # Default Package Update
 #-------------------------------------------------------------------------------
 
-# yum repository metadata Clean up
-dnf clean all
+# Command Non-Interactive Mode
+export DEBIAN_FRONTEND=noninteractive
+
+# apt repository metadata Clean up
+apt clean -y
 
 # Default Package Update
-dnf update -y
+apt update -y && apt upgrade -y && apt dist-upgrade -y
+
+# --- Workaround ---
+apt --fix-broken install -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y dnf-plugins-core dnf-plugin-system-upgrade dnf-utils
-dnf clean all
-dnf makecache
+# Package Install Kali Linux Meta-Package
+#  https://tools.kali.org/kali-metapackages
+#  https://tools.kali.org/tools-listing
+apt install -y kali-linux-full kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
 
-dnf install -y bash-completion bind-utils curl dstat ethtool fio gdisk git hdparm jq lsof lzop iotop mtr nc nmap rpmconf sos tcpdump traceroute vim-enhanced wget
-dnf install -y setroubleshoot-server
-
-# Package Install Fedora RPM Development Tools (from Fedora Official Repository)
-dnf install -y rpmdevtools
-# dnf group install -y "RPM Development Tools"
+# Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
+apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
-AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+AZ=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
 Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
-InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
-PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
-AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
+InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+InstanceType=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+PrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+AmiId=$(curl -s http://169.254.169.254/latest/meta-data/ami-id)
 
 # IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+RoleArn=$(curl -s http://169.254.169.254/latest/meta-data/iam/info | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
 StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
@@ -73,12 +77,18 @@ StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 StsToken=$(echo $StsCredential | jq -r '.Token')
 
 # AWS Account ID
-AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+AwsAccountId=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-dnf install -y awscli
+apt install -y awscli
+
+cat > /etc/profile.d/aws-cli.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/aws_completer aws
+fi
+__EOF__
 
 aws --version
 
@@ -129,7 +139,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(e3.*|f1.*|g3.*|i3.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|e3.*|f1.*|g3.*|i3.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -150,9 +160,10 @@ fi
 #
 # - EBS Optimized Instance
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSOptimized.html
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -165,31 +176,26 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-SHELL]
+# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
 #-------------------------------------------------------------------------------
-# dnf install -y aws-shell
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
-#-------------------------------------------------------------------------------
-# dnf localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
-
-dnf localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+curl -sS "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o "/tmp/amazon-ssm-agent.deb"
+dpkg -i "/tmp/amazon-ssm-agent.deb"
 
 systemctl daemon-reload
 
-systemctl status -l amazon-ssm-agent
+systemctl status amazon-ssm-agent
 systemctl enable amazon-ssm-agent
 systemctl is-enabled amazon-ssm-agent
 
 systemctl restart amazon-ssm-agent
-systemctl status -l amazon-ssm-agent
+systemctl status amazon-ssm-agent
 
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
 # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
+# https://github.com/awslabs/aws-ec2rescue-linux
 #-------------------------------------------------------------------------------
 
 # Package Download Amazon Linux System Administration Tools (from S3 Bucket)
@@ -217,142 +223,16 @@ __EOF__
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
-
-# Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y ansible ansible-doc
+apt install -y ansible
 
 ansible --version
 
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Docker - Fedora Repository]
-#-------------------------------------------------------------------------------
-
-# Package Install Docker Enviroment Tools (from Fedora Official Repository)
-# dnf install -y docker fedora-dockerfiles
-
-# systemctl daemon-reload
-
-# systemctl status -l docker
-# systemctl enable docker
-# systemctl is-enabled docker
-
-# systemctl restart docker
-# systemctl status -l docker
-
-# Docker Deamon Information
-# docker --version
-# docker info
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
-#-------------------------------------------------------------------------------
-
-# Package Uninstall Docker Enviroment Tools (from Fedora Official Repository)
-dnf remove -y docker docker-common docker-selinux docker-engine-selinux docker-engine
-
-# Package Install Docker Enviroment Tools (from Docker Community Edition Official Repository)
-dnf repolist
-dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
-dnf repolist
-dnf config-manager --set-enabled docker-ce-edge
-dnf repolist
-dnf makecache
-
-dnf install -y docker-ce
-
-systemctl daemon-reload
-
-systemctl status -l docker
-systemctl enable docker
-systemctl is-enabled docker
-
-systemctl restart docker
-systemctl status -l docker
-
-# Docker Deamon Information
-docker --version
-
-docker info
-
-# Docker Configuration
-usermod -a -G docker fedora
-
-# Docker Pull Image (from Docker Hub)
-docker pull fedora:latest
-docker pull amazonlinux:latest
-docker pull centos:latest # CentOS v7
-
-# Docker Run (Amazon Linux)
-# docker run -it amazonlinux:latest /bin/bash
-# cat /etc/system-release
-# exit
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Fluentd (td-agent)]
-#-------------------------------------------------------------------------------
-
-# Package Install Fedora C-Language Development Tools (from Fedora Official Repository)
-# dnf install -y gcc
-dnf group install -y "C Development Tools and Libraries"
-
-# Package Install Fedora Ruby Development Tools (from Fedora Official Repository)
-dnf install -y ruby ruby-devel libxml2-devel libxslt-devel sqlite-devel
-
-ruby --version
-
-# Package Install Fluentd (td-agent) Tools (from Ruby Gem Package)
-gem install fluentd -v "~> 0.12.0"
-
-mkdir -p /etc/fluentd
-
-/usr/local/bin/fluentd --setup /etc/fluentd
-
-cat /etc/fluentd/fluent.conf
-
-/usr/local/bin/fluentd --config /etc/fluentd/fluent.conf -vv & # -vv enables trace level logs. You can omit -vv option.
-
-echo '{"json":"message"}' | /usr/local/bin/fluent-cat debug.test
-
-# Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-/usr/local/bin/fluent-gem list
-
-/usr/local/bin/fluent-gem search -r fluent-plugin
-
-/usr/local/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
-/usr/local/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/usr/local/bin/fluent-gem install fluent-plugin-kinesis
-/usr/local/bin/fluent-gem install fluent-plugin-kinesis-firehose
-/usr/local/bin/fluent-gem install fluent-plugin-s3
-
-/usr/local/bin/fluent-gem list
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Node.js & Serverless Application Framework]
-#-------------------------------------------------------------------------------
-dnf install -y nodejs npm
-node -v
-npm -v
-
-npm install -g serverless
-
-sls -v
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.6]
-#-------------------------------------------------------------------------------
-dnf install -y python36
-
-#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-dnf clean all
-
-#-------------------------------------------------------------------------------
-# RPM Package Configuration Check
-#-------------------------------------------------------------------------------
-rpmconf --all
+apt clean -y
 
 #-------------------------------------------------------------------------------
 # System Setting
@@ -387,30 +267,23 @@ ip addr show
 # Network Information(Routing Table) [ip route show]
 ip route show
 
-# Network Information(Firewall Service) [firewalld]
-if [ $(command -v firewall-cmd) ]; then
-    # Network Information(Firewall Service) [systemctl status -l firewalld]
-    systemctl status -l firewalld
-    # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
-fi
-
-# Linux Security Information(SELinux) [getenforce] [sestatus]
-getenforce
-
-sestatus
-
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
-# NTP Service Enabled(chronyd)
-systemctl status -l chronyd
-systemctl restart chronyd
-systemctl status -l chronyd
+# Replace NTP Client software (Uninstall ntp Package)
+systemctl status -l ntp
+systemctl stop ntp
+systemctl status -l ntp
+apt remove -y ntp sntp
 
-systemctl enable chronyd
-systemctl is-enabled chronyd
+# Replace NTP Client software (Install chrony Package)
+apt install -y chrony
+systemctl status -l chrony
+systemctl restart chrony
+systemctl enable chrony
+systemctl is-enabled chrony
+systemctl status -l chrony
 sleep 3
 chronyc tracking
 chronyc sources -v
@@ -420,21 +293,19 @@ chronyc sourcestats -v
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
 	timedatectl set-timezone Asia/Tokyo
 	date
-	# timedatectl status
+	dpkg-reconfigure --frontend noninteractive tzdata
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
 	timedatectl set-timezone UTC
 	date
-	# timedatectl status
+	dpkg-reconfigure --frontend noninteractive tzdata
 else
 	echo "# Default SystemClock and Timezone"
-	# timedatectl status
 	date
+	dpkg-reconfigure --frontend noninteractive tzdata
 fi
 
 # Time synchronization with NTP server
@@ -446,35 +317,36 @@ date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	# Custom Package Installation [language-pack-ja]
+	apt-get install -y task-japanese task-japanese-desktop fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
 	localectl set-locale LANG=ja_JP.utf8
 	locale
-	# localectl status
-	cat /etc/locale.conf
+	strings /etc/default/locale
+	dpkg-reconfigure --frontend noninteractive locales
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
 	localectl set-locale LANG=en_US.utf8
 	locale
-	# localectl status
-	cat /etc/locale.conf
+	strings /etc/default/locale
+	dpkg-reconfigure --frontend noninteractive locales
 else
 	echo "# Default Language"
 	locale
-	cat /etc/locale.conf
+	strings /etc/default/locale
 fi
 
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
-	systemctl restart chronyd
+	
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
@@ -511,5 +383,37 @@ else
 	netstat -r -A inet6
 fi
 
+#-------------------------------------------------------------------------------
+# System Setting (Root Disk Extension)
+#-------------------------------------------------------------------------------
+# Disk Information(Partition) [parted -l]
+parted -l
+
+# Disk Information(Partition) [file -s]
+file -s /dev/xvd*
+
+# Disk Information(MountPoint) [lsblk]
+lsblk
+
+# Disk Information(File System) [df -h]
+df -h
+
+# Expansion of disk partition
+parted -l
+
+/sbin/parted ---pretend-input-tty /dev/xvda resizepart 1 yes 100%
+
+parted -l
+
+# Expansion of disk partition
+df -h
+
+resize2fs /dev/xvda1
+
+df -h
+
+#-------------------------------------------------------------------------------
+# System Reboot
+#-------------------------------------------------------------------------------
 # Instance Reboot
 reboot

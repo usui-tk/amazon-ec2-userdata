@@ -158,6 +158,17 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
+# Custom Package Update [AWS Encryption CLI]
+# https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/crypto-cli.html
+# http://aws-encryption-sdk-cli.readthedocs.io/en/latest/
+# https://github.com/awslabs/aws-encryption-sdk-cli
+#-------------------------------------------------------------------------------
+
+pip install aws-encryption-sdk-cli
+
+/usr/local/bin/aws-encryption-cli --version
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
 #-------------------------------------------------------------------------------
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"

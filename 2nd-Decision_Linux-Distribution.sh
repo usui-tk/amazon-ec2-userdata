@@ -16,6 +16,9 @@ ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata
 ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
+ScriptForFedora27="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-27-HVM.sh"
+ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
+
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -49,6 +52,10 @@ function get_os_info () {
           DIST_TYPE='Oracle'
           DIST=`cat /etc/oracle-release | sed s/\ release.*//`
           REV=`cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*//`
+      elif [ -f /etc/fedora-release ]; then
+          DIST_TYPE='Fedora'
+          DIST=`cat /etc/fedora-release | sed s/\ release.*//`
+          REV=`cat /etc/fedora-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/redhat-release ]; then
           DIST_TYPE='RHEL'
           DIST=`cat /etc/redhat-release | sed s/\ release.*//`
@@ -119,6 +126,20 @@ function get_bootstrap_script () {
         if [ $(echo ${REV} | grep -e '12.') ]; then
            # Bootstrap Script for SUSE Linux Enterprise Server 12
            BootstrapScript=${ScriptForSLESv12}
+        else
+           BootstrapScript=""
+        fi    
+    elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
+        if [ $(echo ${REV} | grep -e '27') ]; then
+           # Bootstrap Script for Fedora 27
+           BootstrapScript=${ScriptForFedora27}
+        else
+           BootstrapScript=""
+        fi    
+    elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
+        if [ $(echo ${REV} | grep -e '2017.') ]; then
+           # Bootstrap Script for Kali Linux 2017.x
+           BootstrapScript=${ScriptForKaliLinux}
         else
            BootstrapScript=""
         fi    
