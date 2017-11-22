@@ -392,10 +392,10 @@ function Get-Ec2LaunchVersion {
     Set-Variable -Name Ec2LaunchModuleConfig -Option Constant -Scope Local -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
     Set-Variable -Name Ec2LaunchVersion -Scope Script -Value ($Null)
 
-    # Get EC2Launch Version from "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
+    # Get EC2Launch Version
     if (Test-Path $Ec2LaunchModuleConfig) {
-        $EC2LaunchModuleVersion = Select-String -Path $Ec2LaunchModuleConfig -Pattern "ModuleVersion"
-        $Ec2LaunchVersion = $($EC2LaunchModuleVersion -match '(\d\.\d\.\d)' | Out-Null; $Matches[1])
+        Import-Module -Name "C:\ProgramData\Amazon\EC2-Windows\Launch\Module\Ec2Launch.psd1"
+        $Ec2LaunchVersion = (Get-Module EC2Launch).Version.ToString()
 
         # Write the information to the Log Files
         if ($Ec2LaunchVersion) {
@@ -775,10 +775,16 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 #  Set-AWSHistoryConfiguration -MaxCmdletHistory 512 -MaxServiceCallHistory 512 -RecordServiceRequests
 #  Set-AWSResponseLogging -Level Always
 
-# Get AMI Information
+# Get AMI Information from Public AMI
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get AMI Information"
-    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_AMI-Information.txt" -Append -Force
+    Write-Log "# [Amazon EC2 - Windows] Get Windows AMI Information from Public AMI"
+    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-Information.txt" -Append -Force
+}
+
+# Get AMI Information from Systems Manager Parameter Store
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
+    Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
@@ -1218,6 +1224,44 @@ Get-PowerPlanInformation
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package ReInstall[Uninstall and Install] (AWS CloudFormation Helper Scripts)
+#  - Workaround processing for multiple aws-cfn-bootstrap package information conflicts -
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package ReInstall[Uninstall and Install] (AWS CloudFormation Helper Scripts)"
+
+# Logging Install Windows Application List (Before Uninstall)
+Write-Log "# Get Install Windows Application List (Before Uninstall)"
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+
+# Uninstall AWS CloudFormation Helper Scripts
+(Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall()
+Start-Sleep -Seconds 5
+
+# Logging Install Windows Application List (After Uninstall)
+Write-Log "# Get Install Windows Application List (After Uninstall)"
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+
+# Package Download System Utility (AWS CloudFormation Helper Scripts)
+# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
+Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+
+# Package Install System Utility (AWS CloudFormation Helper Scripts)
+Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
+Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWSCloudFormationHelperScriptSetup.log")
+
+Start-Sleep -Seconds 5
+
+Get-Service -Name cfn-hup
+
+# Logging Install Windows Application List (After Install)
+Write-Log "# Get Install Windows Application List (After Install)"
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Update (Amazon EC2 Systems Manager Agent)
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -1284,37 +1328,61 @@ if ($RoleName) {
 # Log Separator
 Write-LogSeparator "Package Install System Utility (Amazon Inspector Agent)"
 
-# Package Download System Utility (Amazon Inspector Agent)
-# https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_agents-on-win.html
-Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
-Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
+# Check Region
+if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|^eu-west-1|^us-east-1|^us-west-1|^us-west-2") {
 
-# Package Install System Utility (Amazon Inspector Agent)
-Write-Log "# Package Install System Utility (Amazon Inspector Agent)"
-Start-Process -FilePath "$TOOL_DIR\AWSAgentInstall.exe" -ArgumentList @('/install', '/quiet', '/norestart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonInspecterAgentSetup.log') -Wait | Out-Null
+    # Amazon Inspector Agent Support AWS Regions
+    # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+    Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
 
-Start-Sleep -Seconds 10
+    # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2]
+    if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
 
-Get-Service -Name AWSAgent
+        # Amazon Inspector Agent Support Windows OS Version
+        # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+        Write-Log "# [AWS - EC2-AmazonInspectorAgent] Windows OS Version : $WindowsOSVersion"
 
-# Service Automatic Startup Setting (Amazon Inspector Agent)
-$AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
+        # Package Download System Utility (Amazon Inspector Agent)
+        # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_agents-on-win.html
+        Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
+        Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
 
-if ($AmazonInspectorAgentStatus -ne "Auto") {
-    Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus -> Auto"
-    Set-Service -Name "AWSAgent" -StartupType Automatic
+        # Package Install System Utility (Amazon Inspector Agent)
+        Write-Log "# Package Install System Utility (Amazon Inspector Agent)"
+        Start-Process -FilePath "$TOOL_DIR\AWSAgentInstall.exe" -ArgumentList @('/install', '/quiet', '/norestart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonInspecterAgentSetup.log') -Wait | Out-Null
 
-    Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 10
 
-    $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
-    Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus"
+        Get-Service -Name AWSAgent
+
+        # Service Automatic Startup Setting (Amazon Inspector Agent)
+        $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
+
+        if ($AmazonInspectorAgentStatus -ne "Auto") {
+            Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus -> Auto"
+            Set-Service -Name "AWSAgent" -StartupType Automatic
+
+            Start-Sleep -Seconds 5
+
+            $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
+            Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus"
+        }
+
+        # Display Windows Server OS Parameter [Amazon Inspector Agent Information]
+        if ($RoleName) {
+            cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
+
+            Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+        }
+    }
+    else {
+        # Amazon Inspector Agent Support Windows OS Version (None)
+        Write-Log ("# [AWS - EC2-AmazonInspectorAgent] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+    }
 }
-
-# Display Windows Server OS Parameter [Amazon Inspector Agent Information]
-if ($RoleName) {
-    cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
-
-    Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+else {
+    # Amazon Inspector Agent Support AWS Regions (None)
+    Write-Log ("# [AWS - EC2-AmazonInspectorAgent] AWS Region : " + $Region + " - Not Suppoort AWS Region")
 }
 
 
@@ -1330,87 +1398,117 @@ Set-Variable -Name ElasticGpuId -Scope Script -Value ($Null)
 Set-Variable -Name ElasticGpuResponse -Scope Script -Value ($Null)
 Set-Variable -Name ElasticGpuResponseError -Scope Script -Value ($Null)
 
-# Check Amazon EC2 Elastic GPUs Support InstanceType
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
-Write-Log "# Check Amazon EC2 Elastic GPUs Support InstanceType"
-if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*|^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
-    # Amazon EC2 Elastic GPUs Support InstanceType
-    Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
-}
-else {
-    # Amazon EC2 Elastic GPUs Support InstanceType (None)
-    Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
-}
+# Check Region
+if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-1|^eu-west-1|^us-east-1|^us-east-2|^us-west-2") {
 
-# Check Amazon EC2 Elastic GPU ID
-$ElasticGpuResponseError = try { $ElasticGpuResponse = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
-if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
-    # The Amazon EC2 Elastic GPU is attached
-    Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"
-    Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
-}
-else {
-    # The Amazon EC2 Elastic GPU is not attached
-    Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is not attached"
-}
+    # Amazon EC2 Elastic GPUs Support AWS Regions
+    # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+    Write-Log "# [AWS - EC2-ElasticGPU] AWS Region : $Region"
 
-# Check Amazon EC2 Elastic GPU Information
-if ($ElasticGpuId -match "^egpu-*") {
-    Write-Log "# Check Amazon EC2 Elastic GPU Information"
+    # Check Amazon EC2 Elastic GPUs Support InstanceType
+    # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
+    Write-Log "# Check Amazon EC2 Elastic GPUs Support InstanceType"
+    if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*|^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
+        # Amazon EC2 Elastic GPUs Support InstanceType
+        Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
+    }
+    else {
+        # Amazon EC2 Elastic GPUs Support InstanceType (None)
+        Write-Log ("# [AWS - EC2-ElasticGPU] InstanceType : " + $InstanceType + " - Not Suppoort Instance Type")
+    }
 
-    # Get EC2 Instance attached Elastic GPU Information
-    Set-Variable -Name ElasticGpuInformation -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
-    Set-Variable -Name ElasticGpuType -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
-    Set-Variable -Name ElasticGpuEniIpAddress -Scope Script -Value ($ElasticGpuInformation.connectionConfig.ipv4Address)
+    # Check Amazon EC2 Elastic GPU ID
+    $ElasticGpuResponseError = try { $ElasticGpuResponse = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
+    if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
+        # The Amazon EC2 Elastic GPU is attached
+        Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"
+        Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
+    }
+    else {
+        # The Amazon EC2 Elastic GPU is not attached
+        Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is not attached"
+    }
+
+    # Check Amazon EC2 Elastic GPU Information
+    if ($ElasticGpuId -match "^egpu-*") {
+        Write-Log "# Check Amazon EC2 Elastic GPU Information"
+
+        # Get EC2 Instance attached Elastic GPU Information
+        Set-Variable -Name ElasticGpuInformation -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
+        Set-Variable -Name ElasticGpuType -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
+        Set-Variable -Name ElasticGpuEniIpAddress -Scope Script -Value ($ElasticGpuInformation.connectionConfig.ipv4Address)
     
-    # Logging Amazon EC2 Elastic GPU Information
-    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
-    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
-    Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
+        # Logging Amazon EC2 Elastic GPU Information from EC2 Instance MetaData
+        Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
+        Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
+        Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
 
-    $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
+        $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_EC2InstanceMetaData-Information.txt" -Append -Force
 
-    if ($RoleName) {
-        Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.RequesterId -eq "amazon-elasticgpus" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
-        Set-Variable -Name ElasticGpuEniId -Scope Script -Value ($ElasticGpuEniInsterface.NetworkInterfaceId)
+        # Logging Amazon EC2 Elastic GPU Information from AWS Tools for Windows PowerShell
+        if ($RoleName) {
+            Get-EC2ElasticGpu -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
+        }
 
-        Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
+        # Logging Amazon EC2 Elastic GPU ENI Information from AWS Tools for Windows PowerShell
+        if ($RoleName) {
+            Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.RequesterId -eq "amazon-elasticgpus" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
+            Set-Variable -Name ElasticGpuEniId -Scope Script -Value ($ElasticGpuEniInsterface.NetworkInterfaceId)
 
-        $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Information.txt" -Append -Force
-    }
+            Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
 
-    # Package Download System Utility (Amazon EC2 Elastic GPU Software)
-    # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/working-with-elastic-gpus.html
-    Write-Log "# Package Download System Utility (Amazon EC2 Elastic GPU Software)"
-    Invoke-WebRequest -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
+            $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Information.txt" -Append -Force
+        }
 
-    # Package Install System Utility (Amazon EC2 Elastic GPU Software)
-    Write-Log "# Package Install System Utility (Amazon EC2 Elastic GPU Software)"
-    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
-    Start-Sleep -Seconds 10
+        # Check Windows OS Version[Windows Server 2012 R2, 2016]
+        if ($WindowsOSVersion -match "^6.3|^10.0") {
 
-    # Setting Application Path (Amazon EC2 Elastic GPU Software)
-    [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Amazon\EC2ElasticGPUs\manager\", [EnvironmentVariableTarget]::Machine)
+            # Amazon EC2 Elastic GPUs Support Windows OS Version
+            # https://aws.amazon.com/jp/ec2/elastic-gpus/faqs/
+            Write-Log "# [AWS - EC2-ElasticGPU] Windows OS Version : $WindowsOSVersion"
+
+            # Package Download System Utility (Amazon EC2 Elastic GPU Software)
+            # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/working-with-elastic-gpus.html
+            Write-Log "# Package Download System Utility (Amazon EC2 Elastic GPU Software)"
+            Invoke-WebRequest -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
+
+            # Package Install System Utility (Amazon EC2 Elastic GPU Software)
+            Write-Log "# Package Install System Utility (Amazon EC2 Elastic GPU Software)"
+            Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
+            Start-Sleep -Seconds 10
+
+            # Setting Application Path (Amazon EC2 Elastic GPU Software)
+            [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Amazon\EC2ElasticGPUs\manager\", [EnvironmentVariableTarget]::Machine)
  
-    # Service Automatic Startup Setting (Amazon EC2 Elastic GPU Manager)
-    Get-Service -Name EC2ElasticGPUs_Manager
+            # Service Automatic Startup Setting (Amazon EC2 Elastic GPU Manager)
+            Get-Service -Name EC2ElasticGPUs_Manager
 
-    $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
+            $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
 
-    if ($EC2ElasticGPUs_ManagerStatus -ne "Auto") {
-        Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus -> Auto"
-        Set-Service -Name "EC2ElasticGPUs_Manager" -StartupType Automatic
+            if ($EC2ElasticGPUs_ManagerStatus -ne "Auto") {
+                Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus -> Auto"
+                Set-Service -Name "EC2ElasticGPUs_Manager" -StartupType Automatic
 
-        Start-Sleep -Seconds 5
+                Start-Sleep -Seconds 5
 
-        $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
-        Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus"
+                $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
+                Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus"
+            }
+
+            # Display Windows Server OS Parameter [Amazon EC2 Elastic GPU Manager Information]
+            cmd.exe /c "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" 2>&1
+
+            Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
+        }
+        else {
+            # Amazon EC2 Elastic GPUs Support InstanceType (None)
+            Write-Log ("# [AWS - EC2-ElasticGPU] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+        }
     }
-
-    # Display Windows Server OS Parameter [Amazon EC2 Elastic GPU Manager Information]
-    cmd.exe /c "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" 2>&1
-
-    Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
+}
+else {
+    # Amazon EC2 Elastic GPUs Support AWS Regions (None)
+    Write-Log ("# [AWS - EC2-ElasticGPU] AWS Region : " + $Region + " - Not Suppoort AWS Region")
 }
 
 
@@ -1521,14 +1619,14 @@ if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2012R2&target_type=exelocal'
             $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_windows-exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_for_WindowsServer2012R2.exe"
+            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
             $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_win10-exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_for_WindowsServer2016.exe"
+            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -1866,11 +1964,6 @@ Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile 
 Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
 Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 
-# Package Download System Utility (AWS CloudFormation Helper Scripts)
-# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
-Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
-
 # Package Download System Utility (AWS Directory Service PortTest Application)
 # http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
 Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
@@ -1890,6 +1983,11 @@ Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/A
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
 Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
 Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+
+# Package Download System Utility (AWS ElasticWolf Client Console)
+# https://aws.amazon.com/tools/aws-elasticwolf-client-console/
+Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
+Invoke-WebRequest -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 
 
 #-----------------------------------------------------------------------------------------------------------------------
