@@ -32,6 +32,10 @@ echo $VpcNetwork
 # yum repository metadata Clean up
 dnf clean all
 
+dnf update -y dnf
+
+dnf clean all
+
 # Package Install DNF Administration Tools (from Fedora Official Repository)
 dnf install -y dnf-plugins-core dnf-plugin-system-upgrade dnf-utils
 dnf clean all
@@ -233,37 +237,7 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 
 # Package Install Docker Enviroment Tools (from Fedora Official Repository)
-# dnf install -y docker fedora-dockerfiles
-
-# systemctl daemon-reload
-
-# systemctl status -l docker
-# systemctl enable docker
-# systemctl is-enabled docker
-
-# systemctl restart docker
-# systemctl status -l docker
-
-# Docker Deamon Information
-# docker --version
-# docker info
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
-#-------------------------------------------------------------------------------
-
-# Package Uninstall Docker Enviroment Tools (from Fedora Official Repository)
-dnf remove -y docker docker-common docker-selinux docker-engine-selinux docker-engine
-
-# Package Install Docker Enviroment Tools (from Docker Community Edition Official Repository)
-dnf repolist
-dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
-dnf repolist
-dnf config-manager --set-enabled docker-ce-edge
-dnf repolist
-dnf makecache
-
-dnf install -y docker-ce
+dnf install -y docker fedora-dockerfiles
 
 systemctl daemon-reload
 
@@ -276,16 +250,62 @@ systemctl status -l docker
 
 # Docker Deamon Information
 docker --version
-
 docker info
-
-# Docker Configuration
-usermod -a -G docker fedora
 
 # Docker Pull Image (from Docker Hub)
 docker pull fedora:latest
 docker pull amazonlinux:latest
 docker pull centos:latest # CentOS v7
+
+# Docker Run (Amazon Linux)
+# docker run -it amazonlinux:latest /bin/bash
+# cat /etc/system-release
+# exit
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
+#-------------------------------------------------------------------------------
+
+# Package Uninstall Docker Enviroment Tools (from Fedora Official Repository)
+# dnf remove -y docker docker-common docker-selinux docker-engine-selinux docker-engine
+
+# Package Install Docker Enviroment Tools (from Docker Community Edition Official Repository)
+# dnf repolist
+
+# dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
+# dnf config-manager --set-enabled docker-ce-edge
+
+# dnf makecache
+
+# sleep 5
+
+# dnf repolist
+# dnf makecache
+
+# dnf install -y docker-ce
+
+# systemctl daemon-reload
+
+# systemctl status -l docker
+# systemctl enable docker
+# systemctl is-enabled docker
+
+# systemctl restart docker
+# systemctl status -l docker
+
+# Docker Deamon Information
+# docker --version
+
+# docker info
+
+# Docker Configuration
+# usermod -a -G docker fedora
+
+# Docker Pull Image (from Docker Hub)
+# docker pull fedora:latest
+# docker pull amazonlinux:latest
+# docker pull centos:latest # CentOS v7
 
 # Docker Run (Amazon Linux)
 # docker run -it amazonlinux:latest /bin/bash
@@ -316,7 +336,7 @@ cat /etc/fluentd/fluent.conf
 
 /usr/local/bin/fluentd --config /etc/fluentd/fluent.conf -vv & # -vv enables trace level logs. You can omit -vv option.
 
-echo '{"json":"message"}' | /usr/local/bin/fluent-cat debug.test
+# echo '{"json":"message"}' | /usr/local/bin/fluent-cat debug.test
 
 # Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
 /usr/local/bin/fluent-gem list
