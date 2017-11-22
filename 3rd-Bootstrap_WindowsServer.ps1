@@ -1452,7 +1452,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
 
         # Logging Amazon EC2 Elastic GPU ENI Information from AWS Tools for Windows PowerShell
         if ($RoleName) {
-            Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.RequesterId -eq "amazon-elasticgpus" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
+            Set-Variable -Name ElasticGpuEniInsterface -Scope Script -Value (Get-EC2NetworkInterface | Where-Object { $_.Description -eq "EC2 Elastic GPU ENI" } | Where-Object { $_.PrivateIpAddress -eq ${ElasticGpuEniIpAddress} })
             Set-Variable -Name ElasticGpuEniId -Scope Script -Value ($ElasticGpuEniInsterface.NetworkInterfaceId)
 
             Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
