@@ -471,6 +471,7 @@ date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	dnf install -y ibus-kkc sazanami-gothic-fonts sazanami-mincho-fonts ipa-gothic-fonts ipa-mincho-fonts vlgothic-fonts vlgothic-p-fonts
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status

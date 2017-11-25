@@ -304,7 +304,7 @@ cat > /etc/motd << __EOF__
 __EOF__
 
 #-------------------------------------------------------------------------------
-# LOGGING CONFIGURATION - CentOS (sshd logging)
+# LOGGING CONFIGURATION - RHEL (sshd logging)
 #-------------------------------------------------------------------------------
 declare -rx BASTION_MNT="/var/log/bastion"
 declare -rx BASTION_LOG="bastion.log"
