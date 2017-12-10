@@ -189,7 +189,7 @@ update-rc.d cfn-hup defaults
 service cfn-hup start
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
+# Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------

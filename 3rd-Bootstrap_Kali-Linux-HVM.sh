@@ -178,7 +178,9 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Amazon EC2 Simple Systems Manager (SSM) agent]
+# Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
+# http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
+# https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 curl -sS "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o "/tmp/amazon-ssm-agent.deb"
 dpkg -i "/tmp/amazon-ssm-agent.deb"

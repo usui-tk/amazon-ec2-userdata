@@ -1262,46 +1262,46 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Update (Amazon EC2 Systems Manager Agent)
+# Custom Package Update (AWS Systems Manager agent (aka SSM agent))
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Update System Utility (Amazon EC2 Systems Manager Agent)"
+Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 
-# Package Download System Utility (Amazon EC2 Systems Manager Agent)
+# Package Download System Utility (AWS Systems Manager agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
-Write-Log "# Package Download System Utility (Amazon EC2 Systems Manager Agent)"
+Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
-# Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
+# Logging Windows Server OS Parameter [AWS Systems Manager agent Information]
 Get-Ec2SystemManagerAgentVersion
 
-# Package Update System Utility (Amazon EC2 Systems Manager Agent)
-Write-Log "# Package Update System Utility (Amazon EC2 Systems Manager Agent)"
+# Package Update System Utility (AWS Systems Manager agent)
+Write-Log "# Package Update System Utility (AWS Systems Manager agent)"
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
 Start-Sleep -Seconds 10
 
 Get-Service -Name AmazonSSMAgent
 
-# Service Automatic Startup Setting (Amazon EC2 Systems Manager Agent)
+# Service Automatic Startup Setting (AWS Systems Manager agent)
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
 
 if ($AmazonSSMAgentStatus -ne "Auto") {
-    Write-Log "# [Windows - OS Settings] [Amazon EC2 Systems Manager Agent] Service Startup Type : $AmazonSSMAgentStatus -> Auto"
+    Write-Log "# [Windows - OS Settings] [AWS Systems Manager agent] Service Startup Type : $AmazonSSMAgentStatus -> Auto"
     Set-Service -Name "AmazonSSMAgent" -StartupType Automatic
 
     Start-Sleep -Seconds 5
 
     $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
-    Write-Log "# [Windows - OS Settings] [Amazon EC2 Systems Manager Agent] Service Startup Type : $AmazonSSMAgentStatus"
+    Write-Log "# [Windows - OS Settings] [AWS Systems Manager agent] Service Startup Type : $AmazonSSMAgentStatus"
 }
 
-# Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
+# Logging Windows Server OS Parameter [AWS Systems Manager agent Information]
 Get-Ec2SystemManagerAgentVersion
 
-# Forced cleanup of Amazon SSM Agent's local data
+# Forced cleanup of AWS Systems Manager agent's local data
 Stop-Service -Name AmazonSSMAgent
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
@@ -1315,7 +1315,7 @@ Get-Service -Name AmazonSSMAgent
 # View Log File
 Get-Content -Path $SSMAgentLogFile
 
-# Display Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
+# Display Windows Server OS Parameter [AWS Systems Manager agent Information]
 if ($RoleName) {
     Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
 }

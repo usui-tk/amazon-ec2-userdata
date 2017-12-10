@@ -202,7 +202,9 @@ ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
 cd /tmp
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS Systems Service Manager (aka SSM) agent]
+# Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
+# http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
+# https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
