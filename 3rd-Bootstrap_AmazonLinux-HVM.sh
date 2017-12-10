@@ -61,10 +61,12 @@ AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
-StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-StsToken=$(echo $StsCredential | jq -r '.Token')
+if [ -n "$RoleName" ]; then
+	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+	StsToken=$(echo $StsCredential | jq -r '.Token')
+fi
 
 # AWS Account ID
 AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
@@ -122,7 +124,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|e3.*|f1.*|g3.*|i3.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|e3.*|f1.*|g3.*|h1.*|i3.*|m5.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -146,7 +148,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|d2.*|e3.*|f1.*|g2.*|g3.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|d2.*|e3.*|f1.*|g2.*|g3.*|h1.*|i2.*|i3.*|m1.*|m2.*|m3.*|m4.*|m5.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -160,7 +162,7 @@ fi
 
 # Get EC2 Hypervisor Information[Linux-KVM Hypervisor]
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|m5.*)$ ]]; then
 
 		# Hardware(CPU, BIOS) Information
 		dmidecode
@@ -182,13 +184,13 @@ fi
 
 # Get EC2 Instance attached NVMe Device Information
 #
-# - Amazon EBS and NVMe Volumes [c5]
+# - Amazon EBS and NVMe Volumes [c5, m5]
 #   http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
 # - SSD Instance Store Volumes [f1, i3]
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ssd-instance-store.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|f1.*|i3.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|m5.*|f1.*|i3.*)$ ]]; then
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
