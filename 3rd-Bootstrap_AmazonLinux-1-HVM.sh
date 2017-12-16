@@ -26,6 +26,13 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Parameter Settings
+#-------------------------------------------------------------------------------
+
+# Parameter Settings
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_AmazonLinux-1-HVM.json"
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
@@ -223,6 +230,41 @@ yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_
 /sbin/status amazon-ssm-agent
 
 ssm-cli get-instance-information
+
+#-------------------------------------------------------------------------------
+# Custom Package Update [Amazon CloudWatch Agent]
+# http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip" -o "/tmp/AmazonCloudWatchAgent.zip"
+
+unzip "/tmp/AmazonCloudWatchAgent.zip" -d "/tmp/AmazonCloudWatchAgent"
+
+cd "/tmp/AmazonCloudWatchAgent"
+
+bash -x /tmp/AmazonCloudWatchAgent/install.sh
+
+cd /tmp
+
+# Package Information 
+rpm -qi amazon-cloudwatch-agent
+
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+# Parameter Settings for Amazon CloudWatch Agent
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+
+cat /tmp/config.json
+
+# Configuration for Amazon CloudWatch Agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+
+cat /opt/aws/amazon-cloudwatch-agent/bin/config.json
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
