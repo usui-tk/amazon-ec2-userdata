@@ -1322,6 +1322,97 @@ if ($RoleName) {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (Amazon CloudWatch Agent)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install System Utility (Amazon CloudWatch Agent)"
+
+# ConfigFile Download System Utility (Amazon CloudWatch Agent)
+Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
+if ($WindowsOSVersion -eq "6.1") {
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+}
+elseif ($WindowsOSVersion -eq "6.2") {
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+}
+elseif ($WindowsOSVersion -eq "6.3") {
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+}
+elseif ($WindowsOSVersion -eq "10.0") {
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+}
+else {
+    # [No Target Server OS]
+    Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
+}
+
+# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
+
+    # Amazon CloudWatch Agent Support Windows OS Version
+    # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+    Write-Log "# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : $WindowsOSVersion"
+
+    # Package Download System Utility (Amazon CloudWatch Agent)
+    # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
+    Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
+    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent.zip"
+
+    # Package Uncompress System Utility (Amazon CloudWatch Agent)
+    if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
+        Add-Type -AssemblyName 'System.IO.Compression.Filesystem'
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("$TOOL_DIR\AmazonCloudWatchAgent.zip", "$TOOL_DIR\AmazonCloudWatchAgent")
+    }
+    elseif ($WindowsOSVersion -match "^10.0") {
+        Expand-Archive -Path "$TOOL_DIR\AmazonCloudWatchAgent.zip" -DestinationPath "$TOOL_DIR\AmazonCloudWatchAgent"
+    }
+    else {
+        # Amazon CloudWatch Agent Support Windows OS Version (None)
+        Write-Log ("# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+    }
+
+    # Package Pre-Install System Utility (Amazon CloudWatch Agent)
+    Set-Location -Path "$TOOL_DIR\AmazonCloudWatchAgent"
+
+    $TOOL_DIR\AmazonCloudWatchAgent\install.ps1
+
+    Set-Location -Path $BASE_DIR
+
+    # Package Install System Utility (Amazon CloudWatch Agent)
+    powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a fetch-config -m ec2 -c file:"$TOOL_DIR\AmazonCloudWatchAgent-Config.json" -s
+
+    # Display Windows Server OS Parameter [Amazon CloudWatch Agent Information]
+    powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -m ec2 -a status
+
+    Start-Sleep -Seconds 10
+
+    Get-Service -Name AmazonCloudWatchAgent
+
+    # Service Automatic Startup Setting (Amazon CloudWatch Agent)
+    $AmazonCloudWatchAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonCloudWatchAgent'").StartMode
+
+    if ($AmazonCloudWatchAgentStatus -ne "Auto") {
+        Write-Log "# [AWS - EC2-AmazonCloudWatchAgent] Service Startup Type : $AmazonCloudWatchAgentStatus -> Auto"
+        Set-Service -Name "AmazonCloudWatchAgent" -StartupType Automatic
+
+        Start-Sleep -Seconds 5
+
+        $AmazonCloudWatchAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonCloudWatchAgent'").StartMode
+        Write-Log "# [AWS - EC2-AmazonCloudWatchAgent] Service Startup Type : $AmazonCloudWatchAgentStatus"
+    }
+}
+else {
+    # Amazon CloudWatch Agent Support Windows OS Version (None)
+    Write-Log ("# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Install (Amazon Inspector Agent)
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -1359,13 +1450,13 @@ if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|
         $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
 
         if ($AmazonInspectorAgentStatus -ne "Auto") {
-            Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus -> Auto"
+            Write-Log "# [AWS - EC2-AmazonInspectorAgent] Service Startup Type : $AmazonInspectorAgentStatus -> Auto"
             Set-Service -Name "AWSAgent" -StartupType Automatic
 
             Start-Sleep -Seconds 5
 
             $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
-            Write-Log "# [Windows - OS Settings] [AWS Inspector Agent] Service Startup Type : $AmazonInspectorAgentStatus"
+            Write-Log "# [AWS - EC2-AmazonInspectorAgent] Service Startup Type : $AmazonInspectorAgentStatus"
         }
 
         # Display Windows Server OS Parameter [Amazon Inspector Agent Information]
@@ -1486,13 +1577,13 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
             $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
 
             if ($EC2ElasticGPUs_ManagerStatus -ne "Auto") {
-                Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus -> Auto"
+                Write-Log "# [AWS - EC2-ElasticGPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus -> Auto"
                 Set-Service -Name "EC2ElasticGPUs_Manager" -StartupType Automatic
 
                 Start-Sleep -Seconds 5
 
                 $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
-                Write-Log "# [Windows - OS Settings] [Amazon EC2 Elastic GPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus"
+                Write-Log "# [AWS - EC2-ElasticGPU Manager] Service Startup Type : $EC2ElasticGPUs_ManagerStatus"
             }
 
             # Display Windows Server OS Parameter [Amazon EC2 Elastic GPU Manager Information]
