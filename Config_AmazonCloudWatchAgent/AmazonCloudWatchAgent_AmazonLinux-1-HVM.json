@@ -14,6 +14,14 @@
 					{
 						"file_path": "/var/log/yum.log",
 						"log_group_name": "/aws/ec2/amazonlinux/var-log-yum.log"
+					},
+					{
+						"file_path": "/var/log/amazon/ssm/amazon-ssm-agent.log",
+						"log_group_name": "/aws/ec2/amazonlinux/var-log-amazon-ssm-agent.log"
+					},
+					{
+						"file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
+						"log_group_name": "/aws/ec2/amazonlinux/opt/aws/amazon-cloudwatch-agent.log"
 					}
 				]
 			}
