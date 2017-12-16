@@ -5,15 +5,15 @@
 				"collect_list": [
 					{
 						"file_path": "/var/log/messages",
-						"log_group_name": "messages"
+						"log_group_name": "/aws/ec2/amazonlinux/var-log-message"
 					},
 					{
 						"file_path": "/var/log/secure",
-						"log_group_name": "secure"
+						"log_group_name": "/aws/ec2/amazonlinux/var-log-secure"
 					},
 					{
 						"file_path": "/var/log/yum.log",
-						"log_group_name": "yum.log"
+						"log_group_name": "/aws/ec2/amazonlinux/var-log-yum.log"
 					}
 				]
 			}
