@@ -201,7 +201,8 @@ if [ -n "$RoleName" ]; then
 		echo "# Get PCI-Express Device(lspci -v)"
 		lspci -v
 
-		# Disk Information(MountPoint) [lsblk]
+		# Get Disk Information[MountPoint] (lsblk)
+		echo "# Get Disk Information[MountPoint] (lsblk)"
 		lsblk
 	else
 		echo "# Not Target Instance Type :" $InstanceType

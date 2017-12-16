@@ -8,7 +8,8 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(BootstrapScript)
-ScriptForAmazonLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-HVM.sh"
+ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-1-HVM.sh"
+ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-HVM.sh"
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
@@ -61,7 +62,7 @@ function get_os_info () {
           DIST=`cat /etc/redhat-release | sed s/\ release.*//`
           REV=`cat /etc/redhat-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/system-release ]; then
-          if grep "Amazon Linux AMI" /etc/system-release; then
+          if grep "Amazon Linux" /etc/system-release; then
             DIST_TYPE='Amazon'
           fi
           DIST=`cat /etc/system-release | sed s/\ release.*//`
@@ -86,8 +87,15 @@ function get_os_info () {
 function get_bootstrap_script () {
     # Select a Bootstrap script
     if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST_TYPE}" = "amzn" ]; then
-        # Bootstrap Script for Amazon Linux
-        BootstrapScript=${ScriptForAmazonLinux}
+        if [ $(echo ${REV} | grep -e '2.0') ]; then
+           # Bootstrap Script for Amazon Linux 2.x
+           BootstrapScript=${ScriptForAmazonLinux2}
+        elif [ $(echo ${REV} | grep -e '201') ]; then
+           # Bootstrap Script for Amazon Linux 1.x (2011.09 - 2017.09)
+           BootstrapScript=${ScriptForAmazonLinux1}
+        else
+           BootstrapScript=""
+        fi
     elif [ "${DIST}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
         if [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Red Hat Enterprise Linux v7.x
