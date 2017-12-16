@@ -1332,15 +1332,18 @@ Write-LogSeparator "Package Install System Utility (Amazon CloudWatch Agent)"
 Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
 if ($WindowsOSVersion -eq "6.1") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    # Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.2") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    # Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.3") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    # Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "10.0") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016 R2] : Windows NT OS Version : " + $WindowsOSVersion)
@@ -1378,18 +1381,17 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Pre-Install System Utility (Amazon CloudWatch Agent)
     Set-Location -Path "$TOOL_DIR\AmazonCloudWatchAgent"
-
-    $TOOL_DIR\AmazonCloudWatchAgent\install.ps1
+    "$TOOL_DIR\AmazonCloudWatchAgent\install.ps1"
 
     Set-Location -Path $BASE_DIR
 
     # Package Install System Utility (Amazon CloudWatch Agent)
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a fetch-config -m ec2 -c file:"$TOOL_DIR\AmazonCloudWatchAgent-Config.json" -s
 
+    Start-Sleep -Seconds 10
+
     # Display Windows Server OS Parameter [Amazon CloudWatch Agent Information]
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -m ec2 -a status
-
-    Start-Sleep -Seconds 10
 
     Get-Service -Name AmazonCloudWatchAgent
 
