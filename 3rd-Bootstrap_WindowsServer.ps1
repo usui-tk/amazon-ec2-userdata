@@ -1372,7 +1372,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
         [System.IO.Compression.ZipFile]::ExtractToDirectory("$TOOL_DIR\AmazonCloudWatchAgent.zip", "$TOOL_DIR\AmazonCloudWatchAgent")
     }
     elseif ($WindowsOSVersion -match "^10.0") {
-        Expand-Archive -Path "$TOOL_DIR\AmazonCloudWatchAgent.zip" -DestinationPath "$TOOL_DIR\AmazonCloudWatchAgent"
+        Expand-Archive -Path "$TOOL_DIR\AmazonCloudWatchAgent.zip" -DestinationPath "$TOOL_DIR\AmazonCloudWatchAgent" -Force | Out-Null
     }
     else {
         # Amazon CloudWatch Agent Support Windows OS Version (None)
