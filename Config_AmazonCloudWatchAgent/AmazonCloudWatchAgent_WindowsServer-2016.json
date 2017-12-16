@@ -1,0 +1,132 @@
+{
+	"logs": {
+		"logs_collected": {
+			"files": {
+				"collect_list": [
+					{
+						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\System.evtx",
+						"log_group_name": "System.evtx"
+					},
+					{
+						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\Application.evtx",
+						"log_group_name": "Application.evtx"
+					},
+					{
+						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\Security.evtx",
+						"log_group_name": "Security.evtx"
+					}
+				]
+			},
+			"windows_events": {
+				"collect_list": [
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "System",
+						"log_group_name": "/aws/ec2/windowsserver/2016/eventlog-system"
+					},
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "Application",
+						"log_group_name": "/aws/ec2/windowsserver/2016/eventlog-application"
+					},
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "Security",
+						"log_group_name": "/aws/ec2/windowsserver/2016/eventlog-security"
+					}
+				]
+			}
+		}
+	},
+	"metrics": {
+		"append_dimensions": {
+			"AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+			"ImageId": "${aws:ImageId}",
+			"InstanceId": "${aws:InstanceId}",
+			"InstanceType": "${aws:InstanceType}"
+		},
+		"metrics_collected": {
+			"LogicalDisk": {
+				"measurement": [
+					"% Free Space"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"Memory": {
+				"measurement": [
+					"% Committed Bytes In Use"
+				],
+				"metrics_collection_interval": 10
+			},
+			"Paging File": {
+				"measurement": [
+					"% Usage"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"PhysicalDisk": {
+				"measurement": [
+					"% Disk Time",
+					"Disk Write Bytes/sec",
+					"Disk Read Bytes/sec",
+					"Disk Writes/sec",
+					"Disk Reads/sec"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"Processor": {
+				"measurement": [
+					"% User Time",
+					"% Idle Time",
+					"% Interrupt Time"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"TCPv4": {
+				"measurement": [
+					"Connections Established"
+				],
+				"metrics_collection_interval": 10
+			},
+			"TCPv6": {
+				"measurement": [
+					"Connections Established"
+				],
+				"metrics_collection_interval": 10
+			}
+		}
+	}
+}
