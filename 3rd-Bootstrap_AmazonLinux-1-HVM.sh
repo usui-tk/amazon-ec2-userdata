@@ -262,9 +262,14 @@ cat /tmp/config.json
 # Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-cat /opt/aws/amazon-cloudwatch-agent/bin/config.json
-
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
