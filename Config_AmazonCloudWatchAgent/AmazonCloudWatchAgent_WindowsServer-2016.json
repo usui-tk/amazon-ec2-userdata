@@ -4,23 +4,19 @@
 			"files": {
 				"collect_list": [
 					{
-						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\System.evtx",
-						"log_group_name": "System.evtx"
+						"file_path": "C:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-agent.log",
+						"log_group_name": "/aws/ec2/windowsserver/2016/awslog-ssm-agent"
 					},
 					{
-						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\Application.evtx",
-						"log_group_name": "Application.evtx"
-					},
-					{
-						"file_path": "%SystemRoot%\\System32\\Winevt\\Logs\\Security.evtx",
-						"log_group_name": "Security.evtx"
+						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
+						"log_group_name": "/aws/ec2/windowsserver/2016/awslog-cloudwatch-agent"
 					}
 				]
 			},
 			"windows_events": {
 				"collect_list": [
 					{
-						"event_format": "xml",
+						"event_format": "text",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
@@ -32,7 +28,7 @@
 						"log_group_name": "/aws/ec2/windowsserver/2016/eventlog-system"
 					},
 					{
-						"event_format": "xml",
+						"event_format": "text",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
@@ -44,7 +40,7 @@
 						"log_group_name": "/aws/ec2/windowsserver/2016/eventlog-application"
 					},
 					{
-						"event_format": "xml",
+						"event_format": "text",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
