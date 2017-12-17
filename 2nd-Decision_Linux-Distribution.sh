@@ -15,11 +15,11 @@ ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/m
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
 ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
+ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 ScriptForFedora27="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-27-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
-
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -120,6 +120,9 @@ function get_bootstrap_script () {
         if [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Oracle Linux v7.x
            BootstrapScript=${ScriptForOracleLinuxv7}
+        elif [ $(echo ${REV} | grep -e '6.') ]; then
+           # Bootstrap Script for Oracle Linux v6.x
+           BootstrapScript=${ScriptForOracleLinuxv6}
         else
            BootstrapScript=""
         fi
