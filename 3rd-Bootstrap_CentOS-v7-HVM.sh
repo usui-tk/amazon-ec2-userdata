@@ -33,6 +33,30 @@ echo $VpcNetwork
 CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_CentOS-v7-HVM.json"
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - CentOS v7 
+#    https://wiki.centos.org/Documentation
+#    https://wiki.centos.org/Cloud/AWS
+#
+#    https://aws.amazon.com/marketplace/pp/B00O7WM7QW
+#
+#    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/redhat-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 

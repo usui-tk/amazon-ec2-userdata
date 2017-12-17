@@ -26,6 +26,30 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - CentOS v6
+#    https://wiki.centos.org/Documentation
+#    https://wiki.centos.org/Cloud/AWS
+#
+#    https://aws.amazon.com/marketplace/pp/B00NQAYLWO
+#
+#    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/redhat-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# upstartd service config
+chkconfig --list
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 

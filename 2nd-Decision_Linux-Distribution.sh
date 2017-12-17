@@ -96,7 +96,7 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
-    elif [ "${DIST}" = "RHEL" ] || [ "${DIST_TYPE}" = "rhel" ]; then
+    elif [ "${DIST}" = "RHEL" ] || [ "${DIST}" = "Red Hat Enterprise Linux Server" ] || [ "${DIST_TYPE}" = "rhel" ]; then
         if [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Red Hat Enterprise Linux v7.x
            BootstrapScript=${ScriptForRHELv7}

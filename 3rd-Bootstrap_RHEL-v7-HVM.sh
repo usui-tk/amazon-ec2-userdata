@@ -33,6 +33,29 @@ echo $VpcNetwork
 CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_RHEL-v7-HVM.json"
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - RHEL v7
+#    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
+#    https://access.redhat.com/articles/3135121
+#
+#    https://aws.amazon.com/marketplace/pp/B00KWBZVK6
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/redhat-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 

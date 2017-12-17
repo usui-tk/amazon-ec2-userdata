@@ -26,6 +26,28 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Oracle Linux v6
+#    https://docs.oracle.com/cd/E39368_01/index.html
+#    https://docs.oracle.com/cd/E37670_01/index.html
+#    http://yum.oracle.com/oracle-linux-6.html
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/redhat-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# upstartd service config
+chkconfig --list
+
+#-------------------------------------------------------------------------------
 # Yum Configuration
 #-------------------------------------------------------------------------------
 # yum repository metadata Clean up

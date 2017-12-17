@@ -33,6 +33,28 @@ echo $VpcNetwork
 CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_OracleLinux-v7-HVM.json"
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Oracle Linux v7
+#    https://docs.oracle.com/cd/E77565_01/index.html
+#    https://docs.oracle.com/cd/E52668_01/index.html
+#    http://yum.oracle.com/oracle-linux-7.html
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/redhat-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Yum Configuration
 #-------------------------------------------------------------------------------
 yum clean all
