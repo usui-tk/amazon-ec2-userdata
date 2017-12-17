@@ -1346,7 +1346,7 @@ elseif ($WindowsOSVersion -eq "6.3") {
     Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "10.0") {
-    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
     Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 else {
