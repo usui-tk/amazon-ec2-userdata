@@ -35,6 +35,30 @@ echo $VpcNetwork
 CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Ubuntu-16.04-LTS-HVM.json"
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Ubuntu 16.04 LTS
+#    https://help.ubuntu.com/
+#    https://help.ubuntu.com/lts/serverguide/index.html
+#    https://help.ubuntu.com/lts/installation-guide/amd64/index.html
+#    
+#    https://help.ubuntu.com/community/EC2StartersGuide
+#
+#    https://aws.amazon.com/marketplace/pp/B01JBL2M0O
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+# Default installation package
+apt list --installed | sort > /tmp/deb-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
@@ -111,7 +135,8 @@ json
 
 __EOF__
 
-sleep 3
+# Setting AWS-CLI Logging
+aws configure set cli_history enabled
 
 # Getting AWS-CLI default Region & Output format
 aws configure list

@@ -28,11 +28,48 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Parameter Settings
+#-------------------------------------------------------------------------------
+
+# Parameter Settings
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Kali-Linux-HVM.json"
+
+#-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Kali Linux 2017.3
+#    https://www.kali.org/kali-linux-documentation/
+#    https://docs.kali.org/
+#
+#    https://aws.amazon.com/marketplace/pp/B01M26MMTT
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/lsb-release
+
+# Default installation package
+apt list --installed | sort > /tmp/deb-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
 # Command Non-Interactive Mode
 export DEBIAN_FRONTEND=noninteractive
+
+# Change apt repo list
+cat /etc/apt/sources.list
+
+sed -i 's@http://http.kali.org/kali@http://repo.kali.org/kali@g' /etc/apt/sources.list
+
+cat /etc/apt/sources.list
 
 # apt repository metadata Clean up
 apt clean -y
@@ -50,10 +87,13 @@ apt --fix-broken install -y
 # Package Install Kali Linux Meta-Package
 #  https://tools.kali.org/kali-metapackages
 #  https://tools.kali.org/tools-listing
-apt install -y kali-linux-full kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
+apt install -y kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
 apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
+
+# Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
+apt install -y fonts-ipafont task-japanese task-japanese-desktop
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -105,7 +145,8 @@ json
 
 __EOF__
 
-sleep 3
+# Setting AWS-CLI Logging
+aws configure set cli_history enabled
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
@@ -228,6 +269,46 @@ systemctl status amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
+# Custom Package Install [Amazon CloudWatch Agent]
+# http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip" -o "/tmp/AmazonCloudWatchAgent.zip"
+
+unzip "/tmp/AmazonCloudWatchAgent.zip" -d "/tmp/AmazonCloudWatchAgent"
+
+cd "/tmp/AmazonCloudWatchAgent"
+
+bash -x /tmp/AmazonCloudWatchAgent/install.sh
+
+cd /tmp
+
+# Package Information
+apt show amazon-cloudwatch-agent
+
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+# Parameter Settings for Amazon CloudWatch Agent
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+
+cat /tmp/config.json
+
+# Configuration for Amazon CloudWatch Agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
 # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
 # https://github.com/awslabs/aws-ec2rescue-linux
@@ -265,6 +346,30 @@ apt install -y ansible
 ansible --version
 
 ansible localhost -m setup 
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Visual Studio Code]
+#-------------------------------------------------------------------------------
+cd /tmp
+
+# Download the Microsoft GPG key, and convert it from OpenPGP ASCII 
+# armor format to GnuPG format
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+
+# Move the file into your apt trusted keys directory (requires root)
+mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+ 
+# Add the VS Code Repository
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
+
+# apt repository metadata Clean up
+apt clean -y
+
+# Update and install Visual Studio Code 
+apt update -y && apt install -y code
+
+# Package Information
+apt show code
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

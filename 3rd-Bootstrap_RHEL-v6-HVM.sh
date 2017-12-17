@@ -162,7 +162,8 @@ json
 
 __EOF__
 
-sleep 3
+# Setting AWS-CLI Logging
+aws configure set cli_history enabled
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
