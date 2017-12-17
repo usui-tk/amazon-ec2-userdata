@@ -53,7 +53,7 @@ apt --fix-broken install -y
 apt install -y kali-linux-full kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sysstat tcpdump traceroute unzip wget zip
+apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -177,6 +177,33 @@ if [ -n "$RoleName" ]; then
 	fi
 fi
 
+# Get EC2 Instance attached NVMe Device Information
+#
+# - Amazon EBS and NVMe Volumes [c5, m5]
+#   http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
+# - SSD Instance Store Volumes [f1, i3]
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ssd-instance-store.html
+#
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c5.*|m5.*|f1.*|i3.*)$ ]]; then
+		# Get NVMe Device(nvme list)
+		# http://www.spdk.io/doc/nvme-cli.html
+		# https://github.com/linux-nvme/nvme-cli
+		echo "# Get NVMe Device(nvme list)"
+		nvme list
+
+		# Get PCI-Express Device(lspci -v)
+		echo "# Get PCI-Express Device(lspci -v)"
+		lspci -v
+
+		# Get Disk Information[MountPoint] (lsblk)
+		echo "# Get Disk Information[MountPoint] (lsblk)"
+		lsblk
+	else
+		echo "# Not Target Instance Type :" $InstanceType
+	fi
+fi
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
@@ -184,6 +211,8 @@ fi
 #-------------------------------------------------------------------------------
 curl -sS "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o "/tmp/amazon-ssm-agent.deb"
 dpkg -i "/tmp/amazon-ssm-agent.deb"
+
+apt show amazon-ssm-agent
 
 systemctl daemon-reload
 

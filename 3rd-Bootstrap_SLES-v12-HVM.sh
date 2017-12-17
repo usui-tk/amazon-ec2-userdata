@@ -48,7 +48,7 @@ zypper --non-interactive update
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install arptables bash-completion dstat ebtables git hdparm iotop lzop nmap nvme-cli sdparm systemd-bash-completion time traceroute zypper-log
+zypper --non-interactive install arptables bash-completion dstat ebtables git hdparm hostinfo iotop lzop nmap nvme-cli sdparm supportutils systemd-bash-completion time traceroute unzip zypper-log
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
@@ -81,7 +81,8 @@ zypper clean --all
 zypper refresh
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install jq mtr
+zypper --non-interactive install mtr
+# zypper --non-interactive install jq mtr
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -195,6 +196,33 @@ if [ -n "$RoleName" ]; then
 	else
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
+	fi
+fi
+
+# Get EC2 Instance attached NVMe Device Information
+#
+# - Amazon EBS and NVMe Volumes [c5, m5]
+#   http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
+# - SSD Instance Store Volumes [f1, i3]
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ssd-instance-store.html
+#
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c5.*|m5.*|f1.*|i3.*)$ ]]; then
+		# Get NVMe Device(nvme list)
+		# http://www.spdk.io/doc/nvme-cli.html
+		# https://github.com/linux-nvme/nvme-cli
+		echo "# Get NVMe Device(nvme list)"
+		nvme list
+
+		# Get PCI-Express Device(lspci -v)
+		echo "# Get PCI-Express Device(lspci -v)"
+		lspci -v
+
+		# Get Disk Information[MountPoint] (lsblk)
+		echo "# Get Disk Information[MountPoint] (lsblk)"
+		lsblk
+	else
+		echo "# Not Target Instance Type :" $InstanceType
 	fi
 fi
 

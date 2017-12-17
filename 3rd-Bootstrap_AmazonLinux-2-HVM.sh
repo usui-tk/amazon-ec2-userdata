@@ -186,28 +186,6 @@ if [ -n "$RoleName" ]; then
 	fi
 fi
 
-# Get EC2 Hypervisor Information[Linux-KVM Hypervisor]
-if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|m5.*)$ ]]; then
-
-		# Hardware(CPU, BIOS) Information
-		dmidecode
-
-		cat /proc/cpuinfo
-
-		grep -cw vmx /proc/cpuinfo
-
-		# Numa Node Information
-		numactl --hardware
-		numastat -v
-
-		# Linux Kernel Information
-		dmesg | grep -ie kvm -ie nvme
-	else
-		echo "# Not Target Instance Type :" $InstanceType
-	fi
-fi
-
 # Get EC2 Instance attached NVMe Device Information
 #
 # - Amazon EBS and NVMe Volumes [c5, m5]
