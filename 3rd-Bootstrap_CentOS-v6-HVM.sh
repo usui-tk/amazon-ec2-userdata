@@ -261,7 +261,7 @@ status amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
-# Custom Package Update [Amazon CloudWatch Agent]
+# Custom Package Install [Amazon CloudWatch Agent]
 # http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
 #-------------------------------------------------------------------------------
 
