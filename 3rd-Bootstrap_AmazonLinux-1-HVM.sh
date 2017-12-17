@@ -284,15 +284,14 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-# yum --enablerepo=epel install -y ansible ansible-doc
-# ansible --version
-# ansible localhost -m setup
+yum --enablerepo=epel install -y ansible ansible-doc
+ansible --version
+ansible localhost -m setup
 
 # Package Install Amazon Linux System Administration Tools (from PIP)
-pip install ansible
-
-/usr/local/bin/ansible --version
-/usr/local/bin/ansible localhost -m setup
+# pip install ansible
+# /usr/local/bin/ansible --version
+# /usr/local/bin/ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
