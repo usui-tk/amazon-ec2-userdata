@@ -243,6 +243,8 @@ cat > /etc/profile.d/ec2rl.sh << __EOF__
 export PATH=\$PATH:/opt/aws/ec2rl
 __EOF__
 
+source /etc/profile.d/ec2rl.sh
+
 # Check Version
 /opt/aws/ec2rl/ec2rl version
 

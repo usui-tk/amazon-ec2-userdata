@@ -125,6 +125,8 @@ if [ -n "\$BASH_VERSION" ]; then
 fi
 __EOF__
 
+source /etc/profile.d/aws-cli.sh
+
 aws --version
 
 # Setting AWS-CLI default Region & Output format
@@ -339,6 +341,8 @@ tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
 cat > /etc/profile.d/ec2rl.sh << __EOF__
 export PATH=\$PATH:/opt/aws/ec2rl
 __EOF__
+
+source /etc/profile.d/ec2rl.sh
 
 # Check Version
 /opt/aws/ec2rl/ec2rl version
