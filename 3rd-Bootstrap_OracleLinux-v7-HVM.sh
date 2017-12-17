@@ -46,6 +46,7 @@ uname -a
 
 cat /etc/os-release
 
+cat /etc/oracle-release
 cat /etc/redhat-release
 
 # Default installation package
@@ -328,6 +329,8 @@ cd /tmp
 # yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+
+rpm -qi amazon-ssm-agent
 
 systemctl daemon-reload
 

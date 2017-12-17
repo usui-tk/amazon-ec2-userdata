@@ -213,6 +213,8 @@ fi
 
 dnf localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
+rpm -qi amazon-ssm-agent
+
 systemctl daemon-reload
 
 systemctl status -l amazon-ssm-agent

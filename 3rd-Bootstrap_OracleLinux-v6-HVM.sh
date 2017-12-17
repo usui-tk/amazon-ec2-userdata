@@ -26,6 +26,13 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Parameter Settings
+#-------------------------------------------------------------------------------
+
+# Parameter Settings
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_OracleLinux-v6-HVM.json"
+
+#-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
 #  - Oracle Linux v6
 #    https://docs.oracle.com/cd/E39368_01/index.html
@@ -39,6 +46,7 @@ uname -a
 
 cat /etc/os-release
 
+cat /etc/oracle-release
 cat /etc/redhat-release
 
 # Default installation package
@@ -120,7 +128,7 @@ yum update -y
 yum install -y abrt abrt-cli blktrace cloud-utils-growpart numactl sos sysstat system-config-network-tui time tmpwatch unzip zip
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y dstat gdisk git hdparm jq lsof lzop iotop mtr nc nmap sos tcpdump traceroute vim-enhanced yum-priorities yum-plugin-versionlock wget
+yum install -y dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -304,11 +312,53 @@ cd /tmp
 
 yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
+rpm -qi amazon-ssm-agent
+
 status amazon-ssm-agent
 /sbin/restart amazon-ssm-agent
 status amazon-ssm-agent
 
 ssm-cli get-instance-information
+
+#-------------------------------------------------------------------------------
+# Custom Package Update [Amazon CloudWatch Agent]
+# http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip" -o "/tmp/AmazonCloudWatchAgent.zip"
+
+unzip "/tmp/AmazonCloudWatchAgent.zip" -d "/tmp/AmazonCloudWatchAgent"
+
+cd "/tmp/AmazonCloudWatchAgent"
+
+bash -x /tmp/AmazonCloudWatchAgent/install.sh
+
+cd /tmp
+
+# Package Information 
+rpm -qi amazon-cloudwatch-agent
+
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+# Parameter Settings for Amazon CloudWatch Agent
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+
+cat /tmp/config.json
+
+# Configuration for Amazon CloudWatch Agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
