@@ -1377,12 +1377,15 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     }
 
     # Package Pre-Install System Utility (Amazon CloudWatch Agent)
+    Write-Log "# Package Pre-Install System Utility (Amazon CloudWatch Agent)"
     Set-Location -Path "$TOOL_DIR\AmazonCloudWatchAgent"
-    "$TOOL_DIR\AmazonCloudWatchAgent\install.ps1"
+
+    powershell.exe -ExecutionPolicy Bypass -File "$TOOL_DIR\AmazonCloudWatchAgent\install.ps1"
 
     Set-Location -Path $BASE_DIR
 
     # Package Install System Utility (Amazon CloudWatch Agent)
+    Write-Log "# Package Install System Utility (Amazon CloudWatch Agent)"
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a fetch-config -m ec2 -c file:"$TOOL_DIR\AmazonCloudWatchAgent-Config.json" -s
 
     Start-Sleep -Seconds 10
@@ -2021,8 +2024,7 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 # Package Download System Utility (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
 Write-Log "# Package Download System Utility (Tera Term)"
-Invoke-WebRequest -Uri 'http://dforest.watch.impress.co.jp/library/u/utf8teraterm/10868/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
-# Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.96.exe' -OutFile "$TOOL_DIR\teraterm-4.96.exe"
+Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
 
 # Package Download System Utility (SQL Server Management Studio [SSMS])
 # https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
