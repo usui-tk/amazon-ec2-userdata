@@ -339,7 +339,7 @@ ansible localhost -m setup
 yum clean all
 
 #-------------------------------------------------------------------------------
-# System Setting
+# System information collection
 #-------------------------------------------------------------------------------
 
 # CPU Information [cat /proc/cpuinfo]
@@ -383,13 +383,46 @@ getenforce
 sestatus
 
 #-------------------------------------------------------------------------------
-# System Setting
+# Configure Amazon Time Sync Service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
 #-------------------------------------------------------------------------------
 
-# NTP Service Enabled(ntpd)
+# Replace NTP Client software (Uninstall ntpd Package)
 chkconfig --list ntpd
-chkconfig ntpd on
-chkconfig --list ntpd
+service ntpd stop
+yum erase -y ntp*
+
+# Replace NTP Client software (Install chrony Package)
+yum install -y chrony
+
+# Configure NTP Client software (Configure chronyd)
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
+
+sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony.conf
+
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+# Configure NTP Client software (Start Daemon chronyd)
+service chronyd status
+service chronyd restart
+service chronyd status
+
+chkconfig --list chronyd
+chkconfig chronyd on
+chkconfig --list chronyd
+
+# Configure NTP Client software (Time adjustment)
+sleep 3
+
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop
@@ -430,11 +463,6 @@ else
 	cat /etc/sysconfig/clock
 	cat /etc/localtime
 fi
-
-# Time synchronization with NTP server
-date
-ntpdate 0.rhel.pool.ntp.org
-date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then

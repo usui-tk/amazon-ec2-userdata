@@ -291,7 +291,7 @@ ansible localhost -m setup
 yum clean all
 
 #-------------------------------------------------------------------------------
-# System Setting
+# System information collection
 #-------------------------------------------------------------------------------
 
 # CPU Information [cat /proc/cpuinfo]
@@ -323,24 +323,50 @@ ip addr show
 # Network Information(Routing Table) [ip route show]
 ip route show
 
-# Network Information(Firewall Service) [chkconfig --list iptables]
-chkconfig --list iptables
+# Network Information(Firewall Service) [firewalld]
+if [ $(command -v firewall-cmd) ]; then
+    # Network Information(Firewall Service) [systemctl status -l firewalld]
+    systemctl status -l firewalld
+    # Network Information(Firewall Service) [firewall-cmd --list-all]
+    firewall-cmd --list-all
+fi
 
-# Network Information(Firewall Service) [service ip6tables stop]
-chkconfig --list ip6tables
+# Linux Security Information(SELinux) [getenforce] [sestatus]
+getenforce
+
+sestatus
+
+#-------------------------------------------------------------------------------
+# Configure Amazon Time Sync Service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
+#-------------------------------------------------------------------------------
+
+# Configure NTP Client software (Install chrony Package)
+yum install -y chrony
+
+# Configure NTP Client software (Configure chronyd)
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
+
+# Configure NTP Client software (Start Daemon chronyd)
+systemctl status chronyd
+systemctl restart chronyd
+systemctl status chronyd
+
+systemctl enable chronyd
+systemctl is-enabled chronyd
+
+# Configure NTP Client software (Time adjustment)
+sleep 3
+
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
-
-# NTP Service Enabled(chronyd)
-systemctl restart chronyd
-systemctl enable chronyd
-systemctl is-enabled chronyd
-sleep 3
-chronyc tracking
-chronyc sources -v
-chronyc sourcestats -v
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
@@ -396,9 +422,6 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
-	systemctl restart chronyd
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 	# Disable IPv6 Kernel Parameter
@@ -436,6 +459,10 @@ else
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
+
+#-------------------------------------------------------------------------------
+# Reboot
+#-------------------------------------------------------------------------------
 
 # Instance Reboot
 reboot

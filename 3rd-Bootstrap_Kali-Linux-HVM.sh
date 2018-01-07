@@ -426,7 +426,7 @@ apt show code
 apt clean -y
 
 #-------------------------------------------------------------------------------
-# System Setting
+# System information collection
 #-------------------------------------------------------------------------------
 
 # CPU Information [cat /proc/cpuinfo]
@@ -459,23 +459,45 @@ ip addr show
 ip route show
 
 #-------------------------------------------------------------------------------
-# System Setting
+# Configure Amazon Time Sync Service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntp Package)
+systemctl status ntp
 apt remove -y ntp sntp
 
-# Replace NTP Client software (Install chrony Package)
+# Configure NTP Client software (Install chrony Package)
 apt install -y chrony
-systemctl status -l chrony
+systemctl daemon-reload
+
+# Configure NTP Client software (Configure chronyd)
+cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+sed -i 's/#log tracking measurements statistics/log tracking measurements statistics/g' /etc/chrony/chrony.conf
+
+sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony/chrony.conf
+
+cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+# Configure NTP Client software (Start Daemon chronyd)
+systemctl status chrony
 systemctl restart chrony
+systemctl status chrony
+
 systemctl enable chrony
 systemctl is-enabled chrony
-systemctl status -l chrony
+
+# Configure NTP Client software (Time adjustment)
 sleep 3
+
 chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
@@ -495,13 +517,6 @@ else
 	date
 	dpkg-reconfigure --frontend noninteractive tzdata
 fi
-
-# Time synchronization with NTP server
-date
-chronyc tracking
-chronyc sources -v
-chronyc sourcestats -v
-date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then

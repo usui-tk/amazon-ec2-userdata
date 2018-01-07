@@ -331,7 +331,7 @@ ansible localhost -m setup
 yum clean all
 
 #-------------------------------------------------------------------------------
-# System Setting
+# System information collection
 #-------------------------------------------------------------------------------
 
 # CPU Information [cat /proc/cpuinfo]
@@ -370,16 +370,45 @@ chkconfig --list iptables
 chkconfig --list ip6tables
 
 #-------------------------------------------------------------------------------
+# Configure Amazon Time Sync Service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
+#-------------------------------------------------------------------------------
+
+# Replace NTP Client software (Uninstall ntpd Package)
+chkconfig --list ntpd
+service ntpd stop
+yum erase -y ntp*
+
+# Replace NTP Client software (Install chrony Package)
+yum install -y chrony
+
+# Configure NTP Client software (Configure chronyd)
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
+
+# Configure NTP Client software (Start Daemon chronyd)
+service chronyd status
+service chronyd restart
+service chronyd status
+
+chkconfig --list chronyd
+chkconfig chronyd on
+chkconfig --list chronyd
+
+# Configure NTP Client software (Time adjustment)
+sleep 3
+
+chronyc tracking
+chronyc sources -v
+chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
 # Ephemeral-Disk Auto Mount Disabled (cloud-init)
 sed -i '/ephemeral0/d' /etc/cloud/cloud.cfg
-
-# NTP Service Enabled(ntpd)
-chkconfig --list ntpd
-chkconfig ntpd on
-chkconfig --list ntpd
 
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop
@@ -420,11 +449,6 @@ else
 	cat /etc/sysconfig/clock
 	cat /etc/localtime
 fi
-
-# Time synchronization with NTP server
-date
-ntpdate 0.amazon.pool.ntp.org
-date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
@@ -484,6 +508,10 @@ else
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
+
+#-------------------------------------------------------------------------------
+# Reboot
+#-------------------------------------------------------------------------------
 
 # Instance Reboot
 reboot

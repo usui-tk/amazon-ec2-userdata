@@ -521,7 +521,7 @@ dnf clean all
 rpmconf --all
 
 #-------------------------------------------------------------------------------
-# System Setting
+# System information collection
 #-------------------------------------------------------------------------------
 
 # CPU Information [cat /proc/cpuinfo]
@@ -567,20 +567,40 @@ getenforce
 sestatus
 
 #-------------------------------------------------------------------------------
-# System Setting
+# Configure Amazon Time Sync Service
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
 #-------------------------------------------------------------------------------
 
-# NTP Service Enabled(chronyd)
-systemctl status -l chronyd
+# Configure NTP Client software (Install chrony Package)
+yum install -y chrony
+
+# Configure NTP Client software (Configure chronyd)
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
+
+sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony.conf
+
+cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+
+# Configure NTP Client software (Start Daemon chronyd)
+systemctl status chronyd
 systemctl restart chronyd
-systemctl status -l chronyd
+systemctl status chronyd
 
 systemctl enable chronyd
 systemctl is-enabled chronyd
+
+# Configure NTP Client software (Time adjustment)
 sleep 3
+
 chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# System Setting
+#-------------------------------------------------------------------------------
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
@@ -602,13 +622,6 @@ else
 	# timedatectl status
 	date
 fi
-
-# Time synchronization with NTP server
-date
-chronyc tracking
-chronyc sources -v
-chronyc sourcestats -v
-date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
@@ -678,7 +691,6 @@ else
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
-
 
 #-------------------------------------------------------------------------------
 # Reboot
