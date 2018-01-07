@@ -352,8 +352,52 @@ ansible --version
 
 ansible localhost -m setup 
 
+
+
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Visual Studio Code]
+# Custom Package Installation for Desktop Environment
+#-------------------------------------------------------------------------------
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Google Chrome]
+#  - https://www.google.com/linuxrepositories/
+#-------------------------------------------------------------------------------
+
+cd /tmp
+
+# Import GPG Key File
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+
+# Add the Google Chrome Repository
+echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
+
+# apt repository metadata Clean up
+apt clean -y
+
+# Update and install Google Chrome Stable version
+apt update -y && apt install -y google-chrome-stable
+
+# Package Information
+apt show google-chrome-stable
+
+# Clean up repository file
+ls -l /etc/apt/sources.list.d/
+rm -rf /etc/apt/sources.list.d/google.list
+ls -l /etc/apt/sources.list.d/
+
+# apt repository metadata Clean up
+apt clean -y
+rm -rf /var/lib/apt/lists/*
+apt update -y
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Visual Studio Code]
 #-------------------------------------------------------------------------------
 cd /tmp
 
@@ -419,9 +463,6 @@ ip route show
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntp Package)
-systemctl status -l ntp
-systemctl stop ntp
-systemctl status -l ntp
 apt remove -y ntp sntp
 
 # Replace NTP Client software (Install chrony Package)
@@ -465,7 +506,7 @@ date
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation [language-pack-ja]
-	apt-get install -y task-japanese task-japanese-desktop fonts-ipafont
+	apt install -y task-japanese locales-all task-japanese-desktop fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status

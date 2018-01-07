@@ -318,12 +318,20 @@ docker info
 
 # Docker Pull Image (from Docker Hub)
 docker pull fedora:latest
-docker pull amazonlinux:latest    # Amazon Linux
-docker pull centos:latest         # CentOS v7
+docker pull amazonlinux:latest                   # Amazon Linux
+docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
+docker pull centos:latest                        # CentOS v7
 
 # Docker Run (Amazon Linux)
 # docker run -it amazonlinux:latest /bin/bash
 # cat /etc/system-release
+# cat /etc/image-id 
+# exit
+
+# Docker Run (Amazon Linux 2 LTS)
+# docker run -it amazonlinux:2017.12.0.20171212.2 bash
+# cat /etc/system-release
+# cat /etc/image-id 
 # exit
 
 
@@ -433,6 +441,75 @@ dnf install -y python3
 
 /usr/bin/python3 -V
 
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Environment
+#-------------------------------------------------------------------------------
+dnf group install -y "Fedora Workstation"
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Google Chrome]
+#  - https://www.google.com/linuxrepositories/
+#-------------------------------------------------------------------------------
+
+cat > /etc/yum.repos.d/google-chrome.repo << __EOF__
+[google-chrome]
+name=google-chrome - \$basearch
+baseurl=http://dl.google.com/linux/chrome/rpm/stable/\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
+__EOF__
+
+dnf makecache
+
+# Install Google Chrome Stable version
+dnf install -y google-chrome-stable
+rpm -qi google-chrome-stable
+
+# Install Google Chrome Beta version
+# dnf install -y google-chrome-beta
+# rpm -qi google-chrome-beta
+
+# Install Google Chrome Unstable version
+# dnf install -y google-chrome-unstable
+# rpm -qi google-chrome-unstable
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Visual Studio Code]
+#-------------------------------------------------------------------------------
+
+rpm --import "https://packages.microsoft.com/keys/microsoft.asc"
+ 
+# Add the VS Code Repository
+cat > /etc/yum.repos.d/vscode.repo << __EOF__
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+__EOF__
+
+dnf makecache
+
+# Install Visual Studio Code Stable version
+dnf install -y code
+
+rpm -qi code
+
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
@@ -535,6 +612,7 @@ date
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	dnf install -y langpacks-ja
 	dnf install -y ibus-kkc sazanami-gothic-fonts sazanami-mincho-fonts ipa-gothic-fonts ipa-mincho-fonts vlgothic-fonts vlgothic-p-fonts
 	echo "# Setting System Language -> $Language"
 	locale
