@@ -46,7 +46,6 @@ Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\user
 
 # Set System & Application Config File (System Defined : Windows Server 2008 R2 - 2012 R2)
 Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-Set-Variable -Name CWLogsFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\AWS.EC2.Windows.CloudWatch.json"
 
 # Set System & Application Config File (System Defined : Windows Server 2016)
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
@@ -60,6 +59,20 @@ Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\Pro
 # Windows Bootstrap Common function
 #
 ########################################################################################################################
+
+
+function Convert-SCSITargetIdToDeviceName {
+    param([int]$SCSITargetId)
+    if ($SCSITargetId -eq 0) {
+        return "/dev/sda1"
+    }
+    $deviceName = "xvd"
+    if ($SCSITargetId -gt 25) {
+        $deviceName += [char](0x60 + [int]($SCSITargetId / 26))
+    }
+    $deviceName += [char](0x61 + $SCSITargetId % 26)
+    return $deviceName
+} # end Convert-SCSITargetIdToDeviceName
 
 
 function Format-Message {
@@ -117,6 +130,7 @@ function Set-TimeZoneCompatible {
 #
 # Windows Bootstrap Individual requirement function
 #  [Dependent on function]
+#    - Convert-SCSITargetIdToDeviceName
 #    - Write-Log
 #
 ########################################################################################################################
@@ -204,6 +218,11 @@ function Get-DotNetFrameworkVersion {
 
 
 function Get-EbsVolumesMappingInformation {
+    #--------------------------------------------------------------------------------------
+    #  Listing the Disks Using Windows PowerShell
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-windows-volumes.html#windows-list-disks
+    #--------------------------------------------------------------------------------------
+
     # List the Windows disks
 
     # Set Initialize Parameter
@@ -212,12 +231,7 @@ function Get-EbsVolumesMappingInformation {
     Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
 
-    # Create a hash table that maps each device to a SCSI target
-    $Map = @{"0" = '/dev/sda1'} 
-    for ($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}", [char](97 + $x)))}
-    for ($x = 78; $x -le 102; $x++) {$Map.add($x.ToString(), [String]::Format("xvdc{0}", [char](19 + $x)))}
-
-    Try {
+    try {
         # Use the metadata service to discover which instance the script is running on
         
         # InstanceId
@@ -235,85 +249,62 @@ function Get-EbsVolumesMappingInformation {
             $Region = $AZ.Substring(0, $AZ.Length - 1)
         }
 
-        #Get OS Language
-        $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
-        
-        #Get the volumes attached to this instance
+        # Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings | Sort-Object | Get-Unique
 
+        # Get the block-device-mapping
+        $VirtualDeviceMap = @{}
+        ((Invoke-WebRequest '169.254.169.254/latest/meta-data/block-device-mapping').Content).Split("`n") | ForEach-Object {
+            $VirtualDevice = $_
+            $BlockDeviceName = ((Invoke-WebRequest ("169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice))).Content
+            $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
+            $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
+        }
     }
-    Catch {
+    catch {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
     }
     
-    $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | % {
-        $Drive = $_
+    $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | ForEach-Object {
+        $DiskDrive = $_
+        $Volumes = Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($DiskDrive.DeviceID)'} WHERE AssocClass=Win32_DiskDriveToDiskPartition" | ForEach-Object {
+            $DiskPartition = $_
+            Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($DiskPartition.DeviceID)'} WHERE AssocClass=Win32_LogicalDiskToPartition"
+        }
         
-        # Find the partitions for this drive
-        Get-WmiObject -Class Win32_DiskDriveToDiskPartition | Where-Object {$_.Antecedent -eq $Drive.Path.Path} | % {
-            $D2P = $_
-            # Get details about each partition
-            $Partition = Get-WmiObject -Class Win32_DiskPartition | Where-Object {$_.Path.Path -eq $D2P.Dependent}
-            # Find the drive that this partition is linked to
-            $Disk = Get-WmiObject -Class Win32_LogicalDiskToPartition | Where-Object {$_.Antecedent -in $D2P.Dependent} | % { 
-                $L2P = $_
-                #Get the drive letter for this partition, if there is one
-                Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.Path.Path -in $L2P.Dependent}
-            }
-            $BlockDeviceMapping = $BlockDeviceMappings | Where-Object {$_.DeviceName -eq $Map[$Drive.SCSITargetId.ToString()]}
-       
-            if ($OsLanguage -eq "ja-JP") {
-                # Setting Paramter ["Disk #" in Japanese]
-                $Word_Disk_Base64 = "44OH44Kj44K544KvICM="                                    # A string of "Disk #" was Base64 encoded in Japanese
-                $Word_Disk_Byte = [System.Convert]::FromBase64String($Word_Disk_Base64)       # Conversion from base64 to byte sequence
-                $Word_Disk_String = [System.Text.Encoding]::UTF8.GetString($Word_Disk_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
-
-                # Setting Paramter [" Partition #" in Japanese]
-                $Word_Partition_Base64 = "IOODkeODvOODhuOCo+OCt+ODp+ODsyAj"                             # A string of " Partition #" was Base64 encoded in Japanese
-                $Word_Partition_Byte = [System.Convert]::FromBase64String($Word_Partition_Base64)       # Conversion from base64 to byte sequence
-                $Word_Partition_String = [System.Text.Encoding]::UTF8.GetString($Word_Partition_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
-
-                # Display the information in a table (Japanese : ja-JP)
-                New-Object -TypeName PSCustomObject -Property @{
-                    Device      = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("${Word_Disk_String}", ""));
-                    Boot        = $Partition.BootPartition;
-                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace("${Word_Partition_String}", ""));
-                    SCSITarget  = $Drive.SCSITargetId;
-                    DriveLetter = if ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName  = if ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId    = if ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
-                }
-            }
-            elseif ($OsLanguage -eq "en-US") {
-                # Display the information in a table (English : en-US)
-                New-Object -TypeName PSCustomObject -Property @{
-                    Device      = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #", ""));
-                    Boot        = $Partition.BootPartition;
-                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" Partition #", ""));
-                    SCSITarget  = $Drive.SCSITargetId;
-                    DriveLetter = If ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName  = If ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId    = If ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
-                }
-            }
-            else {
-                # [No Target Server OS]
-                Write-Log ("# [Information] [Amazon EC2 Attached EBS Volumes] No Target Server OS Language : " + $OsLanguage)
-            }
-
+        if ($DiskDrive.PNPDeviceID -like "*PROD_PVDISK*") {
+            $BlockDeviceName = Convert-SCSITargetIdToDeviceName($DiskDrive.SCSITargetId)
+            $BlockDevice = $BlockDeviceMappings | Where-Object { $_.DeviceName -eq $BlockDeviceName }
+            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
+        }
+        elseif ($DiskDrive.PNPDeviceID -like "*PROD_AMAZON_EC2_NVME*") {
+            $BlockDeviceName = Get-Ec2InstanceMetadataContent "meta-data/block-device-mapping/ephemeral$($DiskDrive.SCSIPort - 2)"
+            $BlockDevice = $null
+            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
+        }
+        else {
+            $BlockDeviceName = $null
+            $BlockDevice = $null
+            $VirtualDevice = $null
         }
 
-    } | Sort-Object Disk, Partition | Select-Object Disk, Partition, SCSITarget, DriveLetter, Boot, VolumeId, Device, VolumeName
-    
+        New-Object PSObject -Property @{
+            Disk          = $DiskDrive.Index;
+            Partitions    = $DiskDrive.Partitions;
+            DriveLetter   = if ($Volumes -eq $null) { "N/A" } else { $Volumes.DeviceID };
+            EbsVolumeId   = if ($BlockDevice -eq $null) { "N/A" } else { $BlockDevice.Ebs.VolumeId };
+            Device        = if ($BlockDeviceName -eq $null) { "N/A" } else { $BlockDeviceName };
+            VirtualDevice = if ($VirtualDevice -eq $null) { "N/A" } else { $VirtualDevice };
+            VolumeName    = if ($Volumes -eq $null) { "N/A" } else { $Volumes.VolumeName };
+        }
+    } | Sort-Object Disk, Partitions | Select-Object Disk, Partitions, DriveLetter, EbsVolumeId, Device, VirtualDevice, VolumeName
+
     foreach ($EBSVolumeList in $EBSVolumeLists) {
         if ($EBSVolumeList) {
             # Write the information to the Log Files
-            Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
+            Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partitions - {1}] [DriveLetter - {2}] [EbsVolumeId - {3}] [Device - {4}] [VirtualDevice - {5}] [VolumeName - {6}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partitions, $EBSVolumeList.DriveLetter, $EBSVolumeList.EbsVolumeId, $EBSVolumeList.Device, $EBSVolumeList.VirtualDevice, $EBSVolumeList.VolumeName)
         }
     } 
-    
 } # end Get-EbsVolumesMappingInformation
 
 
@@ -1983,7 +1974,11 @@ Write-LogSeparator "Custom Package Installation (Application)"
 
 # Package Install Modern Web Browser (Google Chrome 64bit Edition)
 Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
-Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+
+# [workaround] Google site to S3 bucket
+Invoke-WebRequest -Uri 'https://s3-ap-northeast-1.amazonaws.com/usui-public-bucket/Installer/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+# Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+
 Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
 Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
 
@@ -2105,8 +2100,11 @@ if ($WindowsOSVersion) {
 
         # Save Configuration Files
         Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+
         Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
         Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
@@ -2124,8 +2122,11 @@ if ($WindowsOSVersion) {
 
         # Save Configuration Files
         Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+
         Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
         Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
@@ -2143,8 +2144,11 @@ if ($WindowsOSVersion) {
 
         # Save Configuration Files
         Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+
         Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-        Copy-Item -Path $CWLogsFile -Destination $BASE_DIR
+
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
         Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
@@ -2161,9 +2165,13 @@ if ($WindowsOSVersion) {
 
         # Save Configuration Files
         Copy-Item -Path $SysprepFile -Destination $BASE_DIR
+
         Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
         Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
         Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
+
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
         Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" -Destination $LOGS_DIR 
