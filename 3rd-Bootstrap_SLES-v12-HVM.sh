@@ -26,6 +26,31 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - SUSE Linux Enterprise Server 12
+#    https://www.suse.com/documentation/sles-12/
+#    https://www.suse.com/ja-jp/documentation/sles-12/
+#    https://www.suse.com/documentation/suse-best-practices/
+#
+#    https://aws.amazon.com/jp/partners/suse/faqs/
+#
+#    https://aws.amazon.com/marketplace/pp/B00PMM9322
+#    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
+#
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 

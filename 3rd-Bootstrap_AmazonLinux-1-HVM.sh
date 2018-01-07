@@ -33,6 +33,34 @@ echo $VpcNetwork
 CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_AmazonLinux-1-HVM.json"
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Amazon Linux 1
+#    https://aws.amazon.com/jp/amazon-linux-ami/
+#    https://aws.amazon.com/jp/releasenotes/
+#    https://aws.amazon.com/jp/amazon-linux-ami/faqs/
+#
+#    https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-linux-ami-basics.html
+#-------------------------------------------------------------------------------
+
+# Linux distribution Information
+uname -a
+
+cat /etc/os-release
+
+cat /etc/system-release
+
+cat /etc/image-id
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# Special package information
+yum --enablerepo=amzn-preview list | grep amzn-preview
+
+# upstartd service config
+chkconfig --list
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
