@@ -26,6 +26,34 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Acquire unique information of Linux distribution
+#  - Fedora 27
+#    https://docs.fedoraproject.org/
+#    https://docs.fedoraproject.org/f27/system-administrators-guide/index.html
+#
+#    https://alt.fedoraproject.org/cloud/
+#    https://fedoracloud.readthedocs.io/en/latest/whatis.html
+#
+#-------------------------------------------------------------------------------
+
+# Show Linux Distribution/Distro information
+lsb_release -a
+
+# Show Linux System Information
+uname -a
+
+# Show Linux distribution release Information
+cat /etc/os-release
+
+cat /etc/system-release
+
+# Default installation package
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# systemd service config
+systemctl list-units --no-pager -all
+
+#-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
 
@@ -290,8 +318,8 @@ docker info
 
 # Docker Pull Image (from Docker Hub)
 docker pull fedora:latest
-docker pull amazonlinux:latest
-docker pull centos:latest # CentOS v7
+docker pull amazonlinux:latest    # Amazon Linux
+docker pull centos:latest         # CentOS v7
 
 # Docker Run (Amazon Linux)
 # docker run -it amazonlinux:latest /bin/bash

@@ -36,9 +36,13 @@ echo $VpcNetwork
 #    http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-linux-ami-basics.html
 #-------------------------------------------------------------------------------
 
-# Linux distribution Information
+# Show Linux Distribution/Distro information
+lsb_release -a
+
+# Show Linux System Information
 uname -a
 
+# Show Linux distribution release Information
 cat /etc/os-release
 
 cat /etc/system-release
