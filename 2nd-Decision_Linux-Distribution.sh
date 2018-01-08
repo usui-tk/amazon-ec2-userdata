@@ -19,6 +19,7 @@ ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-use
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 ScriptForFedora27="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-27-HVM.sh"
+ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
 #-------------------------------------------------------------------------------
@@ -147,6 +148,13 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi    
+    elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
+        if [ $(echo ${REV} | grep -e '9') ]; then
+           # Bootstrap Script for Debian GNU/Linux 9 (Stretch)
+           BootstrapScript=${ScriptForDebian9}
+        else
+           BootstrapScript=""
+        fi    
     elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
         if [ $(echo ${REV} | grep -e '2017.') ]; then
            # Bootstrap Script for Kali Linux 2017.x
@@ -198,7 +206,7 @@ else
         yum install -y curl
     elif [ $(command -v apt-get) ]; then
         # Package Install curl Tools (Debian, Ubuntu)
-        apt-get install -y curl
+        apt install -y curl
     elif [ $(command -v zypper) ]; then
         # Package Install curl Tools (SUSE Linux Enterprise Server)
         zypper --non-interactive install curl
