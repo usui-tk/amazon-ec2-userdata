@@ -413,8 +413,12 @@ if [ $(command -v ufw) ]; then
 fi
 
 # Linux Security Information(AppArmor)
-systemctl status -l apparmor
-aa-status
+if [ $(command -v aa-status) ]; then
+    # Linux Security Information(AppArmor) [systemctl status -l apparmor]
+	systemctl status -l apparmor
+    # Linux Security Information(AppArmor) [aa-status]
+    aa-status
+fi
 
 #-------------------------------------------------------------------------------
 # Configure Amazon Time Sync Service
