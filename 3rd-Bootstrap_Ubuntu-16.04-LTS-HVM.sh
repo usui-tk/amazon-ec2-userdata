@@ -41,6 +41,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://help.ubuntu.com/lts/serverguide/index.html
 #    https://help.ubuntu.com/lts/installation-guide/amd64/index.html
 #    
+#	 https://cloud-images.ubuntu.com/locator/ec2/
 #    https://help.ubuntu.com/community/EC2StartersGuide
 #
 #    https://aws.amazon.com/marketplace/pp/B01JBL2M0O

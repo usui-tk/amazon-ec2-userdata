@@ -80,7 +80,7 @@ apt update -y && apt upgrade -y && apt dist-upgrade -y
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
