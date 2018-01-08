@@ -480,11 +480,11 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation [language-pack-ja]
-	apt install -y language-pack-ja fonts-ipafont
+	apt install -y language-pack-ja-base language-pack-ja fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.utf8
+	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
 	locale
 	strings /etc/default/locale
 elif [ "${Language}" = "en_US.UTF-8" ]; then
