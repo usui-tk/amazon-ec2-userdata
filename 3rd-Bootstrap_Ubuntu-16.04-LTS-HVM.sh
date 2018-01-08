@@ -505,7 +505,9 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
 	
 	# Disable IPv6 Uncomplicated Firewall (ufw)
-	sed -i "s/IPV6=yes/IPV6=no/g" /etc/default/ufw
+	if [ -e /etc/default/ufw ]; then
+		sed -i "s/IPV6=yes/IPV6=no/g" /etc/default/ufw
+	fi
 
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
