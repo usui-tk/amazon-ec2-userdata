@@ -97,9 +97,6 @@ apt install -y kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kal
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
 apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
 
-# Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
-apt install -y fonts-ipafont task-japanese task-japanese-desktop
-
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
 #-------------------------------------------------------------------------------
@@ -354,10 +351,14 @@ ansible localhost -m setup
 
 
 
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
 
+# Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
+apt install -y fonts-ipafont task-japanese task-japanese-desktop
 
 
 

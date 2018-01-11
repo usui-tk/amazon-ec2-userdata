@@ -1345,6 +1345,7 @@ Write-Log "# Get Install Windows Application List (Before Uninstall)"
 Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Uninstall AWS CloudFormation Helper Scripts
+Write-Log "# Uninstall AWS CloudFormation Helper Scripts"
 (Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall()
 Start-Sleep -Seconds 5
 
@@ -1390,7 +1391,7 @@ Get-Ec2SystemManagerAgentVersion
 Write-Log "# Package Update System Utility (AWS Systems Manager agent)"
 Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
-Start-Sleep -Seconds 10
+Start-Sleep -Seconds 5
 
 Get-Service -Name AmazonSSMAgent
 
@@ -1416,7 +1417,7 @@ Stop-Service -Name AmazonSSMAgent
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
 
 Start-Service -Name AmazonSSMAgent
-Start-Sleep -Seconds 30
+Start-Sleep -Seconds 15
 
 # Get Service Status
 Get-Service -Name AmazonSSMAgent
