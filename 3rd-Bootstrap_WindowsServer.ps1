@@ -2140,6 +2140,19 @@ Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_D
 Write-Log "# Package Download System Utility (Tera Term)"
 Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
 
+# Package Download System Utility (WinSCP)
+# https://winscp.net/
+Write-Log "# Package Download System Utility (WinSCP)"
+Invoke-WebRequest -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
+
+# Package Download System Utility (Fluentd)
+# https://www.fluentd.org/
+# https://td-agent-package-browser.herokuapp.com/3/windows
+if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+    Write-Log "# Package Download System Utility (Fluentd)"
+    Invoke-WebRequest -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
+}
+
 # Package Download System Utility (SQL Server Management Studio [SSMS])
 # https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
 # Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"

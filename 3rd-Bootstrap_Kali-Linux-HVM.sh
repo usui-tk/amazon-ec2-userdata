@@ -353,12 +353,28 @@ ansible localhost -m setup
 
 
 
+
+
+
+
+
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
 
+tasksel --list-tasks
+cat /usr/share/tasksel/descs/debian-tasks.desc
+
+# Package Install Kali Linux Desktop Environment for Gnome 3 (from Kali Linux Official Repository)
+tasksel --task-packages gnome-desktop
+
+tasksel install gnome-desktop
+
 # Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
-apt install -y fonts-ipafont task-japanese task-japanese-desktop
+apt install -y task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
+
 
 
 
@@ -465,7 +481,6 @@ ip route show
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntp Package)
-systemctl status ntp
 apt remove -y ntp sntp
 
 # Configure NTP Client software (Install chrony Package)
