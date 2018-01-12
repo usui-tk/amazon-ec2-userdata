@@ -349,37 +349,189 @@ ansible --version
 
 ansible localhost -m setup 
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
+#-------------------------------------------------------------------------------
 
+# Package Uninstall Docker Enviroment Tools (from Kali Linux Official Repository)
+apt remove -y docker docker-engine docker.io* lxc-docker*
 
+# install dependencies 4 cert
+apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
+# add Docker repo gpg key
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
 
+echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" > /etc/apt/sources.list.d/docker-ce.list
 
+# apt repository metadata Clean up
+apt clean -y
 
+# Update and install Docker CE version
+apt update -y && apt install -y docker-ce
 
+# Package Information
+apt show docker-ce
 
+systemctl daemon-reload
 
+systemctl status -l docker
+systemctl enable docker
+systemctl is-enabled docker
 
+systemctl restart docker
+systemctl status -l docker
+
+# Docker Deamon Information
+docker --version
+
+docker info
+
+# manage Docker as a non-root user
+groupadd docker
+usermod -aG docker ec2-user
+
+# Docker Pull Image (from Docker Hub)
+docker pull kalilinux/kali-linux-docker
+docker pull amazonlinux:latest                   # Amazon Linux
+docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
+docker pull centos:latest                        # CentOS v7
+
+# Docker Run (Kali Linux)
+# docker run -it kalilinux/kali-linux-docker /bin/bash
+# cat /etc/os-release
+# exit
+
+# Docker Run (Amazon Linux)
+# docker run -it amazonlinux:latest /bin/bash
+# cat /etc/system-release
+# cat /etc/image-id 
+# exit
+
+# Docker Run (Amazon Linux 2 LTS)
+# docker run -it amazonlinux:2017.12.0.20171212.2 bash
+# cat /etc/system-release
+# cat /etc/image-id 
+# exit
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Fluentd (td-agent)]
+# https://td-agent-package-browser.herokuapp.com/3/debian/stretch/pool/contrib/t/td-agent
+#-------------------------------------------------------------------------------
+
+# Package Install fluentd Tools (from TreasureData Official Repository)
+curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-xenial-td-agent3.sh | sh
+
+# Package Information
+apt show apt show td-agent
+
+systemctl daemon-reload
+
+systemctl status -l td-agent
+systemctl enable td-agent
+systemctl is-enabled td-agent
+
+systemctl restart td-agent
+systemctl status -l td-agent
+
+# Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
+/opt/td-agent/embedded/bin/fluent-gem list
+
+/opt/td-agent/embedded/bin/fluent-gem search -r fluent-plugin
+
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis-firehose
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-s3
+
+/opt/td-agent/embedded/bin/fluent-gem list
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Node.js & Serverless Application Framework]
+#  https://nodejs.org/ja/download/package-manager/#debian-and-ubuntu-based-linux-distributions-debian-ubuntu-linux
+#-------------------------------------------------------------------------------
+
+# Package Install fluentd Tools (from TreasureData Official Repository)
+curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+
+apt install -y nodejs
+
+node -v
+npm -v
+
+npm install -g serverless
+
+sls -v
+
+# configure for ec2-user
+su - "ec2-user" -c "npm install -g serverless"
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python 3.6]
+#-------------------------------------------------------------------------------
+apt install -y python3
+
+/usr/bin/python3 -V
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
 
-tasksel --list-tasks
-cat /usr/share/tasksel/descs/debian-tasks.desc
-
-# Package Install Kali Linux Desktop Environment for Gnome 3 (from Kali Linux Official Repository)
-tasksel --task-packages gnome-desktop
-
-tasksel install gnome-desktop
+# Package Install Kali Linux Desktop Environment [Desktop for Gnome 3]
+apt install -y kali-desktop-gnome
 
 # Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
 apt install -y task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation for VNC Server
+#
+#  - VNC Server User : ec2-user [cloud-init default user]
+#
+#-------------------------------------------------------------------------------
+apt install -y vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
 
+# Configure VNC Server for "ec2-user" user
+su - "ec2-user" << __EOF__
+VNC_PASSWORD=$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
 
+vncpasswd
+$VNC_PASSWORD
+$VNC_PASSWORD
+n
 
+echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+__EOF__
 
+# Pre-operation test of VNC server
+su - "ec2-user" -c "vncserver :1 -geometry 1024x768 -depth 32"
 
+sleep 10
+
+su - "ec2-user" -c "vncserver -kill :1 "
+
+cat /home/ec2-user/.vnc/xstartup
+cat /home/ec2-user/.vnc/config
+
+# Systemd's VNC Server configuration 
+cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
+
+cat /etc/systemd/system/vncserver@:1.service
+
+sed -i 's@<USER>@ec2-user@g' /etc/systemd/system/vncserver@:1.service
+
+cat /etc/systemd/system/vncserver@:1.service
+
+systemctl daemon-reload
+
+# Systemd's VNC Server startup
+systemctl status vncserver@:1.service
+systemctl start vncserver@:1.service
+systemctl status vncserver@:1.service
+
+systemctl enable vncserver@:1.service
+systemctl is-enabled vncserver@:1.service
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Application [Google Chrome]

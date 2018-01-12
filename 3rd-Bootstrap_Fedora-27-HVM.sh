@@ -377,8 +377,9 @@ docker pull centos:latest                        # CentOS v7
 
 # Docker Pull Image (from Docker Hub)
 # docker pull fedora:latest
-# docker pull amazonlinux:latest
-# docker pull centos:latest # CentOS v7
+# docker pull amazonlinux:latest                   # Amazon Linux
+# docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
+# docker pull centos:latest                        # CentOS v7
 
 # Docker Run (Amazon Linux)
 # docker run -it amazonlinux:latest /bin/bash
@@ -435,6 +436,9 @@ npm install -g serverless
 
 sls -v
 
+# configure for fedora
+su - "fedora" -c "npm install -g serverless"
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6]
 #-------------------------------------------------------------------------------
@@ -478,13 +482,13 @@ cat /home/fedora/.vnc/xstartup
 cat /home/fedora/.vnc/config
 
 # Systemd's VNC Server configuration 
-cp -pr /usr/lib/systemd/system/vncserver@.service /usr/lib/systemd/system/vncserver@:1.service
+cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
 
-cat /usr/lib/systemd/system/vncserver@:1.service
+cat /etc/systemd/system/vncserver@:1.service
 
-sed -i 's@<USER>@fedora@g' /usr/lib/systemd/system/vncserver@:1.service
+sed -i 's@<USER>@fedora@g' /etc/systemd/system/vncserver@:1.service
 
-cat /usr/lib/systemd/system/vncserver@:1.service
+cat /etc/systemd/system/vncserver@:1.service
 
 systemctl daemon-reload
 
