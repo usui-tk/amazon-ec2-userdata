@@ -493,23 +493,30 @@ apt install -y task-japanese task-japanese-desktop locales-all fonts-ipafont ibu
 apt install -y vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
 
 # Configure VNC Server for "ec2-user" user
-su - "ec2-user" << __EOF__
-VNC_PASSWORD=$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+cat > /home/ec2-user/vnc-setup.sh << __EOF__
+#!/bin/bash -v
 
-vncpasswd
-$VNC_PASSWORD
-$VNC_PASSWORD
+VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+
+vncpasswd << 'EOF';
+\$VNC_PASSWORD
+\$VNC_PASSWORD
 n
+EOF
 
 echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 __EOF__
+
+chmod 777 /home/ec2-user/vnc-setup.sh
+
+su - "ec2-user" -c "/home/ec2-user/vnc-setup.sh"
 
 # Pre-operation test of VNC server
 su - "ec2-user" -c "vncserver :1 -geometry 1024x768 -depth 32"
 
 sleep 10
 
-su - "ec2-user" -c "vncserver -kill :1 "
+su - "ec2-user" -c "vncserver -kill :1"
 
 cat /home/ec2-user/.vnc/xstartup
 cat /home/ec2-user/.vnc/config

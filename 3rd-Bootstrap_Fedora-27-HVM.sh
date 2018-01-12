@@ -70,6 +70,9 @@ dnf install -y dnf-plugins-core dnf-plugin-system-upgrade
 dnf clean all
 dnf makecache
 
+# --- Workaround ---
+# dnf install -y glibc-langpack* langpacks-*
+
 # Default Package Update
 dnf update -y
 
@@ -395,7 +398,7 @@ docker pull centos:latest                        # CentOS v7
 dnf group install -y "C Development Tools and Libraries"
 
 # Package Install Fedora Ruby Development Tools (from Fedora Official Repository)
-dnf install -y ruby ruby-devel libxml2-devel libxslt-devel sqlite-devel
+dnf install -y ruby ruby-devel rubygem-json libxml2-devel libxslt-devel sqlite-devel
 
 ruby --version
 
@@ -460,23 +463,30 @@ dnf group install -y "Fedora Workstation"
 dnf install -y tigervnc-server
 
 # Configure VNC Server for "fedora" user
-su - "fedora" << __EOF__
-VNC_PASSWORD=$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+cat > /home/fedora/vnc-setup.sh << __EOF__
+#!/bin/bash -v
 
-vncpasswd
-$VNC_PASSWORD
-$VNC_PASSWORD
+VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+
+vncpasswd << 'EOF';
+\$VNC_PASSWORD
+\$VNC_PASSWORD
 n
+EOF
 
 echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 __EOF__
+
+chmod 777 /home/fedora/vnc-setup.sh
+
+su - "fedora" -c "/home/fedora/vnc-setup.sh"
 
 # Pre-operation test of VNC server
 su - "fedora" -c "vncserver :1 -geometry 1024x768 -depth 32"
 
 sleep 10
 
-su - "fedora" -c "vncserver -kill :1 "
+su - "fedora" -c "vncserver -kill :1"
 
 cat /home/fedora/.vnc/xstartup
 cat /home/fedora/.vnc/config
