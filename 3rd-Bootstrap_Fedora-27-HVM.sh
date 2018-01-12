@@ -60,12 +60,13 @@ systemctl list-units --no-pager -all
 # yum repository metadata Clean up
 dnf clean all
 
-dnf update -y dnf
-
+# Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
+dnf update -y bash dnf dnf-utils
 dnf clean all
+dnf makecache
 
 # Package Install DNF Administration Tools (from Fedora Official Repository)
-dnf install -y dnf-plugins-core dnf-plugin-system-upgrade dnf-utils
+dnf install -y dnf-plugins-core dnf-plugin-system-upgrade
 dnf clean all
 dnf makecache
 
@@ -77,7 +78,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y arptables atop bash-completion bc bind-utils collectl curl dstat ebtables ethtool fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl rpmconf sos strace sysstat tcpdump tree traceroute vim-enhanced wget
+dnf install -y arptables atop bash-completion bc bind-utils collectl curl dstat ebtables ethtool fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl rpmconf sos strace sysstat tcpdump tree traceroute unzip vim-enhanced wget zip
 dnf install -y setroubleshoot-server
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
@@ -290,7 +291,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y ansible ansible-doc
+dnf install -y ansible ansible-doc ansible-lint
 
 ansible --version
 
@@ -398,7 +399,7 @@ dnf install -y ruby ruby-devel libxml2-devel libxslt-devel sqlite-devel
 ruby --version
 
 # Package Install Fluentd (td-agent) Tools (from Ruby Gem Package)
-gem install fluentd -v "~> 0.12.0"
+gem install fluentd
 
 mkdir -p /etc/fluentd
 
@@ -441,23 +442,59 @@ dnf install -y python3
 
 /usr/bin/python3 -V
 
-
-
-
-
-
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
 dnf group install -y "Fedora Workstation"
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation for VNC Server
+#
+#  - VNC Server User : fedora [cloud-init default user]
+#
+#-------------------------------------------------------------------------------
+dnf install -y tigervnc-server
 
+# Configure VNC Server for "fedora" user
+su - "fedora" << __EOF__
+VNC_PASSWORD=$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
 
+vncpasswd
+$VNC_PASSWORD
+$VNC_PASSWORD
+n
 
+echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+__EOF__
 
+# Pre-operation test of VNC server
+su - "fedora" -c "vncserver :1 -geometry 1024x768 -depth 32"
 
+sleep 10
 
+su - "fedora" -c "vncserver -kill :1 "
+
+cat /home/fedora/.vnc/xstartup
+cat /home/fedora/.vnc/config
+
+# Systemd's VNC Server configuration 
+cp -pr /usr/lib/systemd/system/vncserver@.service /usr/lib/systemd/system/vncserver@:1.service
+
+cat /usr/lib/systemd/system/vncserver@:1.service
+
+sed -i 's@<USER>@fedora@g' /usr/lib/systemd/system/vncserver@:1.service
+
+cat /usr/lib/systemd/system/vncserver@:1.service
+
+systemctl daemon-reload
+
+# Systemd's VNC Server startup
+systemctl status vncserver@:1.service
+systemctl start vncserver@:1.service
+systemctl status vncserver@:1.service
+
+systemctl enable vncserver@:1.service
+systemctl is-enabled vncserver@:1.service
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Application [Google Chrome]
@@ -557,8 +594,11 @@ ip route show
 if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
-    # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
+
+	systemctl disable firewalld
+	systemctl is-enabled firewalld
+
+	systemctl status -l firewalld
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]
