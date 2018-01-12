@@ -494,7 +494,7 @@ apt install -y vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xo
 
 # Configure VNC Server for "ec2-user" user
 cat > /home/ec2-user/vnc-setup.sh << __EOF__
-#!/bin/bash -v
+#!/bin/bash
 
 VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
 

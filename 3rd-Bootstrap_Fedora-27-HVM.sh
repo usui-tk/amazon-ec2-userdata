@@ -464,7 +464,7 @@ dnf install -y tigervnc-server
 
 # Configure VNC Server for "fedora" user
 cat > /home/fedora/vnc-setup.sh << __EOF__
-#!/bin/bash -v
+#!/bin/bash
 
 VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
 
