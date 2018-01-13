@@ -353,9 +353,6 @@ ansible localhost -m setup
 # Custom Package Installation [Docker Community Edition - Docker.inc Repository]
 #-------------------------------------------------------------------------------
 
-# Package Uninstall Docker Enviroment Tools (from Kali Linux Official Repository)
-apt remove -y docker docker-engine docker.io* lxc-docker*
-
 # install dependencies 4 cert
 apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
@@ -423,7 +420,7 @@ docker pull centos:latest                        # CentOS v7
 curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-xenial-td-agent3.sh | sh
 
 # Package Information
-apt show apt show td-agent
+apt show td-agent
 
 systemctl daemon-reload
 
@@ -452,10 +449,13 @@ systemctl status -l td-agent
 #  https://nodejs.org/ja/download/package-manager/#debian-and-ubuntu-based-linux-distributions-debian-ubuntu-linux
 #-------------------------------------------------------------------------------
 
-# Package Install fluentd Tools (from TreasureData Official Repository)
-curl -sL https://deb.nodesource.com/setup_9.x | sudo -E bash -
+# Package Install node.js/npm Tools (from node.js Official Repository)
+curl -sL https://deb.nodesource.com/setup_9.x | bash -
 
 apt install -y nodejs
+
+# Package Information
+apt show nodejs
 
 node -v
 npm -v
@@ -463,9 +463,6 @@ npm -v
 npm install -g serverless
 
 sls -v
-
-# configure for ec2-user
-su - "ec2-user" -c "npm install -g serverless"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6]
@@ -504,7 +501,7 @@ vncpasswd << 'EOF';
 n
 EOF
 
-echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 __EOF__
 
 chmod 777 /home/ec2-user/vnc-setup.sh
@@ -522,11 +519,23 @@ cat /home/ec2-user/.vnc/xstartup
 cat /home/ec2-user/.vnc/config
 
 # Systemd's VNC Server configuration 
-cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
+cat > /etc/systemd/system/vncserver@:1.service << __EOF__
+[Unit]
+Description=Remote desktop service (VNC)
+After=syslog.target network.target
 
-cat /etc/systemd/system/vncserver@:1.service
+[Service]
+Type=forking
 
-sed -i 's@<USER>@ec2-user@g' /etc/systemd/system/vncserver@:1.service
+ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+ExecStart=/usr/sbin/runuser -l ec2-user -c "/usr/bin/vncserver %i"
+PIDFile=/home/ec2-user/.vnc/%H%i.pid
+ExecStop=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+
+[Install]
+WantedBy=multi-user.target
+
+__EOF__
 
 cat /etc/systemd/system/vncserver@:1.service
 

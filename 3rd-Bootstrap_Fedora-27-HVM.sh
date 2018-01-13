@@ -393,54 +393,62 @@ docker pull centos:latest                        # CentOS v7
 # Custom Package Installation [Fluentd (td-agent)]
 #-------------------------------------------------------------------------------
 
-# Package Install Fedora C-Language Development Tools (from Fedora Official Repository)
-# dnf install -y gcc
-dnf group install -y "C Development Tools and Libraries"
+# curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh| bash
+rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
 
-# Package Install Fedora Ruby Development Tools (from Fedora Official Repository)
-dnf install -y ruby ruby-devel rubygem-json libxml2-devel libxslt-devel sqlite-devel
+cat > /etc/yum.repos.d/td.repo << __EOF__
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/3/redhat/7/x86_64/
+gpgcheck=1
+gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+__EOF__
 
-ruby --version
+dnf makecache
 
-# Package Install Fluentd (td-agent) Tools (from Ruby Gem Package)
-gem install fluentd
+# Install Treasure Agent
+dnf install -y td-agent
 
-mkdir -p /etc/fluentd
+# Package Information
+rpm -qi td-agent
 
-/usr/local/bin/fluentd --setup /etc/fluentd
+systemctl daemon-reload
 
-cat /etc/fluentd/fluent.conf
+systemctl status -l td-agent
+systemctl enable td-agent
+systemctl is-enabled td-agent
 
-/usr/local/bin/fluentd --config /etc/fluentd/fluent.conf -vv & # -vv enables trace level logs. You can omit -vv option.
-
-# echo '{"json":"message"}' | /usr/local/bin/fluent-cat debug.test
+systemctl restart td-agent
+systemctl status -l td-agent
 
 # Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-/usr/local/bin/fluent-gem list
+/opt/td-agent/embedded/bin/fluent-gem list
 
-/usr/local/bin/fluent-gem search -r fluent-plugin
+/opt/td-agent/embedded/bin/fluent-gem search -r fluent-plugin
 
-/usr/local/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
-/usr/local/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/usr/local/bin/fluent-gem install fluent-plugin-kinesis
-/usr/local/bin/fluent-gem install fluent-plugin-kinesis-firehose
-/usr/local/bin/fluent-gem install fluent-plugin-s3
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis-firehose
+/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-s3
 
-/usr/local/bin/fluent-gem list
+/opt/td-agent/embedded/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Node.js & Serverless Application Framework]
 #-------------------------------------------------------------------------------
 dnf install -y nodejs npm
+
+# Package Information
+rpm -qi nodejs
+rpm -qi npm
+
 node -v
 npm -v
 
 npm install -g serverless
 
 sls -v
-
-# configure for fedora
-su - "fedora" -c "npm install -g serverless"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6]
@@ -474,7 +482,7 @@ vncpasswd << 'EOF';
 n
 EOF
 
-echo "# VNC Password is $VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 __EOF__
 
 chmod 777 /home/fedora/vnc-setup.sh
