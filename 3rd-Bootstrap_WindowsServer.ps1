@@ -1598,7 +1598,6 @@ Write-LogSeparator "Package Install System Utility (Amazon EC2 Elastic GPU Softw
 
 # Initialize Parameter
 Set-Variable -Name ElasticGpuId -Scope Script -Value ($Null)
-Set-Variable -Name ElasticGpuResponse -Scope Script -Value ($Null)
 Set-Variable -Name ElasticGpuResponseError -Scope Script -Value ($Null)
 
 # Check Region
@@ -1621,7 +1620,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
     }
 
     # Check Amazon EC2 Elastic GPU ID
-    $ElasticGpuResponseError = try { $ElasticGpuResponse = Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
+    $ElasticGpuResponseError = try { Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
     if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
         # The Amazon EC2 Elastic GPU is attached
         Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"
