@@ -432,7 +432,7 @@ systemctl restart td-agent
 systemctl status -l td-agent
 
 # Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-/opt/td-agent/embedded/bin/fluent-gem list
+/opt/td-agent/embedded/bin/fluent-gem list --local
 
 /opt/td-agent/embedded/bin/fluent-gem search -r fluent-plugin
 
@@ -442,7 +442,7 @@ systemctl status -l td-agent
 /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis-firehose
 /opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-s3
 
-/opt/td-agent/embedded/bin/fluent-gem list
+/opt/td-agent/embedded/bin/fluent-gem list --local
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Node.js & Serverless Application Framework]
