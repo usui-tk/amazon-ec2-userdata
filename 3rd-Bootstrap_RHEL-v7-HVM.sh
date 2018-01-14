@@ -36,6 +36,10 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 # Acquire unique information of Linux distribution
 #  - RHEL v7
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
+#    https://access.redhat.com/support/policy/updates/extras
+#    https://access.redhat.com/articles/1150793
+#    https://access.redhat.com/solutions/3358
+#
 #    https://access.redhat.com/articles/3135121
 #
 #    https://aws.amazon.com/marketplace/pp/B00KWBZVK6
