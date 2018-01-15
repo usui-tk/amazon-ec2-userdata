@@ -362,6 +362,45 @@ ansible --version
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [PowerShell Core(pwsh)]
+# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
+# https://github.com/PowerShell/PowerShell
+# 
+# https://packages.microsoft.com/ubuntu/16.04/prod/
+# 
+# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
+# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
+#-------------------------------------------------------------------------------
+
+# Import the public repository GPG keys
+curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+apt-key list
+
+# Register the Microsoft Ubuntu repository
+curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
+
+# Update the list of products
+apt update -y
+
+# Install PowerShell
+apt install -y powershell
+
+apt show powershell
+
+# Check Version
+pwsh -Version
+
+# Import-Module [AWSPowerShell.NetCore]
+pwsh -Command "Get-Module -ListAvailable"
+
+pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+
+pwsh -Command "Get-Module -ListAvailable"
+
+pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 apt clean -y

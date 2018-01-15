@@ -432,13 +432,39 @@ ansible --version
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Oracle Developer Package:PowerShell]
+# Custom Package Installation [PowerShell Core(pwsh)]
+# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
+# https://github.com/PowerShell/PowerShell
+# 
+# https://packages.microsoft.com/rhel/7/prod/
+# 
+# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
+# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Development Repository)
-# yum --enablerepo=ol7_developer install -y powershell
+# Register the Microsoft RedHat repository
+curl https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/yum.repos.d/microsoft.repo
 
-# powershell --version
+# yum repository metadata Clean up
+yum clean all
+
+# Install PowerShell
+yum install -y powershell
+
+rpm -qi powershell
+
+# Check Version
+pwsh -Version
+
+# Import-Module [AWSPowerShell.NetCore]
+pwsh -Command "Get-Module -ListAvailable"
+
+pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+
+pwsh -Command "Get-Module -ListAvailable"
+
+pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Developer Package:td-agent]

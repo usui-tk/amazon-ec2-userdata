@@ -60,7 +60,9 @@ systemctl list-units --no-pager -all
 
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
-zypper refresh
+zypper refresh -fdb
+
+zypper repos
 
 # Update default package
 zypper --non-interactive update
@@ -107,7 +109,9 @@ SUSEConnect --status-text
 SUSEConnect --list-extensions
 
 zypper clean --all
-zypper refresh
+zypper refresh -fdb
+
+zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 zypper --non-interactive install mtr
@@ -265,6 +269,8 @@ fi
 
 zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
+rpm -qi amazon-ssm-agent
+
 systemctl daemon-reload
 
 systemctl status -l amazon-ssm-agent
@@ -321,12 +327,55 @@ ansible --version
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [PowerShell Core(pwsh)]
+# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
+# https://github.com/PowerShell/PowerShell
+# 
+# https://packages.microsoft.com/rhel/7/prod/
+# 
+# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
+# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
+#-------------------------------------------------------------------------------
+
+# Register the Microsoft signature key
+# rpm --import https://packages.microsoft.com/keys/microsoft.asc
+
+# Add the Microsoft Product feed
+# curl https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/zypp/repos.d/microsoft.repo
+
+# zypper repos
+
+# Update the list of products
+# zypper clean --all
+# zypper refresh -fdb
+
+# zypper --non-interactive update
+
+# Install PowerShell
+# zypper --non-interactive install powershell
+
+# rpm -qi powershell
+
+# Check Version
+# pwsh -Version
+
+# Import-Module [AWSPowerShell.NetCore]
+# pwsh -Command "Get-Module -ListAvailable"
+
+# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+
+# pwsh -Command "Get-Module -ListAvailable"
+
+# pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 zypper clean --all
-zypper refresh
+zypper refresh -fdb
 
-# zypper --non-interactive update
+zypper --non-interactive update
 
 #-------------------------------------------------------------------------------
 # System information collection
