@@ -58,6 +58,7 @@ Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\Progr
 Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
 
+
 ########################################################################################################################
 #
 # Windows Bootstrap Common function
@@ -1746,6 +1747,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     # Package Install Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 6.0)"
     Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\PowerShell-6.0.0-win-x64.msi", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
+    Start-Sleep -Seconds 10
 
     # Package Configure Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 6.0)"
@@ -2089,7 +2091,7 @@ Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
 Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-ENA.zip"
 
 # Package Download Intel Network Driver
-if ($WindowsOSVersion) {
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
         # https://downloadcenter.intel.com/ja/download/18725/
@@ -2122,10 +2124,6 @@ if ($WindowsOSVersion) {
         # [No Target Server OS]
         Write-Log ("# [Information] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
     }
-}
-else {
-    # [Undefined Server OS]
-    Write-Log "# [Warning] [Intel Network Driver] Undefined Server OS"
 }
 
 
