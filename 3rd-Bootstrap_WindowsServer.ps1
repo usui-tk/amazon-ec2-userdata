@@ -1100,6 +1100,47 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Windows Time Service (w32tm) Setting]
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/windows-set-time.html
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Windows Server OS Configuration [Windows Time Service (w32tm) Setting]"
+
+# Initialize Parameter
+Set-Variable -Name W32TM -Scope Script -Value "C:\Windows\System32\w32tm.exe"
+
+# Configuration for Amazon Time Sync Service
+if ($InstanceType -match "^c5.*|^m5.*") {
+    Write-Log ("# [Windows - OS Settings] Windows Time Service - Non-Support Instance Type  : " + $InstanceType)
+
+    # Get Windows Time Service (Service Status/Configuration/Peer Status)
+    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+}
+else {
+    Write-Log ("# [Windows - OS Settings] Windows Time Service - Support Instance Type  : " + $InstanceType)
+
+    # Get Windows Time Service (Service Status/Configuration/Peer Status)
+    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+    
+    # Set Windows Time Service for Amazon Time Sync Service
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
+
+    # Get Windows Time Service (Service Status/Configuration/Peer Status)
+    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Windows Server OS Configuration [Folder Option Setting]
 #-----------------------------------------------------------------------------------------------------------------------
 
