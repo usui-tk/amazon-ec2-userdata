@@ -909,7 +909,7 @@ if ($RoleName) {
 # Get EC2 Instance attached EBS Volume Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume | Where-Object { $_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
+    Get-EC2Volume | Where-Object {$_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
@@ -1749,12 +1749,6 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Configure Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 6.0)"
-
-    # Check Version
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Version")
-
-    # Update Help Contents
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Update-Help")
 
     # Install AWSPowerShell.NetCore
     Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
