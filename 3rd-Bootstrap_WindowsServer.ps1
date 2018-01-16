@@ -34,6 +34,10 @@
 # User Define Parameter
 #-----------------------------------------------------------------------------------------------------------------------
 
+# Set Script Parameter for Script (User Defined)
+Set-Variable -Name FLAG_APP_INSTALL -Option Constant -Scope Script -Value "$TRUE"
+Set-Variable -Name FLAG_APP_DOWNLOAD -Option Constant -Scope Script -Value "$FALSE"
+
 # Set Script Parameter for Directory Name (User Defined)
 Set-Variable -Name BASE_DIR -Option Constant -Scope Script "$Env:SystemDrive\EC2-Bootstrap"
 Set-Variable -Name TOOL_DIR -Option Constant -Scope Script "$BASE_DIR\Tools"
@@ -1715,6 +1719,54 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (PowerShell Core 6.0)
+# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-Windows?view=powershell-6
+# https://github.com/PowerShell/PowerShell
+# 
+# https://github.com/PowerShell/PowerShell/releases
+# 
+# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-windows.html
+# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
+
+# Initialize Parameter
+Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.0\pwsh.exe"
+Set-Variable -Name PWSH_INSTALLER -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.0/PowerShell-6.0.0-win-x64.msi"
+
+# Check Windows OS Version[Windows Server 2008R2, 2012, 2012 R2, 2016]
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
+
+    # Package Download Commnand-Line Shell (PowerShell Core 6.0)
+    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 6.0)"
+    Invoke-WebRequest -Uri "$PWSH_INSTALLER" -OutFile "$TOOL_DIR\PowerShell-6.0.0-win-x64.msi"
+
+    # Package Install Commnand-Line Shell (PowerShell Core 6.0)
+    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 6.0)"
+    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\PowerShell-6.0.0-win-x64.msi", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
+
+    # Package Configure Commnand-Line Shell (PowerShell Core 6.0)
+    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 6.0)"
+
+    # Check Version
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Version")
+
+    # Update Help Contents
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Update-Help")
+
+    # Install AWSPowerShell.NetCore
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
+
+}
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Download (NVIDIA GPU Driver & CUDA Toolkit)
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -2083,6 +2135,7 @@ else {
 }
 
 
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Installation (Application)
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2090,26 +2143,34 @@ else {
 # Log Separator
 Write-LogSeparator "Custom Package Installation (Application)"
 
-# Package Install Modern Web Browser (Google Chrome 64bit Edition)
-Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
+# Custom Package Installation (Google Chrome 64bit Edition)
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Package Install Modern Web Browser (Google Chrome 64bit Edition)
+    Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
 
-# [workaround] Google site to S3 bucket
-Invoke-WebRequest -Uri 'https://s3-ap-northeast-1.amazonaws.com/usui-public-bucket/Installer/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
-# Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+    # Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+    
+    # [workaround] Google site to S3 bucket
+    Invoke-WebRequest -Uri 'https://s3-ap-northeast-1.amazonaws.com/usui-public-bucket/Installer/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 
-Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+    Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
+    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+}
 
-#---------------------------------------------------------------
 # [Caution : Finally the installation process]
-#---------------------------------------------------------------
+# Custom Package Installation (Visual Studio Code 64bit Edition)
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Package Download Text Editor (Visual Studio Code 64bit Edition)
+    Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
+    Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
 
-# Package Install Text Editor (Visual Studio Code 64bit Edition)
-Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
-Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
-Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
-Start-Sleep -Seconds 180
+    # Package Install Text Editor (Visual Studio Code 64bit Edition)
+    Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
+    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
+
+    Start-Sleep -Seconds 180
+}
+
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2121,91 +2182,124 @@ Write-LogSeparator "Custom Package Download (System Utility)"
 
 # Package Download System Utility (Sysinternals Suite)
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
-Write-Log "# Package Download System Utility (Sysinternals Suite)"
-Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (Sysinternals Suite)"
+    Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
+}
 
 # Package Download System Utility (System Explorer)
 # http://systemexplorer.net/
-Write-Log "# Package Download System Utility (System Explorer)"
-Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (System Explorer)"
+    Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
+}
 
 # Package Download System Utility (7-zip)
 # http://www.7-zip.org/
-Write-Log "# Package Download System Utility (7-zip)"
-Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (7-zip)"
+    Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+}
 
 # Package Download System Utility (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
-Write-Log "# Package Download System Utility (Tera Term)"
-Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (Tera Term)"
+    Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
+}
 
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
-Write-Log "# Package Download System Utility (WinSCP)"
-Invoke-WebRequest -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (WinSCP)"
+    Invoke-WebRequest -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
+}
 
 # Package Download System Utility (Fluentd)
 # https://www.fluentd.org/
 # https://td-agent-package-browser.herokuapp.com/3/windows
-if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
-    Write-Log "# Package Download System Utility (Fluentd)"
-    Invoke-WebRequest -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+        Write-Log "# Package Download System Utility (Fluentd)"
+        Invoke-WebRequest -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
+    }
 }
 
 # Package Download System Utility (SQL Server Management Studio [SSMS])
 # https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
-# Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
-# Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
+    # Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
+}
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-if ($WindowsOSVersion -match "^5.*|^6.*") {
-    Write-Log "# Package Download System Utility (EC2Config)"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    if ($WindowsOSVersion -match "^5.*|^6.*") {
+        Write-Log "# Package Download System Utility (EC2Config)"
+        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+    }
 }
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-if ($WindowsOSVersion -match "^10.*") {
-    Write-Log "# Package Download System Utility (EC2Launch)"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    if ($WindowsOSVersion -match "^10.*") {
+        Write-Log "# Package Download System Utility (EC2Launch)"
+        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+    }
 }
 
 # Package Download System Utility (AWS-CLI - 64bit)
 # https://aws.amazon.com/jp/cli/
-Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
+    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+}
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
-Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
+    Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+}
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
 # http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
-Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
-Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
+    Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+}
 
 # Package Download System Utility (EC2Rescue)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
-Write-Log "# Package Download System Utility (EC2Rescue)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (EC2Rescue)"
+    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+}
 
 # Package Download System Utility (AWSLogCollector)
 # 
-Write-Log "# Package Download System Utility (AWSLogCollector)"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWSLogCollector)"
+    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
+}
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
-Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
+    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+}
 
 # Package Download System Utility (AWS ElasticWolf Client Console)
 # https://aws.amazon.com/tools/aws-elasticwolf-client-console/
-Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
-Invoke-WebRequest -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
+    Invoke-WebRequest -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+}
+
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2337,13 +2431,15 @@ Stop-Transcript
 Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR 
 
 
+
 #-----------------------------------------------------------------------------------------------------------------------
-# Hostname rename [#Exclude Amazon WorkSpaces, Amazon AppStream 2.0]
+# Hostname rename
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Setting Hostname
 Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
 Rename-Computer $Hostname -Force
+
 
 
 #-----------------------------------------------------------------------------------------------------------------------
