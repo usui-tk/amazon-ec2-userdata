@@ -890,31 +890,46 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 #  Set-AWSResponseLogging -Level Always
 
 # Get AMI Information from Public AMI
+# - Get-EC2Image
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Image.html
+#
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI Information from Public AMI"
     Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-Information.txt" -Append -Force
 }
 
 # Get AMI Information from Systems Manager Parameter Store
+# - Get-SSMParametersByPath
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-SSMParametersByPath.html
+#
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
     Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
+# - Get-EC2Instance
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Instance.html
+#
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance attached EBS Volume Information
+# - Get-EC2Volume
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Volume.html
+#
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume | Where-Object {$_.Attachments.InstanceId -eq $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
+    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
+# - Get-EC2InstanceAttribute
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2InstanceAttribute.html
 #
+# [Amazon EC2 Instance Network Adapter Type]
 # - ENA (Elastic Network Adapter)
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 # - SR-IOV
@@ -940,7 +955,10 @@ if ($RoleName) {
 }
 
 # Get EC2 Instance Attribute[Storage Interface Performance Attribute]
+# - Get-EC2InstanceAttribute
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2InstanceAttribute.html
 #
+# [Amazon EC2 Instance EBS Network Optimized]
 # - EBS Optimized Instance
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
