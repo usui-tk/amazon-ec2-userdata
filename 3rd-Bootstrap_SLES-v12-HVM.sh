@@ -64,6 +64,10 @@ zypper refresh -fdb
 
 zypper repos
 
+# Package Configure SLES Modules
+#   https://www.suse.com/products/server/features/modules/
+SUSEConnect --list-extensions
+
 # Update default package
 zypper --non-interactive update
 
@@ -79,13 +83,38 @@ zypper --non-interactive update
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install arptables bash-completion dstat ebtables git hdparm hostinfo iotop lzop nmap nvme-cli sdparm supportutils systemd-bash-completion time traceroute unzip zypper-log
+zypper --non-interactive install arptables bash-completion dstat ebtables git-core hdparm hostinfo iotop lzop nmap nvme-cli sdparm supportutils sysstat systemd-bash-completion time traceroute unzip zypper-log
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from openSUSE Build Service Repository)
+#-------------------------------------------------------------------------------
+
+# Repository Configure openSUSE Build Service Repository
+#   https://build.opensuse.org/
+#   http://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/
+
+# Target version : SUSE Linux Enterprise 12 SP3
+zypper repos
+
+zypper --non-interactive addrepo "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
+
+zypper --gpg-auto-import-keys refresh utilities
+
+zypper repos
+
+zypper clean --all
+zypper refresh -fdb
+
+zypper repos
+
+# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+zypper --non-interactive install atop jq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -103,19 +132,13 @@ sleep 5
 
 SUSEConnect --status-text
 
-# Package Configure SLES Modules
-#   https://www.suse.com/products/server/features/modules/
-#
-SUSEConnect --list-extensions
-
 zypper clean --all
 zypper refresh -fdb
 
 zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install mtr
-# zypper --non-interactive install jq mtr
+zypper --non-interactive install collectl mtr
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -337,11 +360,12 @@ ansible localhost -m setup
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
+# Add the Microsoft Product feed
+# zypper --non-interactive addrepo "https://packages.microsoft.com/config/rhel/7/prod.repo"
+
 # Register the Microsoft signature key
 # rpm --import https://packages.microsoft.com/keys/microsoft.asc
-
-# Add the Microsoft Product feed
-# curl https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/zypp/repos.d/microsoft.repo
+# zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
 
 # zypper repos
 
