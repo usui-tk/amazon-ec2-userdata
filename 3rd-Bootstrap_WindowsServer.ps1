@@ -397,7 +397,7 @@ function Get-EbsVolumesMappingInformation2 {
             $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
         }
         elseif ($DiskDrive.PNPDeviceID -like "*PROD_AMAZON_EC2_NVME*") {
-            $BlockDeviceName = Get-Ec2InstanceMetadataContent "meta-data/block-device-mapping/ephemeral$($DiskDrive.SCSIPort - 2)"
+            $BlockDeviceName = ((Invoke-WebRequest ("169.254.169.254/latest/meta-data/block-device-mapping/ephemeral" + $($DiskDrive.SCSIPort - 2)))).Content
             $BlockDevice = $null
             $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
         }
@@ -1479,6 +1479,7 @@ Get-Ec2SystemManagerAgentVersion
 Stop-Service -Name AmazonSSMAgent
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
+Clear-Content -Path $SSMAgentLogFile
 
 Start-Service -Name AmazonSSMAgent
 Start-Sleep -Seconds 15
