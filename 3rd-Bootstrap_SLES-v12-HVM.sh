@@ -74,6 +74,8 @@ zypper --non-interactive update
 # Install recommended packages
 # zypper --non-interactive install-new-recommends
 
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
 #  - Packages sorted by name
@@ -91,21 +93,26 @@ zypper --non-interactive install arptables bash-completion dstat ebtables git-co
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
 
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
+#   https://build.opensuse.org/
+#   https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/
+#   https://download.opensuse.org/repositories/network/SLE_12_SP3/
 #-------------------------------------------------------------------------------
 
-# Repository Configure openSUSE Build Service Repository
-#   https://build.opensuse.org/
-#   http://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/
-
-# Target version : SUSE Linux Enterprise 12 SP3
 zypper repos
 
-zypper --non-interactive addrepo "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
-
+# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
+zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
 zypper --gpg-auto-import-keys refresh utilities
 
+# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
+zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
+zypper --gpg-auto-import-keys refresh network
+
+# Repository Configure openSUSE Build Service Repository
 zypper repos
 
 zypper clean --all
@@ -114,23 +121,28 @@ zypper refresh -fdb
 zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop jq
+zypper --non-interactive install atop jq nmap
+
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
-#-------------------------------------------------------------------------------
-
-# Repository Configure SUSE Package Hub Repository
 #   https://packagehub.suse.com/
 #   https://packagehub.suse.com/how-to-use/
-#
+#-------------------------------------------------------------------------------
+
 SUSEConnect --status-text
 
-# Target version : SUSE Linux Enterprise 12
-SUSEConnect --product PackageHub/12/x86_64
+SUSEConnect --list-extensions
+
+# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
+SUSEConnect --product PackageHub/12.3/x86_64
 sleep 5
 
+# Repository Configure SUSE Package Hub Repository
 SUSEConnect --status-text
+
+SUSEConnect --list-extensions
 
 zypper clean --all
 zypper refresh -fdb
@@ -139,6 +151,8 @@ zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 zypper --non-interactive install collectl mtr
+
+
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
