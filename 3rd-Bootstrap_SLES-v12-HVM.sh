@@ -121,7 +121,7 @@ zypper refresh -fdb
 zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop jq nmap
+zypper --non-interactive install atop jq
 
 
 
@@ -368,14 +368,14 @@ ansible localhost -m setup
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
 # 
-# https://packages.microsoft.com/rhel/7/prod/
+# https://packages.microsoft.com/sles/12/prod/
 # 
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
 # Add the Microsoft Product feed
-# zypper --non-interactive addrepo "https://packages.microsoft.com/config/rhel/7/prod.repo"
+# zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-12-SP3" "https://packages.microsoft.com/config/sles/12/prod.repo"
 
 # Register the Microsoft signature key
 # rpm --import https://packages.microsoft.com/keys/microsoft.asc
