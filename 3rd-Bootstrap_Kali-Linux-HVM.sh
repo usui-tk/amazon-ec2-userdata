@@ -503,9 +503,18 @@ apt show nodejs
 node -v
 npm -v
 
+# Install Serverless Framework
+# https://serverless.com/
+# https://github.com/serverless/serverless
 npm install -g serverless
 
 sls -v
+
+# Install AWS Serverless Application Model (SAM) - SAM Local
+# https://docs.aws.amazon.com/lambda/latest/dg/sam-cli-requirements.html
+# npm install -g aws-sam-local
+
+# sam --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6]
