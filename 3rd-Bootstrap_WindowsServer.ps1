@@ -223,120 +223,6 @@ function Get-DotNetFrameworkVersion {
 
 
 function Get-EbsVolumesMappingInformation {
-    # List the Windows disks
-
-    # Set Initialize Parameter
-    Set-Variable -Name BlockDeviceMapping -Scope Script -Value ($Null)
-    Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
-    Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
-    Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
-
-    # Create a hash table that maps each device to a SCSI target
-    $Map = @{"0" = '/dev/sda1'} 
-    for ($x = 1; $x -le 26; $x++) {$Map.add($x.ToString(), [String]::Format("xvd{0}", [char](97 + $x)))}
-    for ($x = 78; $x -le 102; $x++) {$Map.add($x.ToString(), [String]::Format("xvdc{0}", [char](19 + $x)))}
-
-    Try {
-        # Use the metadata service to discover which instance the script is running on
-        
-        # InstanceId
-        if ( [string]::IsNullOrEmpty($InstanceId) ) {
-            $InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
-        }
-
-        # AZ:Availability Zone
-        if ( [string]::IsNullOrEmpty($AZ) ) {
-            $AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
-        }
-
-        # Region
-        if ( [string]::IsNullOrEmpty($Region) ) {
-            $Region = $AZ.Substring(0, $AZ.Length - 1)
-        }
-
-        #Get OS Language
-        $OsLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
-        
-        #Get the volumes attached to this instance
-        $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings | Sort-Object | Get-Unique
-
-    }
-    Catch {
-        Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
-    }
-    
-    $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | % {
-        $Drive = $_
-        
-        # Find the partitions for this drive
-        Get-WmiObject -Class Win32_DiskDriveToDiskPartition | Where-Object {$_.Antecedent -eq $Drive.Path.Path} | % {
-            $D2P = $_
-            # Get details about each partition
-            $Partition = Get-WmiObject -Class Win32_DiskPartition | Where-Object {$_.Path.Path -eq $D2P.Dependent}
-            # Find the drive that this partition is linked to
-            $Disk = Get-WmiObject -Class Win32_LogicalDiskToPartition | Where-Object {$_.Antecedent -in $D2P.Dependent} | % { 
-                $L2P = $_
-                #Get the drive letter for this partition, if there is one
-                Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.Path.Path -in $L2P.Dependent}
-            }
-            $BlockDeviceMapping = $BlockDeviceMappings | Where-Object {$_.DeviceName -eq $Map[$Drive.SCSITargetId.ToString()]}
-       
-            if ($OsLanguage -eq "ja-JP") {
-                # Setting Paramter ["Disk #" in Japanese]
-                $Word_Disk_Base64 = "44OH44Kj44K544KvICM="                                    # A string of "Disk #" was Base64 encoded in Japanese
-                $Word_Disk_Byte = [System.Convert]::FromBase64String($Word_Disk_Base64)       # Conversion from base64 to byte sequence
-                $Word_Disk_String = [System.Text.Encoding]::UTF8.GetString($Word_Disk_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
-
-                # Setting Paramter [" Partition #" in Japanese]
-                $Word_Partition_Base64 = "IOODkeODvOODhuOCo+OCt+ODp+ODsyAj"                             # A string of " Partition #" was Base64 encoded in Japanese
-                $Word_Partition_Byte = [System.Convert]::FromBase64String($Word_Partition_Base64)       # Conversion from base64 to byte sequence
-                $Word_Partition_String = [System.Text.Encoding]::UTF8.GetString($Word_Partition_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
-
-                # Display the information in a table (Japanese : ja-JP)
-                New-Object -TypeName PSCustomObject -Property @{
-                    Device      = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("${Word_Disk_String}", ""));
-                    Boot        = $Partition.BootPartition;
-                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace("${Word_Partition_String}", ""));
-                    SCSITarget  = $Drive.SCSITargetId;
-                    DriveLetter = if ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName  = if ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId    = if ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
-                }
-            }
-            elseif ($OsLanguage -eq "en-US") {
-                # Display the information in a table (English : en-US)
-                New-Object -TypeName PSCustomObject -Property @{
-                    Device      = $Map[$Drive.SCSITargetId.ToString()];
-                    Disk        = [Int]::Parse($Partition.Name.Split(",")[0].Replace("Disk #", ""));
-                    Boot        = $Partition.BootPartition;
-                    Partition   = [Int]::Parse($Partition.Name.Split(",")[1].Replace(" Partition #", ""));
-                    SCSITarget  = $Drive.SCSITargetId;
-                    DriveLetter = If ($Disk -eq $NULL) {"NA"} else {$Disk.DeviceID};
-                    VolumeName  = If ($Disk -eq $NULL) {"NA"} else {$Disk.VolumeName};
-                    VolumeId    = If ($BlockDeviceMapping -eq $NULL) {"NA"} else {$BlockDeviceMapping.Ebs.VolumeId}
-                }
-            }
-            else {
-                # [No Target Server OS]
-                Write-Log ("# [Information] [Amazon EC2 Attached EBS Volumes] No Target Server OS Language : " + $OsLanguage)
-            }
-
-        }
-
-    } | Sort-Object Disk, Partition | Select-Object Disk, Partition, SCSITarget, DriveLetter, Boot, VolumeId, Device, VolumeName
-    
-    foreach ($EBSVolumeList in $EBSVolumeLists) {
-        if ($EBSVolumeList) {
-            # Write the information to the Log Files
-            Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partition - {1}] [SCSITarget - {2}] [DriveLetter - {3}] [Boot - {4}] [VolumeId - {5}] [Device - {6}] [VolumeName - {7}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partition, $EBSVolumeList.SCSITarget, $EBSVolumeList.DriveLetter, $EBSVolumeList.Boot, $EBSVolumeList.VolumeId, $EBSVolumeList.Device, $EBSVolumeList.VolumeName)
-        }
-    } 
-    
-} # end Get-EbsVolumesMappingInformation
-
-
-function Get-EbsVolumesMappingInformation2 {
     #--------------------------------------------------------------------------------------
     #  Listing the Disks Using Windows PowerShell
     #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2-windows-volumes.html#windows-list-disks
@@ -424,7 +310,7 @@ function Get-EbsVolumesMappingInformation2 {
             Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partitions - {1}] [DriveLetter - {2}] [EbsVolumeId - {3}] [Device - {4}] [VirtualDevice - {5}] [VolumeName - {6}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partitions, $EBSVolumeList.DriveLetter, $EBSVolumeList.EbsVolumeId, $EBSVolumeList.Device, $EBSVolumeList.VirtualDevice, $EBSVolumeList.VolumeName)
         }
     } 
-} # end Get-EbsVolumesMappingInformation2
+} # end Get-EbsVolumesMappingInformation
 
 
 function Get-Ec2ConfigVersion {
@@ -815,11 +701,7 @@ Get-AmazonMachineInformation
 
 # Logging Amazon EC2 attached EBS Volume List
 if ($RoleName) {
-    Write-Log "# [AWS - EBS] [#workaround] FunctionTest - Get-EbsVolumesMappingInformation"
     Get-EbsVolumesMappingInformation
-
-    Write-Log "# [AWS - EBS] [#workaround] FunctionTest - Get-EbsVolumesMappingInformation2"
-    Get-EbsVolumesMappingInformation2
 }
 
 # Logging Windows Server OS Parameter [AMI : Amazon Machine Image]
