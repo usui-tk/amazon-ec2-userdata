@@ -52,6 +52,9 @@ cat /etc/image-id
 # Default installation package
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
 
+# Default repository package
+yum list all > /tmp/yum-repo-rpm-list.txt
+
 # Special package information
 amazon-linux-extras list
 
@@ -73,7 +76,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y arptables_jf bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y arptables_jf bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

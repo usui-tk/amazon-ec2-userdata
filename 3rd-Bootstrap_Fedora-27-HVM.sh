@@ -50,6 +50,9 @@ cat /etc/system-release
 # Default installation package
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
 
+# Default repository package
+dnf list all > /tmp/yum-repo-rpm-list.txt
+
 # systemd service config
 systemctl list-units --no-pager -all
 

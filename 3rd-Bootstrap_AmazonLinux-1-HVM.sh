@@ -58,6 +58,9 @@ cat /etc/image-id
 # Default installation package
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
 
+# Default repository package
+yum list all > /tmp/yum-repo-rpm-list.txt
+
 # Special package information
 yum --enablerepo=amzn-preview list | grep amzn-preview
 
