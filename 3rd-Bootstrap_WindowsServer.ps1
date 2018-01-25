@@ -719,18 +719,7 @@ Set-StrictMode -Version Latest
 Write-LogSeparator "Test Network Connection"
 
 # Initialize Parameter
-Set-Variable -Name FlagIMDSConnection -Scope Script -Value ($Null)
 Set-Variable -Name FlagInternetConnection -Scope Script -Value ($Null)
-
-# Test Connecting to EC2 Instance Metadata Service (169.254.169.254)
-#  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
-$FlagIMDSConnection = Test-Connection -ComputerName 169.254.169.254 -Count 1 -Quiet -ErrorAction SilentlyContinue
-if ($FlagIMDSConnection -eq $TRUE) {
-    Write-Log "# [Network Connection] EC2 Instance Metadata Service : 169.254.169.254 - [Connection OK]"
-}
-else {
-    Write-Log "# [Network Connection] EC2 Instance Metadata Service : 169.254.169.254 - [Connection NG]"
-}
 
 # Test Connecting to the Internet (Google Public DNS:8.8.8.8)
 #  https://developers.google.com/speed/public-dns/
@@ -1868,7 +1857,7 @@ if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2012R2&target_type=exelocal'
             $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_windows-exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
@@ -2259,13 +2248,6 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
 }
 
-# Package Download System Utility (EC2Rescue)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (EC2Rescue)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
-}
-
 # Package Download System Utility (AWSLogCollector)
 # 
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
@@ -2284,7 +2266,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://aws.amazon.com/tools/aws-elasticwolf-client-console/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
-    Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+    Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\ElasticWolf-win-5.1.7.zip"
 }
 
 
@@ -2300,7 +2282,31 @@ Write-LogSeparator "Collect Script/Config Files & Logging Data Files"
 Write-Log "# Get System & User Variables"
 Get-Variable | Export-Csv -Encoding default $BASE_DIR\Bootstrap-Variable.csv
 
-# Save Userdata Script, Bootstrap Script, Logging Data Files
+
+# Package Download System Utility (EC2Rescue)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
+Write-Log "# Package Download System Utility (EC2Rescue)"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+
+# Package Uncompress System Utility (EC2Rescue)
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
+    Add-Type -AssemblyName 'System.IO.Compression.Filesystem'
+    [System.IO.Compression.ZipFile]::ExtractToDirectory("$TOOL_DIR\EC2Rescue_latest.zip", "$TOOL_DIR\EC2Rescue_latest")
+}
+elseif ($WindowsOSVersion -match "^10.0") {
+    Expand-Archive -Path "$TOOL_DIR\EC2Rescue_latest.zip" -DestinationPath "$TOOL_DIR\EC2Rescue_latest" -Force | Out-Null
+}
+else {
+    # EC2Rescue Support Windows OS Version (None)
+    Write-Log ("# [AWS - EC2Rescue] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+}
+
+# Log Collect (EC2Rescue)
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
+Start-Process -FilePath "C:\EC2-Bootstrap\Tools\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:C:\EC2-Bootstrap\Logs\EC2RescueCmd.zip") | Out-Null
+Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd2.zip") | Out-Null
+
+# Save Userdata Script, Bootstrap Script Files
 if ($WindowsOSVersion) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
@@ -2317,12 +2323,6 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
-        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
-
     }
     elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
@@ -2339,12 +2339,6 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
-        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
-
     }
     elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
@@ -2361,12 +2355,6 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt" -Destination $LOGS_DIR 
-        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
-
     }
     elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
@@ -2384,12 +2372,6 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\*.log" -Destination $LOGS_DIR 
-        Copy-Item -Path $SSMAgentLogFile -Destination $LOGS_DIR 
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
-
     }
     else {
         # [No Target Server OS]
