@@ -533,12 +533,12 @@ function Get-WebContentToFile {
         Write-Log ("# [NOTICE] Do not download files : " + $Uri)
     }
     else {
-        Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] / [" + $OutFile + "]" )
+        Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] -> [" + $OutFile + "]" )
 
         $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -OutFile $OutFile) } 
         Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
 
-        Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] / [" + $OutFile + "]" )
+        Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] -> [" + $OutFile + "]" )
 
     }
 } # end Get-WebContentToFile
@@ -2144,7 +2144,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
     Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 
-    Start-Sleep -Seconds 180
+    Start-Sleep -Seconds 60
 }
 
 
@@ -2307,7 +2307,7 @@ Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWind
 
 
 
-# Save Userdata Script, Bootstrap Script Files
+# Save Userdata Script, Bootstrap Script, Logging Data Files
 if ($WindowsOSVersion) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
@@ -2324,6 +2324,10 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     }
     elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
@@ -2340,6 +2344,10 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     }
     elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
@@ -2356,6 +2364,10 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     }
     elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
@@ -2373,6 +2385,10 @@ if ($WindowsOSVersion) {
 
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+        # Save Logging Files
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+
     }
     else {
         # [No Target Server OS]
