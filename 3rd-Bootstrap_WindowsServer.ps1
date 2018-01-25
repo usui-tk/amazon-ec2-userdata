@@ -2303,8 +2303,9 @@ else {
 
 # Log Collect (EC2Rescue)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
-Start-Process -FilePath "C:\EC2-Bootstrap\Tools\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:C:\EC2-Bootstrap\Logs\EC2RescueCmd.zip") | Out-Null
-Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd2.zip") | Out-Null
+Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
+
+
 
 # Save Userdata Script, Bootstrap Script Files
 if ($WindowsOSVersion) {
