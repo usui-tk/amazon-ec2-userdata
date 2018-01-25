@@ -36,7 +36,7 @@
 
 # Set Script Parameter for Script (User Defined)
 Set-Variable -Name FLAG_APP_INSTALL -Option Constant -Scope Script -Value "$TRUE"
-Set-Variable -Name FLAG_APP_DOWNLOAD -Option Constant -Scope Script -Value "$FALSE"
+Set-Variable -Name FLAG_APP_DOWNLOAD -Option Constant -Scope Script -Value "$TRUE"
 
 # Set Script Parameter for Directory Name (User Defined)
 Set-Variable -Name BASE_DIR -Option Constant -Scope Script "$Env:SystemDrive\EC2-Bootstrap"
@@ -519,6 +519,31 @@ function Get-WindowsDriverInformation {
 } # end function Get-WindowsDriverInformation
 
 
+function Get-WebContentToFile {
+    Param([String]$Uri, [String]$OutFile)
+
+    # Initialize Parameter
+    Set-Variable -Name DownloadStatus -Scope Script -Value ($Null)
+
+    # Workaround -> https://github.com/PowerShell/PowerShell/issues/2138
+    Set-Variable -Name ProgressPreference -Scope Script -Value "SilentlyContinue"
+
+    if ( Test-Path $OutFile ) {
+        Write-Log ("# [NOTICE] File already exists : " + $OutFile)
+        Write-Log ("# [NOTICE] Do not download files : " + $Uri)
+    }
+    else {
+        Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] / [" + $OutFile + "]" )
+
+        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -OutFile $OutFile) } 
+        Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
+
+        Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] / [" + $OutFile + "]" )
+
+    }
+} # end Get-WebContentToFile
+
+
 function Get-WindowsServerInformation {
     #--------------------------------------------------------------------------------------
     #  Windows Server OS Version Tables (Windows NT Version Tables)
@@ -684,6 +709,38 @@ Set-Location -Path $BASE_DIR
 
 Get-ExecutionPolicy -List
 Set-StrictMode -Version Latest
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Test Network Connection
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Test Network Connection"
+
+# Initialize Parameter
+Set-Variable -Name FlagIMDSConnection -Scope Script -Value ($Null)
+Set-Variable -Name FlagInternetConnection -Scope Script -Value ($Null)
+
+# Test Connecting to EC2 Instance Metadata Service (169.254.169.254)
+#  https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
+$FlagIMDSConnection = Test-Connection -ComputerName 169.254.169.254 -Count 1 -Quiet -ErrorAction SilentlyContinue
+if ($FlagIMDSConnection -eq $TRUE) {
+    Write-Log "# [Network Connection] EC2 Instance Metadata Service : 169.254.169.254 - [Connection OK]"
+}
+else {
+    Write-Log "# [Network Connection] EC2 Instance Metadata Service : 169.254.169.254 - [Connection NG]"
+}
+
+# Test Connecting to the Internet (Google Public DNS:8.8.8.8)
+#  https://developers.google.com/speed/public-dns/
+$FlagInternetConnection = Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction SilentlyContinue
+if ($FlagInternetConnection -eq $TRUE) {
+    Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection OK]"
+}
+else {
+    Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection NG]"
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1302,7 +1359,7 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 # Package Download System Utility (AWS CloudFormation Helper Scripts)
 # http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
-Invoke-WebRequest -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
 
 # Package Install System Utility (AWS CloudFormation Helper Scripts)
 Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
@@ -1328,7 +1385,7 @@ Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
-Invoke-WebRequest -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+Get-WebContentToFile -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
 # Logging Windows Server OS Parameter [AWS Systems Manager agent Information]
 Get-Ec2SystemManagerAgentVersion
@@ -1389,19 +1446,19 @@ Write-LogSeparator "Package Install System Utility (Amazon CloudWatch Agent)"
 Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
 if ($WindowsOSVersion -eq "6.1") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.2") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.3") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "10.0") {
     Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
-    Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 else {
     # [No Target Server OS]
@@ -1418,7 +1475,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     # Package Download System Utility (Amazon CloudWatch Agent)
     # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
     Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
-    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent.zip"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent.zip"
 
     # Package Uncompress System Utility (Amazon CloudWatch Agent)
     if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
@@ -1495,7 +1552,7 @@ if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|
         # Package Download System Utility (Amazon Inspector Agent)
         # https://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_agents-on-win.html
         Write-Log "# Package Download System Utility (Amazon Inspector Agent)"
-        Invoke-WebRequest -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
+        Get-WebContentToFile -Uri 'https://d1wk0tztpsntt1.cloudfront.net/windows/installer/latest/AWSAgentInstall.exe' -OutFile "$TOOL_DIR\AWSAgentInstall.exe"
 
         # Package Install System Utility (Amazon Inspector Agent)
         Write-Log "# Package Install System Utility (Amazon Inspector Agent)"
@@ -1619,7 +1676,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
             # Package Download System Utility (Amazon EC2 Elastic GPU Software)
             # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/working-with-elastic-gpus.html
             Write-Log "# Package Download System Utility (Amazon EC2 Elastic GPU Software)"
-            Invoke-WebRequest -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
+            Get-WebContentToFile -Uri 'http://ec2-elasticgpus.s3-website-us-east-1.amazonaws.com/latest' -OutFile "$TOOL_DIR\EC2ElasticGPUs_Manager.msi"
 
             # Package Install System Utility (Amazon EC2 Elastic GPU Software)
             Write-Log "# Package Install System Utility (Amazon EC2 Elastic GPU Software)"
@@ -1684,7 +1741,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Download Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 6.0)"
-    Invoke-WebRequest -Uri "$PWSH_INSTALLER" -OutFile "$TOOL_DIR\PowerShell-6.0.0-win-x64.msi"
+    Get-WebContentToFile -Uri "$PWSH_INSTALLER" -OutFile "$TOOL_DIR\PowerShell-6.0.0-win-x64.msi"
 
     # Package Install Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 6.0)"
@@ -1818,7 +1875,7 @@ if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
             $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_win10-exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Invoke-WebRequest -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -1845,7 +1902,7 @@ if ($InstanceType -match "^g2.*") {
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
+            Get-WebContentToFile -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2008R2.exe"
         }
         elseif ($WindowsOSVersion -eq "6.2") {
             # [Windows Server 2012]
@@ -1853,7 +1910,7 @@ if ($InstanceType -match "^g2.*") {
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
+            Get-WebContentToFile -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012.exe"
         }
         elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
@@ -1861,7 +1918,7 @@ if ($InstanceType -match "^g2.*") {
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "quadro-tesla-grid-winserv2008-2008r2-2012-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
@@ -1869,7 +1926,7 @@ if ($InstanceType -match "^g2.*") {
             $K520_driverversion = $($K520_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K520_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/GRID/" + ${K520_driverversion} + "/" + ${K520_driverversion} + "-quadro-winserv-2016-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID K520 GPU Driver URL : " + $K520_driverurl)
-            Invoke-WebRequest -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $K520_driverurl -OutFile "$TOOL_DIR\NVIDIA-GRID-K520-GPU-Driver_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -1896,7 +1953,7 @@ if ($InstanceType -match "^g3.*") {
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
-            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2008R2.exe"
+            Get-WebContentToFile -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2008R2.exe"
         }
         elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
@@ -1904,7 +1961,7 @@ if ($InstanceType -match "^g3.*") {
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
-            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
@@ -1912,7 +1969,7 @@ if ($InstanceType -match "^g3.*") {
             $M60_driverversion = $($M60_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $M60_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${M60_driverversion} + "/" + ${M60_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA GRID M60 GPU Driver URL : " + $M60_driverurl)
-            Invoke-WebRequest -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $M60_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-M60-GPU-Driver_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -1939,7 +1996,7 @@ if ($InstanceType -match "^p2.*") {
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
-            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
+            Get-WebContentToFile -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2008R2.exe"
         }
         elseif ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
@@ -1947,7 +2004,7 @@ if ($InstanceType -match "^p2.*") {
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
-            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
@@ -1955,7 +2012,7 @@ if ($InstanceType -match "^p2.*") {
             $K80_driverversion = $($K80_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $K80_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${K80_driverversion} + "/" + ${K80_driverversion} + "-tesla-desktop-winserver2016-international-whql.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla K80 GPU Driver URL : " + $K80_driverurl)
-            Invoke-WebRequest -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $K80_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-K80-GPU-Driver_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -1982,7 +2039,7 @@ if ($InstanceType -match "^p3.*") {
             $V100_driverversion = $($V100_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $V100_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${V100_driverversion} + "/" + ${V100_driverversion} + "-tesla-desktop-2012r2-64bit-international.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla V100 GPU Driver URL : " + $V100_driverurl)
-            Invoke-WebRequest -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
@@ -1990,7 +2047,7 @@ if ($InstanceType -match "^p3.*") {
             $V100_driverversion = $($V100_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
             $V100_driverurl = "http://us.download.nvidia.com/Windows/Quadro_Certified/" + ${V100_driverversion} + "/" + ${V100_driverversion} + "-tesla-desktop-winserver2016-international.exe"
             Write-Log ("# [Information] Package Download NVIDIA Tesla V100 GPU Driver URL : " + $V100_driverurl)
-            Invoke-WebRequest -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $V100_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-V100-GPU-Driver_for_WindowsServer2016.exe"
         }
         else {
             # [No Target Server OS]
@@ -2010,7 +2067,7 @@ Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 # https://github.com/JeremyMain/GPUProfiler
 if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)"
-    Invoke-WebRequest -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.05/GPUProfiler_1.05-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.05-x64.zip"
+    Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.05/GPUProfiler_1.05-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.05-x64.zip"
 }
 
 
@@ -2025,12 +2082,12 @@ Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
-Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-StorageNetworkDriver-AWSPVDriverSetup.zip"
+Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-StorageNetworkDriver-AWSPVDriverSetup.zip"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
-Invoke-WebRequest -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-ENA.zip"
+Get-WebContentToFile -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-ENA.zip"
 
 # Package Download Intel Network Driver
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
@@ -2039,28 +2096,28 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
         # https://downloadcenter.intel.com/ja/download/18725/
         # Package Download Intel Network Driver (Windows Server 2008 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
     }
     elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
         # https://downloadcenter.intel.com/ja/download/21694/
         # Package Download Intel Network Driver (Windows Server 2012)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012.exe"
     }
     elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
         # https://downloadcenter.intel.com/ja/download/23073/
         # Package Download Intel Network Driver (Windows Server 2012 R2)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012R2.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012R2.exe"
     }
     elseif ($WindowsOSVersion -eq "10.0") {
         # [Windows Server 2016]
         # https://downloadcenter.intel.com/ja/download/26092/
         # Package Download Intel Network Driver (Windows Server 2016)
         Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-        Invoke-WebRequest -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2016.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2016.exe"
     }
     else {
         # [No Target Server OS]
@@ -2081,11 +2138,7 @@ Write-LogSeparator "Custom Package Installation (Application)"
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Package Install Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
-
-    # Invoke-WebRequest -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
-    
-    # [workaround] Google site to S3 bucket
-    Invoke-WebRequest -Uri 'https://s3-ap-northeast-1.amazonaws.com/usui-public-bucket/Installer/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+    Get-WebContentToFile -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
     Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
@@ -2096,7 +2149,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Package Download Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
-    Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
+    Get-WebContentToFile -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
@@ -2118,35 +2171,35 @@ Write-LogSeparator "Custom Package Download (System Utility)"
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Sysinternals Suite)"
-    Invoke-WebRequest -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
+    Get-WebContentToFile -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
 }
 
 # Package Download System Utility (System Explorer)
 # http://systemexplorer.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (System Explorer)"
-    Invoke-WebRequest -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
+    Get-WebContentToFile -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
 }
 
 # Package Download System Utility (7-zip)
 # http://www.7-zip.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (7-zip)"
-    Invoke-WebRequest -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+    Get-WebContentToFile -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
 }
 
 # Package Download System Utility (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Tera Term)"
-    Invoke-WebRequest -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
+    Get-WebContentToFile -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
 }
 
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Invoke-WebRequest -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2155,7 +2208,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Invoke-WebRequest -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
     }
 }
 
@@ -2163,7 +2216,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
-    # Invoke-WebRequest -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
+    # Get-WebContentToFile -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
 }
 
 # Package Download System Utility (EC2Config)
@@ -2171,7 +2224,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^5.*|^6.*") {
         Write-Log "# Package Download System Utility (EC2Config)"
-        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
     }
 }
 
@@ -2180,8 +2233,8 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^10.*") {
         Write-Log "# Package Download System Utility (EC2Launch)"
-        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
-        Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
     }
 }
 
@@ -2189,49 +2242,49 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://aws.amazon.com/jp/cli/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
-    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
 }
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-    Invoke-WebRequest -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+    Get-WebContentToFile -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
 # http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
-    Invoke-WebRequest -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
+    Get-WebContentToFile -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
 }
 
 # Package Download System Utility (EC2Rescue)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (EC2Rescue)"
-    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
 }
 
 # Package Download System Utility (AWSLogCollector)
 # 
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWSLogCollector)"
-    Invoke-WebRequest -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
+    Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
 }
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
-    Invoke-WebRequest -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 }
 
 # Package Download System Utility (AWS ElasticWolf Client Console)
 # https://aws.amazon.com/tools/aws-elasticwolf-client-console/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
-    Invoke-WebRequest -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
+    Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 }
 
 
