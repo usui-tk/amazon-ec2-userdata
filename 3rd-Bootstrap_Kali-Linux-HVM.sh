@@ -55,11 +55,11 @@ cat /etc/os-release
 
 cat /etc/lsb-release
 
-# Default installation package
-apt list --installed | sort > /tmp/deb-list.txt
+# Default installation package [apt command]
+apt list --installed > /tmp/command-log_apt_installed-package.txt
 
-# Default repository package
-apt list > /tmp/apt-repo-deb-list.txt
+# Default repository package [apt command]
+apt list > /tmp/command-log_apt_repository-package-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all

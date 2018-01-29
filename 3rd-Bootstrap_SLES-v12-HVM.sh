@@ -49,13 +49,13 @@ uname -a
 cat /etc/os-release
 
 # Default installation package [rpm command]
-rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
 
 # Default installation package [zypper command]
-zypper search --installed-only > /tmp/rpm-list_zypper.txt
+zypper search --installed-only > /tmp/command-log_zypper_installed-package.txt
 
-# Default repository package
-zypper search > /tmp/zypper-repo-rpm-list.txt
+# Default repository package [zypper command]
+zypper search > /tmp/command-log_zypper_repository-package-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all

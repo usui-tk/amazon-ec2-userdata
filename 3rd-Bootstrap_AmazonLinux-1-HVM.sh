@@ -55,11 +55,14 @@ cat /etc/system-release
 
 cat /etc/image-id
 
-# Default installation package
-rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+# Default installation package [rpm command]
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
 
-# Default repository package
-yum list all > /tmp/yum-repo-rpm-list.txt
+# Default installation package [yum command]
+yum list installed > /tmp/command-log_yum_installed-package.txt
+
+# Default repository package [yum command]
+yum list all > /tmp/command-log_yum_repository-package-list.txt
 
 # Special package information
 yum --enablerepo=amzn-preview list | grep amzn-preview

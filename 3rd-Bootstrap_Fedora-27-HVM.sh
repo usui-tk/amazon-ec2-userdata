@@ -47,11 +47,14 @@ cat /etc/os-release
 
 cat /etc/system-release
 
-# Default installation package
-rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+# Default installation package [rpm command]
+rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
 
-# Default repository package
-dnf list all > /tmp/yum-repo-rpm-list.txt
+# Default installation package [dnf command]
+dnf list installed > /tmp/command-log_dnf_installed-package.txt
+
+# Default repository package [dnf command]
+dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all
@@ -64,7 +67,7 @@ systemctl list-units --no-pager -all
 dnf clean all
 
 # Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
-dnf update -y bash dnf dnf-utils
+dnf install -y bash dnf dnf-conf dnf-utils
 dnf clean all
 dnf makecache
 
@@ -451,6 +454,7 @@ gpgcheck=1
 gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
 __EOF__
 
+dnf clean all
 dnf makecache
 
 # Install Treasure Agent
@@ -595,6 +599,7 @@ gpgcheck=1
 gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
 __EOF__
 
+dnf clean all
 dnf makecache
 
 # Install Google Chrome Stable version
@@ -625,6 +630,7 @@ gpgcheck=1
 gpgkey=https://packages.microsoft.com/keys/microsoft.asc
 __EOF__
 
+dnf clean all
 dnf makecache
 
 # Install Visual Studio Code Stable version
