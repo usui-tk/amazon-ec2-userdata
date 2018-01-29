@@ -58,6 +58,9 @@ cat /etc/lsb-release
 # Default installation package
 apt list --installed | sort > /tmp/deb-list.txt
 
+# Default repository package
+apt list > /tmp/apt-repo-deb-list.txt
+
 # systemd service config
 systemctl list-units --no-pager -all
 
@@ -89,13 +92,20 @@ apt --fix-broken install -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Kali Linux Meta-Package
-#  https://tools.kali.org/kali-metapackages
-#  https://tools.kali.org/tools-listing
-apt install -y kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
+# Package Install Debian apt Administration Tools (from Debian Official Repository)
+apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
 apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Special package for Kali]
+#  https://tools.kali.org/kali-metapackages
+#  https://tools.kali.org/tools-listing
+#-------------------------------------------------------------------------------
+
+# Package Install Kali Linux Meta-Package
+apt install -y kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -372,6 +382,7 @@ apt-key list
 sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list'
 
 # Update the list of products
+apt clean -y
 apt update -y
 
 # Install PowerShell
@@ -506,9 +517,9 @@ npm -v
 # Install Serverless Framework
 # https://serverless.com/
 # https://github.com/serverless/serverless
-npm install -g serverless
+# npm install -g serverless
 
-sls -v
+# sls -v
 
 # Install AWS Serverless Application Model (SAM) - SAM Local
 # https://docs.aws.amazon.com/lambda/latest/dg/sam-cli-requirements.html
@@ -522,6 +533,13 @@ sls -v
 apt install -y python3
 
 /usr/bin/python3 -V
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Go 1.9]
+#-------------------------------------------------------------------------------
+apt install -y golang golang-github-aws-aws-sdk-go-dev
+
+/usr/bin/go version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment

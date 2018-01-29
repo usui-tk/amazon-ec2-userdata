@@ -48,8 +48,14 @@ uname -a
 # Show Linux distribution release Information
 cat /etc/os-release
 
-# Default installation package
+# Default installation package [rpm command]
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/rpm-list.txt
+
+# Default installation package [zypper command]
+zypper search --installed-only > /tmp/rpm-list_zypper.txt
+
+# Default repository package
+zypper search > /tmp/zypper-repo-rpm-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all
@@ -74,8 +80,6 @@ zypper --non-interactive update
 # Install recommended packages
 # zypper --non-interactive install-new-recommends
 
-
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
 #  - Packages sorted by name
@@ -93,8 +97,6 @@ zypper --non-interactive install patterns-sles-apparmor
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
 zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
-
-
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
@@ -124,8 +126,6 @@ zypper repos
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 zypper --non-interactive install atop jq
 
-
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
 #   https://packagehub.suse.com/
@@ -152,8 +152,6 @@ zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 zypper --non-interactive install collectl mtr
-
-
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -355,6 +353,7 @@ source /etc/profile.d/ec2rl.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
+# https://packagehub.suse.com/packages/ansible/
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)

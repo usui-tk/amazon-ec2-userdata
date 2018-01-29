@@ -40,6 +40,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://help.ubuntu.com/
 #    https://help.ubuntu.com/lts/serverguide/index.html
 #    https://help.ubuntu.com/lts/installation-guide/amd64/index.html
+#    http://packages.ubuntu.com/ja/
 #    
 #	 https://cloud-images.ubuntu.com/locator/ec2/
 #    https://help.ubuntu.com/community/EC2StartersGuide
@@ -59,6 +60,9 @@ cat /etc/os-release
 
 # Default installation package
 apt list --installed | sort > /tmp/deb-list.txt
+
+# Default repository package
+apt list > /tmp/apt-repo-deb-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all
@@ -80,8 +84,11 @@ apt update -y && apt upgrade -y && apt dist-upgrade -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
+# Package Install Ubuntu apt Administration Tools (from Ubuntu Official Repository)
+apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
+
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
+apt install -y arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr-tiny needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
@@ -346,6 +353,7 @@ source /etc/profile.d/ec2rl.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
+# http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-via-apt-ubuntu
 #-------------------------------------------------------------------------------
 
 apt install -y software-properties-common
@@ -380,6 +388,7 @@ apt-key list
 curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
 
 # Update the list of products
+apt clean -y
 apt update -y
 
 # Install PowerShell

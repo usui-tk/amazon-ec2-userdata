@@ -39,6 +39,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #  - Debian GNU/Linux 9 (Stretch)
 #    https://www.debian.org/
 #    https://www.debian.org/releases/
+#    https://www.debian.org/distrib/packages
 #
 #    https://wiki.debian.org/FrontPage
 #    https://wiki.debian.org/Cloud/AmazonEC2Image
@@ -58,6 +59,9 @@ cat /etc/os-release
 
 # Default installation package
 apt list --installed | sort > /tmp/deb-list.txt
+
+# Default repository package
+apt list > /tmp/apt-repo-deb-list.txt
 
 # systemd service config
 systemctl list-units --no-pager -all
@@ -79,8 +83,11 @@ apt update -y && apt upgrade -y && apt dist-upgrade -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
+# Package Install Debian apt Administration Tools (from Debian Official Repository)
+apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
+
+# Package Install Debian System Administration Tools (from Debian Official Repository)
+apt install -y arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -357,10 +364,6 @@ ansible localhost -m setup
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
-# Install system components
-apt update -y
-apt install -y curl gnupg apt-transport-https
-
 # Import the public repository GPG keys
 curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 apt-key list
@@ -369,6 +372,7 @@ apt-key list
 sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list'
 
 # Update the list of products
+apt clean -y
 apt update -y
 
 # Install PowerShell
