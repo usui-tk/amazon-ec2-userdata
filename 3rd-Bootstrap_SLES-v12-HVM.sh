@@ -89,7 +89,7 @@ zypper --non-interactive update
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install arptables bash-completion dstat ebtables git-core hdparm hostinfo iotop lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute unzip zypper-log
+zypper --non-interactive install arptables bash-completion cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute unzip zypper-log
 zypper --non-interactive install patterns-sles-apparmor
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
