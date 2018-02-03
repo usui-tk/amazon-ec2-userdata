@@ -75,7 +75,7 @@ export DEBIAN_FRONTEND=noninteractive
 # Change apt repo list
 cat /etc/apt/sources.list
 
-sed -i 's@http://http.kali.org/kali@http://repo.kali.org/kali@g' /etc/apt/sources.list
+# sed -i 's@http://http.kali.org/kali@http://repo.kali.org/kali@g' /etc/apt/sources.list
 
 cat /etc/apt/sources.list
 
@@ -375,7 +375,7 @@ apt update -y
 apt install -y curl gnupg apt-transport-https libunwind8 libicu57
 
 # Import the public repository GPG keys
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 apt-key list
 
 # Register the Microsoft Product feed
@@ -408,10 +408,10 @@ pwsh -Command "Get-AWSPowerShellVersion"
 #-------------------------------------------------------------------------------
 
 # install dependencies 4 cert
-apt install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
 # add Docker repo gpg key
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
 echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" > /etc/apt/sources.list.d/docker-ce.list
 
@@ -627,7 +627,7 @@ systemctl is-enabled vncserver@:1.service
 cd /tmp
 
 # Import GPG Key File
-wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
+curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
 
 # Add the Google Chrome Repository
 echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
