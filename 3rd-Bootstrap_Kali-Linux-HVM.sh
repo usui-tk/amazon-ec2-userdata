@@ -678,7 +678,15 @@ apt show code
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
+
+# apt repository metadata Clean up
 apt clean -y
+
+# Default Package Update
+apt update -y && apt upgrade -y && apt dist-upgrade -y
+
+# Clean up package
+apt autoremove -y
 
 #-------------------------------------------------------------------------------
 # System information collection
