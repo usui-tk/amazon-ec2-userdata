@@ -498,6 +498,7 @@ sestatus
 
 # Configure NTP Client software (Install chrony Package)
 yum install -y chrony
+systemctl daemon-reload
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"

@@ -473,6 +473,7 @@ zypper --non-interactive remove ntp
 
 # Replace NTP Client software (Install chrony Package)
 zypper --non-interactive install chrony
+systemctl daemon-reload
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
