@@ -1532,7 +1532,7 @@ if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|
     Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
 
     # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2]
-    if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
+    if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
         # Amazon Inspector Agent Support Windows OS Version
         # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
