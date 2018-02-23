@@ -1040,7 +1040,7 @@ Set-Variable -Name W32TM -Scope Script -Value "C:\Windows\System32\w32tm.exe"
 
 # Configuration for Amazon Time Sync Service
 if ($InstanceType -match "^c5.*|^m5.*") {
-    Write-Log ("# [Windows - OS Settings] Windows Time Service - Non-Support Instance Type  : " + $InstanceType)
+    Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Non-Support Instance Type  : " + $InstanceType)
 
     # Get Windows Time Service (Service Status/Configuration/Peer Status)
     Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
@@ -1049,10 +1049,10 @@ if ($InstanceType -match "^c5.*|^m5.*") {
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
 }
 else {
-    Write-Log ("# [Windows - OS Settings] Windows Time Service - Support Instance Type  : " + $InstanceType)
+    Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Support Instance Type  : " + $InstanceType)
 
     # Get Windows Time Service (Service Status/Configuration/Peer Status)
-    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+    Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
@@ -1061,7 +1061,7 @@ else {
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
 
     # Get Windows Time Service (Service Status/Configuration/Peer Status)
-    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+    Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
     Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
@@ -1373,6 +1373,7 @@ Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 # Package Download System Utility (AWS Systems Manager agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
+# Get-WebContentToFile -Uri "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe" -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Get-WebContentToFile -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
@@ -1524,14 +1525,14 @@ else {
 # Log Separator
 Write-LogSeparator "Package Install System Utility (Amazon Inspector Agent)"
 
+# Amazon Inspector Agent Support AWS Regions
+# http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
+
 # Check Region
 if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|^eu-west-1|^us-east-1|^us-west-1|^us-west-2") {
 
-    # Amazon Inspector Agent Support AWS Regions
-    # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
-    Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
-
-    # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2]
+    # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
     if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
         # Amazon Inspector Agent Support Windows OS Version
@@ -1721,7 +1722,7 @@ else {
 # Log Separator
 Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
-# Initialize Parameter
+# Initialize Parameter [# Depends on PowerShell v6.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.1\pwsh.exe"
 Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.1/PowerShell-6.0.1-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.0.1-win-x64.msi"
@@ -2175,7 +2176,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # http://www.7-zip.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (7-zip)"
-    Get-WebContentToFile -Uri 'http://www.7-zip.org/a/7z1604-x64.exe' -OutFile "$TOOL_DIR\7z1604-x64.exe"
+    Get-WebContentToFile -Uri 'http://www.7-zip.org/a/7z1801-x64.exe' -OutFile "$TOOL_DIR\7z1801-x64.exe"
 }
 
 # Package Download System Utility (Tera Term)
@@ -2189,7 +2190,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.11.3-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.11.3-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.13-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.13-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2198,7 +2199,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.0.1-0-x64-beta2.msi' -OutFile "$TOOL_DIR\td-agent-3.0.1-0-x64-beta2.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.1.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.1.1-0-x64.msi"
     }
 }
 

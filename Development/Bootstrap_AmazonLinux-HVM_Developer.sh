@@ -252,7 +252,8 @@ docker pull centos:latest # CentOS v7
 #-------------------------------------------------------------------------------
 
 # Package Install Fluentd (td-agent) Tools (from Treasure Data Inc Official Repository)
-curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent2.sh | sh
+# https://docs.fluentd.org/v1.0/articles/install-by-rpm#amazon-linux
+curl -L https://toolbelt.treasuredata.com/sh/install-amazon1-td-agent3.sh | sh
 
 rpm -qi td-agent
 
