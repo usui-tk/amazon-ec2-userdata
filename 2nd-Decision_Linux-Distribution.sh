@@ -156,8 +156,11 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
-        if [ $(echo ${REV} | grep -e '2017.') ] || [ $(echo ${REV} | grep -e '2018.') ]; then
-           # Bootstrap Script for Kali Linux 2017.x, 2018.x
+        if [ $(echo ${REV} | grep -e '2017.') ]; then
+           # Bootstrap Script for Kali Linux 2017.x
+           BootstrapScript=${ScriptForKaliLinux}
+        elif [ $(echo ${REV} | grep -e '2018.') ]; then
+           # Bootstrap Script for Kali Linux 2018.x
            BootstrapScript=${ScriptForKaliLinux}
         else
            BootstrapScript=""
