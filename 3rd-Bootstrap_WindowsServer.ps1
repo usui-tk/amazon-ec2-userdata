@@ -716,17 +716,30 @@ Set-StrictMode -Version Latest
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Test Network Connection"
+Write-LogSeparator "Change PowerShell SecurityProtocol"
+
+# Initialize Parameter
+Set-Variable -Name PowerShellSecurityProtocol -Scope Script -Value ($Null)
+
+# Get System Support - PowerShell SecurityProtocol 
+[enum]::GetNames([Net.SecurityProtocolType])
 
 # Get PowerShell SecurityProtocol
-[Net.ServicePointManager]::SecurityProtocol
+$PowerShellSecurityProtocol = [Net.ServicePointManager]::SecurityProtocol
+Write-Log ("# [PowerShell SecurityProtocol] (Before) : " + $PowerShellSecurityProtocol)
 
 # Set PowerShell SecurityProtocol
-[System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11
-# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+if ($PowerShellSecurityProtocol -match "^Ssl3|^Tls") {
+    # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
+    [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
+
+    # Set PowerShell SecurityProtocol [TLS v1.2]
+    # [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+}
 
 # Get PowerShell SecurityProtocol
-[Net.ServicePointManager]::SecurityProtocol
+$PowerShellSecurityProtocol = [Net.ServicePointManager]::SecurityProtocol
+Write-Log ("# [PowerShell SecurityProtocol] (After) : " + $PowerShellSecurityProtocol)
 
 
 #-----------------------------------------------------------------------------------------------------------------------
