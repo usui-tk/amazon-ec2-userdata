@@ -712,6 +712,24 @@ Set-StrictMode -Version Latest
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Change PowerShell SecurityProtocol
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Test Network Connection"
+
+# Get PowerShell SecurityProtocol
+[Net.ServicePointManager]::SecurityProtocol
+
+# Set PowerShell SecurityProtocol
+[System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11
+# [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+
+# Get PowerShell SecurityProtocol
+[Net.ServicePointManager]::SecurityProtocol
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Test Network Connection
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -1373,7 +1391,7 @@ Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 # Package Download System Utility (AWS Systems Manager agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
-# Get-WebContentToFile -Uri "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe" -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+# Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
 Get-WebContentToFile -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 
@@ -2183,7 +2201,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Tera Term)"
-    Get-WebContentToFile -Uri 'https://ja.osdn.net/dl/ttssh2/teraterm-4.97.exe' -OutFile "$TOOL_DIR\teraterm-4.97.exe"
+    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.98.exe' -OutFile "$TOOL_DIR\teraterm-4.98.exe"
 }
 
 # Package Download System Utility (WinSCP)
@@ -2305,8 +2323,9 @@ else {
 
 # Log Collect (EC2Rescue)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
+Write-Log "# EC2RescueCmd.exe - Start)"
 Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
-
+Write-Log "# EC2RescueCmd.exe - Complete)"
 
 
 # Save Userdata Script, Bootstrap Script, Logging Data Files
