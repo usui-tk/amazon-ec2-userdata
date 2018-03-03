@@ -324,6 +324,8 @@ curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
 
 mkdir -p "/opt/aws"
 
+mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
+
 tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
 
 cat > /etc/profile.d/ec2rl.sh << __EOF__
