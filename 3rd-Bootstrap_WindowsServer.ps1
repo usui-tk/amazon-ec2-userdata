@@ -1754,9 +1754,9 @@ else {
 Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
 # Initialize Parameter [# Depends on PowerShell v6.0 version information]
-Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.1\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.1/PowerShell-6.0.1-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.0.1-win-x64.msi"
+Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.2\pwsh.exe"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.0.2-win-x64.msi"
 
 # Check Windows OS Version[Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
