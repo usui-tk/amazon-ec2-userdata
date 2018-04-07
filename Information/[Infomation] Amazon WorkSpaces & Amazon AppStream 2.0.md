@@ -18,9 +18,11 @@
 |:-----------|------------:|
 | Value Bundle | t2.small |
 | Standard Bundle | t2.medium |
-| Performance Bundle | m3.large |
+| Performance Bundle | m3.large -> t2.large |
 | Power Bundle | t2.xlarge |
 | Graphics Bundle | g2.2xlarge |
+
+Amazon WorkSpaces is enabled at T2 Unlimited
 
 - [Amazon WorkSpaces Management Interface IP Ranges (AWS Managed VPC)]
 - (http://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-port-requirements.html#network-interfaces)
