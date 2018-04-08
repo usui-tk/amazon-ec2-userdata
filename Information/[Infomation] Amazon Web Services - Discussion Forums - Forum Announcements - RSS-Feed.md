@@ -62,29 +62,32 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 ## Category : Compute
 
-- AWS Developer Forums: Forum Announcements - Amazon Elastic Compute Cloud (EC2)
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=30
+- AWS Developer Forums: Forum Announcements - AWS Batch
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=240
 
 - AWS Developer Forums: Forum Announcements - AWS Elastic Beanstalk
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=86
 
-- AWS Developer Forums: Forum Announcements - AWS Lambda
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=186
+- AWS Developer Forums: Forum Announcements - Amazon Elastic Compute Cloud (EC2)
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=30
 
 - AWS Developer Forums: Forum Announcements - Amazon Container Service (ECS)
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=187
 
-- AWS Developer Forums: Forum Announcements - FPGA Development
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=243
+- AWS Developer Forums: Forum Announcements - AWS Lambda
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=186
 
 - AWS Developer Forums: Forum Announcements - Amazon Lightsail
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=231
 
-- AWS Developer Forums: Forum Announcements - AWS Batch
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=240
-
 - AWS Developer Forums: Forum Announcements - Amazon Linux
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=228
+
+- AWS Developer Forums: Forum Announcements - FPGA Development
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=243
+
+- AWS Developer Forums: Forum Announcements - AWS Serverless Application Repository
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=287
 
 ## Category : Customer Engagement
 
@@ -119,6 +122,9 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 ## Category : Desktop & App Streaming
 
+- AWS Developer Forums: Forum Announcements - Amazon AppStream 2.0
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=233
+
 - AWS Developer Forums: Forum Announcements - Amazon WorkSpaces
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=164
 
@@ -145,8 +151,6 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Cloud9
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=268
 
-- AWS Developer Forums: Forum Announcements - AWS Serverless Application Repository
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=287
 
 ## Category : Game Development
 
@@ -193,6 +197,12 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - Amazon Comprehend
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=281
 
+- AWS Developer Forums: Forum Announcements - Amazon Transcribe
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=278
+
+- AWS Developer Forums: Forum Announcements - Amazon Translate
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=267
+
 ## Category : Management Tools
 
 - AWS Developer Forums: Forum Announcements - AWS CloudFormation
@@ -221,6 +231,9 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 - AWS Developer Forums: Forum Announcements - Resource Groups Tagging API
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=218
+
+- AWS Developer Forums: Forum Announcements - AWS Auto Scaling
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=291
 
 ## Category : Media Services
 
@@ -334,6 +347,12 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Single Sign-on (SSO)
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=277
 
+- AWS Developer Forums: Forum Announcements - AWS Firewall Manager
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=292
+
+- AWS Developer Forums: Forum Announcements - AWS Secrets Manager
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=296
+
 ## Category : Storage
 
 - AWS Developer Forums: Forum Announcements - Amazon Simple Storage Service
@@ -374,5 +393,4 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - Amazon AppStream
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=171
 
-- AWS Developer Forums: Forum Announcements - Amazon AppStream 2.0
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=233
+
