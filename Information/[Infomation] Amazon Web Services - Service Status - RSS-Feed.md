@@ -95,6 +95,9 @@
 - Amazon Redshift (Tokyo)
 - https://status.aws.amazon.com/rss/redshift-ap-northeast-1.rss
 
+- Amazon Rekognition (Tokyo)
+- https://status.aws.amazon.com/rss/rekognition-ap-northeast-1.rss
+
 - Amazon Relational Database Service (Tokyo)
 - https://status.aws.amazon.com/rss/rds-ap-northeast-1.rss
 
@@ -161,6 +164,9 @@
 - AWS CodePipeline (Tokyo)
 - https://status.aws.amazon.com/rss/codepipeline-ap-northeast-1.rss
 
+- AWS CodeStar (Tokyo)
+- https://status.aws.amazon.com/rss/codestar-ap-northeast-1.rss
+
 - AWS Config (Tokyo)
 - https://status.aws.amazon.com/rss/config-ap-northeast-1.rss
 
@@ -182,8 +188,14 @@
 - AWS Elemental MediaConvert (Tokyo)
 - https://status.aws.amazon.com/rss/mediaconvert-ap-northeast-1.rss
 
+- AWS Elemental MediaLive (Tokyo)
+- https://status.aws.amazon.com/rss/elementalmedialive-ap-northeast-1.rss
+
 - AWS Elemental MediaPackage (Tokyo)
 - https://status.aws.amazon.com/rss/elementalmediapackage-ap-northeast-1.rss
+
+- AWS Elemental MediaStore (Tokyo)
+- https://status.aws.amazon.com/rss/elementalmediastore-ap-northeast-1.rss
 
 - AWS Greengrass (Tokyo)
 - https://status.aws.amazon.com/rss/awsgreengrass-ap-northeast-1.rss
@@ -215,6 +227,9 @@
 - AWS Marketplace
 - https://status.aws.amazon.com/rss/marketplace.rss
 
+- AWS NAT Gateway (Tokyo)
+- https://status.aws.amazon.com/rss/natgateway-ap-northeast-1.rss
+
 - AWS OpsWorks for Chef Automate (Tokyo)
 - https://status.aws.amazon.com/rss/opsworkschef-ap-northeast-1.rss
 
@@ -233,6 +248,9 @@
 - AWS Resource Groups Tagging API (Tokyo)
 - https://status.aws.amazon.com/rss/resourcegroupstaggingapi-ap-northeast-1.rss
 
+- AWS Serverless Application Repository (Tokyo)
+- https://status.aws.amazon.com/rss/serverlessrepo-ap-northeast-1.rss
+
 - AWS Service Catalog (Tokyo)
 - https://status.aws.amazon.com/rss/servicecatalog-ap-northeast-1.rss
 
@@ -247,4 +265,8 @@
 
 - AWS X-Ray (Tokyo)
 - https://status.aws.amazon.com/rss/xray-ap-northeast-1.rss
+
+
+
+## RSS Feed [ap-northeast-3 / Osaka-Local]
 
