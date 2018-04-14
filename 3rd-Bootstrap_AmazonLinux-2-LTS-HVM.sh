@@ -26,6 +26,13 @@ echo $Timezone
 echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
+# Parameter Settings
+#-------------------------------------------------------------------------------
+
+# Parameter Settings
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_AmazonLinux-2-LTS-HVM.json"
+
+#-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
 #  - Amazon Linux 2 
 #    https://aws.amazon.com/jp/amazon-linux-2/
@@ -79,7 +86,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y arptables_jf bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y acpid arptables_jf bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iperf3 iotop mlocate mtr nc nmap nvme-cli numactl perf strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -244,11 +251,51 @@ systemctl status -l amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
+# Custom Package Install [Amazon CloudWatch Agent]
+# http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
+#-------------------------------------------------------------------------------
+
+# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip" -o "/tmp/AmazonCloudWatchAgent.zip"
+
+unzip "/tmp/AmazonCloudWatchAgent.zip" -d "/tmp/AmazonCloudWatchAgent"
+
+cd "/tmp/AmazonCloudWatchAgent"
+
+bash -x /tmp/AmazonCloudWatchAgent/install.sh
+
+cd /tmp
+
+# Package Information 
+rpm -qi amazon-cloudwatch-agent
+
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+# Parameter Settings for Amazon CloudWatch Agent
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+
+cat /tmp/config.json
+
+# Configuration for Amazon CloudWatch Agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Utilities for Amazon Elastic File System[EFS] - (efs-utils)]
 # https://docs.aws.amazon.com/efs/latest/ug/using-amazon-efs-utils.html
 # https://github.com/aws/efs-utils
 #-------------------------------------------------------------------------------
-yum -y install amazon-efs-utils
+yum -y install amazon-efs-utils nfs-utils nfs4-acl-tools nfstest
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -299,6 +346,20 @@ rpm -qi ansible
 # Ansible Information
 ansible --version
 ansible localhost -m setup
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [vim]
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux System Administration Tools (from Extras Library Repository)
+amazon-linux-extras list
+
+amazon-linux-extras install vim
+
+amazon-linux-extras list
+
+# Package Information [vim]
+rpm -qi vim-common
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
