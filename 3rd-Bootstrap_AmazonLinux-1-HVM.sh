@@ -288,6 +288,13 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
 cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Utilities for Amazon Elastic File System[EFS] - (efs-utils)]
+# https://docs.aws.amazon.com/efs/latest/ug/using-amazon-efs-utils.html
+# https://github.com/aws/efs-utils
+#-------------------------------------------------------------------------------
+yum -y install amazon-efs-utils
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
 # http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Linux-Server-EC2Rescue.html
 # https://github.com/awslabs/aws-ec2rescue-linux

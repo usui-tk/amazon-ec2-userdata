@@ -126,7 +126,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)

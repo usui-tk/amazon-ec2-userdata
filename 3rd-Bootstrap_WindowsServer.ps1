@@ -1070,33 +1070,22 @@ Write-LogSeparator "Windows Server OS Configuration [Windows Time Service (w32tm
 Set-Variable -Name W32TM -Scope Script -Value "C:\Windows\System32\w32tm.exe"
 
 # Configuration for Amazon Time Sync Service
-if ($InstanceType -match "^c5.*|^m5.*") {
-    Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Non-Support Instance Type  : " + $InstanceType)
+Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Support Instance Type  : " + $InstanceType)
 
-    # Get Windows Time Service (Service Status/Configuration/Peer Status)
-    Write-Log "# [Amazon EC2 - Windows] Windows Time Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
-}
-else {
-    Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Support Instance Type  : " + $InstanceType)
-
-    # Get Windows Time Service (Service Status/Configuration/Peer Status)
-    Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+# Get Windows Time Service (Service Status/Configuration/Peer Status)
+Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
     
-    # Set Windows Time Service for Amazon Time Sync Service
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
+# Set Windows Time Service for Amazon Time Sync Service
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
 
-    # Get Windows Time Service (Service Status/Configuration/Peer Status)
-    Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-    Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
-}
+# Get Windows Time Service (Service Status/Configuration/Peer Status)
+Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2296,7 +2285,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 # Package Download System Utility (AWS ElasticWolf Client Console)
-# https://aws.amazon.com/tools/aws-elasticwolf-client-console/
+# https://aws.amazon.com/jp/tools/aws-elasticwolf-client-console/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
     Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\ElasticWolf-win-5.1.7.zip"
@@ -2336,9 +2325,9 @@ else {
 
 # Log Collect (EC2Rescue)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
-Write-Log "# EC2RescueCmd.exe - Start)"
+Write-Log "# Execution System Utility (EC2Rescue) - Start"
 Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
-Write-Log "# EC2RescueCmd.exe - Complete)"
+Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 
 # Save Userdata Script, Bootstrap Script, Logging Data Files
