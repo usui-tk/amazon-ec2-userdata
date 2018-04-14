@@ -87,9 +87,9 @@ function get_os_info () {
 
 function get_bootstrap_script () {
     # Select a Bootstrap script
-    if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST_TYPE}" = "amzn" ]; then
-        if [ $(echo ${REV} | grep -e '2.0') ]; then
-           # Bootstrap Script for Amazon Linux 2.x
+    if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST}" = "Amazon Linux" ] || [ "${DIST_TYPE}" = "amzn" ]; then
+        if [ $(echo ${REV} | grep -e '2 (2017.12)') ]; then
+           # Bootstrap Script for Amazon Linux 2.x [Caution - Workaround]
            BootstrapScript=${ScriptForAmazonLinux2}
         elif [ $(echo ${REV} | grep -e '201') ]; then
            # Bootstrap Script for Amazon Linux 1.x (2011.09 - 2017.09)
