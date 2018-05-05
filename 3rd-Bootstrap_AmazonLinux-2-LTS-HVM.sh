@@ -44,7 +44,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 
 # Show Linux Distribution/Distro information
-lsb_release -a
+if [ $(command -v lsb_release) ]; then
+    lsb_release -a
+fi
 
 # Show Linux System Information
 uname -a

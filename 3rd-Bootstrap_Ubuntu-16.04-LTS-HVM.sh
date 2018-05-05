@@ -50,7 +50,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 
 # Show Linux Distribution/Distro information
-lsb_release -a
+if [ $(command -v lsb_release) ]; then
+    lsb_release -a
+fi
 
 # Show Linux System Information
 uname -a
@@ -251,6 +253,8 @@ fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
+# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
 apt install -y python-setuptools
 easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
