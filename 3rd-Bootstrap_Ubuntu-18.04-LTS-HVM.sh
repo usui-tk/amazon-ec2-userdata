@@ -264,7 +264,7 @@ snap services amazon-ssm-agent.amazon-ssm-agent
 # snap restart amazon-ssm-agent.amazon-ssm-agent
 # snap services amazon-ssm-agent.amazon-ssm-agent
 
-amazon-ssm-agent.ssm-cli get-instance-information
+/snap/bin/amazon-ssm-agent.ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
