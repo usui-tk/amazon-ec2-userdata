@@ -1074,18 +1074,18 @@ Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Support Instanc
 
 # Get Windows Time Service (Service Status/Configuration/Peer Status)
 Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
     
 # Set Windows Time Service for Amazon Time Sync Service
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
 
 # Get Windows Time Service (Service Status/Configuration/Peer Status)
 Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-Start-Process -FilePath $W32TM -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1372,7 +1372,7 @@ Get-WebContentToFile -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-
 
 # Package Install System Utility (AWS CloudFormation Helper Scripts)
 Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
-Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWSCloudFormationHelperScriptSetup.log")
+Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWSCloudFormationHelperScriptSetup.log")
 
 Start-Sleep -Seconds 5
 
@@ -1402,7 +1402,7 @@ Get-Ec2SystemManagerAgentVersion
 
 # Package Update System Utility (AWS Systems Manager agent)
 Write-Log "# Package Update System Utility (AWS Systems Manager agent)"
-Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
 Start-Sleep -Seconds 5
 
@@ -1441,7 +1441,7 @@ Get-Content -Path $SSMAgentLogFile
 
 # Display Windows Server OS Parameter [AWS Systems Manager agent Information]
 if ($RoleName) {
-    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
+    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -Verb runas -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
 }
 
 
@@ -1566,7 +1566,7 @@ if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|
 
         # Package Install System Utility (Amazon Inspector Agent)
         Write-Log "# Package Install System Utility (Amazon Inspector Agent)"
-        Start-Process -FilePath "$TOOL_DIR\AWSAgentInstall.exe" -ArgumentList @('/install', '/quiet', '/norestart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonInspecterAgentSetup.log') -Wait | Out-Null
+        Start-Process -FilePath "$TOOL_DIR\AWSAgentInstall.exe" -Verb runas -ArgumentList @('/install', '/quiet', '/norestart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonInspecterAgentSetup.log') -Wait | Out-Null
 
         Start-Sleep -Seconds 10
 
@@ -1589,7 +1589,7 @@ if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|
         if ($RoleName) {
             cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
 
-            Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+            Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -Verb runas -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
         }
     }
     else {
@@ -1690,7 +1690,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
 
             # Package Install System Utility (Amazon EC2 Elastic GPU Software)
             Write-Log "# Package Install System Utility (Amazon EC2 Elastic GPU Software)"
-            Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
+            Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\EC2ElasticGPUs_Manager.msi", "/qn", "/L*v $LOGS_DIR\APPS_EC2ElasticGPUs_Manager.log")
             Start-Sleep -Seconds 10
 
             # Setting Application Path (Amazon EC2 Elastic GPU Software)
@@ -1714,7 +1714,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
             # Display Windows Server OS Parameter [Amazon EC2 Elastic GPU Manager Information]
             cmd.exe /c "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" 2>&1
 
-            Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
+            Start-Process -FilePath "C:\Program Files\Amazon\EC2ElasticGPUs\manager\egcli.exe" -Verb runas -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonEC2ElasticGpuManagerStatusError.log"
         }
         else {
             # Amazon EC2 Elastic GPUs Support InstanceType (None)
@@ -1756,17 +1756,17 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Install Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 6.0)"
-    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
     Start-Sleep -Seconds 10
 
     # Package Configure Commnand-Line Shell (PowerShell Core 6.0)
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 6.0)"
 
     # Install AWSPowerShell.NetCore
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
+    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
+    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
 
 }
 
@@ -2152,7 +2152,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-    Start-Process "msiexec.exe" -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
 }
 
 # [Caution : Finally the installation process]
@@ -2164,7 +2164,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
+    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -Verb runas -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 
     Start-Sleep -Seconds 60
 }
@@ -2326,7 +2326,7 @@ else {
 # Log Collect (EC2Rescue)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
 Write-Log "# Execution System Utility (EC2Rescue) - Start"
-Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
+Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
 Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 
