@@ -17,8 +17,10 @@ ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata
 ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
+ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 ScriptForFedora27="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-27-HVM.sh"
+
 ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
@@ -131,6 +133,9 @@ function get_bootstrap_script () {
         if [ $(echo ${REV} | grep -e '16.04') ]; then
            # Bootstrap Script for Ubuntu 16.04 LTS
            BootstrapScript=${ScriptForUbuntu1604}
+        elif [ $(echo ${REV} | grep -e '18.04') ]; then
+           # Bootstrap Script for Ubuntu 18.04 LTS
+           BootstrapScript=${ScriptForUbuntu1804}
         else
            BootstrapScript=""
         fi    

@@ -32,11 +32,11 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Ubuntu-16.04-LTS-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Ubuntu-18.04-LTS-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Ubuntu 16.04 LTS
+#  - Ubuntu 18.04 LTS
 #    https://help.ubuntu.com/
 #    https://help.ubuntu.com/lts/serverguide/index.html
 #    https://help.ubuntu.com/lts/installation-guide/amd64/index.html
@@ -45,7 +45,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #	 https://cloud-images.ubuntu.com/locator/ec2/
 #    https://help.ubuntu.com/community/EC2StartersGuide
 #
-#    https://aws.amazon.com/marketplace/pp/B01JBL2M0O
+#    https://aws.amazon.com/marketplace/pp/
 #
 #-------------------------------------------------------------------------------
 
@@ -250,36 +250,21 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudFormation Helper Scripts]
-#-------------------------------------------------------------------------------
-apt install -y python-setuptools
-easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-
-ln -s /usr/local/lib/python2.7/dist-packages/aws_cfn_bootstrap-1.4-py2.7.egg/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
-chmod +x /etc/init.d/cfn-hup
-update-rc.d cfn-hup defaults
-service cfn-hup start
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-curl -sS "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb" -o "/tmp/amazon-ssm-agent.deb"
-dpkg -i "/tmp/amazon-ssm-agent.deb"
 
-apt show amazon-ssm-agent
+snap list --all
 
-systemctl daemon-reload
+snap info amazon-ssm-agent
 
-systemctl status -l amazon-ssm-agent
-systemctl enable amazon-ssm-agent
-systemctl is-enabled amazon-ssm-agent
+snap services amazon-ssm-agent.amazon-ssm-agent
 
-systemctl restart amazon-ssm-agent
-systemctl status -l amazon-ssm-agent
+# snap restart amazon-ssm-agent.amazon-ssm-agent
+# snap services amazon-ssm-agent.amazon-ssm-agent
 
-ssm-cli get-instance-information
+amazon-ssm-agent.ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -360,11 +345,6 @@ source /etc/profile.d/ec2rl.sh
 
 apt install -y software-properties-common
 
-apt-add-repository -y ppa:ansible/ansible
-apt-key list
-
-apt update -y
-
 apt install -y ansible
 
 apt show ansible
@@ -378,7 +358,7 @@ ansible localhost -m setup
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
 # 
-# https://packages.microsoft.com/ubuntu/16.04/prod/
+# https://packages.microsoft.com/ubuntu/18.04/prod/
 # 
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
@@ -389,28 +369,28 @@ curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 apt-key list
 
 # Register the Microsoft Ubuntu repository
-curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
+curl https://packages.microsoft.com/config/ubuntu/18.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
 
 # Update the list of products
 apt clean -y
 apt update -y
 
 # Install PowerShell
-apt install -y powershell
+# apt install -y powershell
 
-apt show powershell
+# apt show powershell
 
 # Check Version
-pwsh -Version
+# pwsh -Version
 
 # Import-Module [AWSPowerShell.NetCore]
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
@@ -485,9 +465,9 @@ systemctl daemon-reload
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
-sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony/chrony.conf
+sed -i 's/#log tracking measurements statistics/log measurements statistics tracking/g' /etc/chrony/chrony.conf
 
-sed -i "20i# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony/chrony.conf
+sed -i "17i#\n# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony/chrony.conf
 
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
