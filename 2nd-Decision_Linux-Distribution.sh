@@ -16,12 +16,12 @@ ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
 ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
-ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
+ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
-ScriptForFedora27="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-27-HVM.sh"
-
 ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
+
+ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
 #-------------------------------------------------------------------------------
@@ -130,12 +130,12 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
-        if [ $(echo ${REV} | grep -e '16.04') ]; then
-           # Bootstrap Script for Ubuntu 16.04 LTS
-           BootstrapScript=${ScriptForUbuntu1604}
-        elif [ $(echo ${REV} | grep -e '18.04') ]; then
+        if [ $(echo ${REV} | grep -e '18.04') ]; then
            # Bootstrap Script for Ubuntu 18.04 LTS
            BootstrapScript=${ScriptForUbuntu1804}
+        elif [ $(echo ${REV} | grep -e '16.04') ]; then
+           # Bootstrap Script for Ubuntu 16.04 LTS
+           BootstrapScript=${ScriptForUbuntu1604}
         else
            BootstrapScript=""
         fi    
@@ -147,9 +147,12 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
-        if [ $(echo ${REV} | grep -e '27') ]; then
+        if [ $(echo ${REV} | grep -e '28') ]; then
+           # Bootstrap Script for Fedora 28
+           BootstrapScript=${ScriptForFedora}
+        elif [ $(echo ${REV} | grep -e '27') ]; then
            # Bootstrap Script for Fedora 27
-           BootstrapScript=${ScriptForFedora27}
+           BootstrapScript=${ScriptForFedora}
         else
            BootstrapScript=""
         fi    
@@ -161,11 +164,11 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
-        if [ $(echo ${REV} | grep -e '2017.') ]; then
-           # Bootstrap Script for Kali Linux 2017.x
-           BootstrapScript=${ScriptForKaliLinux}
-        elif [ $(echo ${REV} | grep -e '2018.') ]; then
+        if [ $(echo ${REV} | grep -e '2018.') ]; then
            # Bootstrap Script for Kali Linux 2018.x
+           BootstrapScript=${ScriptForKaliLinux}
+        elif [ $(echo ${REV} | grep -e '2017.') ]; then
+           # Bootstrap Script for Kali Linux 2017.x
            BootstrapScript=${ScriptForKaliLinux}
         else
            BootstrapScript=""

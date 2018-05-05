@@ -27,9 +27,8 @@ echo $VpcNetwork
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Fedora 27
+#  - Fedora
 #    https://docs.fedoraproject.org/
-#    https://docs.fedoraproject.org/f27/system-administrators-guide/index.html
 #
 #    https://alt.fedoraproject.org/cloud/
 #    https://fedoracloud.readthedocs.io/en/latest/whatis.html
@@ -37,7 +36,9 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Show Linux Distribution/Distro information
-lsb_release -a
+if [ $(command -v lsb_release) ]; then
+    lsb_release -a
+fi
 
 # Show Linux System Information
 uname -a
@@ -124,6 +125,8 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
 dnf install -y awscli
+
+cat /etc/bash_completion.d/aws_bash_completer
 
 aws --version
 
@@ -349,7 +352,7 @@ pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 
 pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
