@@ -29,6 +29,20 @@
 #
 ########################################################################################################################
 
+#-------------------------------------------------------------------------------
+# Information of Windows Server
+#  - Windows Server
+#    https://docs.microsoft.com/ja-jp/windows-server/windows-server
+#
+#  - Windows Server on AWS
+#    https://aws.amazon.com/jp/windows/
+#    http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/
+#
+#  - Windows Server AMI
+#    https://aws.amazon.com/jp/windows/resources/amis/
+#    https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/windows-ami-version-history.html
+#-------------------------------------------------------------------------------
+
 
 #-----------------------------------------------------------------------------------------------------------------------
 # User Define Parameter
@@ -1747,7 +1761,7 @@ Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.2\
 Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.0.2-win-x64.msi"
 
-# Check Windows OS Version[Windows Server 2008R2, 2012, 2012 R2, 2016]
+# Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Download Commnand-Line Shell (PowerShell Core 6.0)
@@ -1770,6 +1784,62 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
 }
 
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (Windows Admin Center)
+# https://docs.microsoft.com/en-us/windows-server/manage/windows-admin-center/overview
+# https://docs.microsoft.com/en-us/windows-server/manage/windows-admin-center/deploy/install
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install System Utility (Windows Admin Center)"
+
+# Initialize Parameter
+Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdownload"
+Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1804.msi"
+Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
+
+# Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
+if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+
+    # Package Download Web-based System Administrator Tool (Windows Admin Center)
+    Write-Log "# Package Download Web-based System Administrator Tool (Windows Admin Center)"
+    Get-WebContentToFile -Uri "$WAC_INSTALLER_URL" -OutFile "$TOOL_DIR\$WAC_INSTALLER_FILE"
+
+    # Package Install Web-based System Administrator Tool (Windows Admin Center)
+    ## Write-Log "# Package Install Web-based System Administrator Tool (Windows Admin Center)"
+    ## Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$WAC_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log", "SME_PORT=$WAC_HTTPS_PORT", "SSL_CERTIFICATE_OPTION=generate")
+    ## Start-Sleep -Seconds 10
+
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (SQL Server Management Studio)
+# https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-2017
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install Database Administration Tool (SQL Server Management Studio)"
+
+# Initialize Parameter
+Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://go.microsoft.com/fwlink/?linkid=870039"
+Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "SSMS-Setup-JPN.exe"
+
+# Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
+
+    # Package Download Database Administration Tool (SQL Server Management Studio)
+    ## Write-Log "# Package Download Database Administration Tool (SQL Server Management Studio)"
+    ## Get-WebContentToFile -Uri "$SSMS_INSTALLER_URL" -OutFile "$TOOL_DIR\$SSMS_INSTALLER_FILE"
+
+
+    # Package Install Database Administration Tool (SQL Server Management Studio)
+    ## Write-Log "# Package Install Database Administration Tool (SQL Server Management Studio)"
+    ## Start-Process -FilePath "$TOOL_DIR\$SSMS_INSTALLER_FILE" -Verb runas -ArgumentList @("/install ", "/quiet", "/passive", "/norestart", "/LOG=C:\EC2-Bootstrap\Logs\APPS_SSMS_Setup.log")
+    ## Start-Sleep -Seconds 10
+
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2221,13 +2291,6 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
         Write-Log "# Package Download System Utility (Fluentd)"
         Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.1.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.1.1-0-x64.msi"
     }
-}
-
-# Package Download System Utility (SQL Server Management Studio [SSMS])
-# https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Write-Log "# Package Download System Utility (SQL Server Management Studio [SSMS])"
-    # Get-WebContentToFile -Uri 'https://go.microsoft.com/fwlink/?linkid=858904' -OutFile "$TOOL_DIR\SSMS-Setup-JPN.exe"
 }
 
 # Package Download System Utility (EC2Config)
