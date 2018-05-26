@@ -911,7 +911,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^c5.*|^e3.*|^f1.*|^g3.*|^h1.*|^i3.*|^m5.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
+    if ($InstanceType -match "^c5.*|^c5d.*|^e3.*|^f1.*|^g3.*|^h1.*|^i3.*|^i3p.*|^m5.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -936,7 +936,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^c5.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^h1.*|^i2.*|^i3.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^p2.*|^p3.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^h1.*|^i2.*|^i3.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^p2.*|^p3.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -2266,7 +2266,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # http://www.7-zip.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (7-zip)"
-    Get-WebContentToFile -Uri 'http://www.7-zip.org/a/7z1801-x64.exe' -OutFile "$TOOL_DIR\7z1801-x64.exe"
+    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1805-x64.exe' -OutFile "$TOOL_DIR\7z1805-x64.exe"
 }
 
 # Package Download System Utility (Tera Term)
@@ -2280,7 +2280,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.13-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.13-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.13.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.13.2-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
