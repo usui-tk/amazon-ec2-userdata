@@ -49,6 +49,12 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Step Functions
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=237
 
+## Category : AR & VR
+
+- AWS Developer Forums: Forum Announcements - Amazon Sumerian
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=300
+
+
 ## Category : Business Productivity
 
 - AWS Developer Forums: Forum Announcements - Alexa for Business
@@ -89,6 +95,10 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Serverless Application Repository
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=287
 
+- AWS Developer Forums: Forum Announcements - Amazon EKS
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=303
+
+
 ## Category : Customer Engagement
 
 - AWS Developer Forums: Forum Announcements - Amazon Connect
@@ -119,6 +129,13 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 - AWS Developer Forums: Forum Announcements - AWS Schema Conversion Tool
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=208
+
+- AWS Developer Forums: Forum Announcements - Amazon RDS Database Preview Environment
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=301
+
+- AWS Developer Forums: Forum Announcements - Amazon Neptune
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=253
+
 
 ## Category : Desktop & App Streaming
 
@@ -170,6 +187,12 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 - AWS Developer Forums: Forum Announcements - Amazon FreeRTOS
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=276
+
+- AWS Developer Forums: Forum Announcements - AWS IoT Analytics
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=298
+
+- AWS Developer Forums: Forum Announcements - AWS IoT 1-Click
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=294
 
 ## Category : Machine Learning
 
@@ -229,7 +252,7 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Systems Manager
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=185
 
-- AWS Developer Forums: Forum Announcements - Resource Groups Tagging API
+- AWS Developer Forums: Forum Announcements - Tagging in AWS
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=218
 
 - AWS Developer Forums: Forum Announcements - AWS Auto Scaling
@@ -268,6 +291,9 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 
 - AWS Developer Forums: Forum Announcements - AWS Migration Hub
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=255
+
+- AWS Developer Forums: Forum Announcements - AWS Server Migration Service
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=304
 
 ## Category : Mobile Services
 
@@ -353,6 +379,9 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - AWS Secrets Manager
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=296
 
+- AWS Developer Forums: Forum Announcements - AWS Crypto Tools
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=302
+
 ## Category : Storage
 
 - AWS Developer Forums: Forum Announcements - Amazon Simple Storage Service
@@ -375,20 +404,23 @@ https://forums.aws.amazon.com/category.jspa?categoryID=3
 - AWS Developer Forums: Forum Announcements - Amazon DevPay
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=37
 
-- AWS Developer Forums: Forum Announcements - Amazon Flexible Payments Service
-- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=35
-
 - AWS Developer Forums: Forum Announcements - Amazon Fulfillment Web Service
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=41
 
 - AWS Developer Forums: Forum Announcements - Amazon Mechanical Turk (Beta)
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=11
 
+- AWS Developer Forums: Forum Announcements - Amazon Flexible Payments Service
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=35
+
 - AWS Developer Forums: Forum Announcements - AWS Support API
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=159
 
 - AWS Developer Forums: Forum Announcements - AWS Training & Certification
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=145
+
+- AWS Developer Forums: Forum Announcements - AWS Blockchain Templates
+- https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=299
 
 - AWS Developer Forums: Forum Announcements - Amazon AppStream
 - https://forums.aws.amazon.com/rss/rssannounce.jspa?forumID=171
