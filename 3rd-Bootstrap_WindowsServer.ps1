@@ -868,7 +868,7 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 #
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI Information from Public AMI"
-    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-Information.txt" -Append -Force
+    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-Information_from_PublicAMI.txt" -Append -Force
 }
 
 # Get AMI Information from Systems Manager Parameter Store
@@ -878,6 +878,18 @@ if ($RoleName) {
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
     Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
+}
+
+# Get Windows Installation Media Information from Public Snapshot
+# - Get-EC2Snapshot
+#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Snapshot.html
+#
+# [Adding Windows Components Using Installation Media]
+#   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/windows-optional-components.html
+#
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get Windows Installation Media Information from Public Snapshot"
+    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" }  | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsInstallationMedia-List-Information_from_Public-Snapshot.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
@@ -911,7 +923,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^c5.*|^c5d.*|^e3.*|^f1.*|^g3.*|^h1.*|^i3.*|^i3p.*|^m5.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
+    if ($InstanceType -match "^c5.*|^c5d.*|^e3.*|^f1.*|^g3.*|^h1.*|^i3.*|^i3p.*|^m5.*|^m5d.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -936,7 +948,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^h1.*|^i2.*|^i3.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^p2.*|^p3.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
+    if ($InstanceType -match "^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^h1.*|^i2.*|^i3.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5d.*|^p2.*|^p3.*|^r3.*|^r4.*|^x1.*|^x1e.*") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -1560,11 +1572,11 @@ else {
 Write-LogSeparator "Package Install System Utility (Amazon Inspector Agent)"
 
 # Amazon Inspector Agent Support AWS Regions
-# http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+# https://docs.aws.amazon.com/ja_jp/general/latest/gr/rande.html#inspector_region
 Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
 
 # Check Region
-if ($Region -match "^ap-northeast-1|^ap-northeast-2|^ap-south-1|^ap-southeast-2|^eu-west-1|^us-east-1|^us-west-1|^us-west-2") {
+if ($Region -match "^us-east-1|^us-east-1|^us-west-1|^us-west-2|^ap-south-1|^ap-northeast-2|^ap-southeast-2|^ap-northeast-1|^eu-west-1|^eu-central-1") {
 
     # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
     if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -1632,13 +1644,13 @@ Set-Variable -Name ElasticGpuResponseError -Scope Script -Value ($Null)
 if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-1|^eu-west-1|^us-east-1|^us-east-2|^us-west-2") {
 
     # Amazon EC2 Elastic GPUs Support AWS Regions
-    # http://docs.aws.amazon.com/ja_jp/inspector/latest/userguide/inspector_supported_os_regions.html
+    # https://aws.amazon.com/ec2/elastic-gpus/pricing/?nc1=h_ls
     Write-Log "# [AWS - EC2-ElasticGPU] AWS Region : $Region"
 
     # Check Amazon EC2 Elastic GPUs Support InstanceType
     # https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/elastic-gpus.html
     Write-Log "# Check Amazon EC2 Elastic GPUs Support InstanceType"
-    if ($InstanceType -match "^c3.*|^c4.*|^m3.*|^m4.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*|^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
+    if ($InstanceType -match "^c3.*|^c4.*|^c5.*|^m3.*|^m4.*|^m5.*|^r3.*|^r4.*|^x1.*|^d2.*|^i3.*|^t2.medium|^t2.large|^t2.xlarge|^t2.2xlarge") {
         # Amazon EC2 Elastic GPUs Support InstanceType
         Write-Log "# [AWS - EC2-ElasticGPU] InstanceType : $InstanceType"
     }
@@ -2148,7 +2160,7 @@ Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 # https://github.com/JeremyMain/GPUProfiler
 if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)"
-    Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.05/GPUProfiler_1.05-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.05-x64.zip"
+    Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.06a/GPUProfiler_1.06a-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.06a-x64.zip"
 }
 
 
@@ -2163,7 +2175,12 @@ Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
-Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-StorageNetworkDriver-AWSPVDriverSetup.zip"
+Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-StorageDriver-AWSPVDriverSetup.zip"
+
+# Package Download AWS NVMe Drivers
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/aws-nvme-drivers.html
+Write-Log "# Package Download AWS NVMe Drivers"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip' -OutFile "$TOOL_DIR\AWS-StorageDriver-AWSNVMe.zip"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
@@ -2273,7 +2290,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Tera Term)"
-    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.98.exe' -OutFile "$TOOL_DIR\teraterm-4.98.exe"
+    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.99.exe' -OutFile "$TOOL_DIR\teraterm-4.99.exe"
 }
 
 # Package Download System Utility (WinSCP)

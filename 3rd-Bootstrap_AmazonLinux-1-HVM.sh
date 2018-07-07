@@ -145,10 +145,24 @@ if [ -n "$RoleName" ]; then
 	aws ec2 describe-regions --region ${Region}
 fi
 
-# Get AMI Information
+# Get AMI information of this EC2 instance
 if [ -n "$RoleName" ]; then
-	echo "# Get AMI Information"
+	echo "# Get AMI information of this EC2 instance"
 	aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region}
+fi
+
+# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
+if [ -n "$RoleName" ]; then
+	echo "# Get Newest AMI Information from Public AMI"
+	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=amzn-ami-hvm-*-gp2" "Name=virtualization-type,Values=hvm" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+fi
+
+# Get the latest AMI information of the OS type of this EC2 instance from Systems Manager Parameter Store
+if [ -n "$RoleName" ]; then
+	echo "# Get Newest AMI Information from Systems Manager Parameter Store"
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/amzn-ami-hvm-x86_64-gp2" --output json --region ${Region}
 fi
 
 # Get EC2 Instance Information
@@ -171,7 +185,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|e3.*|f1.*|g3.*|h1.*|i3.*|i3p.*|m5.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|e3.*|f1.*|g3.*|h1.*|i3.*|i3p.*|m5.*|m5d.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -195,7 +209,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|c5d.*|d2.*|e3.*|f1.*|g2.*|g3.*|h1.*|i2.*|i3.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c1.*|c3.*|c4.*|c5.*|c5d.*|d2.*|e3.*|f1.*|g2.*|g3.*|h1.*|i2.*|i3.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5d.*|p2.*|p3.*|r3.*|r4.*|x1.*|x1e.*)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -215,7 +229,7 @@ fi
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ssd-instance-store.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|m5.*|f1.*|i3.*|i3p.*)$ ]]; then
+	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|m5.*|m5d.*|f1.*|i3.*|i3p.*)$ ]]; then
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
