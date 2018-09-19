@@ -115,3 +115,35 @@ dkms install -m ixgbevf -v 4.3.5
 
 modinfo ixgbevf
 ethtool -i eth0
+
+
+#-------------------------------------------------------------------------------
+# Configure EC2 Instance Support for Amazon ENA Device
+#-------------------------------------------------------------------------------
+if [ -n "$RoleName" ]; then
+
+	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+
+	# Modify EC2 Instance Attribute(Elastic Network Adapter Status)
+	# aws ec2 modify-instance-attribute --instance-id ${InstanceId} --sriov-net-support simple
+
+	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+fi
+
+
+#-------------------------------------------------------------------------------
+# Remove Network Persistent Rules
+#-------------------------------------------------------------------------------
+# [Important]
+# If your instance operating system contains an /etc/udev/rules.d/70-persistent-net.rules file, you must delete it before creating the AMI. 
+# This file contains the MAC address for the Ethernet adapter of the original instance.
+# If another instance boots with this file, the operating system will be unable to find the device and eth0 might fail, causing boot issues.
+# This file is regenerated at the next boot cycle, and any instances launched from the AMI create their own version of the file.
+#-------------------------------------------------------------------------------
+
+if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then
+    rm -fr /etc/udev/rules.d/70-persistent-net.rules
+fi
+
