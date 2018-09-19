@@ -187,8 +187,6 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y python2-pip
-pip install --upgrade pip
-
 pip install awscli
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
