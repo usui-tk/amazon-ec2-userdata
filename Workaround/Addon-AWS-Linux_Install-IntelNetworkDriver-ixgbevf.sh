@@ -4,8 +4,8 @@
 # Custom Package Installation [Intel Network Driver(ixgbevf)]
 #
 # Target Linux Distribution
-#  - Red Hat Enterprise Linux v7.3, v6.9
-#  - CentOS v7.3(1602), v6.9
+#  - Red Hat Enterprise Linux v6.x, v7.x
+#  - CentOS v6.x, v7,x
 #
 # Reference
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking.html
@@ -14,25 +14,90 @@
 #  https://sourceforge.net/projects/e1000/files/ixgbevf%20stable/
 #-------------------------------------------------------------------------------
 
-# Package Install DKMS (from EPEL Repository)
-yum --enablerepo=epel install -y dkms wget gcc kernel-devel kernel-headers
 
-# Set Grub2 Parameter
-rpm -qa | grep -e '^systemd-[0-9]\+\|^udev-[0-9]\+'
-sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
-grub2-mkconfig -o /boot/grub2/grub.cfg
+#-------------------------------------------------------------------------------
+# Get Instance Information [AWS-CLI]
+#-------------------------------------------------------------------------------
+
+# Instance MetaData
+AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+Region=$(echo $AZ | sed -e 's/.$//g')
+InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
+PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
+
+# IAM Role & STS Information
+RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+
+# Get EC2 Instance Information
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance Information"
+	aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
+fi
+
+# Get EC2 Instance Attribute[Network Interface Performance Attribute]
+#
+# - ENA (Elastic Network Adapter)
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
+# - SR-IOV
+#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
+#
+if [ -n "$RoleName" ]; then
+	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|e3.*|f1.*|g3.*|h1.*|i3.*|i3p.*|m5.*|m5d.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
+		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
+		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+		echo "# Get Linux Kernel Module(modinfo ena)"
+		modinfo ena
+	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
+		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
+		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
+		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
+		modinfo ixgbevf
+	else
+		echo "# Not Target Instance Type :" $InstanceType
+	fi
+fi
+
+
+#-------------------------------------------------------------------------------
+# Install Kernel module and Configure Dynamic Kernel Module Support (DKMS) 
+#-------------------------------------------------------------------------------
+
+# Package Install Kernel Module
+yum install -y kernel-devel kernel-headers
+
+# Package Install Build Tool
+yum install -y gcc make rpm-build rpmdevtools
+# yum groupinstall -y "Development tools"
+
+# Package Install DKMS (from EPEL Repository)
+yum --enablerepo=epel install -y dkms
+
+# Set Grub2 Parameter for RHEL v7.x/CentOS v7.x
+if [ $(command -v grub2-mkconfig) ]; then
+    rpm -qa | grep -e '^systemd-[0-9]\+\|^udev-[0-9]\+'
+    sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
+    grub2-mkconfig -o /boot/grub2/grub.cfg
+fi
+
+# Get Intel Ethernet Driver source code at sourceforge
+curl -LsS "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.3.5/ixgbevf-4.3.5.tar.gz" -o "/usr/src/ixgbevf-4.3.5.tar.gz"
 
 cd /usr/src
-wget -O ixgbevf-4.3.2.tar.gz "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.3.2/ixgbevf-4.3.2.tar.gz"
-tar xzf ixgbevf-4.3.2.tar.gz
-rm -fr ixgbevf-4.3.2.tar.gz
-cd ixgbevf-4.3.2
+tar xzf ixgbevf-4.3.5.tar.gz
+rm -fr ixgbevf-4.3.5.tar.gz
+
+cd ixgbevf-4.3.5
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="4.3.2"
+PACKAGE_VERSION="4.3.5"
 CLEAN="cd src/; make clean"
-MAKE="cd src/; make BUILD_KERNEL=${kernelver}"
+MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
 BUILT_MODULE_NAME[0]="ixgbevf"
 DEST_MODULE_LOCATION[0]="/updates"
@@ -44,10 +109,9 @@ __EOF__
 modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 4.3.2
-dkms build -m ixgbevf -v 4.3.2
-dkms install -m ixgbevf -v 4.3.2
+dkms add -m ixgbevf -v 4.3.5
+dkms build -m ixgbevf -v 4.3.5
+dkms install -m ixgbevf -v 4.3.5
 
 modinfo ixgbevf
 ethtool -i eth0
-
