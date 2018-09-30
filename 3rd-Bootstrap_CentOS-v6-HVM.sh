@@ -52,10 +52,7 @@ fi
 uname -a
 
 # Show Linux distribution release Information
-cat /etc/os-release
-
 cat /etc/centos-release
-cat /etc/redhat-release
 
 # Default installation package [rpm command]
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt

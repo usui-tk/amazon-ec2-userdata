@@ -55,8 +55,6 @@ fi
 uname -a
 
 # Show Linux distribution release Information
-cat /etc/os-release
-
 cat /etc/redhat-release
 
 # Default installation package [rpm command]
