@@ -90,7 +90,7 @@ yum update -y
 yum install -y abrt abrt-cli blktrace numactl parted sos sysstat system-config-network-tui time tmpwatch tzdata unzip usermode yum-utils zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package

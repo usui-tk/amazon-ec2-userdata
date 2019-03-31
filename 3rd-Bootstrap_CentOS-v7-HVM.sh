@@ -84,7 +84,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -96,7 +96,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop collectl fio jq
+yum --enablerepo=epel install -y atop collectl jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
