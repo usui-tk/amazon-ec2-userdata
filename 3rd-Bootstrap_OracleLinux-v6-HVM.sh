@@ -138,7 +138,7 @@ yum install -y abrt abrt-cli blktrace cloud-utils-growpart numactl sos sysstat s
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
 yum install -y dstat gdisk git hdparm lsof lzop iotop mtr nc nmap sos tcpdump traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
-yum install -y setroubleshoot-server
+yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
@@ -161,7 +161,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-testing.repo
 yum clean all
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion cloud-init cloud-utils-growpart collectl dracut-modules-growroot fio
+yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -487,8 +487,40 @@ chronyc sources -v
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned (from Red Hat Official Repository)
+yum install -y tuned tuned-utils tuned-profiles-oracle
+
+# Configure Tuned software (Start Daemon tuned)
+service tuned status
+service tuned restart
+service tuned status
+
+chkconfig --list tuned
+chkconfig tuned on
+chkconfig --list tuned
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
+
+# Setting SELinux permissive mode
+getenforce
+sestatus
+cat /etc/selinux/config
+sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+cat /etc/selinux/config
+setenforce 0
+getenforce
 
 # Firewall Service Disabled (iptables/ip6tables)
 service iptables stop

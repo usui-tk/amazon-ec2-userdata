@@ -85,17 +85,17 @@ if [ $(command -v grub2-mkconfig) ]; then
 fi
 
 # Get Intel Ethernet Driver source code at sourceforge
-curl -LsS "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.3.6/ixgbevf-4.3.6.tar.gz" -o "/usr/src/ixgbevf-4.3.6.tar.gz"
+curl -LsS "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.5.2/ixgbevf-4.5.2.tar.gz" -o "/usr/src/ixgbevf-4.5.2.tar.gz"
 
 cd /usr/src
-tar xzf ixgbevf-4.3.6.tar.gz
-rm -fr ixgbevf-4.3.6.tar.gz
+tar xzf ixgbevf-4.5.2.tar.gz
+rm -fr ixgbevf-4.5.2.tar.gz
 
-cd ixgbevf-4.3.6
+cd ixgbevf-4.5.2
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="4.3.6"
+PACKAGE_VERSION="4.5.2"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
@@ -109,9 +109,9 @@ __EOF__
 modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 4.3.6
-dkms build -m ixgbevf -v 4.3.6
-dkms install -m ixgbevf -v 4.3.6
+dkms add -m ixgbevf -v 4.5.2
+dkms build -m ixgbevf -v 4.5.2
+dkms install -m ixgbevf -v 4.5.2
 
 modinfo ixgbevf
 ethtool -i eth0

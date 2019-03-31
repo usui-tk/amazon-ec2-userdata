@@ -85,18 +85,18 @@ if [ $(command -v grub2-mkconfig) ]; then
 fi
 
 # Get Amazon ENA Driver source code at github
-curl -LsS "https://github.com/amzn/amzn-drivers/archive/ena_linux_1.6.0.tar.gz" -o "/usr/src/ena_linux_1.6.0.tar.gz"
+curl -LsS "https://github.com/amzn/amzn-drivers/archive/ena_linux_2.0.3.tar.gz" -o "/usr/src/ena_linux_2.0.3.tar.gz"
 
 cd /usr/src
-tar xzf ena_linux_1.6.0.tar.gz
-rm -fr ena_linux_1.6.0.tar.gz
+tar xzf ena_linux_2.0.3.tar.gz
+rm -fr ena_linux_2.0.3.tar.gz
 
-mv amzn-drivers-ena_linux_1.6.0 amzn-drivers-ena_linux-1.6.0
-cd amzn-drivers-ena_linux-1.6.0
+mv amzn-drivers-ena_linux_2.0.3 amzn-drivers-ena_linux-2.0.3
+cd amzn-drivers-ena_linux-2.0.3
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ena"
-PACKAGE_VERSION="1.6.0"
+PACKAGE_VERSION="2.0.3"
 CLEAN="make -C kernel/linux/ena clean"
 MAKE="make -C kernel/linux/ena/ BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_NAME[0]="ena"
@@ -109,9 +109,9 @@ __EOF__
 # Make & Build & Install Amazon ENA Driver
 ethtool -i eth0
 
-dkms add -m amzn-drivers-ena_linux -v 1.6.0
-dkms build -m amzn-drivers-ena_linux -v 1.6.0
-dkms install -m amzn-drivers-ena_linux -v 1.6.0
+dkms add -m amzn-drivers-ena_linux -v 2.0.3
+dkms build -m amzn-drivers-ena_linux -v 2.0.3
+dkms install -m amzn-drivers-ena_linux -v 2.0.3
 
 modinfo ena
 ethtool -i eth0

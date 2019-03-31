@@ -100,8 +100,8 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
-yum install -y setroubleshoot-server
+yum install -y arptables bash-completion bc bind-utils dstat ebtables gdisk git hdparm lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -538,8 +538,39 @@ chronyc sources -v
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned (from Red Hat Official Repository)
+yum install -y tuned tuned-utils tuned-profiles-oracle
+
+# Configure Tuned software (Start Daemon tuned)
+systemctl status tuned
+systemctl restart tuned
+systemctl status tuned
+
+systemctl enable tuned
+systemctl is-enabled tuned
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
+
+# Setting SELinux permissive mode
+getenforce
+sestatus
+cat /etc/selinux/config
+sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+cat /etc/selinux/config
+setenforce 0
+getenforce
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then

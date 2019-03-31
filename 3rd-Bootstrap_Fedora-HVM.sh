@@ -89,7 +89,7 @@ dnf update -y
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
 dnf install -y arptables atop bash-completion bc bind-utils collectl curl dstat ebtables ethtool fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl rpmconf sos strace sysstat tcpdump tree traceroute unzip vim-enhanced wget zip
-dnf install -y setroubleshoot-server
+dnf install -y setroubleshoot-server setools-console
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
 dnf install -y rpmdevtools
@@ -746,6 +746,15 @@ chronyc sourcestats -v
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
+
+# Setting SELinux permissive mode
+getenforce
+sestatus
+cat /etc/selinux/config
+sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
+cat /etc/selinux/config
+setenforce 0
+getenforce
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
