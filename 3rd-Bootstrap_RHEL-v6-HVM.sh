@@ -310,6 +310,29 @@ status amazon-ssm-agent
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon Inspector Agent]
+# https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
+#-------------------------------------------------------------------------------
+
+curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
+
+chmod 700 /tmp/Install-Amazon-Inspector-Agent
+bash /tmp/Install-Amazon-Inspector-Agent
+
+rpm -qi AwsAgent
+
+/opt/aws/awsagent/bin/awsagent status
+
+# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+service awsagent status
+service awsagent restart
+service awsagent status
+
+chkconfig --list awsagent
+chkconfig awsagent on
+chkconfig --list awsagent
+
+#-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
 # http://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance.html
 #-------------------------------------------------------------------------------
