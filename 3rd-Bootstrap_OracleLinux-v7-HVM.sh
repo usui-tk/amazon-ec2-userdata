@@ -402,8 +402,6 @@ cat /tmp/config.json
 # View Amazon CloudWatch Agent config files
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
-
 cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
