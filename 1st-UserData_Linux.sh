@@ -13,7 +13,7 @@ DecisionScript="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/ma
 # Parameter file Settings
 cat > /tmp/userdata-parameter << __EOF__
 # Language [ja_JP.UTF-8],[en_US.UTF-8]
-Language="ja_JP.UTF-8"
+Language="en_US.UTF-8"
 
 # Timezone [Asia/Tokyo],[UTC]
 Timezone="Asia/Tokyo"
