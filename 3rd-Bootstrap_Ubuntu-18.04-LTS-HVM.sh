@@ -15,7 +15,7 @@ fi
 
 if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
     # Default Language
-	Language="ja_JP.UTF-8"
+	Language="en_US.UTF-8"
     # Default Timezone
 	Timezone="Asia/Tokyo"
 	# Default VPC Network
