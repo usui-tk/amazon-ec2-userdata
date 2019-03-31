@@ -69,7 +69,6 @@ fi
 
 # Package Install Kernel Module
 yum install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
-yum update -y kernel kernel-devel kernel-headers
 
 # Package Install Build Tool
 yum install -y gcc make rpm-build rpmdevtools
