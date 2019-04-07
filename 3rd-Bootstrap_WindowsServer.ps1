@@ -272,7 +272,7 @@ function Get-EbsVolumesMappingInformation {
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
 
         # Get the block-device-mapping
-        $VirtualDeviceMap = @{}
+        $VirtualDeviceMap = @{ }
         ((Invoke-WebRequest '169.254.169.254/latest/meta-data/block-device-mapping').Content).Split("`n") | ForEach-Object {
             $VirtualDevice = $_
             $BlockDeviceName = ((Invoke-WebRequest ("169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice))).Content
@@ -356,12 +356,12 @@ function Get-Ec2InstanceMetadata {
     #--------------------------------------------------------------------------------------
 
     # Set AWS Instance Metadata
-    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
     Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document").region
-    Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
-    Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
-    Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
-    Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
+    Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+    Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
+    Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
+    Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
     # Set IAM Role & STS Information
     Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
@@ -785,7 +785,7 @@ else {
 Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 
 # Logging AWS Instance Metadata
-Get-Ec2InstanceMetadata
+Get-EC2InstanceMetadata
 
 # Logging Amazon EC2 Hardware
 Get-AmazonMachineInformation
@@ -889,7 +889,7 @@ if ($RoleName) {
 #
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get Windows Installation Media Information from Public Snapshot"
-    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" }  | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsInstallationMedia-List-Information_from_Public-Snapshot.txt" -Append -Force
+    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsInstallationMedia-List-Information_from_Public-Snapshot.txt" -Append -Force
 }
 
 # Get EC2 Instance Information
@@ -898,7 +898,7 @@ if ($RoleName) {
 #
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance attached EBS Volume Information
@@ -907,7 +907,7 @@ if ($RoleName) {
 #
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
+    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
 }
 
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
@@ -926,7 +926,7 @@ if ($RoleName) {
     if ($InstanceType -match "^c5.*|^c5d.*|^e3.*|^f1.*|^g3.*|^h1.*|^i3.*|^i3p.*|^m5.*|^m5d.*|^p2.*|^p3.*|^r4.*|^x1.*|^x1e.*|^m4.16xlarge") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId} | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
+        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
         # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
     }
     elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^r3.*|^m4.*") {
@@ -1184,7 +1184,7 @@ if ($WindowsOSVersion -match "^6.1") {
     $connections = $networkListManager.GetNetworkConnections()
 
     # Set network location to Private for all networks
-    $connections | % {$_.GetNetwork().SetCategory(1)}
+    $connections | ForEach-Object { $_.GetNetwork().SetCategory(1) }
 
     Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
 }
@@ -1280,23 +1280,23 @@ if ($WindowsOSVersion -match "^6.1") {
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : START"
 
     # Display IPv6 Information
-    netsh interface ipv6 show interface | Out-Default
-    netsh interface ipv6 show prefixpolicies | Out-Default
-    netsh interface ipv6 show global | Out-Default
+    netsh.exe interface ipv6 show interface | Out-Default
+    netsh.exe interface ipv6 show prefixpolicies | Out-Default
+    netsh.exe interface ipv6 show global | Out-Default
 
     # Disable IPv6 Binding (ISATAP Interface)
-    netsh interface ipv6 isatap set state disabled | Out-Default
+    netsh.exe interface ipv6 isatap set state disabled | Out-Default
 
     # Disable IPv6 Binding (6to4 Interface)
-    netsh interface ipv6 6to4 set state disabled | Out-Default
+    netsh.exe interface ipv6 6to4 set state disabled | Out-Default
 
     # Disable IPv6 Binding (Teredo Interface)
-    netsh interface ipv6 set teredo disabled | Out-Default
+    netsh.exe interface ipv6 set teredo disabled | Out-Default
 
     # Display IPv6 Information
-    netsh interface ipv6 show interface | Out-Default
-    netsh interface ipv6 show prefixpolicies | Out-Default
-    netsh interface ipv6 show global | Out-Default
+    netsh.exe interface ipv6 show interface | Out-Default
+    netsh.exe interface ipv6 show prefixpolicies | Out-Default
+    netsh.exe interface ipv6 show global | Out-Default
 
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
 }
@@ -1660,11 +1660,11 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
     }
 
     # Check Amazon EC2 Elastic GPU ID
-    $ElasticGpuResponseError = try { Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch {$_.Exception.Response.StatusCode.Value__}
+    $ElasticGpuResponseError = try { Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch { $_.Exception.Response.StatusCode.Value__ }
     if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
         # The Amazon EC2 Elastic GPU is attached
         Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"
-        Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-Restmethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
+        Set-Variable -Name ElasticGpuId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations")
     }
     else {
         # The Amazon EC2 Elastic GPU is not attached
@@ -1689,7 +1689,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
 
         # Logging Amazon EC2 Elastic GPU Information from AWS Tools for Windows PowerShell
         if ($RoleName) {
-            Get-EC2ElasticGpu -Filter @{Name = "instance-id"; Values = $InstanceId} | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
+            Get-EC2ElasticGpu -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
         }
 
         # Logging Amazon EC2 Elastic GPU ENI Information from AWS Tools for Windows PowerShell
@@ -1769,9 +1769,9 @@ else {
 Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
 # Initialize Parameter [# Depends on PowerShell v6.0 version information]
-Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6.0.2\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.0.2-win-x64.msi"
+Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6\pwsh.exe"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.0/PowerShell-6.2.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.0-win-x64.msi"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -1808,7 +1808,7 @@ Write-LogSeparator "Package Install System Utility (Windows Admin Center)"
 
 # Initialize Parameter
 Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdownload"
-Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1804.msi"
+Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1809.msi"
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
 # Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
@@ -2283,21 +2283,21 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # http://www.7-zip.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (7-zip)"
-    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1805-x64.exe' -OutFile "$TOOL_DIR\7z1805-x64.exe"
+    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1900-x64.exe' -OutFile "$TOOL_DIR\7z1900-x64.exe"
 }
 
 # Package Download System Utility (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Tera Term)"
-    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.99.exe' -OutFile "$TOOL_DIR\teraterm-4.99.exe"
+    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
 }
 
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.13.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.13.2-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2306,7 +2306,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.1.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.1.1-0-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.3.0-1-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.3.0-1-x64.msi"
     }
 }
 
@@ -2329,11 +2329,13 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
-# Package Download System Utility (AWS-CLI - 64bit)
+# Package Download System Utility (AWS-CLI)
 # https://aws.amazon.com/jp/cli/
+# https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/install-windows.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (AWS-CLI - 64bit)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64.msi' -OutFile "$TOOL_DIR\AWSCLI64.msi"
+    Write-Log "# Package Download System Utility (AWS-CLI)"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLISetup.exe' -OutFile "$TOOL_DIR\AWSCLISetup.exe"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi' -OutFile "$TOOL_DIR\AWSCLI64PY3.msi"
 }
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
