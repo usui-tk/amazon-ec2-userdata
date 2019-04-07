@@ -85,6 +85,8 @@ yum update -y
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
 yum install -y arptables bash-completion bc bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y cifs-utils nfs-utils nfs4-acl-tools
+yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -129,6 +131,7 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y python2-pip
 pip install awscli
+pip show awscli
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then

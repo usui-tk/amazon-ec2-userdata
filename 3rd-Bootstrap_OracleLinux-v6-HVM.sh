@@ -138,6 +138,8 @@ yum install -y abrt abrt-cli blktrace cloud-utils-growpart numactl sos sysstat s
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
 yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y cifs-utils nfs-utils nfs4-acl-tools
+yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -194,6 +196,7 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 #-------------------------------------------------------------------------------
 yum --enablerepo=epel install -y python-pip python2-colorama python2-rsa python2-jmespath python-futures python-ordereddict
 pip install awscli
+pip show awscli
 
 # Workaround - SSL-Warnings
 # https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
