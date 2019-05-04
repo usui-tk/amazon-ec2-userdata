@@ -62,10 +62,10 @@ Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
 Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
 
-# Set System & Application Config File (System Defined : Windows Server 2008 R2 - 2012 R2)
+# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2)
 Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 
-# Set System & Application Config File (System Defined : Windows Server 2016)
+# Set System & Application Config File (System Defined : Windows Server 2016, 2019)
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
 # Set System & Application Log File (System Defined : All Windows Server)
@@ -2239,7 +2239,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/qn", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
 }
 
 # [Caution : Finally the installation process]
@@ -2251,9 +2251,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -Verb runas -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
-
-    Start-Sleep -Seconds 60
+    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 }
 
 
