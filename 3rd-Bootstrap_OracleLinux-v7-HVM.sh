@@ -104,14 +104,6 @@ yum-config-manager --enable ol7_optional_latest
 #  http://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/index.html
 yum-config-manager --enable ol7_addons
 
-# Latest packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
-yum-config-manager --enable ol7_developer
-
-# Latest EPEL packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
-yum-config-manager --enable ol7_developer_EPEL
-
 # Latest Software Collection Library packages for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
 # yum-config-manager --enable ol7_software_collections
@@ -131,13 +123,38 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y arptables bash-completion bc bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
 # Package Install Device driver compatible with Amazon EC2 (from Oracle Linux Official Repository)
 # yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+
+
+# Latest packages for test and development for Oracle Linux 7.
+#  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
+
+cat > /etc/yum.repos.d/oracle-developer-ol7.repo << __EOF__
+[ol7_developer]
+name=Packages for test and development - Oracle Linux $releasever Packages ($basearch)
+baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/developer/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
+
+# Latest EPEL packages for test and development for Oracle Linux 7.
+#  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
+
+cat > /etc/yum.repos.d/oracle-developer-epel-ol7.repo << __EOF__
+[ol7_developer_EPEL]
+name=EPEL packages for test and development - Oracle Linux $releasever Packages ($basearch)
+baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/developer_EPEL/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
 yum --enablerepo=ol7_developer_EPEL install -y jq cloud-utils-growpart
@@ -520,14 +537,15 @@ rpm -qi powershell
 # Check Version
 pwsh -Version
 
-# Import-Module [AWSPowerShell.NetCore]
+# Operation check of PowerShell command
 pwsh -Command "Get-Module -ListAvailable"
 
 pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Get-AWSPowerShellVersion"
+# pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------

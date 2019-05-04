@@ -391,10 +391,11 @@ apt update -y
 # Check Version
 # pwsh -Version
 
-# Import-Module [AWSPowerShell.NetCore]
+# Operation check of PowerShell command
 # pwsh -Command "Get-Module -ListAvailable"
 
 # pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+# pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 # pwsh -Command "Get-Module -ListAvailable"
 

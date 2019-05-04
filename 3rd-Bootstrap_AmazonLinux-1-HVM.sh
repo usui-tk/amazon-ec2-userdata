@@ -87,7 +87,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables_jf bc collectl dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y acpid arptables_jf bc bcc collectl dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 
