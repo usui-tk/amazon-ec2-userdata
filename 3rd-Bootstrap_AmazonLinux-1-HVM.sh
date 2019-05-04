@@ -87,7 +87,9 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y arptables_jf bc collectl dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y acpid arptables_jf bc collectl dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli perf sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+yum install -y cifs-utils nfs-utils nfs4-acl-tools
+yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -262,6 +264,29 @@ yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_
 /sbin/status amazon-ssm-agent
 
 ssm-cli get-instance-information
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Amazon Inspector Agent]
+# https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
+#-------------------------------------------------------------------------------
+
+curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
+
+chmod 700 /tmp/Install-Amazon-Inspector-Agent
+bash /tmp/Install-Amazon-Inspector-Agent
+
+rpm -qi AwsAgent
+
+/opt/aws/awsagent/bin/awsagent status
+
+# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+service awsagent status
+service awsagent restart
+service awsagent status
+
+chkconfig --list awsagent
+chkconfig awsagent on
+chkconfig --list awsagent
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
