@@ -71,14 +71,17 @@ systemctl list-units --no-pager -all
 # Yum Configuration
 #-------------------------------------------------------------------------------
 yum clean all
-yum install -y rhn-client-tools yum-utils
+yum install -y oraclelinux-release-el7 rhn-client-tools yum-utils
 yum clean all
+
+# Update AMI Defalut YUM Repositories File
+/usr/bin/ol_yum_configure.sh
+
+yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
 rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
-
-# Add Oralce Linux v7 Public YUM Repositories File
-yum-config-manager --add-repo http://public-yum.oracle.com/public-yum-ol7.repo
+yum clean all
 
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v7)
@@ -89,9 +92,9 @@ yum-config-manager --add-repo http://public-yum.oracle.com/public-yum-ol7.repo
 #  http://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/index.html
 yum-config-manager --enable ol7_latest
 
-# Latest Unbreakable Enterprise Kernel Release 4 packages for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/UEKR4/x86_64/index.html
-yum-config-manager --enable ol7_UEKR4
+# Latest Unbreakable Enterprise Kernel Release 5 packages for Oracle Linux 7.
+#  http://yum.oracle.com/repo/OracleLinux/OL7/UEKR5/x86_64/index.html
+yum-config-manager --enable ol7_UEKR5
 
 # Latest packages released for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/optional/latest/x86_64/index.html
@@ -133,6 +136,9 @@ yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
+# Package Install Device driver compatible with Amazon EC2 (from Oracle Linux Official Repository)
+# yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
 yum --enablerepo=ol7_developer_EPEL install -y jq cloud-utils-growpart
 
@@ -158,6 +164,29 @@ yum clean all
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop collectl
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Oracle Database]
+#-------------------------------------------------------------------------------
+
+# Package Install Oracle Database Utility (from Oracle Linux Official Repository)
+yum install -y kmod-oracleasm oracleasm-support
+yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall oracle-database-server-12cR2-preinstall oracle-database-preinstall-18c oracle-database-preinstall-19c
+
+# Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
+#  http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
+
+cat > /etc/yum.repos.d/oracle-instantclient-ol7.repo << __EOF__
+[ol7_instantclient]
+name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
+baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
+
+# Package Install Oracle Instant Client (from Oracle Linux Official Repository)
+yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -188,17 +217,9 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python2-pip
-pip install awscli
-pip show awscli
+yum install -y awscli
 
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
-
-source /etc/profile.d/aws-cli.sh
+rpm -qi awscli
 
 aws --version
 
@@ -374,24 +395,24 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
+# curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
 
-chmod 700 /tmp/Install-Amazon-Inspector-Agent
-bash /tmp/Install-Amazon-Inspector-Agent
+# chmod 700 /tmp/Install-Amazon-Inspector-Agent
+# bash /tmp/Install-Amazon-Inspector-Agent
 
-rpm -qi AwsAgent
+# rpm -qi AwsAgent
 
-/opt/aws/awsagent/bin/awsagent status
+# /opt/aws/awsagent/bin/awsagent status
 
 # Configure Amazon Inspector Agent software (Start Daemon awsagent)
-systemctl status awsagent
-systemctl enable awsagent
-systemctl is-enabled awsagent
+# systemctl status awsagent
+# systemctl enable awsagent
+# systemctl is-enabled awsagent
 
-systemctl restart awsagent
-systemctl status awsagent
+# systemctl restart awsagent
+# systemctl status awsagent
 
-/opt/aws/awsagent/bin/awsagent status
+# /opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]

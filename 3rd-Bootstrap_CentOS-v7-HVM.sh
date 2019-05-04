@@ -89,6 +89,9 @@ yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
+# Package Install Device driver compatible with Amazon EC2 (from CentOS Community Repository)
+yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
 
@@ -129,17 +132,9 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python2-pip
-pip install awscli
-pip show awscli
+yum install -y awscli
 
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
-
-source /etc/profile.d/aws-cli.sh
+rpm -qi awscli
 
 aws --version
 

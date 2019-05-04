@@ -105,6 +105,9 @@ yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
+# Package Install Device driver compatible with Amazon EC2 (from Red Hat Official Repository)
+yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
@@ -161,13 +164,14 @@ yum --enablerepo=epel install -y python2-pip
 pip install awscli
 pip show awscli
 
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
 
-source /etc/profile.d/aws-cli.sh
+complete -C aws_completer aws
+__EOF__
 
 aws --version
 
