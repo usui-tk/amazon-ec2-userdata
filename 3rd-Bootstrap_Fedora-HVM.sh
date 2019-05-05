@@ -58,7 +58,7 @@ dnf list installed > /tmp/command-log_dnf_installed-package.txt
 dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 
 # systemd service config
-systemctl list-units --no-pager -all
+systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update

@@ -66,7 +66,7 @@ zypper search --installed-only > /tmp/command-log_zypper_installed-package.txt
 zypper search > /tmp/command-log_zypper_repository-package-list.txt
 
 # systemd service config
-systemctl list-units --no-pager -all
+systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -86,7 +86,7 @@ SUSEConnect --list-extensions
 zypper --non-interactive update
 
 # Install recommended packages
-# zypper --non-interactive install-new-recommends
+zypper --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)

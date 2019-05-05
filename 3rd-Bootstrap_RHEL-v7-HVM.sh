@@ -69,7 +69,7 @@ yum list installed > /tmp/command-log_yum_installed-package.txt
 yum list all > /tmp/command-log_yum_repository-package-list.txt
 
 # systemd service config
-systemctl list-units --no-pager -all
+systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
