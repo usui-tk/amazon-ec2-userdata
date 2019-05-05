@@ -141,7 +141,7 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "SLES" ] || [ "${DIST_TYPE}" = "sles" ]; then
-        if [ $(echo ${REV} | grep -e '15.') ]; then
+        if [ $(echo ${REV} | grep -e '15') ]; then
            # Bootstrap Script for SUSE Linux Enterprise Server 15
            BootstrapScript=${ScriptForSLESv15}
         elif [ $(echo ${REV} | grep -e '12.') ]; then
