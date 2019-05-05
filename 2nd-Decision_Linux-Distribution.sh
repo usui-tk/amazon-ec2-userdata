@@ -18,6 +18,7 @@ ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-use
 ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
 ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
+ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
 
@@ -140,14 +141,23 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "SLES" ] || [ "${DIST_TYPE}" = "sles" ]; then
-        if [ $(echo ${REV} | grep -e '12.') ]; then
+        if [ $(echo ${REV} | grep -e '15.') ]; then
+           # Bootstrap Script for SUSE Linux Enterprise Server 15
+           BootstrapScript=${ScriptForSLESv15}
+        elif [ $(echo ${REV} | grep -e '12.') ]; then
            # Bootstrap Script for SUSE Linux Enterprise Server 12
            BootstrapScript=${ScriptForSLESv12}
         else
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
-        if [ $(echo ${REV} | grep -e '28') ]; then
+        if [ $(echo ${REV} | grep -e '30') ]; then
+           # Bootstrap Script for Fedora 30
+           BootstrapScript=${ScriptForFedora}
+        elif [ $(echo ${REV} | grep -e '29') ]; then
+           # Bootstrap Script for Fedora 29
+           BootstrapScript=${ScriptForFedora}
+        elif [ $(echo ${REV} | grep -e '28') ]; then
            # Bootstrap Script for Fedora 28
            BootstrapScript=${ScriptForFedora}
         elif [ $(echo ${REV} | grep -e '27') ]; then

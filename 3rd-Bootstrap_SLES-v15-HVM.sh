@@ -30,19 +30,18 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_SLES-v12-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_SLES-v15-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - SUSE Linux Enterprise Server 12
-#    https://www.suse.com/documentation/sles-12/
-#    https://www.suse.com/ja-jp/documentation/sles-12/
+#  - SUSE Linux Enterprise Server 15
+#    https://www.suse.com/documentation/sles-15/
+#    https://www.suse.com/ja-jp/documentation/sles-15/
 #    https://www.suse.com/documentation/suse-best-practices/
 #
-#    https://aws.amazon.com/jp/partners/suse/faqs/
+#    https://en.opensuse.org/YaST_Software_Management
 #
-#    https://aws.amazon.com/marketplace/pp/B00PMM9322
-#    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
+#    https://aws.amazon.com/jp/partners/suse/faqs/
 #
 #-------------------------------------------------------------------------------
 
@@ -99,33 +98,28 @@ zypper --non-interactive update
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
 zypper --non-interactive install --type pattern yast2_basis
-zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
-zypper --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
+zypper --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 zypper --non-interactive install patterns-sles-apparmor
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
-#  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
+#  zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
+zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
+zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
+zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
-#   https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/
-#   https://download.opensuse.org/repositories/network/SLE_12_SP3/
+#   https://download.opensuse.org/repositories/utilities/SLE_15/
 #-------------------------------------------------------------------------------
 
 zypper repos
 
-# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
-zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
+# Add openSUSE Build Service Repository [utilities/SLE_15] : Version - SUSE Linux Enterprise 15
+zypper addrepo --check --refresh --name "utilities-SLE-15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
 zypper --gpg-auto-import-keys refresh utilities
-
-# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
-zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
-zypper --gpg-auto-import-keys refresh network
 
 # Repository Configure openSUSE Build Service Repository
 zypper repos
@@ -136,7 +130,8 @@ zypper refresh -fdb
 zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop jq
+zypper --non-interactive install atop
+# zypper --non-interactive install jq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -148,8 +143,8 @@ SUSEConnect --status-text
 
 SUSEConnect --list-extensions
 
-# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
-SUSEConnect --product "PackageHub/12.3/x86_64"
+# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
+SUSEConnect --product "PackageHub/15/x86_64"
 sleep 5
 
 # Repository Configure SUSE Package Hub Repository
@@ -163,7 +158,7 @@ zypper refresh -fdb
 zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install collectl mtr
+# zypper --non-interactive install collectl mtr
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -178,18 +173,18 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+# RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+# RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
-if [ -n "$RoleName" ]; then
-	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-	StsToken=$(echo $StsCredential | jq -r '.Token')
-fi
+# if [ -n "$RoleName" ]; then
+# 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+# 	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+# 	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+# 	StsToken=$(echo $StsCredential | jq -r '.Token')
+# fi
 
 # AWS Account ID
-AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+# AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -314,8 +309,9 @@ fi
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 # zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+zypper --non-interactive install amazon-ssm-agent
 
 rpm -qi amazon-ssm-agent
 
@@ -409,25 +405,25 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install ansible
+# zypper --non-interactive install ansible
 
-ansible --version
+# ansible --version
 
-ansible localhost -m setup 
+# ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
 # 
-# https://packages.microsoft.com/sles/12/prod/
+# https://packages.microsoft.com/sles/15/prod/
 # 
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
 # Add the Microsoft Product repository
-zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-12" "https://packages.microsoft.com/config/sles/12/prod.repo"
+zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-15" "https://packages.microsoft.com/config/sles/15/prod.repo"
 
 # Register the Microsoft signature key
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
@@ -436,10 +432,10 @@ zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
 zypper repos
 
 # Update the list of products
-# zypper clean --all
-# zypper refresh -fdb
+zypper clean --all
+zypper refresh -fdb
 
-# zypper --non-interactive update
+zypper --non-interactive update
 
 # Install PowerShell
 # zypper --non-interactive install powershell
@@ -518,13 +514,7 @@ rcapparmor status
 # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html
 #-------------------------------------------------------------------------------
 
-# Replace NTP Client software (Uninstall ntp Package)
-systemctl status -l ntpd
-systemctl stop ntpd
-systemctl status -l ntpd
-zypper --non-interactive remove ntp
-
-# Replace NTP Client software (Install chrony Package)
+# Configure NTP Client software (Install chrony Package)
 zypper --non-interactive install chrony
 systemctl daemon-reload
 
@@ -532,10 +522,6 @@ systemctl daemon-reload
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
-
-sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169.123 prefer iburst\n" /etc/chrony.conf
-
-cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 # Configure NTP Client software (Start Daemon chronyd)
 systemctl status chronyd
