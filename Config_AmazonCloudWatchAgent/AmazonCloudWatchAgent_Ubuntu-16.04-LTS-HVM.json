@@ -5,23 +5,28 @@
 				"collect_list": [
 					{
 						"file_path": "/var/log/syslog",
-						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-syslog"
+						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-syslog",
+						"log_stream_name": "{instance_id}"
 					},
 					{
 						"file_path": "/var/log/auth.log",
-						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-auth.log"
+						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-auth.log",
+						"log_stream_name": "{instance_id}"
 					},
 					{
 						"file_path": "/var/log/dpkg.log",
-						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-dpkg.log"
+						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-dpkg.log",
+						"log_stream_name": "{instance_id}"
 					},
 					{
 						"file_path": "/var/log/amazon/ssm/amazon-ssm-agent.log",
-						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-amazon-ssm-agent.log"
+						"log_group_name": "/aws/ec2/ubuntu-1604-lts/var-log-amazon-ssm-agent.log",
+						"log_stream_name": "{instance_id}"
 					},
 					{
 						"file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
-						"log_group_name": "/aws/ec2/ubuntu-1604-lts/opt/aws/amazon-cloudwatch-agent.log"
+						"log_group_name": "/aws/ec2/ubuntu-1604-lts/opt/aws/amazon-cloudwatch-agent.log",
+						"log_stream_name": "{instance_id}"
 					}
 				]
 			}
