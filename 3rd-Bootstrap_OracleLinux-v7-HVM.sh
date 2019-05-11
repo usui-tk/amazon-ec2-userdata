@@ -383,7 +383,7 @@ pip install argparse
 pip install python-daemon
 pip install requests
 
-curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
+curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
 tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
 
 cd /tmp/aws-cfn-bootstrap-1.4/

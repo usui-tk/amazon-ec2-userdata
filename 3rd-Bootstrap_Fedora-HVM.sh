@@ -89,6 +89,8 @@ dnf update -y
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
 dnf install -y arptables atop bash-completion bc bind-utils collectl curl dstat ebtables ethtool fio gdisk git hdparm jq lsof lzop iotop mlocate mtr nc nmap nvme-cli numactl rpmconf sos strace sysstat tcpdump tree traceroute unzip vim-enhanced wget zip
+dnf install -y cifs-utils nfs-utils nfs4-acl-tools
+dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server setools-console
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
@@ -790,7 +792,7 @@ fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
-	dnf install -y langpacks-ja
+	dnf install -y langpacks-ja glibc-langpack-ja
 	dnf install -y ibus-kkc sazanami-gothic-fonts sazanami-mincho-fonts ipa-gothic-fonts ipa-mincho-fonts vlgothic-fonts vlgothic-p-fonts
 	echo "# Setting System Language -> $Language"
 	locale

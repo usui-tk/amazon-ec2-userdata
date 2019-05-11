@@ -66,8 +66,11 @@ yum list installed > /tmp/command-log_yum_installed-package.txt
 # Default repository package [yum command]
 yum list all > /tmp/command-log_yum_repository-package-list.txt
 
-# upstartd service config
-chkconfig --list
+# upstartd service config [chkconfig command]
+chkconfig --list > /tmp/command-log_chkconfig_list.txt
+
+# Default repository list [yum command]
+yum repolist all > /tmp/command-log_yum_repository-list.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -76,6 +79,9 @@ chkconfig --list
 # Red Hat Update Infrastructure Client Package Update
 yum clean all
 yum update -y rh-amazon-rhui-client
+
+# Checking repository information
+yum repolist all
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
 yum-config-manager --enable rhui-REGION-rhel-server-releases
@@ -289,7 +295,7 @@ pip install argparse
 pip install python-daemon
 pip install requests
 
-curl https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz -o /tmp/aws-cfn-bootstrap-latest.tar.gz
+curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
 tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
 
 cd /tmp/aws-cfn-bootstrap-1.4/
