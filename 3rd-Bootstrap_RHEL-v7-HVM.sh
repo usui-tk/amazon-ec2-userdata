@@ -91,8 +91,9 @@ yum-config-manager --enable rhui-REGION-rhel-server-rh-common
 yum-config-manager --enable rhui-REGION-client-config-server-7
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-optional
 yum-config-manager --enable rhui-REGION-rhel-server-extras
+yum-config-manager --enable rhui-REGION-rhel-server-optional
+yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 # yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # yum repository metadata Clean up
@@ -108,8 +109,11 @@ yum update -y
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
-yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
+yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
+
+# Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
+yum install -y redhat-lsb-core redhat-support-tool
 
 # Package Install Device driver compatible with Amazon EC2 (from Red Hat Official Repository)
 yum install -y kmod-redhat-ena kmod-redhat-ixgbe
@@ -453,7 +457,10 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y ansible ansible-doc rhel-system-roles
+# yum install -y ansible ansible-doc rhel-system-roles
+
+# Package Install Ansible (from EPEL Repository)
+yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 

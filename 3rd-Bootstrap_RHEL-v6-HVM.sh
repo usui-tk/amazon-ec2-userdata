@@ -89,6 +89,7 @@ yum-config-manager --enable rhui-REGION-rhel-server-rh-common
 yum-config-manager --enable rhui-REGION-client-config-server-6
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
+yum-config-manager --enable rhui-REGION-rhel-server-extras
 yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 # yum-config-manager --enable rhui-REGION-rhel-server-rhscl
@@ -108,6 +109,9 @@ yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcp
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
+
+# Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
+yum install -y redhat-lsb-core redhat-support-tool
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm

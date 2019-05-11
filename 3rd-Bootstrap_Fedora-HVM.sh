@@ -826,7 +826,7 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
-	DisableIPv6Conf="/etc/sysctl.d/99-ipv6-disable.conf"
+	DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
 
 	cat /dev/null > $DisableIPv6Conf
 	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf

@@ -233,7 +233,7 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-7.*" "Name=virtualization-type,Values=hvm" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 fi
@@ -703,7 +703,7 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
-	DisableIPv6Conf="/etc/sysctl.d/99-ipv6-disable.conf"
+	DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
 
 	cat /dev/null > $DisableIPv6Conf
 	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf

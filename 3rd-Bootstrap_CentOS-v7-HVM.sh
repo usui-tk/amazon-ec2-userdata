@@ -86,7 +86,7 @@ yum update -y
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
 yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
-yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
+yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
 # Package Install Device driver compatible with Amazon EC2 (from CentOS Community Repository)
