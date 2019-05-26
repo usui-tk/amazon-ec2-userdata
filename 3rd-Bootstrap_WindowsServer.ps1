@@ -2311,8 +2311,8 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Package Download Terminal emulator (Tera Term)
-    Write-Log "# Package Download File archiver (7-Zip)"
-    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
+    Write-Log "# Package Download Terminal emulator (Tera Term)"
+    Get-WebContentToFile -Uri 'https://ja.osdn.net/frs/redir.php?m=jaist&f=ttssh2%2F70691%2Fteraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
 
     # Package Install Terminal emulator (Tera Term)
     Write-Log "# Package Install Terminal emulator (Tera Term)"
