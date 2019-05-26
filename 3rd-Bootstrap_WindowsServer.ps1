@@ -27,6 +27,10 @@
 #               [Windows_Server-2016-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2016-English-Full-Base-YYYY.MM.DD]
 #
+#      - 10.0 : Windows Server 2019 (Microsoft Windows Server 2019 [Datacenter Edition])
+#               [Windows_Server-2019-Japanese-Full-Base-YYYY.MM.DD]
+#               [Windows_Server-2019-English-Full-Base-YYYY.MM.DD]
+#
 ########################################################################################################################
 
 #-------------------------------------------------------------------------------
@@ -923,7 +927,7 @@ if ($RoleName) {
 #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c5.*|^c5d.*|^c5n.*|^e3.*|^f1.*|^g3.*|^g3s.*|^h1.*|^i3.*|^i3p.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^p3dn.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^m4.16xlarge|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
+    if ($InstanceType -match "^a1.*|^c5.*|^c5d.*|^c5n.*|^e3.*|^f1.*|^g3.*|^g3s.*|^h1.*|^i3.*|^i3en.*|^i3p.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^p3dn.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^m4.16xlarge|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -948,7 +952,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^c5n.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^g3s.*|^h1.*|^i2.*|^i3.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^r3.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
+    if ($InstanceType -match "^a1.*|^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^c5n.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^g3s.*|^h1.*|^i2.*|^i3.*|^i3en.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^r3.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -1371,6 +1375,35 @@ Get-PowerPlanInformation
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (AWS-CLI)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install System Utility (AWS-CLI)"
+
+# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
+
+    # Package Download System Utility (AWS-CLI)
+    # https://aws.amazon.com/jp/cli/
+    # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/install-windows.html
+    Write-Log "# Package Download System Utility (AWS-CLI)"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi' -OutFile "$TOOL_DIR\AWSCLI64PY3.msi"
+    # Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLISetup.exe' -OutFile "$TOOL_DIR\AWSCLISetup.exe"
+
+    # Package Install System Utility (AWS-CLI)
+    Write-Log "# Package Install System Utility (AWS-CLI)"
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\AWSCLI64PY3.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWSCLISetup.log")
+
+    Start-Sleep -Seconds 5
+}
+else {
+    # Amazon CloudWatch Agent Support Windows OS Version (None)
+    Write-Log ("# [AWS - EC2-AWSCLI] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Custom Package ReInstall[Uninstall and Install] (AWS CloudFormation Helper Scripts)
 #  - Workaround processing for multiple aws-cfn-bootstrap package information conflicts -
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1398,7 +1431,7 @@ Get-WebContentToFile -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-
 
 # Package Install System Utility (AWS CloudFormation Helper Scripts)
 Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
-Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWSCloudFormationHelperScriptSetup.log")
+Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWSCloudFormationHelperScriptSetup.log")
 
 Start-Sleep -Seconds 5
 
@@ -1428,7 +1461,7 @@ Get-Ec2SystemManagerAgentVersion
 
 # Package Update System Utility (AWS Systems Manager agent)
 Write-Log "# Package Update System Utility (AWS Systems Manager agent)"
-Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AWS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
 
 Start-Sleep -Seconds 5
 
@@ -1467,7 +1500,7 @@ Get-Content -Path $SSMAgentLogFile
 
 # Display Windows Server OS Parameter [AWS Systems Manager agent Information]
 if ($RoleName) {
-    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -Verb runas -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
+    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -Verb runas -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_AWS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
 }
 
 
@@ -1511,31 +1544,18 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     # Package Download System Utility (Amazon CloudWatch Agent)
     # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
     Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent.zip"
-
-    # Package Uncompress System Utility (Amazon CloudWatch Agent)
-    if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
-        Add-Type -AssemblyName 'System.IO.Compression.Filesystem'
-        [System.IO.Compression.ZipFile]::ExtractToDirectory("$TOOL_DIR\AmazonCloudWatchAgent.zip", "$TOOL_DIR\AmazonCloudWatchAgent")
-    }
-    elseif ($WindowsOSVersion -match "^10.0") {
-        Expand-Archive -Path "$TOOL_DIR\AmazonCloudWatchAgent.zip" -DestinationPath "$TOOL_DIR\AmazonCloudWatchAgent" -Force | Out-Null
-    }
-    else {
-        # Amazon CloudWatch Agent Support Windows OS Version (None)
-        Write-Log ("# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
-    }
-
-    # Package Pre-Install System Utility (Amazon CloudWatch Agent)
-    Write-Log "# Package Pre-Install System Utility (Amazon CloudWatch Agent)"
-    Set-Location -Path "$TOOL_DIR\AmazonCloudWatchAgent"
-
-    powershell.exe -ExecutionPolicy Bypass -File "$TOOL_DIR\AmazonCloudWatchAgent\install.ps1"
-
-    Set-Location -Path $BASE_DIR
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi' -OutFile "$TOOL_DIR\amazon-cloudwatch-agent.msi"
 
     # Package Install System Utility (Amazon CloudWatch Agent)
     Write-Log "# Package Install System Utility (Amazon CloudWatch Agent)"
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\amazon-cloudwatch-agent.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AmazonCloudWatchAgentSetup.log")
+
+    Start-Sleep -Seconds 5
+
+    Get-Service -Name AmazonCloudWatchAgent
+
+    # Package Configuration System Utility (Amazon CloudWatch Agent)
+    Write-Log "# Package Configuration System Utility (Amazon CloudWatch Agent)"
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -a fetch-config -m ec2 -c file:"$TOOL_DIR\AmazonCloudWatchAgent-Config.json" -s
 
     Start-Sleep -Seconds 10
@@ -1576,7 +1596,7 @@ Write-LogSeparator "Package Install System Utility (Amazon Inspector Agent)"
 Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
 
 # Check Region
-if ($Region -match "^us-east-1|^us-east-1|^us-west-1|^us-west-2|^ap-south-1|^ap-northeast-2|^ap-southeast-2|^ap-northeast-1|^eu-west-1|^eu-central-1") {
+if ($Region -match "^us-east-1|^us-east-2|^us-west-1|^us-west-2|^ap-south-1|^ap-northeast-2|^ap-southeast-2|^ap-northeast-1|^eu-west-1|^eu-central-1") {
 
     # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
     if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -1959,16 +1979,21 @@ if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
         if ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2012R2&target_type=exelocal'
-            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_windows-exe"
+            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_windows.exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2012R2.exe"
+            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2012R2.exe"
         }
         elseif ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
             $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
-            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/9.0/Prod/local_installers/cuda_9.0.176_win10-exe"
+            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_win10.exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v9_for_WindowsServer2016.exe"
+            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2016.exe"
+            # [Windows Server 2019]
+            # $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2019&target_type=exelocal'
+            # $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_win10.exe"
+            # Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
+            # Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2019.exe"
         }
         else {
             # [No Target Server OS]
@@ -2160,9 +2185,8 @@ Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 # https://github.com/JeremyMain/GPUProfiler
 if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)"
-    Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.06a/GPUProfiler_1.06a-x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_1.06a-x64.zip"
+    Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.07a/GPUProfiler_v1.07a_x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_v1.07a_x64.zip"
 }
-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2224,7 +2248,6 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 
-
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Installation (Application)
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2233,14 +2256,47 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 Write-LogSeparator "Custom Package Installation (Application)"
 
 # Custom Package Installation (Google Chrome 64bit Edition)
+# https://cloud.google.com/chrome-enterprise/browser/download/#chrome-browser-download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
-    # Package Install Modern Web Browser (Google Chrome 64bit Edition)
+    # Package Download Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
     Get-WebContentToFile -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
 
+    # Package Install Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
     Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+
+    Start-Sleep -Seconds 5
 }
+
+# Custom Package Installation (7-Zip)
+# http://www.7-zip.org/
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Package Download File archiver (7-Zip)
+    Write-Log "# Package Download File archiver (7-Zip)"
+    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1900-x64.exe' -OutFile "$TOOL_DIR\7z1900-x64.exe"
+
+    # Package Install File archiver (7-Zip)
+    Write-Log "# Package Install File archiver (7-Zip)"
+    Start-Process -FilePath "$TOOL_DIR\7z1900-x64.exe" -Verb runas -Wait -ArgumentList @("/S") | Out-Null
+
+    Start-Sleep -Seconds 5
+}
+
+# Custom Package Installation (Tera Term)
+# https://ja.osdn.net/projects/ttssh2/
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Package Download Terminal emulator (Tera Term)
+    Write-Log "# Package Download File archiver (7-Zip)"
+    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
+
+    # Package Install Terminal emulator (Tera Term)
+    Write-Log "# Package Install Terminal emulator (Tera Term)"
+    Start-Process -FilePath "$TOOL_DIR\teraterm-4.102.exe" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/NORESTART", "/LOG=C:\EC2-Bootstrap\Logs\APPS_TeraTermSetup.log") | Out-Null
+    
+    Start-Sleep -Seconds 5
+}
+
 
 # [Caution : Finally the installation process]
 # Custom Package Installation (Visual Studio Code 64bit Edition)
@@ -2253,7 +2309,6 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
     Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 }
-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2277,25 +2332,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
 }
 
-# Package Download System Utility (7-zip)
-# http://www.7-zip.org/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (7-zip)"
-    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1900-x64.exe' -OutFile "$TOOL_DIR\7z1900-x64.exe"
-}
-
-# Package Download System Utility (Tera Term)
-# https://ja.osdn.net/projects/ttssh2/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (Tera Term)"
-    Get-WebContentToFile -Uri 'https://osdn.net/dl/ttssh2/teraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
-}
-
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.1-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.1-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2304,7 +2345,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.3.0-1-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.3.0-1-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.4.0-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.4.0-0-x64.msi"
     }
 }
 
@@ -2327,20 +2368,18 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
-# Package Download System Utility (AWS-CLI)
-# https://aws.amazon.com/jp/cli/
-# https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/install-windows.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (AWS-CLI)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLISetup.exe' -OutFile "$TOOL_DIR\AWSCLISetup.exe"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi' -OutFile "$TOOL_DIR\AWSCLI64PY3.msi"
-}
-
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
     Get-WebContentToFile -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+}
+
+# Package Download System Utility (Session Manager Plugin for the AWS CLI)
+# https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (Session Manager Plugin for the AWS CLI)"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe' -OutFile "$TOOL_DIR\SessionManagerPluginSetup.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
