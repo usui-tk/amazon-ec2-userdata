@@ -109,7 +109,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y arptables bash-completion bc bcc-tools bind-utils curl dstat ebtables ethtool fio gdisk git hdparm jq libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced wget zip
+dnf install -y arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server setools-console
@@ -117,8 +117,11 @@ dnf install -y setroubleshoot-server setools-console
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 dnf install -y redhat-lsb-core redhat-support-tool
 
+# Package Install Red Hat Enterprise Linux Web-Based support tools (from Red Hat Official Repository)
+dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+# dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 # cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 # [epel]
@@ -129,16 +132,16 @@ dnf install -y redhat-lsb-core redhat-support-tool
 # gpgcheck=0
 # __EOF__
 
-# yum --enablerepo=epel -y install epel-release
+# dnf --enablerepo=epel -y install epel-release
 # rm -f /etc/yum.repos.d/epel-bootstrap.repo
 
 # sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 # # yum-config-manager --disable epel epel-debuginfo epel-source
 
-# yum clean all
+# dnf clean all
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
-# yum --enablerepo=epel install -y atop collectl
+# dnf --enablerepo=epel install -y atop collectl
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -262,7 +265,7 @@ fi
 
 
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|h1.*|i3.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -288,7 +291,7 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -313,7 +316,7 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ssd-instance-store.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|i3.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
