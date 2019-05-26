@@ -368,18 +368,18 @@ function Get-Ec2InstanceMetadata {
     Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
     # Set IAM Role & STS Information
-    Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info").Content | ConvertFrom-Json).InstanceProfileArn
+    Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info") | ConvertFrom-Json).InstanceProfileArn
     Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
     
     if ($RoleName) {
-        Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)).Content | ConvertFrom-Json)
+        Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)) | ConvertFrom-Json)
         Set-Variable -Name StsAccessKeyId -Scope Script -Value $StsCredential.AccessKeyId
         Set-Variable -Name StsSecretAccessKey -Scope Script -Value $StsCredential.SecretAccessKey
         Set-Variable -Name StsToken -Scope Script -Value $StsCredential.Token
     }
 
     # Set AWS Account ID
-    Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document").Content | ConvertFrom-Json).accountId
+    Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document") | ConvertFrom-Json).accountId
 
     # Logging AWS Instance Metadata
     Write-Log "# [AWS - EC2] Region : $Region"
@@ -1037,7 +1037,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     # $AUSettings.ScheduledInstallationDay  = 1    # Every Sunday
     # $AUSettings.ScheduledInstallationTime = 3    # AM 3:00
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
-    $AUSettings.FeaturedUpdatesEnabled = $True  # Enabled
+    $AUSettings.FeaturedUpdatesEnabled = $True     # Enabled
 
     # Save Windows Update Policy 
     $AUSettings.Save()
@@ -1104,18 +1104,18 @@ Write-Log ("# [Windows - OS Settings] Amazon Time Sync Service - Support Instanc
 
 # Get Windows Time Service (Service Status/Configuration/Peer Status)
 Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /peers /verbose")
     
 # Set Windows Time Service for Amazon Time Sync Service
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
 
 # Get Windows Time Service (Service Status/Configuration/Peer Status)
 Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time Service (Service Status/Configuration/Peer Status)"
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /status /verbose")
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
-Start-Process -FilePath $W32TM -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/query /peers /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /status /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
+Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /peers /verbose")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1833,10 +1833,10 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 6.0)"
 
     # Install AWSPowerShell.NetCore
-    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
-    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
 
 }
 
@@ -2469,7 +2469,7 @@ else {
 # Log Collect (EC2Rescue)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
 Write-Log "# Execution System Utility (EC2Rescue) - Start"
-Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -Verb runas -NoNewWindow -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
+Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -Verb runas -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
 Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 
