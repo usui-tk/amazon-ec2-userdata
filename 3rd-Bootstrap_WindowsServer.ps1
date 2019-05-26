@@ -1347,27 +1347,51 @@ else {
 # Log Separator
 Write-LogSeparator "Windows Server OS Configuration [System PowerPlan]"
 
-# Setting Paramter ["high performance" in Japanese]
+# Setting Paramter [PowerShell script "high performance" in Japanese]
 $Word_HighPower_Base64 = "6auY44OR44OV44Kp44O844Oe44Oz44K5"                             # A string of "high performance" was Base64 encoded in Japanese
 $Word_HighPower_Byte = [System.Convert]::FromBase64String($Word_HighPower_Base64)       # Conversion from base64 to byte sequence
 $Word_HighPower_String = [System.Text.Encoding]::UTF8.GetString($Word_HighPower_Byte)   # To convert a sequence of bytes into a string of UTF-8 encoding
 
+# Setting Paramter [GUID parameter "high performance" of powercfg.exe]
+$Guid_HighPower = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"                                # https://docs.microsoft.com/en-us/windows/desktop/power/power-policy-settings
+
 # Logging Windows Server OS Parameter [System Power Plan Information]
 Get-PowerPlanInformation
 
-# Change System PowerPlan (High Performance)
-if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }) {
-    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $Word_HighPower_String"
-    (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }).Activate()
-    Start-Sleep -Seconds 5
+if ($WindowsOSVersion -match "^6.1|^6.2|^6.3") {
+    # Change System PowerPlan (High Performance)
+    if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }) {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $Word_HighPower_String"
+        (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }).Activate()
+        Start-Sleep -Seconds 5
+    }
+    elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - High performance"
+        (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
+        Start-Sleep -Seconds 5
+    }
+    else {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - No change"
+    }
 }
-elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
-    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - High performance"
-    (Get-WmiObject -Name root\cimv2\power -Class Win32_PowerPlan -Filter 'ElementName = "High performance"').Activate()
-    Start-Sleep -Seconds 5
+elseif ($WindowsOSVersion -match "^10.0") {
+    # Change System PowerPlan (High Performance)
+    if (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq $Word_HighPower_String }) {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - $Word_HighPower_String"
+        Start-Process "powercfg.exe" -Verb runas -Wait -ArgumentList @("/setactive", "$Guid_HighPower")
+        Start-Sleep -Seconds 5
+    }
+    elseif (Get-WmiObject -Namespace root\cimv2\power -Class win32_PowerPlan | Where-Object { $_.ElementName -eq "High performance" }) {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - High performance"
+        Start-Process "powercfg.exe" -Verb runas -Wait -ArgumentList @("/setactive", "$Guid_HighPower")
+        Start-Sleep -Seconds 5
+    }
+    else {
+        Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - No change"
+    }
 }
 else {
-    Write-Log "# [Windows - OS Settings] PowerPlan : Change System PowerPlan - No change"
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
 }
 
 # Logging Windows Server OS Parameter [System Power Plan Information]
