@@ -368,18 +368,18 @@ function Get-Ec2InstanceMetadata {
     Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
     # Set IAM Role & STS Information
-    Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info") | ConvertFrom-Json).InstanceProfileArn
+    Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
     Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
     
     if ($RoleName) {
-        Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName)) | ConvertFrom-Json)
+        Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName) -UseBasicParsing) | ConvertFrom-Json)
         Set-Variable -Name StsAccessKeyId -Scope Script -Value $StsCredential.AccessKeyId
         Set-Variable -Name StsSecretAccessKey -Scope Script -Value $StsCredential.SecretAccessKey
         Set-Variable -Name StsToken -Scope Script -Value $StsCredential.Token
     }
 
     # Set AWS Account ID
-    Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/dynamic/instance-identity/document") | ConvertFrom-Json).accountId
+    Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -UseBasicParsing) | ConvertFrom-Json).accountId
 
     # Logging AWS Instance Metadata
     Write-Log "# [AWS - EC2] Region : $Region"
@@ -553,7 +553,7 @@ function Get-WebContentToFile {
     else {
         Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] -> [" + $OutFile + "]" )
 
-        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -OutFile $OutFile) } 
+        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) } 
         Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
 
         Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] -> [" + $OutFile + "]" )
@@ -1129,16 +1129,38 @@ Write-LogSeparator "Windows Server OS Configuration [Folder Option Setting]"
 Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (Before)"
 Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
-Get-ItemProperty -Path $FolderOptionRegistry
+if (Test-Path -Path $FolderOptionRegistry) {
 
-# [Check] Show hidden files, folders, or drives
-Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
-# [UnCheck] Hide extensions for known file types
-Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
-# [Check] Restore previous folders windows
-New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+    # [Check] Show hidden files, folders, or drives
+    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
+        Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+        Write-Log "# Set-ItemProperty"
+    }
+    else {
+        New-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
+        Write-Log "# New-ItemProperty"
+    }
 
-Get-ItemProperty -Path $FolderOptionRegistry
+    # [UnCheck] Hide extensions for known file types
+    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
+        Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+        Write-Log "# Set-ItemProperty"
+    }
+    else {
+        New-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
+        Write-Log "# New-ItemProperty"
+    }
+
+    # [Check] Restore previous folders windows
+    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
+        Set-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
+        Write-Log "# Set-ItemProperty"
+    }
+    else {
+        New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+        Write-Log "# New-ItemProperty"
+    }
+}
 
 Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (After)"
 
@@ -1459,7 +1481,7 @@ Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-
 
 Start-Sleep -Seconds 5
 
-Get-Service -Name cfn-hup
+Get-Service -Name "cfn-hup"
 
 # Logging Install Windows Application List (After Install)
 Write-Log "# Get Install Windows Application List (After Install)"
@@ -1489,7 +1511,7 @@ Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -Argumen
 
 Start-Sleep -Seconds 5
 
-Get-Service -Name AmazonSSMAgent
+Get-Service -Name "AmazonSSMAgent"
 
 # Service Automatic Startup Setting (AWS Systems Manager agent)
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
@@ -1508,16 +1530,16 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
 Get-Ec2SystemManagerAgentVersion
 
 # Forced cleanup of AWS Systems Manager agent's local data
-Stop-Service -Name AmazonSSMAgent
+Stop-Service -Name "AmazonSSMAgent"
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
 Clear-Content -Path $SSMAgentLogFile
 
-Start-Service -Name AmazonSSMAgent
+Start-Service -Name "AmazonSSMAgent"
 Start-Sleep -Seconds 15
 
 # Get Service Status
-Get-Service -Name AmazonSSMAgent
+Get-Service -Name "AmazonSSMAgent"
 
 # View Log File
 Get-Content -Path $SSMAgentLogFile
@@ -1576,7 +1598,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     Start-Sleep -Seconds 5
 
-    Get-Service -Name AmazonCloudWatchAgent
+    Get-Service -Name "AmazonCloudWatchAgent"
 
     # Package Configuration System Utility (Amazon CloudWatch Agent)
     Write-Log "# Package Configuration System Utility (Amazon CloudWatch Agent)"
@@ -1587,7 +1609,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     # Display Windows Server OS Parameter [Amazon CloudWatch Agent Information]
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -m ec2 -a status
 
-    Get-Service -Name AmazonCloudWatchAgent
+    Get-Service -Name "AmazonCloudWatchAgent"
 
     # Service Automatic Startup Setting (Amazon CloudWatch Agent)
     $AmazonCloudWatchAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonCloudWatchAgent'").StartMode
@@ -1640,7 +1662,7 @@ if ($Region -match "^us-east-1|^us-east-2|^us-west-1|^us-west-2|^ap-south-1|^ap-
 
         Start-Sleep -Seconds 10
 
-        Get-Service -Name AWSAgent
+        Get-Service -Name "AWSAgent"
 
         # Service Automatic Startup Setting (Amazon Inspector Agent)
         $AmazonInspectorAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AWSAgent'").StartMode
@@ -1704,7 +1726,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
     }
 
     # Check Amazon EC2 Elastic GPU ID
-    $ElasticGpuResponseError = try { Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" } catch { $_.Exception.Response.StatusCode.Value__ }
+    $ElasticGpuResponseError = try { Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/elastic-gpus/associations" -UseBasicParsing } catch { $_.Exception.Response.StatusCode.Value__ }
     if ([String]::IsNullOrEmpty($ElasticGpuResponseError)) {
         # The Amazon EC2 Elastic GPU is attached
         Write-Log "# [AWS - EC2-ElasticGPU] Elastic GPU is attached"

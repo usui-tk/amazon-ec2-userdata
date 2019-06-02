@@ -105,7 +105,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
@@ -134,7 +134,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion fio iperf3 jq
+yum --enablerepo=epel install -y bash-completion fio iperf3 jq zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

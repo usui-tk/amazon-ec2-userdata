@@ -123,7 +123,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tree traceroute unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
@@ -180,7 +180,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop collectl
+yum --enablerepo=epel install -y atop collectl zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]

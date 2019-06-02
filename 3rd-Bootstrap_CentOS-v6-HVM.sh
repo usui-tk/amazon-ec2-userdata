@@ -87,10 +87,10 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of CentOS and RHEL (from CentOS Community Repository)
-yum install -y abrt abrt-cli blktrace numactl parted sos sysstat system-config-network-tui time tmpwatch tzdata unzip usermode yum-utils zip
+yum install -y abrt abrt-cli blktrace numactl parted redhat-lsb-core sos sysstat system-config-network-tui time tmpwatch tzdata unzip usermode yum-utils zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
@@ -104,7 +104,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq
+yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
