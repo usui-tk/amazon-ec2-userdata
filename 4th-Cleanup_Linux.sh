@@ -6,9 +6,6 @@ rm -rf /etc/udev/rules.d/70-persistent-*
 # Remove cloud-init status
 rm -rf /var/lib/cloud/* 
 
-# Remove Amazon System Manager (Agent) status
-rm -rf /var/lib/amazon/ssm/* 
-
 # Remove /tmp files
 rm -rf /tmp/* 
 
