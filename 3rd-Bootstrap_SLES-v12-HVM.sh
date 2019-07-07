@@ -98,10 +98,9 @@ zypper --non-interactive update
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install --type pattern yast2_basis
-zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
+zypper --non-interactive install arptables bash-completion cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
 zypper --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
-zypper --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
+zypper --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 zypper --non-interactive install patterns-sles-apparmor
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
@@ -148,22 +147,22 @@ SUSEConnect --status-text
 
 SUSEConnect --list-extensions
 
-# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
-SUSEConnect --product "PackageHub/12.3/x86_64"
-sleep 5
+# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
+# SUSEConnect --product "PackageHub/12.4/x86_64"
+# sleep 5
 
 # Repository Configure SUSE Package Hub Repository
-SUSEConnect --status-text
+# SUSEConnect --status-text
 
-SUSEConnect --list-extensions
+# SUSEConnect --list-extensions
 
-zypper clean --all
-zypper refresh -fdb
+# zypper clean --all
+# zypper refresh -fdb
 
-zypper repos
+# zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install collectl mtr
+# zypper --non-interactive install collectl mtr
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -415,11 +414,11 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-zypper --non-interactive install ansible
+# zypper --non-interactive install ansible
 
-ansible --version
+# ansible --version
 
-ansible localhost -m setup 
+# ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]

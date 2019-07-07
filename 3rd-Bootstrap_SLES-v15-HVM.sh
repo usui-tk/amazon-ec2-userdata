@@ -117,8 +117,8 @@ zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-To
 
 zypper repos
 
-# Add openSUSE Build Service Repository [utilities/SLE_15] : Version - SUSE Linux Enterprise 15
-zypper addrepo --check --refresh --name "utilities-SLE-15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
+# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports] : Version - SUSE Linux Enterprise 15 SP1
+zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15-SP1" "http://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
 zypper --gpg-auto-import-keys refresh utilities
 
 # Repository Configure openSUSE Build Service Repository
@@ -130,8 +130,7 @@ zypper refresh -fdb
 zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop
-# zypper --non-interactive install jq
+zypper --non-interactive install atop jq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -144,18 +143,18 @@ SUSEConnect --status-text
 SUSEConnect --list-extensions
 
 # Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
-SUSEConnect --product "PackageHub/15/x86_64"
-sleep 5
+# SUSEConnect --product "PackageHub/15.1/x86_64"
+# sleep 5
 
 # Repository Configure SUSE Package Hub Repository
-SUSEConnect --status-text
+# SUSEConnect --status-text
 
-SUSEConnect --list-extensions
+# SUSEConnect --list-extensions
 
-zypper clean --all
-zypper refresh -fdb
+# zypper clean --all
+# zypper refresh -fdb
 
-zypper repos
+# zypper repos
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 # zypper --non-interactive install collectl mtr
@@ -173,18 +172,18 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-# RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-# RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 
-# if [ -n "$RoleName" ]; then
-# 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-# 	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-# 	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-# 	StsToken=$(echo $StsCredential | jq -r '.Token')
-# fi
+if [ -n "$RoleName" ]; then
+	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+	StsToken=$(echo $StsCredential | jq -r '.Token')
+fi
 
 # AWS Account ID
-# AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
