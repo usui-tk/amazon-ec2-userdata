@@ -31,21 +31,21 @@ Write-MessageSeparator "Start Script Execution Cleanup Script"
 # Delete Bootstrap working directory
 if (Test-Path -Path $BASE_DIR) {
     Write-Message ("# Delete directory [" + $BASE_DIR + "]")
-    Remove-Item -Path $BASE_DIR -Recurse -Force
+    Remove-Item -Path $BASE_DIR -Recurse -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 5
 }
 
 # Delete Windows TEMP directory
 if (Test-Path -Path $TEMP_DIR) {
     Write-Message ("# Delete directory [" + $TEMP_DIR + "]")
-    Remove-Item -Path $TEMP_DIR -Recurse -Force
+    Remove-Item -Path $TEMP_DIR -Recurse -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 5
 }
 
 # Delete RecycleBin's files
 if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Clear-RecycleBin" }) {
     Write-Message "# Delete RecycleBin's files [Clear-RecycleBin]"
-    Clear-RecycleBin -DriveLetter "C" -Force
+    Clear-RecycleBin -DriveLetter "C" -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 5
 }
 else {
@@ -58,32 +58,32 @@ else {
 Set-Variable -Name Ec2ConfigLogFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt"
 if (Test-Path -Path $Ec2ConfigLogFile) {
     Write-Message ("# Clear file [" + $Ec2ConfigLogFile + "]")
-    Clear-Content -Path $Ec2ConfigLogFile -Force
+    Clear-Content -Path $Ec2ConfigLogFile -Force -ErrorAction SilentlyContinue
 }
 
 Set-Variable -Name Ec2LaunchLogFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\Ec2Launch.log"
 if (Test-Path -Path $Ec2LaunchLogFile) {
     Write-Message ("# Clear file [" + $Ec2LaunchLogFile + "]")
-    Clear-Content -Path $Ec2LaunchLogFile -Force
+    Clear-Content -Path $Ec2LaunchLogFile -Force -ErrorAction SilentlyContinue
 }
 
 Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 if (Test-Path -Path $SSMAgentLogFile) {
     Write-Message ("# Clear file [" + $SSMAgentLogFile + "]")
-    Clear-Content -Path $SSMAgentLogFile -Force
+    Clear-Content -Path $SSMAgentLogFile -Force -ErrorAction SilentlyContinue
 }
 
 Set-Variable -Name CWAgentLogFile -Value "C:\ProgramData\Amazon\AmazonCloudWatchAgent\Logs\amazon-cloudwatch-agent.log"
 if (Test-Path -Path $CWAgentLogFile) {
     Write-Message ("# Clear file [" + $CWAgentLogFile + "]")
-    Clear-Content -Path $CWAgentLogFile -Force
+    Clear-Content -Path $CWAgentLogFile -Force -ErrorAction SilentlyContinue
 }
 
 # Clear Windows Event Log
 if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Clear-EventLog" }) {
     Write-Message "# Clear Windows Event Log [Clear-EventLog]"
     Get-EventLog -List
-    Get-EventLog -LogName * | ForEach-Object -Process { Clear-EventLog $_.Log }
+    Get-EventLog -LogName * | ForEach-Object -Process { Clear-EventLog $_.Log -ErrorAction SilentlyContinue }
     Start-Sleep -Seconds 5
     Get-EventLog -List
 }
@@ -97,31 +97,9 @@ else {
 
 # Clear PowerShell history
 Get-History
-Clear-History
+Clear-History -ErrorAction SilentlyContinue
 
 Write-MessageSeparator "Complete Script Execution Cleanup Script"
-
-#---------------------------------------------------------------------------------------------------------------------------
-
-# Windows Server OS Configuration [Folder Option Setting]
-Write-MessageSeparator "Windows Server OS Configuration [Folder Option Setting]"
-Set-Variable -Name FolderOptionRegistry -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
-
-if (Test-Path -Path $FolderOptionRegistry) {
-
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
-    }
-
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
-    }
-
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
-    }
-
-}
 
 #---------------------------------------------------------------------------------------------------------------------------
 
