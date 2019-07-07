@@ -1127,38 +1127,77 @@ Write-LogSeparator "Windows Server OS Configuration [Folder Option Setting]"
 
 # Change Windows Folder Option Policy
 Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (Before)"
-Set-Variable -Name FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
-if (Test-Path -Path $FolderOptionRegistry) {
+Set-Variable -Name HKLM_FolderOptionRegistry -Option Constant -Scope Local -Value "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+Set-Variable -Name HKCU_FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
+if (Test-Path -Path $HKLM_FolderOptionRegistry) {
     # [Check] Show hidden files, folders, or drives
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
-        Write-Log "# Set-ItemProperty"
+    if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\Hidden")
     }
     else {
-        New-ItemProperty -Path $FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
-        Write-Log "# New-ItemProperty"
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\Hidden")
     }
 
     # [UnCheck] Hide extensions for known file types
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
-        Write-Log "# Set-ItemProperty"
+    if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\HideFileExt")
     }
     else {
-        New-ItemProperty -Path $FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
-        Write-Log "# New-ItemProperty"
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\HideFileExt")
     }
 
     # [Check] Restore previous folders windows
-    if ((Get-Item -Path $FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
-        Set-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
-        Write-Log "# Set-ItemProperty"
+    if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\PersistBrowsers")
     }
     else {
-        New-ItemProperty -Path $FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
-        Write-Log "# New-ItemProperty"
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\PersistBrowsers")
+    }
+}
+
+if ( -Not (Test-Path -Path $HKCU_FolderOptionRegistry ) ) {
+    Write-Log ("# New-Item - " + $HKCU_FolderOptionRegistry)
+    New-Item -Path $HKCU_FolderOptionRegistry -Force 
+    Start-Sleep -Seconds 5
+}
+
+if (Test-Path -Path $HKCU_FolderOptionRegistry) {
+    # [Check] Show hidden files, folders, or drives
+    if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\Hidden")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\Hidden")
+    }
+
+    # [UnCheck] Hide extensions for known file types
+    if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\HideFileExt")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\HideFileExt")
+    }
+
+    # [Check] Restore previous folders windows
+    if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\PersistBrowsers")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\PersistBrowsers")
     }
 }
 
@@ -1167,24 +1206,124 @@ Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (After)
 
 # Change Display Desktop Icon Policy
 Write-Log "# [Windows - OS Settings] Change Display Desktop Icon Policy (Before)"
-Set-Variable -Name DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
-Set-Variable -Name DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
-New-Item -Path $DesktopIconRegistry -Force 
-New-Item -Path $DesktopIconRegistrySetting -Force 
+Set-Variable -Name HKLM_DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
+Set-Variable -Name HKCU_DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
+Set-Variable -Name HKCU_DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
-#[CLSID] : My Computer
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
-#[CLSID] : Control Panel
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
-#[CLSID] : User's Files
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
-#[CLSID] : Recycle Bin
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
-#[CLSID] : Network
-New-ItemProperty -Path $DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+if (Test-Path -Path $HKLM_DesktopIconRegistrySetting) {
+    #[CLSID] : My Computer
+    if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+    }
+    else {
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+    }
 
-Get-ItemProperty -Path $DesktopIconRegistrySetting
+    #[CLSID] : Control Panel
+    if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}') {
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
+    }
+    else {
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
+    }
+
+    #[CLSID] : User's Files
+    if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{59031a47-3f72-44a7-89c5-5595fe6b30ee}') {
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
+    }
+    else {
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
+    }
+
+    #[CLSID] : Recycle Bin
+    if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{645FF040-5081-101B-9F08-00AA002F954E}') {
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
+    }
+    else {
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
+    }
+
+    #[CLSID] : Network
+    if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}') {
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
+    }
+    else {
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
+    }
+}
+
+if ( -Not (Test-Path -Path $HKCU_DesktopIconRegistry ) ) {
+    Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistry)
+    New-Item -Path $HKCU_DesktopIconRegistry -Force 
+    Start-Sleep -Seconds 5
+
+    Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistrySetting)
+    New-Item -Path $HKCU_DesktopIconRegistrySetting -Force 
+    Start-Sleep -Seconds 5
+}
+
+if (Test-Path -Path $HKCU_DesktopIconRegistrySetting) {
+    #[CLSID] : My Computer
+    if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
+    }
+
+    #[CLSID] : Control Panel
+    if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}') {
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
+    }
+
+    #[CLSID] : User's Files
+    if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{59031a47-3f72-44a7-89c5-5595fe6b30ee}') {
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
+    }
+
+    #[CLSID] : Recycle Bin
+    if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{645FF040-5081-101B-9F08-00AA002F954E}') {
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
+    }
+
+    #[CLSID] : Network
+    if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}') {
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force
+        Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
+    }
+    else {
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+        Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
+    }
+}
 
 Write-Log "# [Windows - OS Settings] Change Display Desktop Icon Policy (After)"
 
@@ -2600,6 +2739,7 @@ Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR
 
 # Stop Transcript Logging
 Stop-Transcript
+Start-Sleep -Seconds 15
 
 # Save Logging Files(Start-Transcript Function LogFiles)
 Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR 

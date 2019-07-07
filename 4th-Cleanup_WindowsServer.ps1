@@ -81,17 +81,21 @@ if (Test-Path -Path $CWAgentLogFile) {
 
 # Clear Windows Event Log
 if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Clear-EventLog" }) {
-    Write-Message "# Clear Windows Event Log [Clear-EventLog]"
+    Write-Message "# Clear Windows Event Log [Get-EventLog (Before Cleanup EventLog)]"
     Get-EventLog -List
+    Write-Message "# Clear Windows Event Log [Clear-EventLog]"
     Get-EventLog -LogName * | ForEach-Object -Process { Clear-EventLog $_.Log -ErrorAction SilentlyContinue }
     Start-Sleep -Seconds 5
+    Write-Message "# Clear Windows Event Log [Get-EventLog (After Cleanup EventLog)]"
     Get-EventLog -List
 }
 else {
-    Write-Message "# Clear Windows Event Log [GlobalSession.ClearLog]"
+    Write-Message "# Clear Windows Event Log [Get-EventLog (Before Cleanup EventLog)]"
     Get-EventLog -List
+    Write-Message "# Clear Windows Event Log [GlobalSession.ClearLog]"
     Get-WinEvent -ListLog * | ForEach-Object -Process { [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($_.LogName) }
     Start-Sleep -Seconds 5
+    Write-Message "# Clear Windows Event Log [Get-EventLog (After Cleanup EventLog)]"
     Get-EventLog -List
 }
 
