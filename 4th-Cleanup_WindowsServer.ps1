@@ -1,6 +1,6 @@
 # Parameter
 Set-Variable -Name BASE_DIR -Value "$Env:SystemDrive\EC2-Bootstrap"
-Set-Variable -Name TEMP_DIR -Value "$Env:SystemRoot\Temp"
+Set-Variable -Name TEMP_DIR -Value "$Env:SystemRoot\Temp\*"
 
 # Function
 function Format-Message {
