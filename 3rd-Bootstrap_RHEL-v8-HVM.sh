@@ -113,6 +113,7 @@ dnf install -y arptables bash-completion bc bcc-tools bind-utils crypto-policies
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server setools-console
+dnf install -y pcp pcp-zeroconf pcp-system-tools pcp-export-pcp2json pcp-selinux
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 dnf install -y redhat-lsb-core redhat-support-tool
