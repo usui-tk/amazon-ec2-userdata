@@ -1389,48 +1389,37 @@ else {
 Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting]"
 
 # Update Sysprep Answer File
-if ($WindowsOSLanguage) {
-    if ($WindowsOSLanguage -eq "ja-JP") {
-        # Update Sysprep Answer File
-        if ($WindowsOSVersion -match "^5.*|^6.*") {
-            # Sysprep Answer File
-            Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-            
-            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-            
-            if (Test-Path $SysprepFile) {
-                Get-Content -Path $SysprepFile
-                Update-SysprepAnswerFile $SysprepFile
-                Get-Content -Path $SysprepFile
-            }
-
-            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+if ($WindowsOSLanguage -eq "ja-JP") {
+    # Update Sysprep Answer File
+    if ($WindowsOSVersion -match "^5.*|^6.*") {
+        # Sysprep Answer File
+        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"            
+        if (Test-Path $SysprepFile) {
+            Get-Content -Path $SysprepFile
+            Update-SysprepAnswerFile $SysprepFile
+            Get-Content -Path $SysprepFile
+        }
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
 
         }
         elseif ($WindowsOSVersion -match "^10.*") {
-            # Sysprep Answer File
-            Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-            
-            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-
-            if (Test-Path $SysprepFile) {
-                Get-Content -Path $SysprepFile
-                Update-SysprepAnswerFile $SysprepFile
-                Get-Content -Path $SysprepFile
-            }
-            
-            Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
-        }
-        else {
-            Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
-        }
+        # Sysprep Answer File
+        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
+        if (Test-Path $SysprepFile) {
+            Get-Content -Path $SysprepFile
+            Update-SysprepAnswerFile $SysprepFile
+            Get-Content -Path $SysprepFile
+        }     
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
     }
     else {
-        Write-Log ("# [Information] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
+        Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
     }
 }
 else {
-    Write-Log "# [Warning] No Target - Windows OS Language"
+    Write-Log ("# [Information] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
 }
 
 
@@ -1820,7 +1809,7 @@ if ($Region -match "^us-east-1|^us-east-2|^us-west-1|^us-west-2|^ap-south-1|^ap-
         if ($RoleName) {
             cmd.exe /c "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" 2>&1
 
-            Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -Verb runas -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
+            # Start-Process -FilePath "C:\Program Files\Amazon Web Services\AWS Agent\AWSAgentStatus.exe" -Verb runas -RedirectStandardOutput "$LOGS_DIR\APPS_AmazonInspecterAgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_AmazonInspecterAgentStatusError.log"
         }
     }
     else {
