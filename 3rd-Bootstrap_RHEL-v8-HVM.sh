@@ -82,7 +82,7 @@ dnf module list > /tmp/command-log_dnf_module-list.txt
 # Red Hat Update Infrastructure Client Package Update
 dnf clean all
 dnf update -y rh-amazon-rhui-client
-dnf update -y dnf dnf-utils
+dnf update -y dnf dnf-data dnf-utils
 
 # Checking repository information
 dnf repolist all
@@ -176,7 +176,7 @@ AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/
 # Python package introduction and setting
 dnf module list | grep python
 dnf install -y @python36
-dnf install -y python3-asn1crypto python3-dateutil python3-humanize python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
+dnf install -y python3-asn1crypto python3-dateutil python3-humanize python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
 dnf module list | grep python
 
 alternatives --list
@@ -649,6 +649,11 @@ sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 cat /etc/selinux/config
 setenforce 0
 getenforce
+
+# Setting System crypto policy (Default -> FUTURE)
+update-crypto-policies --show
+update-crypto-policies --set FUTURE
+update-crypto-policies --is-applied
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then

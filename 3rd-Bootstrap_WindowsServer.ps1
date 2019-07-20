@@ -548,7 +548,7 @@ function Get-WebContentToFile {
 
     if ( Test-Path $OutFile ) {
         Write-Log ("# [NOTICE] File already exists : " + $OutFile)
-        Write-Log ("# [NOTICE] Do not download files : " + $Uri)
+        Write-Log ("# [NOTICE] Do not download files from : " + $Uri)
     }
     else {
         Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] -> [" + $OutFile + "]" )
@@ -1975,8 +1975,8 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
 # Initialize Parameter [# Depends on PowerShell v6.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.0/PowerShell-6.2.0-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.2/PowerShell-6.2.2-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.2-win-x64.msi"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -2013,7 +2013,7 @@ Write-LogSeparator "Package Install System Utility (Windows Admin Center)"
 
 # Initialize Parameter
 Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdownload"
-Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1809.msi"
+Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1904.1"
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
 # Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
@@ -2443,56 +2443,99 @@ Write-LogSeparator "Custom Package Installation (Application)"
 # Custom Package Installation (Google Chrome 64bit Edition)
 # https://cloud.google.com/chrome-enterprise/browser/download/#chrome-browser-download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter
+    Set-Variable -Name CHROME_INSTALLER_URL -Scope Script -Value "https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi"
+    Set-Variable -Name CHROME_INSTALLER_FILE -Scope Script -Value "googlechrome.msi"
+
     # Package Download Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
-    Get-WebContentToFile -Uri 'https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi' -OutFile "$TOOL_DIR\googlechrome.msi"
+    Get-WebContentToFile -Uri "$CHROME_INSTALLER_URL" -OutFile "$TOOL_DIR\$CHROME_INSTALLER_FILE"
 
     # Package Install Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\googlechrome.msi", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
-
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$CHROME_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
     Start-Sleep -Seconds 5
 }
 
 # Custom Package Installation (7-Zip)
 # http://www.7-zip.org/
+# https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter [# Depends on 7-Zip version information]
+    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z1900-x64.exe"
+    Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value "7z1900-x64.exe"
+
     # Package Download File archiver (7-Zip)
     Write-Log "# Package Download File archiver (7-Zip)"
-    Get-WebContentToFile -Uri 'https://www.7-zip.org/a/7z1900-x64.exe' -OutFile "$TOOL_DIR\7z1900-x64.exe"
+    Get-WebContentToFile -Uri "$7ZIP_INSTALLER_URL" -OutFile "$TOOL_DIR\$7ZIP_INSTALLER_FILE"
 
     # Package Install File archiver (7-Zip)
     Write-Log "# Package Install File archiver (7-Zip)"
-    Start-Process -FilePath "$TOOL_DIR\7z1900-x64.exe" -Verb runas -Wait -ArgumentList @("/S") | Out-Null
-
+    Start-Process -FilePath "$TOOL_DIR\$7ZIP_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/S") | Out-Null
     Start-Sleep -Seconds 5
 }
 
 # Custom Package Installation (Tera Term)
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter [# Depends on Tera Term version information]
+    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://ja.osdn.net/frs/redir.php?m=iij&f=ttssh2%2F71232%2Fteraterm-4.103.exe"
+    Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value "teraterm-4.103.exe"
+
     # Package Download Terminal emulator (Tera Term)
     Write-Log "# Package Download Terminal emulator (Tera Term)"
-    Get-WebContentToFile -Uri 'https://ja.osdn.net/frs/redir.php?m=jaist&f=ttssh2%2F70691%2Fteraterm-4.102.exe' -OutFile "$TOOL_DIR\teraterm-4.102.exe"
+    Get-WebContentToFile -Uri "$TERATERM_INSTALLER_URL" -OutFile "$TOOL_DIR\$TERATERM_INSTALLER_FILE"
 
     # Package Install Terminal emulator (Tera Term)
     Write-Log "# Package Install Terminal emulator (Tera Term)"
-    Start-Process -FilePath "$TOOL_DIR\teraterm-4.102.exe" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/NORESTART", "/LOG=C:\EC2-Bootstrap\Logs\APPS_TeraTermSetup.log") | Out-Null
-    
+    Start-Process -FilePath "$TOOL_DIR\$TERATERM_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/NORESTART", "/LOG=C:\EC2-Bootstrap\Logs\APPS_TeraTermSetup.log") | Out-Null
     Start-Sleep -Seconds 5
 }
 
+# Custom Package Installation (IrfanView)
+# https://www.irfanview.net/
+# https://www.irfanview.com/faq.htm#PAGE12
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+
+    # Initialize Parameter [# Depends on IrfanView version information]
+    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview453_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value "iview453_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview453_plugins_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value "iview453_plugins_x64_setup.exe"
+
+    # Package Download Graphic Viewer (IrfanView)
+    Write-Log "# Package Download Graphic Viewer (IrfanView)"
+    Get-WebContentToFile -Uri "$IRFANVIEW_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE"
+
+    # Package Install Graphic Viewer (IrfanView)
+    Write-Log "# Package Install Graphic Viewer (IrfanView)"
+    Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent", "/desktop=1", "/thumbs=0", "/group=1", "/allusers=1", "/assoc=1", "/allusers=1", "/ini=%APPDATA%\IrfanView") | Out-Null
+    Start-Sleep -Seconds 5
+
+    # Package Download Graphic Viewer (IrfanView All Plugins)
+    Write-Log "# Package Download Graphic Viewer (IrfanView All Plugins)"
+    Get-WebContentToFile -Uri "$IRFANVIEW_PLUGIN_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE"
+
+    # Package Install Graphic Viewer (IrfanView All Plugins)
+    Write-Log "# Package Install Graphic Viewer (IrfanView All Plugins)"
+    Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent") | Out-Null
+    Start-Sleep -Seconds 5
+}
 
 # [Caution : Finally the installation process]
 # Custom Package Installation (Visual Studio Code 64bit Edition)
 if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter
+    Set-Variable -Name VSCODE_INSTALLER_URL -Scope Script -Value "https://go.microsoft.com/fwlink/?linkid=852157"
+    Set-Variable -Name VSCODE_INSTALLER_FILE -Scope Script -Value "VSCodeSetup-x64.exe"
+
     # Package Download Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
-    Get-WebContentToFile -Uri 'https://go.microsoft.com/fwlink/?linkid=852157' -OutFile "$TOOL_DIR\VSCodeSetup-x64.exe"
+    Get-WebContentToFile -Uri "$VSCODE_INSTALLER_URL" -OutFile "$TOOL_DIR\$VSCODE_INSTALLER_FILE"
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-    Start-Process -FilePath "$TOOL_DIR\VSCodeSetup-x64.exe" -Verb runas -Wait -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
+    Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
 }
 
 
@@ -2521,7 +2564,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.1-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.1-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.2-Setup.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2530,7 +2573,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.4.0-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.4.0-0-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.4.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.4.1-0-x64.msi"
     }
 }
 
