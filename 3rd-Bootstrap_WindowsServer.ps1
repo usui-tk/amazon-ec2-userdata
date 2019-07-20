@@ -2373,17 +2373,17 @@ Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 # Package Download Amazon Windows Paravirtual Drivers
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
-Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Drivers/AWSPVDriverSetup.zip' -OutFile "$TOOL_DIR\AWS-StorageDriver-AWSPVDriverSetup.zip"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/AWSPV/Latest/AWSPVDriver.zip' -OutFile "$TOOL_DIR\AWSPVDriver.zip"
 
 # Package Download AWS NVMe Drivers
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/aws-nvme-drivers.html
 Write-Log "# Package Download AWS NVMe Drivers"
-Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip' -OutFile "$TOOL_DIR\AWS-StorageDriver-AWSNVMe.zip"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip' -OutFile "$TOOL_DIR\AWSNVMe.zip"
 
 # Package Download Amazon Elastic Network Adapter Driver
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
-Get-WebContentToFile -Uri 'http://ec2-windows-drivers.s3.amazonaws.com/ENA.zip' -OutFile "$TOOL_DIR\AWS-NetworkDriver-ENA.zip"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/ENA/Latest/AwsEnaNetworkDriver.zip' -OutFile "$TOOL_DIR\AwsEnaNetworkDriver.zip"
 
 # Package Download Intel Network Driver
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
@@ -2571,7 +2571,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^5.*|^6.*") {
         Write-Log "# Package Download System Utility (EC2Config)"
-        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+        Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
     }
 }
 
@@ -2589,7 +2589,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://aws.amazon.com/jp/powershell/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-    Get-WebContentToFile -Uri 'http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+    Get-WebContentToFile -Uri 'https://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
 }
 
 # Package Download System Utility (Session Manager Plugin for the AWS CLI)
