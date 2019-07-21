@@ -69,6 +69,12 @@ zypper search > /tmp/command-log_zypper_repository-package-list.txt
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
+# Default repository list [zypper command]
+zypper products > /tmp/command-log_zypper_repository-list.txt
+
+# Default repository pattern [zypper command]
+zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.txt
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -84,7 +90,7 @@ zypper repos
 SUSEConnect --list-extensions
 
 # Update default package
-zypper --non-interactive update
+zypper --non-interactive update --auto-agree-with-licenses
 
 # Install recommended packages
 # zypper --non-interactive install-new-recommends

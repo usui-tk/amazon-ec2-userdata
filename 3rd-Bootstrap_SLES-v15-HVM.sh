@@ -68,6 +68,12 @@ zypper search > /tmp/command-log_zypper_repository-package-list.txt
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
+# Default repository list [zypper command]
+zypper products > /tmp/command-log_zypper_repository-list.txt
+
+# Default repository pattern [zypper command]
+zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.txt
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -83,7 +89,18 @@ zypper repos
 SUSEConnect --list-extensions
 
 # Update default package
-zypper --non-interactive update
+zypper --non-interactive update --auto-agree-with-licenses
+
+# Apply SLES Service Pack
+# zypper migration << __EOF__
+# 
+# 1
+# y
+# q
+# yes
+# q
+# yes
+# __EOF__
 
 # Install recommended packages
 # zypper --non-interactive install-new-recommends
@@ -96,12 +113,16 @@ zypper --non-interactive update
 #    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern and install)
+zypper --non-interactive install --type pattern base
+zypper --non-interactive install --type pattern enhanced_base
 zypper --non-interactive install --type pattern yast2_basis
-zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
+zypper --non-interactive install --type pattern apparmor
+
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package and install)
+zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
 zypper --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
-zypper --non-interactive install patterns-sles-apparmor
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
@@ -109,28 +130,44 @@ zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-In
 zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
 
+# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository)
+SlesForSapFlag=$(find /etc/zypp | sort | grep "SLE-Product-SLES_SAP15" | wc -l)
+if [ $? -ne 0 ];then
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+else
+	echo "SUSE Linux Enterprise Server for SAP Applications 15"
+
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern and install)
+	zypper --non-interactive install --type pattern sap_server
+	zypper --non-interactive install --type pattern sap-hana
+
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select package and install)
+	zypper --non-interactive install sapconf saptune insserv-compat
+	zypper --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
+fi
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
 #   https://download.opensuse.org/repositories/utilities/SLE_15/
 #-------------------------------------------------------------------------------
 
-zypper repos
+# zypper repos
 
 # Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports] : Version - SUSE Linux Enterprise 15 SP1
-zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15-SP1" "http://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
-zypper --gpg-auto-import-keys refresh utilities
+# zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15-SP1" "http://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
+# zypper --gpg-auto-import-keys refresh utilities
 
 # Repository Configure openSUSE Build Service Repository
-zypper repos
+# zypper repos
 
-zypper clean --all
-zypper refresh -fdb
+# zypper clean --all
+# zypper refresh -fdb
 
-zypper repos
+# zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop jq
+# zypper --non-interactive install atop
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -138,9 +175,9 @@ zypper --non-interactive install atop jq
 #   https://packagehub.suse.com/how-to-use/
 #-------------------------------------------------------------------------------
 
-SUSEConnect --status-text
+# SUSEConnect --status-text
 
-SUSEConnect --list-extensions
+# SUSEConnect --list-extensions
 
 # Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
 # SUSEConnect --product "PackageHub/15.1/x86_64"
@@ -559,11 +596,25 @@ systemctl enable tuned
 systemctl is-enabled tuned
 
 # Configure Tuned software (select profile - throughput-performance)
-tuned-adm list
+SlesForSapFlag=$(find /etc/zypp | sort | grep "SLE-Product-SLES_SAP15" | wc -l)
+if [ $? -ne 0 ];then
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
 
-tuned-adm active
-tuned-adm profile throughput-performance 
-tuned-adm active
+	# Configure Tuned software (select profile - throughput-performance)
+	tuned-adm list
+	tuned-adm active
+	tuned-adm profile throughput-performance 
+	tuned-adm active
+else
+	echo "SUSE Linux Enterprise Server for SAP Applications 15"
+
+	# Configure Tuned software (select profile - sapconf)
+	tuned-adm list
+	tuned-adm active
+	tuned-adm profile sapconf
+	# tuned-adm profile saptune
+	tuned-adm active
+fi
 
 #-------------------------------------------------------------------------------
 # System Setting
