@@ -113,13 +113,13 @@ zypper --non-interactive update --auto-agree-with-licenses
 #    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern and install)
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
 zypper --non-interactive install --type pattern base
 zypper --non-interactive install --type pattern enhanced_base
 zypper --non-interactive install --type pattern yast2_basis
 zypper --non-interactive install --type pattern apparmor
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package and install)
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
 zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
 zypper --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
@@ -131,17 +131,17 @@ zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-In
 zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository)
-SlesForSapFlag=$(find /etc/zypp | sort | grep "SLE-Product-SLES_SAP15" | wc -l)
+SlesForSapFlag=$(find /etc/zypp | grep "SLE-Product-SLES_SAP15" | wc -l)
 if [ $? -ne 0 ];then
 	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
 else
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
 
-	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern and install)
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
 	zypper --non-interactive install --type pattern sap_server
 	zypper --non-interactive install --type pattern sap-hana
 
-	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select package and install)
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select package)
 	zypper --non-interactive install sapconf saptune insserv-compat
 	zypper --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
 fi
@@ -595,11 +595,10 @@ systemctl status tuned
 systemctl enable tuned
 systemctl is-enabled tuned
 
-# Configure Tuned software (select profile - throughput-performance)
+# Configure Tuned software
 SlesForSapFlag=$(find /etc/zypp | sort | grep "SLE-Product-SLES_SAP15" | wc -l)
 if [ $? -ne 0 ];then
 	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
-
 	# Configure Tuned software (select profile - throughput-performance)
 	tuned-adm list
 	tuned-adm active
@@ -607,7 +606,6 @@ if [ $? -ne 0 ];then
 	tuned-adm active
 else
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
-
 	# Configure Tuned software (select profile - sapconf)
 	tuned-adm list
 	tuned-adm active
