@@ -80,7 +80,7 @@ zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.t
 
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
-zypper refresh -fdb
+zypper --quiet refresh -fdb
 
 zypper repos
 
@@ -89,7 +89,7 @@ zypper repos
 SUSEConnect --list-extensions
 
 # Update default package
-zypper --non-interactive update --auto-agree-with-licenses
+zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply SLES Service Pack
 # zypper migration << __EOF__
@@ -103,7 +103,7 @@ zypper --non-interactive update --auto-agree-with-licenses
 # __EOF__
 
 # Install recommended packages
-# zypper --non-interactive install-new-recommends
+# zypper --quiet --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
@@ -114,36 +114,57 @@ zypper --non-interactive update --auto-agree-with-licenses
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
-zypper --non-interactive install --type pattern base
-zypper --non-interactive install --type pattern enhanced_base
-zypper --non-interactive install --type pattern yast2_basis
-zypper --non-interactive install --type pattern apparmor
+zypper --quiet --non-interactive install --type pattern base
+zypper --quiet --non-interactive install --type pattern yast2_basis
+zypper --quiet --non-interactive install --type pattern apparmor
+zypper --quiet --non-interactive install --type pattern enhanced_base
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
-zypper --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
-zypper --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
+SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES15-SP1")
+if [ $SlesForSp1Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 15 SP1"
+	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
+	zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+	zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
+else
+	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
+	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
+	zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+	zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
+fi
 
-# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
-#  zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-zypper --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
+SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES15-SP1")
+if [ $SlesForSp1Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 15 SP1"
+	# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
+	#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
+	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
+	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
+	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+else
+	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
+	# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
+	#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
+	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
+	# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
+	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+fi
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository)
-SlesForSapFlag=$(find /etc/zypp | grep "SLE-Product-SLES_SAP15" | wc -l)
-if [ $? -ne 0 ];then
-	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
-else
+SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
+if [ $SlesForSapFlag -gt 0 ];then
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
 
 	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
-	zypper --non-interactive install --type pattern sap_server
-	zypper --non-interactive install --type pattern sap-hana
+	zypper --quiet --non-interactive install --type pattern sap_server
+	zypper --quiet --non-interactive install --type pattern sap-hana
 
 	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-	zypper --non-interactive install sapconf saptune insserv-compat
-	zypper --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
+	zypper --quiet --non-interactive install sapconf saptune insserv-compat
+	zypper --quiet --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
+else
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
 fi
 
 #-------------------------------------------------------------------------------
@@ -152,22 +173,19 @@ fi
 #   https://download.opensuse.org/repositories/utilities/SLE_15/
 #-------------------------------------------------------------------------------
 
-# zypper repos
-
-# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports] : Version - SUSE Linux Enterprise 15 SP1
-# zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15-SP1" "http://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
-# zypper --gpg-auto-import-keys refresh utilities
+# Add openSUSE Build Service Repository [utilities/SLE_15]
+zypper repos
+zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
+zypper --gpg-auto-import-keys refresh utilities
 
 # Repository Configure openSUSE Build Service Repository
-# zypper repos
-
-# zypper clean --all
-# zypper refresh -fdb
-
-# zypper repos
+zypper repos
+zypper clean --all
+zypper --quiet refresh -fdb
+zypper repos
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-# zypper --non-interactive install atop
+zypper --quiet --non-interactive install atop
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -175,26 +193,49 @@ fi
 #   https://packagehub.suse.com/how-to-use/
 #-------------------------------------------------------------------------------
 
-# SUSEConnect --status-text
+# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES15-SP1")
+if [ $SlesForSp1Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 15 SP1"
 
-# SUSEConnect --list-extensions
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP1
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
+	# SUSEConnect --product "PackageHub/15.1/x86_64"
+	# sleep 5
 
-# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
-# SUSEConnect --product "PackageHub/15.1/x86_64"
-# sleep 5
+	# Repository Configure SUSE Package Hub Repository
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
 
-# Repository Configure SUSE Package Hub Repository
-# SUSEConnect --status-text
+	# zypper clean --all
+	# zypper --quiet refresh -fdb
 
-# SUSEConnect --list-extensions
+	# zypper repos
 
-# zypper clean --all
-# zypper refresh -fdb
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	# zypper --quiet --non-interactive install collectl mtr
+else
+	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
 
-# zypper repos
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
+	# SUSEConnect --product "PackageHub/15/x86_64"
+	# sleep 5
 
-# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-# zypper --non-interactive install collectl mtr
+	# Repository Configure SUSE Package Hub Repository
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
+
+	# zypper clean --all
+	# zypper --quiet refresh -fdb
+
+	# zypper repos
+
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	# zypper --quiet --non-interactive install collectl mtr
+fi
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -354,10 +395,10 @@ fi
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-# zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
-# zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --quiet --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-zypper --non-interactive install amazon-ssm-agent
+zypper --quiet --non-interactive install amazon-ssm-agent
 
 rpm -qi amazon-ssm-agent
 
@@ -377,7 +418,7 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
 #-------------------------------------------------------------------------------
 
-zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
+zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 # Package Information 
 rpm -qi amazon-cloudwatch-agent
@@ -413,7 +454,7 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install python-curses
+zypper --quiet --non-interactive install python-curses
 
 # Package Download Amazon Linux System Administration Tools (from S3 Bucket)
 curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
@@ -447,7 +488,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-# zypper --non-interactive install ansible
+# zypper --quiet --non-interactive install ansible
 
 # ansible --version
 
@@ -475,12 +516,12 @@ zypper repos
 
 # Update the list of products
 zypper clean --all
-zypper refresh -fdb
+zypper --quiet refresh -fdb
 
-zypper --non-interactive update
+zypper --quiet --non-interactive update
 
 # Install PowerShell
-# zypper --non-interactive install powershell
+# zypper --quiet --non-interactive install powershell
 
 # rpm -qi powershell
 
@@ -502,9 +543,9 @@ zypper --non-interactive update
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 zypper clean --all
-zypper refresh -fdb
+zypper --quiet refresh -fdb
 
-zypper --non-interactive update
+zypper --quiet --non-interactive update
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -557,7 +598,7 @@ rcapparmor status
 #-------------------------------------------------------------------------------
 
 # Configure NTP Client software (Install chrony Package)
-zypper --non-interactive install chrony
+zypper --quiet --non-interactive install chrony
 systemctl daemon-reload
 
 # Configure NTP Client software (Configure chronyd)
@@ -585,7 +626,7 @@ chronyc sourcestats -v
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install tuned
+zypper --quiet --non-interactive install tuned
 
 # Configure Tuned software (Start Daemon tuned)
 systemctl status tuned
