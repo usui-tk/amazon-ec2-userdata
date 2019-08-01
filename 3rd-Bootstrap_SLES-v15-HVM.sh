@@ -95,11 +95,13 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 # zypper migration << __EOF__
 # 
 # 1
+# 
 # y
 # q
 # yes
 # q
 # yes
+# 
 # __EOF__
 
 # Install recommended packages
@@ -173,19 +175,40 @@ fi
 #   https://download.opensuse.org/repositories/utilities/SLE_15/
 #-------------------------------------------------------------------------------
 
-# Add openSUSE Build Service Repository [utilities/SLE_15]
-zypper repos
-zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
-zypper --gpg-auto-import-keys refresh utilities
+SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES15-SP1")
+if [ $SlesForSp1Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 15 SP1"
 
-# Repository Configure openSUSE Build Service Repository
-zypper repos
-zypper clean --all
-zypper --quiet refresh -fdb
-zypper repos
+	# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports]
+	zypper repos
+	zypper addrepo --check --refresh --name "SLE_15_SP1_Backports" "https://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
+	zypper --gpg-auto-import-keys refresh utilities
 
-# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --quiet --non-interactive install atop
+	# Repository Configure openSUSE Build Service Repository
+	zypper repos
+	zypper clean --all
+	zypper --quiet refresh -fdb
+	zypper repos
+
+	# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+	zypper --quiet --non-interactive install atop
+else
+	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
+
+	# Add openSUSE Build Service Repository [utilities/SLE_15]
+	zypper repos
+	zypper addrepo --check --refresh --name "SLE_15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
+	zypper --gpg-auto-import-keys refresh utilities
+
+	# Repository Configure openSUSE Build Service Repository
+	zypper repos
+	zypper clean --all
+	zypper --quiet refresh -fdb
+	zypper repos
+
+	# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+	zypper --quiet --non-interactive install atop
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -250,18 +273,24 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+if [ $(command -v jq) ]; then
+    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-	StsToken=$(echo $StsCredential | jq -r '.Token')
+	if [ $(command -v jq) ]; then
+		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+		StsToken=$(echo $StsCredential | jq -r '.Token')
+	fi
 fi
 
 # AWS Account ID
-AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+if [ $(command -v jq) ]; then
+    AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -637,15 +666,8 @@ systemctl enable tuned
 systemctl is-enabled tuned
 
 # Configure Tuned software
-SlesForSapFlag=$(find /etc/zypp | sort | grep "SLE-Product-SLES_SAP15" | wc -l)
-if [ $? -ne 0 ];then
-	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
-	# Configure Tuned software (select profile - throughput-performance)
-	tuned-adm list
-	tuned-adm active
-	tuned-adm profile throughput-performance 
-	tuned-adm active
-else
+SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
+if [ $SlesForSapFlag -gt 0 ];then
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
 	# Configure Tuned software (select profile - sapconf)
 	tuned-adm list
@@ -653,7 +675,14 @@ else
 	tuned-adm profile sapconf
 	# tuned-adm profile saptune
 	tuned-adm active
-fi
+else
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+	# Configure Tuned software (select profile - throughput-performance)
+	tuned-adm list
+	tuned-adm active
+	tuned-adm profile throughput-performance 
+	tuned-adm active
+fi 
 
 #-------------------------------------------------------------------------------
 # System Setting
