@@ -24,54 +24,6 @@ SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
 #-------------------------------------------------------------------------------
-# Get Instance Information [AWS-CLI]
-#-------------------------------------------------------------------------------
-
-# Instance MetaData
-AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-Region=$(echo $AZ | sed -e 's/.$//g')
-InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
-InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
-PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
-AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
-
-# IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-RoleName=$(echo $RoleArn | cut -d '/' -f 2)
-
-# Get EC2 Instance Information
-if [ -n "$RoleName" ]; then
-	echo "# Get EC2 Instance Information"
-	aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region}
-fi
-
-# Get EC2 Instance Attribute[Network Interface Performance Attribute]
-#
-# - ENA (Elastic Network Adapter)
-#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
-# - SR-IOV
-#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/sriov-networking.html
-#
-if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(c5.*|c5d.*|e3.*|f1.*|g3.*|h1.*|i3.*|i3p.*|m5.*|m5d.*|p2.*|p3.*|r4.*|x1.*|x1e.*|m4.16xlarge)$ ]]; then
-		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
-		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
-		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
-	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
-		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
-		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
-	else
-		echo "# Not Target Instance Type :" $InstanceType
-	fi
-fi
-
-
-#-------------------------------------------------------------------------------
 # Install Kernel module and Configure Dynamic Kernel Module Support (DKMS) 
 #-------------------------------------------------------------------------------
 
@@ -122,7 +74,6 @@ dkms install -m ixgbevf -v ${SourceVersion}
 
 modinfo ixgbevf
 
-
 #-------------------------------------------------------------------------------
 # Configure EC2 Instance Support for Amazon ENA Device
 #-------------------------------------------------------------------------------
@@ -137,7 +88,6 @@ if [ -n "$RoleName" ]; then
 	# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 	aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
 fi
-
 
 #-------------------------------------------------------------------------------
 # Remove Network Persistent Rules
