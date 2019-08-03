@@ -334,9 +334,15 @@ SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
 if [ $SlesForSapFlag -gt 0 ];then
 	if [ -n "$RoleName" ]; then
 		echo "SUSE Linux Enterprise Server for SAP Applications 15"
-		echo "# Get Newest AMI Information from Public AMI"
-		NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=6ajp9738nmxhrsj68dvuwztp9" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
-		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+		echo "# Get Newest AMI Information from Public AMI (AWS Martketplace/PAYG)"
+		ProductCodes=$(curl -s "http://169.254.169.254/latest/meta-data/product-codes")
+		if [ -n "$ProductCodes" ]; then
+			NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=${ProductCodes}" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
+			aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+		else
+			NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=6ajp9738nmxhrsj68dvuwztp9" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
+			aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+		fi
 	fi
 else
 	if [ -n "$RoleName" ]; then
