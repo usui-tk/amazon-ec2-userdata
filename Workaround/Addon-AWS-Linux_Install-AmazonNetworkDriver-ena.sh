@@ -69,8 +69,8 @@ cd /usr/src
 tar xzf ${SourceFile}
 rm -fr ${SourceFile}
 
-mv "amzn-drivers-ena_linux_${SourceVersion}" "amzn-drivers-ena_linux-${SourceVersion}"
-cd "amzn-drivers-ena_linux-${SourceVersion}"
+mv "amzn-drivers-ena_linux_${SourceVersion}" "amzn-drivers-${SourceVersion}"
+cd "amzn-drivers-${SourceVersion}"
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ena"
