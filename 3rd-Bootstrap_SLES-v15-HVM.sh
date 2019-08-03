@@ -38,10 +38,13 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/documentation/sles-15/
 #    https://www.suse.com/ja-jp/documentation/sles-15/
 #    https://www.suse.com/documentation/suse-best-practices/
-#
-#    https://en.opensuse.org/YaST_Software_Management
+#    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
 #
 #    https://aws.amazon.com/jp/partners/suse/faqs/
+#    https://aws.amazon.com/marketplace/pp/B07SPX8ML1
+#    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
+#
+#    https://en.opensuse.org/YaST_Software_Management
 #
 #-------------------------------------------------------------------------------
 
@@ -545,10 +548,10 @@ zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
 zypper repos
 
 # Update the list of products
-zypper clean --all
-zypper --quiet refresh -fdb
+# zypper clean --all
+# zypper --quiet refresh -fdb
 
-zypper --quiet --non-interactive update
+# zypper --quiet --non-interactive update
 
 # Install PowerShell
 # zypper --quiet --non-interactive install powershell

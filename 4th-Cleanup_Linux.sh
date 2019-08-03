@@ -23,7 +23,7 @@ if [ -f /root/.ssh/authorized_keys ]; then
     shred -u /root/.ssh/authorized_keys
 fi
 
-# Remove SSH Authorized Keys (ec2-user User) for Amazon Linux, Red Hat Enterprise Linux, SUSE Linux Enterprise Server
+# Remove SSH Authorized Keys (ec2-user User) for Amazon Linux, Red Hat Enterprise Linux (RHEL), SUSE Linux Enterprise Server (SLES)
 if [ -f /home/ec2-user/.ssh/authorized_keys ]; then
     shred -u /home/ec2-user/.ssh/authorized_keys
 fi
@@ -52,6 +52,10 @@ fi
 unset HISTFILE
 [ -f /root/.bash_history ] && rm -rf /root/.bash_history
 [ -f /home/ec2-user/.bash_history ] && rm -rf /home/ec2-user/.bash_history
+[ -f /home/centos/.bash_history ] && rm -rf /home/centos/.bash_history
+[ -f /home/fedora/.bash_history ] && rm -rf /home/fedora/.bash_history
+[ -f /home/ubuntu/.bash_history ] && rm -rf /home/ubuntu/.bash_history
+[ -f /home/admin/.bash_history ] && rm -rf /home/admin/.bash_history
 
 # Shutdown
 shutdown -h now

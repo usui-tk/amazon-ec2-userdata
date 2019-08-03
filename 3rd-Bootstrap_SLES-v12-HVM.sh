@@ -38,9 +38,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/documentation/sles-12/
 #    https://www.suse.com/ja-jp/documentation/sles-12/
 #    https://www.suse.com/documentation/suse-best-practices/
+#    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
 #
 #    https://aws.amazon.com/jp/partners/suse/faqs/
-#
 #    https://aws.amazon.com/marketplace/pp/B00PMM9322
 #    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
 #
@@ -81,7 +81,7 @@ zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.t
 
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
-zypper refresh -fdb
+zypper --quiet refresh -fdb
 
 zypper repos
 
@@ -90,10 +90,10 @@ zypper repos
 SUSEConnect --list-extensions
 
 # Update default package
-zypper --non-interactive update --auto-agree-with-licenses
+zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Install recommended packages
-# zypper --non-interactive install-new-recommends
+# zypper --quiet --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
@@ -103,45 +103,72 @@ zypper --non-interactive update --auto-agree-with-licenses
 #    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install arptables bash-completion cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
-zypper --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
-zypper --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
-zypper --non-interactive install patterns-sles-apparmor
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
+zypper --quiet --non-interactive install --type pattern base
+zypper --quiet --non-interactive install --type pattern apparmor
+
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
+zypper --quiet --non-interactive install arptables bash-completion cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop lsb-release lzop nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
+zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+zypper --quiet --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
-zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
+zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
+zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
+zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
-#   https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/
-#   https://download.opensuse.org/repositories/network/SLE_12_SP3/
+#   https://download.opensuse.org/repositories/utilities/
+#   https://download.opensuse.org/repositories/network/
 #-------------------------------------------------------------------------------
 
-zypper repos
+SlesForSp4Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP4")
+if [ $SlesForSp4Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP4"
+fi
 
-# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
-zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
-zypper --gpg-auto-import-keys refresh utilities
+SlesForSp3Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP3")
+if [ $SlesForSp3Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP3"
 
-# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
-zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
-zypper --gpg-auto-import-keys refresh network
+	# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
+	zypper repos
+	zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
+	zypper --gpg-auto-import-keys refresh utilities
 
-# Repository Configure openSUSE Build Service Repository
-zypper repos
+	# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
+	zypper repos
+	zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
+	zypper --gpg-auto-import-keys refresh network
 
-zypper clean --all
-zypper refresh -fdb
+	# Repository Configure openSUSE Build Service Repository
+	zypper repos
+	zypper clean --all
+	zypper refresh -fdb
+	zypper repos
 
-zypper repos
+	# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+	zypper --non-interactive install atop jq
+fi
 
-# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-zypper --non-interactive install atop jq
+SlesForSp2Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP2")
+if [ $SlesForSp2Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP2"
+
+	# Add openSUSE Build Service Repository [utilities/SLE_12_SP2_Backports] : Version - SUSE Linux Enterprise 12 SP2
+	zypper repos
+	zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP2" "https://download.opensuse.org/repositories/utilities/SLE_12_SP2_Backports/utilities.repo"
+	zypper --gpg-auto-import-keys refresh utilities
+
+	# Repository Configure openSUSE Build Service Repository
+	zypper repos
+	zypper clean --all
+	zypper refresh -fdb
+	zypper repos
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Package Hub Repository)
@@ -149,26 +176,94 @@ zypper --non-interactive install atop jq
 #   https://packagehub.suse.com/how-to-use/
 #-------------------------------------------------------------------------------
 
-SUSEConnect --status-text
+SlesForSp4Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP4")
+if [ $SlesForSp4Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP4"
 
-SUSEConnect --list-extensions
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
+	# SUSEConnect --product "PackageHub/12.4/x86_64"
+	# sleep 5
 
-# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
-# SUSEConnect --product "PackageHub/12.4/x86_64"
-# sleep 5
+	# Repository Configure SUSE Package Hub Repository
+	# SUSEConnect --status-text
+	# SUSEConnect --list-extensions
 
-# Repository Configure SUSE Package Hub Repository
-# SUSEConnect --status-text
+	# zypper clean --all
+	# zypper --quiet refresh -fdb
 
-# SUSEConnect --list-extensions
+	# zypper repos
 
-# zypper clean --all
-# zypper refresh -fdb
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	# zypper --quiet --non-interactive install collectl mtr
+fi
 
-# zypper repos
+SlesForSp3Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP3")
+if [ $SlesForSp3Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP3"
 
-# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-# zypper --non-interactive install collectl mtr
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+	SUSEConnect --product "PackageHub/12.3/x86_64"
+	sleep 5
+
+	# Repository Configure SUSE Package Hub Repository
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+
+	zypper clean --all
+	zypper --quiet refresh -fdb
+	zypper repos
+
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	zypper --quiet --non-interactive install collectl mtr
+fi
+
+SlesForSp2Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP2")
+if [ $SlesForSp2Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP2"
+
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP2
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+	SUSEConnect --product "PackageHub/12.2/x86_64"
+	sleep 5
+
+	# Repository Configure SUSE Package Hub Repository
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+
+	zypper clean --all
+	zypper --quiet refresh -fdb
+	zypper repos
+
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	zypper --quiet --non-interactive install collectl mtr
+fi
+
+SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP1")
+if [ $SlesForSp1Flag -gt 0 ];then
+	echo "SUSE Linux Enterprise Server 12 SP1"
+
+	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP1
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+	SUSEConnect --product "PackageHub/12.1/x86_64"
+	sleep 5
+
+	# Repository Configure SUSE Package Hub Repository
+	SUSEConnect --status-text
+	SUSEConnect --list-extensions
+
+	zypper clean --all
+	zypper --quiet refresh -fdb
+	zypper repos
+
+	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+	zypper --quiet --non-interactive install collectl mtr
+fi
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -183,18 +278,24 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+if [ $(command -v jq) ]; then
+    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-	StsToken=$(echo $StsCredential | jq -r '.Token')
+	if [ $(command -v jq) ]; then
+		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+		StsToken=$(echo $StsCredential | jq -r '.Token')
+	fi
 fi
 
 # AWS Account ID
-AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+if [ $(command -v jq) ]; then
+    AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -328,9 +429,10 @@ fi
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-# zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --quiet --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-zypper --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+zypper --quiet --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
@@ -350,7 +452,7 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
 #-------------------------------------------------------------------------------
 
-zypper --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
+zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 # Package Information 
 rpm -qi amazon-cloudwatch-agent
@@ -448,12 +550,12 @@ zypper repos
 
 # Update the list of products
 # zypper clean --all
-# zypper refresh -fdb
+# zypper --quiet refresh -fdb
 
-# zypper --non-interactive update
+# zypper --quiet --non-interactive update
 
 # Install PowerShell
-# zypper --non-interactive install powershell
+# zypper --quiet --non-interactive install powershell
 
 # rpm -qi powershell
 
@@ -475,9 +577,9 @@ zypper repos
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 zypper clean --all
-zypper refresh -fdb
+zypper --quiet refresh -fdb
 
-zypper --non-interactive update
+zypper --quiet --non-interactive update
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -533,10 +635,10 @@ rcapparmor status
 systemctl status -l ntpd
 systemctl stop ntpd
 systemctl status -l ntpd
-zypper --non-interactive remove ntp
+zypper --quiet --non-interactive remove ntp
 
 # Replace NTP Client software (Install chrony Package)
-zypper --non-interactive install chrony
+zypper --quiet --non-interactive install chrony
 systemctl daemon-reload
 
 # Configure NTP Client software (Configure chronyd)
@@ -568,7 +670,7 @@ chronyc sourcestats -v
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from SUSE Linux Enterprise Server Software repository)
-zypper --non-interactive install tuned
+zypper --quiet --non-interactive install tuned
 
 # Configure Tuned software (Start Daemon tuned)
 systemctl status tuned

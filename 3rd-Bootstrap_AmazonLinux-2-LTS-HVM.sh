@@ -38,7 +38,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://aws.amazon.com/jp/amazon-linux-2/
 #    https://aws.amazon.com/jp/amazon-linux-2/release-notes/
 #    https://aws.amazon.com/jp/amazon-linux-2/faqs/
-#    https://cdn.amazonlinux.com/os-images/2017.12.0.20171212.2/
+#    https://cdn.amazonlinux.com/os-images/latest/
+#
+#    https://github.com/amazonlinux
 #
 #    http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-linux-ami-basics.html
 #-------------------------------------------------------------------------------
@@ -91,6 +93,9 @@ yum update -y
 yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iperf3 iotop mlocate mtr nc nmap nvme-cli numactl perf rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
+
+# Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
+yum install -y ec2-hibinit-agent hibagent 
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -370,6 +375,20 @@ source /etc/profile.d/ec2rl.sh
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [kernel-ng]
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux Next-gen Kernel (from Extras Library Repository)
+# amazon-linux-extras list
+
+# amazon-linux-extras install -y kernel-ng
+
+# amazon-linux-extras list
+
+# Package Information [kernel]
+# rpm -qi kernel
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
@@ -479,6 +498,37 @@ sleep 3
 chronyc tracking
 chronyc sources -v
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# Configure Amazon Linux Kernel Autotuning (ec2sys-autotune)
+# https://github.com/amazonlinux/autotune
+#-------------------------------------------------------------------------------
+
+# Package Install ec2sys-autotune
+yum install -y ec2sys-autotune
+
+# Configure ec2sys-autotune software (Start Daemon autotune)
+systemctl status autotune
+systemctl restart autotune
+systemctl status autotune
+
+systemctl enable autotune
+systemctl is-enabled autotune
+
+autotune status
+autotune list
+
+# Configure ec2sys-autotune software (Check Current profile)
+autotune active
+autotune showconfig
+
+# Configure ec2sys-autotune software
+# autotune profile base
+# autotune profile placement-group
+# autotune profile udp-server
+# autotune apply
+# autotune active
+# autotune showconfig
 
 #-------------------------------------------------------------------------------
 # System Setting
