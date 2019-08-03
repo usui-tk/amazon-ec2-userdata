@@ -426,8 +426,9 @@ fi
 #-------------------------------------------------------------------------------
 # zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 # zypper --quiet --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+# zypper --quiet --non-interactive install amazon-ssm-agent
 
-zypper --quiet --non-interactive install amazon-ssm-agent
+zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
