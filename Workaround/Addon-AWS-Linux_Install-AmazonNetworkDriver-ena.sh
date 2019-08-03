@@ -104,7 +104,7 @@ cd "amzn-drivers-ena_linux-${SourceVersion}"
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ena"
-PACKAGE_VERSION="\${SourceVersion}"
+PACKAGE_VERSION="TEMP-VERSION"
 CLEAN="make -C kernel/linux/ena clean"
 MAKE="make -C kernel/linux/ena/ BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_NAME[0]="ena"
@@ -114,15 +114,14 @@ DEST_MODULE_NAME[0]="ena"
 AUTOINSTALL="yes"
 __EOF__
 
-# Make & Build & Install Amazon ENA Driver
-ethtool -i eth0
+sed -i 's/TEMP-VERSION/'${SourceVersion}'/g' dkms.conf
 
+# Make & Build & Install Amazon ENA Driver
 dkms add -m amzn-drivers-ena_linux -v ${SourceVersion}
 dkms build -m amzn-drivers-ena_linux -v ${SourceVersion}
 dkms install -m amzn-drivers-ena_linux -v ${SourceVersion}
 
 modinfo ena
-ethtool -i eth0
 
 
 #-------------------------------------------------------------------------------

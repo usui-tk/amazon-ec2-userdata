@@ -103,7 +103,7 @@ cd "ixgbevf-${SourceVersion}"
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="\${SourceVersion}"
+PACKAGE_VERSION="TEMP-VERSION"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
@@ -113,16 +113,14 @@ DEST_MODULE_NAME[0]="ixgbevf"
 AUTOINSTALL="yes"
 __EOF__
 
-# Make & Build & Install ixgbevf
-modinfo ixgbevf
-ethtool -i eth0
+sed -i 's/TEMP-VERSION/'${SourceVersion}'/g' dkms.conf
 
+# Make & Build & Install ixgbevf
 dkms add -m ixgbevf -v ${SourceVersion}
 dkms build -m ixgbevf -v ${SourceVersion}
 dkms install -m ixgbevf -v ${SourceVersion}
 
 modinfo ixgbevf
-ethtool -i eth0
 
 
 #-------------------------------------------------------------------------------
