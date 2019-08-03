@@ -87,9 +87,11 @@ __EOF__
 sed -i 's/TEMP-VERSION/'${SourceVersion}'/g' dkms.conf
 
 # Make & Build & Install Amazon ENA Driver
-dkms add -m amzn-drivers-ena_linux -v ${SourceVersion}
-dkms build -m amzn-drivers-ena_linux -v ${SourceVersion}
-dkms install -m amzn-drivers-ena_linux -v ${SourceVersion}
+date; dkms add -m amzn-drivers -v ${SourceVersion}; date
+
+date; dkms build -m amzn-drivers -v ${SourceVersion}; date
+
+date; dkms install -m amzn-drivers -v ${SourceVersion}; date
 
 modinfo ena
 

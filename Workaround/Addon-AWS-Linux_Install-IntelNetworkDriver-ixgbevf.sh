@@ -86,9 +86,11 @@ __EOF__
 sed -i 's/TEMP-VERSION/'${SourceVersion}'/g' dkms.conf
 
 # Make & Build & Install ixgbevf
-dkms add -m ixgbevf -v ${SourceVersion}
-dkms build -m ixgbevf -v ${SourceVersion}
-dkms install -m ixgbevf -v ${SourceVersion}
+date; dkms add -m ixgbevf -v ${SourceVersion}; date
+
+date; dkms build -m ixgbevf -v ${SourceVersion}; date
+
+date; dkms install -m ixgbevf -v ${SourceVersion}; date
 
 modinfo ixgbevf
 
