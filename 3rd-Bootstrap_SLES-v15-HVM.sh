@@ -329,6 +329,24 @@ if [ -n "$RoleName" ]; then
 	aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region}
 fi
 
+# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
+SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
+if [ $SlesForSapFlag -gt 0 ];then
+	if [ -n "$RoleName" ]; then
+		echo "SUSE Linux Enterprise Server for SAP Applications 15"
+		echo "# Get Newest AMI Information from Public AMI"
+		NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=6ajp9738nmxhrsj68dvuwztp9" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	fi
+else
+	if [ -n "$RoleName" ]; then
+		echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+		echo "# Get Newest AMI Information from Public AMI"
+		NewestAmiId=$(aws ec2 describe-images --owner 013907871322 --filter "Name=name,Values=suse-sles-15-*-hvm-ssd-x86_64" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)' --output text --region ${Region} | grep -v byos | grep -v ecs | grep -v sapcal | sort -k 3 --reverse | head -n 1 | awk '{print $1}')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	fi
+fi 
+
 # Get EC2 Instance Information
 if [ -n "$RoleName" ]; then
 	echo "# Get EC2 Instance Information"

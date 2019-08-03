@@ -110,18 +110,24 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+if [ $(command -v jq) ]; then
+    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-	StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-	StsToken=$(echo $StsCredential | jq -r '.Token')
+	if [ $(command -v jq) ]; then
+		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+		StsToken=$(echo $StsCredential | jq -r '.Token')
+	fi
 fi
 
 # AWS Account ID
-AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+if [ $(command -v jq) ]; then
+    AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
@@ -159,7 +165,7 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=amzn2-ami-hvm-*-gp2" "Name=virtualization-type,Values=hvm" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=amzn2-ami-hvm-*-gp2" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 fi
