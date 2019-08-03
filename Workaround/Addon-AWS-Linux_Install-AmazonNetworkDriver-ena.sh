@@ -24,6 +24,24 @@ SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
 #-------------------------------------------------------------------------------
+# Set AWS Instance MetaData
+#-------------------------------------------------------------------------------
+
+# Instance MetaData
+AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+Region=$(echo $AZ | sed -e 's/.$//g')
+InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
+PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
+
+# IAM Role & STS Information
+if [ $(command -v jq) ]; then
+    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+fi
+
+#-------------------------------------------------------------------------------
 # Install Kernel module and Configure Dynamic Kernel Module Support (DKMS) 
 #-------------------------------------------------------------------------------
 
@@ -78,16 +96,18 @@ modinfo ena
 #-------------------------------------------------------------------------------
 # Configure EC2 Instance Support for Amazon ENA Device
 #-------------------------------------------------------------------------------
+
 if [ -n "$RoleName" ]; then
+	if [ $(command -v aws) ]; then
+		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+		aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].EnaSupport" --output json --region ${Region}
 
-	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
-	aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].EnaSupport" --output json --region ${Region}
+		# Modify EC2 Instance Attribute(Elastic Network Adapter Status)
+		# aws ec2 modify-instance-attribute --instance-id ${InstanceId} --ena-support
 
-	# Modify EC2 Instance Attribute(Elastic Network Adapter Status)
-	# aws ec2 modify-instance-attribute --instance-id ${InstanceId} --ena-support
-
-	# Get EC2 Instance Attribute(Elastic Network Adapter Status)
-	aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].EnaSupport" --output json --region ${Region}
+		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
+		# aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].EnaSupport" --output json --region ${Region}
+	fi
 fi
 
 #-------------------------------------------------------------------------------
