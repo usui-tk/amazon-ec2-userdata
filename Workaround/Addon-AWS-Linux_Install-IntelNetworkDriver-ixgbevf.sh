@@ -14,6 +14,14 @@
 #  https://sourceforge.net/projects/e1000/files/ixgbevf%20stable/
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+# Parameter definition [Intel Network Driver(ixgbevf)]
+#-------------------------------------------------------------------------------
+
+# Source code acquisition URL and definition of file name and version information
+SourceUrl="https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.6.1/ixgbevf-4.6.1.tar.gz"
+SourceFile=$(echo ${SourceUrl##*/})
+SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
 #-------------------------------------------------------------------------------
 # Get Instance Information [AWS-CLI]
@@ -84,18 +92,18 @@ if [ $(command -v grub2-mkconfig) ]; then
     grub2-mkconfig -o /boot/grub2/grub.cfg
 fi
 
-# Get Intel Ethernet Driver source code at sourceforge
-curl -LsS "https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.5.3/ixgbevf-4.5.3.tar.gz" -o "/usr/src/ixgbevf-4.5.3.tar.gz"
+# Get Intel Ethernet Driver source code
+curl -LsS "${SourceUrl}" -o "/usr/src/${SourceFile}"
 
 cd /usr/src
-tar xzf ixgbevf-4.5.3.tar.gz
-rm -fr ixgbevf-4.5.3.tar.gz
+tar xzf ${SourceFile}
+rm -fr ${SourceFile}
 
-cd ixgbevf-4.5.3
+cd "ixgbevf-${SourceVersion}"
 
 cat > dkms.conf << __EOF__
 PACKAGE_NAME="ixgbevf"
-PACKAGE_VERSION="4.5.3"
+PACKAGE_VERSION="\${SourceVersion}"
 CLEAN="cd src/; make clean"
 MAKE="cd src/; make BUILD_KERNEL=\${kernelver}"
 BUILT_MODULE_LOCATION[0]="src/"
@@ -109,9 +117,9 @@ __EOF__
 modinfo ixgbevf
 ethtool -i eth0
 
-dkms add -m ixgbevf -v 4.5.3
-dkms build -m ixgbevf -v 4.5.3
-dkms install -m ixgbevf -v 4.5.3
+dkms add -m ixgbevf -v ${SourceVersion}
+dkms build -m ixgbevf -v ${SourceVersion}
+dkms install -m ixgbevf -v ${SourceVersion}
 
 modinfo ixgbevf
 ethtool -i eth0
