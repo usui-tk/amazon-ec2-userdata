@@ -279,6 +279,8 @@ fi
 
 yum install -y amazon-ssm-agent
 
+rpm -qi amazon-ssm-agent
+
 systemctl daemon-reload
 
 systemctl status -l amazon-ssm-agent
