@@ -45,7 +45,7 @@ fi
 
 # Remove SSH Authorized Keys (admin User) for Debian
 if [ -f /home/admin/.ssh/authorized_keys ]; then
-    shred -u /admin/centos/.ssh/authorized_keys
+    shred -u /home/admin/.ssh/authorized_keys
 fi
 
 # Remove Bash History
