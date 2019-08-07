@@ -123,14 +123,26 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget zip
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
-# Package Install Device driver compatible with Amazon EC2 (from Oracle Linux Official Repository)
-# yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+# Package Install Oracle Linux support tools (from Oracle Linux Official Repository)
+yum install -y redhat-lsb-core
 
+# Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Official Repository)
+# yum install -y kpatch
+
+# Package Install Python 3 Runtime (from Oracle Linux Official Repository)
+yum install -y python3 python3-pip python3-devel
+
+# Package Install Device driver compatible with Amazon EC2 (from Oracle Linux Official Repository)
+# - Additional kernel modules up to Oracle Linux v7.6 (not required from Oracle Linux v7.7)
+# yum install -y kmod-redhat-ena
+
+# Package Install Python 3 Runtime (from Oracle Linux Official Repository)
+yum install -y python3 python3-pip python3-devel
 
 # Latest packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
@@ -303,8 +315,6 @@ fi
 # - SR-IOV
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html
 #
-
-
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
@@ -381,8 +391,9 @@ fi
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python2-pip
-# pip install --upgrade pip
+
+yum --enablerepo=epel install -y python2-pip
+pip install --upgrade pip
 
 pip install pystache
 pip install argparse

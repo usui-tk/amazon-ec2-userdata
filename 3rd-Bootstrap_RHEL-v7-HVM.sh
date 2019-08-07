@@ -107,7 +107,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm libicu lsof lzop iotop iperf3 mlocate mtr nc nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget zip
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
@@ -115,8 +115,15 @@ yum install -y setroubleshoot-server setools-console
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 yum install -y redhat-lsb-core redhat-support-tool
 
+# Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
+yum install -y kpatch
+
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+yum install -y python3 python3-pip python3-devel
+
 # Package Install Device driver compatible with Amazon EC2 (from Red Hat Official Repository)
-yum install -y kmod-redhat-ena kmod-redhat-ixgbe
+# - Additional kernel modules up to RHEL v7.6 (not required from RHEL v7.7)
+# yum install -y kmod-redhat-ena
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -176,9 +183,18 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python2-pip
-pip install awscli
-pip show awscli
+
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
+# yum install -y python3 python3-pip python3-devel
+python3 --version
+
+pip3 install awscli
+pip3 show awscli
+
+alternatives --list
+alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
+alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1
+alternatives --list
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
@@ -248,8 +264,6 @@ fi
 # - SR-IOV
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html
 #
-
-
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
@@ -326,8 +340,9 @@ fi
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python2-pip
-# pip install --upgrade pip
+
+yum --enablerepo=epel install -y python2-pip
+pip install --upgrade pip
 
 pip install pystache
 pip install argparse
