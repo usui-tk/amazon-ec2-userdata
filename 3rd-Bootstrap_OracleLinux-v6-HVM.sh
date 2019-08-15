@@ -85,6 +85,8 @@ rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
 # Add Oralce Linux v6 Public YUM Repositories File
 curl -sS "http://public-yum.oracle.com/public-yum-ol6.repo" -o "/etc/yum.repos.d/public-yum-ol6.repo"
 
+cat "/etc/yum.repos.d/public-yum-ol6.repo" | grep -E "\[|enable" | xargs -n 2 | awk '{print $2, $1}'
+
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v6)
 #  http://yum.oracle.com/oracle-linux-6.html
