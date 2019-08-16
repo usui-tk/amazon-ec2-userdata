@@ -231,6 +231,8 @@ else
         yum install -y curl
     elif [ $(command -v apt-get) ]; then
         # Package Install curl Tools (Debian, Ubuntu)
+        export DEBIAN_FRONTEND=noninteractive
+        apt clean -y
         apt install -y curl
     elif [ $(command -v zypper) ]; then
         # Package Install curl Tools (SUSE Linux Enterprise Server)
