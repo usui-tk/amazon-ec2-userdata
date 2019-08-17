@@ -265,6 +265,12 @@ if [ -n "$RoleName" ]; then
 	aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 fi
 
+# Get EC2 Instance attached VPC Security Group Information
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance attached VPC Security Group Information"
+	aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region}
+fi
+
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 #
 # - Summary of Networking and Storage Features
@@ -492,18 +498,20 @@ source /etc/profile.d/ec2rl.sh
 
 # ansible localhost -m setup 
 
+
+
 # Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-pip3 install ansible
-pip3 show ansible
+# pip3 install ansible
+# pip3 show ansible
 
-alternatives --list
-alternatives --install "/usr/bin/ansible" ansible "/usr/local/bin/ansible" 1
-alternatives --list
+# alternatives --list
+# alternatives --install "/usr/bin/ansible" ansible "/usr/local/bin/ansible" 1
+# alternatives --list
 
-which ansible
-ansible --version
+# which ansible
+# ansible --version
 
-ansible localhost -m setup 
+# ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
@@ -662,8 +670,8 @@ getenforce
 
 # Setting System crypto policy (Default -> FUTURE)
 update-crypto-policies --show
-update-crypto-policies --set FUTURE
-update-crypto-policies --is-applied
+# update-crypto-policies --set FUTURE
+# update-crypto-policies --is-applied
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
