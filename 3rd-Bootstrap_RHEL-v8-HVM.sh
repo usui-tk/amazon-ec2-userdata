@@ -89,12 +89,12 @@ dnf repolist all
 dnf module list
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
-dnf config-manager --enable rhui-rhel-8-baseos-rhui-rpms
-dnf config-manager --enable rhui-rhel-8-appstream-rhui-rpms
+dnf config-manager --enable rhel-8-baseos-rhui-rpms
+dnf config-manager --enable rhel-8-appstream-rhui-rpms
 dnf config-manager --enable rhui-client-config-server-8
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
-# dnf config-manager --enable rhui-rhel-8-supplementary-rhui-rpms
+# dnf config-manager --enable rhel-8-supplementary-rhui-rpms
 # dnf config-manager --enable rhui-codeready-builder-for-rhel-8-rhui-rpms
 
 # Cleanup repository information
@@ -124,24 +124,29 @@ dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-reco
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
-# cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-# [epel]
-# name=Bootstrap EPEL
-# mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-8&arch=\$basearch
-# failovermethod=priority
-# enabled=0
-# gpgcheck=0
-# __EOF__
+cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
+[epel]
+name=Extra Packages for Enterprise Linux \$releasever - \$basearch
+#baseurl=https://download.fedoraproject.org/pub/epel/\$releasever/Everything/\$basearch
+metalink=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch&infra=\$infra&content=\$contentdir
+failovermethod=priority
+enabled=0
+gpgcheck=0
+__EOF__
 
-# dnf --enablerepo=epel -y install epel-release
-# rm -f /etc/yum.repos.d/epel-bootstrap.repo
+dnf --enablerepo=epel -y install epel-release
+rm -f /etc/yum.repos.d/epel-bootstrap.repo
 
-# sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# # yum-config-manager --disable epel epel-debuginfo epel-source
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+# dnf config-manager --disable epel epel-debuginfo epel-source
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
-# dnf clean all
+dnf clean all
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
+dnf --enablerepo=epel install -y iftop
 # dnf --enablerepo=epel install -y atop collectl
 
 #-------------------------------------------------------------------------------
@@ -183,7 +188,7 @@ fi
 # Python package introduction and setting
 dnf module list | grep python
 dnf install -y @python36
-dnf install -y python3-asn1crypto python3-dateutil python3-humanize python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
+dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
 dnf module list | grep python
 
 alternatives --list
