@@ -1,5 +1,7 @@
 #!/bin/bash -v
 
+set -e -x
+
 # Remove the udev persistent rules file
 rm -rf /etc/udev/rules.d/70-persistent-*
 

@@ -204,6 +204,12 @@ if [ -n "$RoleName" ]; then
 	aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region}
 fi
 
+# Get EC2 Instance attached VPC Security Group Information
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance attached VPC Security Group Information"
+	aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region}
+fi
+
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 #
 # - Summary of Networking and Storage Features
