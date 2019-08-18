@@ -161,7 +161,6 @@ else
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
 	# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
-	zypper --quiet --non-interactive install python3-susepubliccloudinfo
 fi
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository)
