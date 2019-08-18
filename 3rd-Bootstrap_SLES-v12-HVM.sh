@@ -42,10 +42,17 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/documentation/suse-best-practices/
 #    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
 #
+#    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.json
+#    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.xml
+#
 #    https://aws.amazon.com/jp/partners/suse/faqs/
 #    https://aws.amazon.com/marketplace/pp/B00PMM9322
 #    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
 #
+#
+#    https://en.opensuse.org/YaST_Software_Management
+#
+#    https://github.com/SUSE-Enceladus
 #-------------------------------------------------------------------------------
 
 # Show Linux Distribution/Distro information

@@ -236,6 +236,7 @@ else
         apt install -y curl
     elif [ $(command -v zypper) ]; then
         # Package Install curl Tools (SUSE Linux Enterprise Server)
+        zypper clean --all
         zypper --quiet --non-interactive install curl
     else
         echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"

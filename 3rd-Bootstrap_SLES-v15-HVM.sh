@@ -41,6 +41,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/ja-jp/documentation/sles-15/
 #    https://www.suse.com/documentation/suse-best-practices/
 #    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
+#    
+#    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.json
+#    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.xml
 #
 #    https://aws.amazon.com/jp/partners/suse/faqs/
 #    https://aws.amazon.com/marketplace/pp/B07SPX8ML1
@@ -48,6 +51,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://en.opensuse.org/YaST_Software_Management
 #
+#    https://github.com/SUSE-Enceladus
 #-------------------------------------------------------------------------------
 
 # Show Linux Distribution/Distro information
@@ -149,6 +153,7 @@ if [ $SlesForSp1Flag -gt 0 ];then
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+	zypper --quiet --non-interactive install python3-susepubliccloudinfo
 else
 	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
 	# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
@@ -156,6 +161,7 @@ else
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
 	# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 	zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+	zypper --quiet --non-interactive install python3-susepubliccloudinfo
 fi
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository)
@@ -354,6 +360,13 @@ else
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 	fi
 fi 
+
+# Get the latest AMI information of the OS type of this EC2 instance from SUSE Public Cloud Info Service
+# https://www.suse.com/c/suse-public-cloud-image-life-cycle/
+# https://github.com/SUSE-Enceladus/public-cloud-info-client
+if [ $(command -v pint) ]; then
+    pint amazon images --active --json --region=${Region}
+fi
 
 # Get EC2 Instance Information
 if [ -n "$RoleName" ]; then
