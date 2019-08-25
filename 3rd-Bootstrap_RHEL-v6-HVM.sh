@@ -94,7 +94,7 @@ yum-config-manager --enable rhui-REGION-client-config-server-6
 yum-config-manager --enable rhui-REGION-rhel-server-extras
 yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # yum repository metadata Clean up
 yum clean all
@@ -107,13 +107,16 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 yum install -y redhat-lsb-core redhat-support-tool
+
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-tools
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
@@ -173,6 +176,7 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
+
 yum --enablerepo=epel install -y python-pip python2-colorama python2-rsa python2-jmespath python-futures python-ordereddict
 pip install awscli
 pip show awscli
@@ -226,9 +230,15 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-6.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=amzn2-ami-hvm-*-gp2" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+fi
+
+# Get the latest AMI information of the OS type of this EC2 instance from Systems Manager Parameter Store
+if [ -n "$RoleName" ]; then
+	echo "# Get Newest AMI Information from Systems Manager Parameter Store"
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" --output json --region ${Region}
 fi
 
 # Get EC2 Instance Information
@@ -263,14 +273,22 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+
+		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
+		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
+    		modinfo ena
+		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		
+		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
+		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
+    		modinfo ixgbevf
+		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -285,17 +303,50 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	else
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
 fi
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-CLI/Python 3]
+#-------------------------------------------------------------------------------
+
+# yum install -y rh-python36.x86_64 rh-python36-python-pip.noarch rh-python36-python-devel.x86_64
+# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six rh-python36-python-simplejson
+
+# /opt/rh/rh-python36/root/usr/bin/python3 -V
+# /opt/rh/rh-python36/root/usr/bin/pip3 -V
+
+# /opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+
+# /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+
+# alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
+# alternatives --display aws
+# alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
+# alternatives --display aws_completer
+
+# Setting Bash-Completion
+# cat > /etc/profile.d/aws-cli.sh << __EOF__
+# if [ -n "\$BASH_VERSION" ]; then
+#    complete -C /usr/bin/aws_completer aws
+# fi
+# __EOF__
+
+# source /etc/profile.d/aws-cli.sh
+
+# aws --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
@@ -319,7 +370,13 @@ python setup.py build
 python setup.py install
 
 chmod 775 /usr/init/redhat/cfn-hup
-ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+if [ -L /etc/init.d/cfn-hup ]; then
+	echo "Symbolic link exists"
+else
+	echo "No symbolic link exists"
+	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+fi
 
 cd /tmp
 
@@ -328,9 +385,8 @@ cd /tmp
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-# yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
@@ -345,14 +401,9 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
-
-chmod 700 /tmp/Install-Amazon-Inspector-Agent
-bash /tmp/Install-Amazon-Inspector-Agent
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
 
 rpm -qi AwsAgent
-
-/opt/aws/awsagent/bin/awsagent status
 
 # Configure Amazon Inspector Agent software (Start Daemon awsagent)
 service awsagent status
@@ -362,6 +413,8 @@ service awsagent status
 chkconfig --list awsagent
 chkconfig awsagent on
 chkconfig --list awsagent
+
+/opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -377,15 +430,11 @@ cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Parameter Settings for Amazon CloudWatch Agent
+# Configure Amazon CloudWatch Agent software (Monitor settings)
 curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-cat /tmp/config.json
-
-# Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
@@ -613,7 +662,7 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -623,7 +672,7 @@ else
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
