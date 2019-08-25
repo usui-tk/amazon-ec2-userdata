@@ -92,7 +92,7 @@ apt update -y && apt upgrade -y && apt dist-upgrade -y
 apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -205,18 +205,26 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+
+		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
+		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
+    		modinfo ena
+		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		
+		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
+		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
+    		modinfo ixgbevf
+		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -231,13 +239,16 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	else
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
@@ -257,18 +268,35 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+		
+		# Get Linux Kernel Module(modinfo nvme)
+		echo "# Get Linux Kernel Module(modinfo nvme)"
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+    		modinfo nvme
+		fi
+		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		echo "# Get NVMe Device(nvme list)"
-		nvme list
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+			if [ $(command -v nvme) ]; then
+				echo "# Get NVMe Device(nvme list)"
+				nvme list
+			fi
+		fi
 
 		# Get PCI-Express Device(lspci -v)
-		echo "# Get PCI-Express Device(lspci -v)"
-		lspci -v
+		if [ $(command -v lspci) ]; then
+			echo "# Get PCI-Express Device(lspci -v)"
+			lspci -v
+		fi
 
-		# Disk Information(MountPoint) [lsblk]
-		lsblk
+		# Get Disk[MountPoint] Information (lsblk -a)
+		if [ $(command -v lsblk) ]; then
+			echo "# Get Disk[MountPoint] Information (lsblk -a)"
+			lsblk -a
+		fi
+		
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -282,7 +310,13 @@ fi
 apt install -y python-setuptools
 easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-ln -s /usr/local/lib/python2.7/dist-packages/aws_cfn_bootstrap-1.4-py2.7.egg/init/ubuntu/cfn-hup /etc/init.d/cfn-hup
+if [ -L /etc/init.d/cfn-hup ]; then
+	echo "Symbolic link exists"
+else
+	echo "No symbolic link exists"
+	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+fi
+
 chmod +x /etc/init.d/cfn-hup
 update-rc.d cfn-hup defaults
 service cfn-hup start
@@ -299,11 +333,18 @@ apt show amazon-ssm-agent
 
 systemctl daemon-reload
 
+systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
-systemctl enable amazon-ssm-agent
-systemctl is-enabled amazon-ssm-agent
+
+# Configure AWS Systems Manager Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
+	systemctl enable amazon-ssm-agent
+	systemctl is-enabled amazon-ssm-agent
+fi
 
 systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
 
 ssm-cli get-instance-information
@@ -313,24 +354,30 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
 
-chmod 700 /tmp/Install-Amazon-Inspector-Agent
-bash /tmp/Install-Amazon-Inspector-Agent
+# Check the exit code of the Amazon Inspector Agent installer script
+if [ $? -eq 0 ]; then
+    apt show AwsAgent
+	
+	systemctl daemon-reload
 
-apt show AwsAgent
+	systemctl restart awsagent
 
-/opt/aws/awsagent/bin/awsagent status
+	systemctl status -l awsagent
 
-# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-systemctl status awsagent
-systemctl enable awsagent
-systemctl is-enabled awsagent
+	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
+		systemctl enable awsagent
+		systemctl is-enabled awsagent
+	fi
 
-systemctl restart awsagent
-systemctl status awsagent
+	systemctl restart awsagent
 
-/opt/aws/awsagent/bin/awsagent status
+	systemctl status -l awsagent
+
+	/opt/aws/awsagent/bin/awsagent status
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -339,25 +386,30 @@ systemctl status awsagent
 curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/debian/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
 dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
 
-# Package Information 
-rpm -qi amazon-cloudwatch-agent
+apt show amazon-cloudwatch-agent
 
 cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Parameter Settings for Amazon CloudWatch Agent
+systemctl daemon-reload
+
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
+
+# Configure Amazon CloudWatch Agent software (Monitor settings)
 curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-cat /tmp/config.json
-
-# Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+
+systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
@@ -379,7 +431,7 @@ mkdir -p "/opt/aws"
 
 mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
 
-tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+tar -xzf "/tmp/ec2rl.tgz" -C "/opt/aws"
 
 cat > /etc/profile.d/ec2rl.sh << __EOF__
 export PATH=\$PATH:/opt/aws/ec2rl
@@ -516,22 +568,31 @@ fi
 
 # Configure NTP Client software (Install chrony Package)
 apt install -y chrony
+
+apt show chrony
+
 systemctl daemon-reload
+
+systemctl status -l chronyd
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
+	systemctl enable chronyd
+	systemctl is-enabled chronyd
+fi
+
+systemctl restart chronyd
+
+systemctl status -l chronyd
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 sed -i 's/#log tracking measurements statistics/log measurements statistics tracking/g' /etc/chrony/chrony.conf
 
-# Configure NTP Client software (Start Daemon chronyd)
-systemctl status chrony
-systemctl restart chrony
-systemctl status chrony
-
-systemctl enable chrony
-systemctl is-enabled chrony
-
 # Configure NTP Client software (Time adjustment)
+systemctl restart chronyd
+
 sleep 3
 
 chronyc tracking
@@ -615,7 +676,7 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -625,7 +686,7 @@ else
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"

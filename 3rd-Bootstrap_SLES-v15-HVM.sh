@@ -134,12 +134,12 @@ zypper --quiet --non-interactive install --type pattern enhanced_base
 SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES15-SP1")
 if [ $SlesForSp1Flag -gt 0 ];then
 	echo "SUSE Linux Enterprise Server 15 SP1"
-	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
+	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop jq kexec-tools kmod-bash-completion lsb-release lzop net-snmp nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
 	zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 	zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 else
 	echo "SUSE Linux Enterprise Server 15 (non SP1)" 
-	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kmod-bash-completion lsb-release lzop nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
+	zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kexec-tools kmod-bash-completion lsb-release lzop net-snmp nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
 	zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 	zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 fi
@@ -399,14 +399,22 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+
+		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
+		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
+    		modinfo ena
+		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		
+		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
+		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
+    		modinfo ixgbevf
+		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -421,13 +429,16 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	else
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
@@ -447,18 +458,35 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+		
+		# Get Linux Kernel Module(modinfo nvme)
+		echo "# Get Linux Kernel Module(modinfo nvme)"
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+    		modinfo nvme
+		fi
+		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		echo "# Get NVMe Device(nvme list)"
-		nvme list
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+			if [ $(command -v nvme) ]; then
+				echo "# Get NVMe Device(nvme list)"
+				nvme list
+			fi
+		fi
 
 		# Get PCI-Express Device(lspci -v)
-		echo "# Get PCI-Express Device(lspci -v)"
-		lspci -v
+		if [ $(command -v lspci) ]; then
+			echo "# Get PCI-Express Device(lspci -v)"
+			lspci -v
+		fi
 
-		# Disk Information(MountPoint) [lsblk]
-		lsblk
+		# Get Disk[MountPoint] Information (lsblk -a)
+		if [ $(command -v lsblk) ]; then
+			echo "# Get Disk[MountPoint] Information (lsblk -a)"
+			lsblk -a
+		fi
+		
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -469,9 +497,6 @@ fi
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-# zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
-# zypper --quiet --non-interactive --no-gpg-checks install "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
-# zypper --quiet --non-interactive install amazon-ssm-agent
 
 zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
@@ -479,11 +504,18 @@ rpm -qi amazon-ssm-agent
 
 systemctl daemon-reload
 
+systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
-systemctl enable amazon-ssm-agent
-systemctl is-enabled amazon-ssm-agent
+
+# Configure AWS Systems Manager Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
+	systemctl enable amazon-ssm-agent
+	systemctl is-enabled amazon-ssm-agent
+fi
 
 systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
 
 ssm-cli get-instance-information
@@ -495,25 +527,30 @@ ssm-cli get-instance-information
 
 zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"
 
-# Package Information 
 rpm -qi amazon-cloudwatch-agent
 
 cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Parameter Settings for Amazon CloudWatch Agent
+systemctl daemon-reload
+
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
+
+# Configure Amazon CloudWatch Agent software (Monitor settings)
 curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-cat /tmp/config.json
-
-# Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+
+systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
@@ -536,7 +573,7 @@ curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
 
 mkdir -p "/opt/aws"
 
-tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+tar -xzf "/tmp/ec2rl.tgz" -C "/opt/aws"
 
 mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
 
@@ -674,22 +711,31 @@ rcapparmor status
 
 # Configure NTP Client software (Install chrony Package)
 zypper --quiet --non-interactive install chrony
+
+rpm -qi chrony
+
 systemctl daemon-reload
+
+systemctl status -l chronyd
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
+	systemctl enable chronyd
+	systemctl is-enabled chronyd
+fi
+
+systemctl restart chronyd
+
+systemctl status -l chronyd
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
 
-# Configure NTP Client software (Start Daemon chronyd)
-systemctl status chronyd
-systemctl restart chronyd
-systemctl status chronyd
-
-systemctl enable chronyd
-systemctl is-enabled chronyd
-
 # Configure NTP Client software (Time adjustment)
+systemctl restart chronyd
+
 sleep 3
 
 chronyc tracking
@@ -703,13 +749,19 @@ chronyc sourcestats -v
 # Package Install Tuned (from SUSE Linux Enterprise Server Software repository)
 zypper --quiet --non-interactive install tuned
 
-# Configure Tuned software (Start Daemon tuned)
-systemctl status tuned
-systemctl restart tuned
-systemctl status tuned
+rpm -qi tuned
 
-systemctl enable tuned
-systemctl is-enabled tuned
+systemctl daemon-reload
+
+# Configure Tuned software (Start Daemon tuned)
+if [ $(systemctl is-enabled tuned) = "disabled" ]; then
+	systemctl enable tuned
+	systemctl is-enabled tuned
+fi
+
+systemctl restart tuned
+
+systemctl status -l tuned
 
 # Configure Tuned software
 SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
@@ -802,7 +854,7 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -812,7 +864,7 @@ else
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"

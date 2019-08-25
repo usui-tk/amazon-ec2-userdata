@@ -89,13 +89,16 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of CentOS and RHEL (from CentOS Community Repository)
-yum install -y abrt abrt-cli blktrace numactl parted redhat-lsb-core sos sysstat system-config-network-tui time tmpwatch tzdata unzip usermode yum-utils zip
+yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y dstat gdisk git hdparm libicu lsof lzop iotop mtr nc nmap sos tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
+
+# Package Install CentOS support tools (from CentOS Community Repository)
+yum install -y redhat-lsb-core
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
@@ -219,6 +222,7 @@ if [ -n "$RoleName" ]; then
 	aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region}
 fi
 
+
 # Get EC2 Instance Attribute[Network Interface Performance Attribute]
 #
 # - Summary of Networking and Storage Features
@@ -233,14 +237,22 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+
+		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
+		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
+    		modinfo ena
+		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		
+		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
+		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
+    		modinfo ixgbevf
+		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -255,13 +267,16 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-		if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	else
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
@@ -282,7 +297,7 @@ pip install python-daemon
 pip install requests
 
 curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
+tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
 
 cd /tmp/aws-cfn-bootstrap-1.4/
 python setup.py build
@@ -298,9 +313,8 @@ cd /tmp
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
-# yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
-yum localinstall -y "https://amazon-ssm-${Region}.s3.amazonaws.com/latest/linux_amd64/amazon-ssm-agent.rpm"
+yum localinstall -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
@@ -315,23 +329,23 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex
 
-chmod 700 /tmp/Install-Amazon-Inspector-Agent
-bash /tmp/Install-Amazon-Inspector-Agent
+# Check the exit code of the Amazon Inspector Agent installer script
+if [ $? -eq 0 ]; then
+    rpm -qi AwsAgent
+	
+	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+	service awsagent status
+	service awsagent restart
+	service awsagent status
 
-rpm -qi AwsAgent
+	chkconfig --list awsagent
+	chkconfig awsagent on
+	chkconfig --list awsagent
 
-/opt/aws/awsagent/bin/awsagent status
-
-# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-service awsagent status
-service awsagent restart
-service awsagent status
-
-chkconfig --list awsagent
-chkconfig awsagent on
-chkconfig --list awsagent
+	/opt/aws/awsagent/bin/awsagent status
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -347,15 +361,11 @@ cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Parameter Settings for Amazon CloudWatch Agent
+# Configure Amazon CloudWatch Agent software (Monitor settings)
 curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-cat /tmp/config.json
-
-# Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
@@ -578,7 +588,7 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -588,7 +598,7 @@ else
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"

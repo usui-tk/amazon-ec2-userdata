@@ -230,15 +230,9 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=amzn2-ami-hvm-*-gp2" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-6.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
-fi
-
-# Get the latest AMI information of the OS type of this EC2 instance from Systems Manager Parameter Store
-if [ -n "$RoleName" ]; then
-	echo "# Get Newest AMI Information from Systems Manager Parameter Store"
-	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2" --output json --region ${Region}
 fi
 
 # Get EC2 Instance Information
@@ -363,7 +357,7 @@ pip install python-daemon
 pip install requests
 
 curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-tar -pxvzf /tmp/aws-cfn-bootstrap-latest.tar.gz -C /tmp
+tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
 
 cd /tmp/aws-cfn-bootstrap-1.4/
 python setup.py build
@@ -401,7 +395,7 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $? -eq 0 ]; then
