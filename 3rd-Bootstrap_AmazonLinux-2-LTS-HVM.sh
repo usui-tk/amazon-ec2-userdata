@@ -92,7 +92,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iperf3 iotop mlocate mtr nc nmap nvme-cli numactl perf rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
+yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iperf3 iotop mlocate mtr nc net-snmp-utils nmap nvme-cli numactl perf rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 
@@ -322,9 +322,7 @@ systemctl restart amazon-ssm-agent
 systemctl status -l amazon-ssm-agent
 
 # Configure AWS Systems Manager Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled amazon-ssm-agent) ]; then
-	systemctl is-enabled amazon-ssm-agent
-else
+if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 	systemctl enable amazon-ssm-agent
 	systemctl is-enabled amazon-ssm-agent
 fi
@@ -342,27 +340,28 @@ ssm-cli get-instance-information
 
 curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
 
-rpm -qi AwsAgent
+# Check the exit code of the Amazon Inspector Agent installer script
+if [ $? -eq 0 ]; then
+    rpm -qi AwsAgent
+	
+	systemctl daemon-reload
 
-systemctl daemon-reload
+	systemctl restart awsagent
 
-systemctl restart awsagent
+	systemctl status -l awsagent
 
-systemctl status -l awsagent
+	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
+		systemctl enable awsagent
+		systemctl is-enabled awsagent
+	fi
 
-# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled awsagent) ]; then
-	systemctl is-enabled awsagent
-else
-	systemctl enable awsagent
-	systemctl is-enabled awsagent
+	systemctl restart awsagent
+
+	systemctl status -l awsagent
+
+	/opt/aws/awsagent/bin/awsagent status
 fi
-
-systemctl restart awsagent
-
-systemctl status -l awsagent
-
-/opt/aws/awsagent/bin/awsagent status
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -380,9 +379,7 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 systemctl daemon-reload
 
 # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled amazon-cloudwatch-agent) ]; then
-	systemctl is-enabled amazon-cloudwatch-agent
-else
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
 	systemctl enable amazon-cloudwatch-agent
 	systemctl is-enabled amazon-cloudwatch-agent
 fi
@@ -563,9 +560,7 @@ systemctl daemon-reload
 systemctl status -l chronyd
 
 # Configure NTP Client software (Start Daemon chronyd)
-if [ $(systemctl is-enabled chronyd) ]; then
-	systemctl is-enabled chronyd
-else
+if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
 	systemctl enable chronyd
 	systemctl is-enabled chronyd
 fi
@@ -603,9 +598,7 @@ systemctl daemon-reload
 systemctl status -l autotune
 
 # Configure ec2sys-autotune software (Start Daemon autotune)
-if [ $(systemctl is-enabled autotune) ]; then
-	systemctl is-enabled autotune
-else
+if [ $(systemctl is-enabled autotune) = "disabled" ]; then
 	systemctl enable autotune
 	systemctl is-enabled autotune
 fi
