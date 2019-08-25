@@ -413,7 +413,7 @@ curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
 
 mkdir -p "/opt/aws"
 
-tar -xzvf "/tmp/ec2rl.tgz" -C "/opt/aws"
+tar -xzf "/tmp/ec2rl.tgz" -C "/opt/aws"
 
 mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
 
@@ -594,8 +594,6 @@ yum install -y ec2sys-autotune
 rpm -qi ec2sys-autotune
 
 systemctl daemon-reload
-
-systemctl status -l autotune
 
 # Configure ec2sys-autotune software (Start Daemon autotune)
 if [ $(systemctl is-enabled autotune) = "disabled" ]; then
