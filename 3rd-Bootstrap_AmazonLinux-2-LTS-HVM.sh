@@ -92,7 +92,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq lsof lzop iperf3 iotop mlocate mtr nc nmap nvme-cli numactl perf rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
+yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iperf3 iotop mlocate mtr nc nmap nvme-cli numactl perf rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 
@@ -210,14 +210,22 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
+
+		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		modinfo ena
+		if [ $(lsmod | grep ena) ]; then
+    		modinfo ena
+		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
+		
+		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		modinfo ixgbevf
+		if [ $(lsmod | grep ixgbevf) ]; then
+    		modinfo ixgbevf
+		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -236,9 +244,12 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
+
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	else
+		# Get Linux Block Device Read-Ahead Value(blockdev --report)
 		echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
 		blockdev --report
 	fi
@@ -258,18 +269,35 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+		
+		# Get Linux Kernel Module(modinfo nvme)
+		echo "# Get Linux Kernel Module(modinfo nvme)"
+		if [ $(lsmod | grep nvme) ]; then
+    		modinfo nvme
+		fi
+		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		echo "# Get NVMe Device(nvme list)"
-		nvme list
+		if [ $(lsmod | grep nvme) ]; then
+			if [ $(command -v nvme) ]; then
+				echo "# Get NVMe Device(nvme list)"
+				nvme list
+			fi
+		fi
 
 		# Get PCI-Express Device(lspci -v)
-		echo "# Get PCI-Express Device(lspci -v)"
-		lspci -v
+		if [ $(command -v lspci) ]; then
+			echo "# Get PCI-Express Device(lspci -v)"
+			lspci -v
+		fi
 
-		# Disk Information(MountPoint) [lsblk]
-		lsblk
+		# Get Disk[MountPoint] Information (lsblk -a)
+		if [ $(command -v lsblk) ]; then
+			echo "# Get Disk[MountPoint] Information (lsblk -a)"
+			lsblk -a
+		fi
+		
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -290,10 +318,17 @@ rpm -qi amazon-ssm-agent
 systemctl daemon-reload
 
 systemctl status -l amazon-ssm-agent
-systemctl enable amazon-ssm-agent
-systemctl is-enabled amazon-ssm-agent
+
+# Configure AWS Systems Manager Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-ssm-agent) ]; then
+	systemctl is-enabled amazon-ssm-agent
+else
+	systemctl enable amazon-ssm-agent
+	systemctl is-enabled amazon-ssm-agent
+fi
 
 systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
 
 ssm-cli get-instance-information
@@ -303,22 +338,25 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -sS "https://inspector-agent.amazonaws.com/linux/latest/install" -o "/tmp/Install-Amazon-Inspector-Agent"
-
-chmod 700 /tmp/Install-Amazon-Inspector-Agent
-bash /tmp/Install-Amazon-Inspector-Agent
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
 
 rpm -qi AwsAgent
 
-/opt/aws/awsagent/bin/awsagent status
+systemctl daemon-reload
+
+systemctl status -l awsagent
 
 # Configure Amazon Inspector Agent software (Start Daemon awsagent)
-systemctl status awsagent
-systemctl enable awsagent
-systemctl is-enabled awsagent
+if [ $(systemctl is-enabled awsagent) ]; then
+	systemctl is-enabled awsagent
+else
+	systemctl enable awsagent
+	systemctl is-enabled awsagent
+fi
 
 systemctl restart awsagent
-systemctl status awsagent
+
+systemctl status -l awsagent
 
 /opt/aws/awsagent/bin/awsagent status
 
@@ -329,25 +367,34 @@ systemctl status awsagent
 
 yum localinstall -y "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
 
-# Package Information 
 rpm -qi amazon-cloudwatch-agent
 
 cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Parameter Settings for Amazon CloudWatch Agent
+systemctl daemon-reload
+
+systemctl status -l amazon-cloudwatch-agent
+
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) ]; then
+	systemctl is-enabled amazon-cloudwatch-agent
+else
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
+
+# Configure Amazon CloudWatch Agent software (Monitor settings)
 curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-cat /tmp/config.json
-
-# Configuration for Amazon CloudWatch Agent
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+
+systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
@@ -435,6 +482,20 @@ amazon-linux-extras list
 rpm -qi vim-common
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [BCC]
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux System Administration Tools (from Extras Library Repository)
+amazon-linux-extras list
+
+amazon-linux-extras install -y BCC
+
+amazon-linux-extras list
+
+# Package Information [bcc]
+rpm -qi bcc
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all
@@ -493,20 +554,32 @@ sestatus
 # Configure NTP Client software (Install chrony Package)
 yum install -y chrony
 
+rpm -qi chrony
+
+systemctl daemon-reload
+
+systemctl status -l chronyd
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled chronyd) ]; then
+	systemctl is-enabled chronyd
+else
+	systemctl enable chronyd
+	systemctl is-enabled chronyd
+fi
+
+systemctl restart chronyd
+
+systemctl status -l chronyd
+
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
 
-# Configure NTP Client software (Start Daemon chronyd)
-systemctl status chronyd
-systemctl restart chronyd
-systemctl status chronyd
-
-systemctl enable chronyd
-systemctl is-enabled chronyd
-
 # Configure NTP Client software (Time adjustment)
+systemctl restart chronyd
+
 sleep 3
 
 chronyc tracking
@@ -521,13 +594,23 @@ chronyc sourcestats -v
 # Package Install ec2sys-autotune
 yum install -y ec2sys-autotune
 
-# Configure ec2sys-autotune software (Start Daemon autotune)
-systemctl status autotune
-systemctl restart autotune
-systemctl status autotune
+rpm -qi ec2sys-autotune
 
-systemctl enable autotune
-systemctl is-enabled autotune
+systemctl daemon-reload
+
+systemctl status -l autotune
+
+# Configure ec2sys-autotune software (Start Daemon autotune)
+if [ $(systemctl is-enabled autotune) ]; then
+	systemctl is-enabled autotune
+else
+	systemctl enable autotune
+	systemctl is-enabled autotune
+fi
+
+systemctl restart autotune
+
+systemctl status -l autotune
 
 autotune status
 autotune list
