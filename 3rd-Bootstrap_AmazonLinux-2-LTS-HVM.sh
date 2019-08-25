@@ -213,7 +213,7 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		if [ $(lsmod | grep ena) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
     		modinfo ena
 		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
@@ -223,7 +223,7 @@ if [ -n "$RoleName" ]; then
 		
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		if [ $(lsmod | grep ixgbevf) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
     		modinfo ixgbevf
 		fi
 	else
@@ -272,14 +272,14 @@ if [ -n "$RoleName" ]; then
 		
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
-		if [ $(lsmod | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
     		modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		if [ $(lsmod | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
 			if [ $(command -v nvme) ]; then
 				echo "# Get NVMe Device(nvme list)"
 				nvme list
@@ -317,6 +317,8 @@ rpm -qi amazon-ssm-agent
 
 systemctl daemon-reload
 
+systemctl restart amazon-ssm-agent
+
 systemctl status -l amazon-ssm-agent
 
 # Configure AWS Systems Manager Agent software (Start Daemon awsagent)
@@ -343,6 +345,8 @@ curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -
 rpm -qi AwsAgent
 
 systemctl daemon-reload
+
+systemctl restart awsagent
 
 systemctl status -l awsagent
 
@@ -374,8 +378,6 @@ cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
 systemctl daemon-reload
-
-systemctl status -l amazon-cloudwatch-agent
 
 # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
 if [ $(systemctl is-enabled amazon-cloudwatch-agent) ]; then
@@ -706,7 +708,7 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -716,7 +718,7 @@ else
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
 	echo "# Show IPv6 Kernel Module"
-	lsmod | grep ipv6
+	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
