@@ -403,18 +403,21 @@ ssm-cli get-instance-information
 
 curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex 
 
-rpm -qi AwsAgent
+# Check the exit code of the Amazon Inspector Agent installer script
+if [ $? -eq 0 ]; then
+    rpm -qi AwsAgent
+	
+	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+	service awsagent status
+	service awsagent restart
+	service awsagent status
 
-# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-service awsagent status
-service awsagent restart
-service awsagent status
+	chkconfig --list awsagent
+	chkconfig awsagent on
+	chkconfig --list awsagent
 
-chkconfig --list awsagent
-chkconfig awsagent on
-chkconfig --list awsagent
-
-/opt/aws/awsagent/bin/awsagent status
+	/opt/aws/awsagent/bin/awsagent status
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
