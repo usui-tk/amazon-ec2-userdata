@@ -21,6 +21,7 @@ ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userda
 ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
+ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
 ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
 
 ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
@@ -171,14 +172,20 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
-        if [ $(echo ${REV} | grep -e '9') ]; then
+        if [ $(echo ${REV} | grep -e '10') ]; then
+           # Bootstrap Script for Debian GNU/Linux 10 (Buster)
+           BootstrapScript=${ScriptForDebian9}
+        elif [ $(echo ${REV} | grep -e '9') ]; then
            # Bootstrap Script for Debian GNU/Linux 9 (Stretch)
            BootstrapScript=${ScriptForDebian9}
         else
            BootstrapScript=""
         fi    
     elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
-        if [ $(echo ${REV} | grep -e '2018.') ]; then
+        if [ $(echo ${REV} | grep -e '2019.') ]; then
+           # Bootstrap Script for Kali Linux 2019.x
+           BootstrapScript=${ScriptForKaliLinux}
+        elif [ $(echo ${REV} | grep -e '2018.') ]; then
            # Bootstrap Script for Kali Linux 2018.x
            BootstrapScript=${ScriptForKaliLinux}
         elif [ $(echo ${REV} | grep -e '2017.') ]; then
