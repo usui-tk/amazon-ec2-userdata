@@ -174,7 +174,7 @@ function get_bootstrap_script () {
     elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
         if [ $(echo ${REV} | grep -e '10') ]; then
            # Bootstrap Script for Debian GNU/Linux 10 (Buster)
-           BootstrapScript=${ScriptForDebian9}
+           BootstrapScript=${ScriptForDebian10}
         elif [ $(echo ${REV} | grep -e '9') ]; then
            # Bootstrap Script for Debian GNU/Linux 9 (Stretch)
            BootstrapScript=${ScriptForDebian9}
