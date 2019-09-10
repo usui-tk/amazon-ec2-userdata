@@ -790,7 +790,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
 	# locale
 	# localectl status
-	# localectl set-locale LANG=ja_JP.utf8
+	# localectl set-locale LANG=ja_JP.UTF-8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -798,7 +798,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
 	# locale
 	# localectl status
-	# localectl set-locale LANG=en_US.utf8
+	# localectl set-locale LANG=en_US.UTF-8
 	locale
 	# localectl status
 	cat /etc/locale.conf
