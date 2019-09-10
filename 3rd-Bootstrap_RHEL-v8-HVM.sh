@@ -442,11 +442,15 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-# curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || echo $?
+# # Variable initialization
+# InspectorInstallStatus="0"
+
+# # Run Amazon Inspector Agent installer script
+# curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || InspectorInstallStatus=$?
 
 # # Check the exit code of the Amazon Inspector Agent installer script
-# if [ $? -eq 0 ]; then
-#   rpm -qi AwsAgent
+# if [ $InspectorInstallStatus -eq 0 ]; then
+#     rpm -qi AwsAgent
 	
 # 	systemctl daemon-reload
 
@@ -465,6 +469,8 @@ ssm-cli get-instance-information
 # 	systemctl status -l awsagent
 
 # 	/opt/aws/awsagent/bin/awsagent status
+# else
+# 	echo "Failed to execute Amazon Inspector Agent installer script"
 # fi
 
 #-------------------------------------------------------------------------------
