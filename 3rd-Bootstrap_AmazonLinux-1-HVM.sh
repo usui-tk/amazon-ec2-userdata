@@ -321,7 +321,7 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || echo $?
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $? -eq 0 ]; then

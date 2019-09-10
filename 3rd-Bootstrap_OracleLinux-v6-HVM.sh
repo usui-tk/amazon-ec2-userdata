@@ -389,23 +389,23 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex
+# curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || echo $?
 
-# Check the exit code of the Amazon Inspector Agent installer script
-if [ $? -eq 0 ]; then
-    rpm -qi AwsAgent
+# # Check the exit code of the Amazon Inspector Agent installer script
+# if [ $? -eq 0 ]; then
+#     rpm -qi AwsAgent
 	
-	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-	service awsagent status
-	service awsagent restart
-	service awsagent status
+# 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+# 	service awsagent status
+# 	service awsagent restart
+# 	service awsagent status
 
-	chkconfig --list awsagent
-	chkconfig awsagent on
-	chkconfig --list awsagent
+# 	chkconfig --list awsagent
+# 	chkconfig awsagent on
+# 	chkconfig --list awsagent
 
-	/opt/aws/awsagent/bin/awsagent status
-fi
+# 	/opt/aws/awsagent/bin/awsagent status
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
