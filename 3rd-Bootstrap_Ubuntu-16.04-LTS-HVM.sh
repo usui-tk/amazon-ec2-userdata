@@ -77,27 +77,27 @@ systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit
 export DEBIAN_FRONTEND=noninteractive
 
 # apt repository metadata Clean up
-apt clean -y
+apt clean -y -q
 
 # Default Package Update
-apt update -y && apt upgrade -y && apt dist-upgrade -y
+apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu apt Administration Tools (from Ubuntu Official Repository)
-apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
+apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y arptables atop bash-completion binutils debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr-tiny needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
+apt install -y -q arptables atop bash-completion binutils debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr-tiny needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
 #-------------------------------------------------------------------------------
 
 # Package Install Special package for AWS (from Ubuntu Official Repository)
-apt install -y linux-aws linux-image-aws linux-tools-aws
+apt install -y -q linux-aws linux-image-aws linux-tools-aws
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -112,14 +112,14 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	if [ $(compgen -ac | grep jq) ]; then
+	if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
 		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 		StsToken=$(echo $StsCredential | jq -r '.Token')
@@ -127,14 +127,14 @@ if [ -n "$RoleName" ]; then
 fi
 
 # AWS Account ID
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-apt install -y awscli
+apt install -y -q awscli
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -312,7 +312,7 @@ fi
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
-apt install -y python-setuptools
+apt install -y -q python-setuptools
 easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
 if [ -L /etc/init.d/cfn-hup ]; then
@@ -456,14 +456,14 @@ source /etc/profile.d/ec2rl.sh
 # http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-via-apt-ubuntu
 #-------------------------------------------------------------------------------
 
-apt install -y software-properties-common
+apt install -y -q software-properties-common
 
 apt-add-repository -y ppa:ansible/ansible
 apt-key list
 
-apt update -y
+apt update -y -q
 
-apt install -y ansible
+apt install -y -q ansible
 
 apt show ansible
 
@@ -490,11 +490,11 @@ apt-key list
 curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
 
 # Update the list of products
-apt clean -y
-apt update -y
+apt clean -y -q
+apt update -y -q
 
 # Install PowerShell
-apt install -y powershell
+apt install -y -q powershell
 
 apt show powershell
 
@@ -515,7 +515,7 @@ pwsh -Command "Get-Module -ListAvailable"
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-apt clean -y
+apt clean -y -q
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -578,7 +578,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Configure NTP Client software (Install chrony Package)
-apt install -y chrony
+apt install -y -q chrony
 
 apt show chrony
 
@@ -640,7 +640,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation [language-pack-ja]
-	apt install -y language-pack-ja-base language-pack-ja fonts-ipafont
+	apt install -y -q language-pack-ja-base language-pack-ja fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status

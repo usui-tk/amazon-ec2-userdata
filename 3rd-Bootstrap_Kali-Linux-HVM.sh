@@ -82,23 +82,23 @@ cat /etc/apt/sources.list
 cat /etc/apt/sources.list
 
 # apt repository metadata Clean up
-apt clean -y
+apt clean -y -q
 
 # Default Package Update
-apt update -y && apt upgrade -y && apt dist-upgrade -y
+apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 
 # --- Workaround ---
-apt --fix-broken install -y
+apt --fix-broken install -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Debian apt Administration Tools (from Debian Official Repository)
-apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
+apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for Kali]
@@ -107,7 +107,7 @@ apt install -y arptables atop bash-completion binutils collectl curl debian-good
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux Meta-Package
-apt install -y kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
+apt install -y -q kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -122,14 +122,14 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	if [ $(compgen -ac | grep jq) ]; then
+	if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
 		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 		StsToken=$(echo $StsCredential | jq -r '.Token')
@@ -137,14 +137,14 @@ if [ -n "$RoleName" ]; then
 fi
 
 # AWS Account ID
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-apt install -y awscli
+apt install -y -q awscli
 
 cat > /etc/profile.d/aws-cli.sh << __EOF__
 if [ -n "\$BASH_VERSION" ]; then
@@ -419,7 +419,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
-apt install -y ansible
+apt install -y -q ansible
 
 ansible --version
 
@@ -437,8 +437,8 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 
 # Install system components
-apt update -y
-apt install -y curl gnupg apt-transport-https libunwind8 libicu57
+apt update -y -q
+apt install -y -q curl gnupg apt-transport-https libunwind8 libicu57
 
 # Import the public repository GPG keys
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -452,7 +452,7 @@ apt clean -y
 apt update -y
 
 # Install PowerShell
-apt install -y powershell
+apt install -y -q powershell
 
 apt show powershell
 
@@ -475,7 +475,7 @@ pwsh -Command "Get-Module -ListAvailable"
 #-------------------------------------------------------------------------------
 
 # install dependencies 4 cert
-apt install -y apt-transport-https ca-certificates curl gnupg2 software-properties-common
+apt install -y -q apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
 # add Docker repo gpg key
 curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
@@ -486,7 +486,7 @@ echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" 
 apt clean -y
 
 # Update and install Docker CE version
-apt update -y && apt install -y docker-ce
+apt update -y -q && apt install -y docker-ce -q
 
 # Package Information
 apt show docker-ce
@@ -573,7 +573,7 @@ systemctl status -l td-agent
 # Package Install node.js/npm Tools (from node.js Official Repository)
 curl -sL https://deb.nodesource.com/setup_9.x | bash -
 
-apt install -y nodejs
+apt install -y -q nodejs
 
 # Package Information
 apt show nodejs
@@ -597,14 +597,14 @@ npm -v
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.6]
 #-------------------------------------------------------------------------------
-apt install -y python3
+apt install -y -q python3
 
 /usr/bin/python3 -V
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Go 1.9]
 #-------------------------------------------------------------------------------
-apt install -y golang golang-github-aws-aws-sdk-go-dev
+apt install -y -q golang golang-github-aws-aws-sdk-go-dev
 
 /usr/bin/go version
 
@@ -613,10 +613,10 @@ apt install -y golang golang-github-aws-aws-sdk-go-dev
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux Desktop Environment [Desktop for Gnome 3]
-apt install -y kali-desktop-gnome
+apt install -y -q kali-desktop-gnome
 
 # Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
-apt install -y task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
+apt install -y -q task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for VNC Server
@@ -624,7 +624,7 @@ apt install -y task-japanese task-japanese-desktop locales-all fonts-ipafont ibu
 #  - VNC Server User : ec2-user [cloud-init default user]
 #
 #-------------------------------------------------------------------------------
-apt install -y vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
+apt install -y -q vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
 
 # Configure VNC Server for "ec2-user" user
 cat > /home/ec2-user/vnc-setup.sh << __EOF__
@@ -703,7 +703,7 @@ echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /et
 apt clean -y
 
 # Update and install Google Chrome Stable version
-apt update -y && apt install -y google-chrome-stable
+apt update -y -q && apt install -y -q google-chrome-stable
 
 # Package Information
 apt show google-chrome-stable
@@ -737,7 +737,7 @@ echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" 
 apt clean -y
 
 # Update and install Visual Studio Code 
-apt update -y && apt install -y code
+apt update -y && apt install -y -q code
 
 # Package Information
 apt show code
@@ -747,13 +747,13 @@ apt show code
 #-------------------------------------------------------------------------------
 
 # apt repository metadata Clean up
-apt clean -y
+apt clean -y -q 
 
 # Default Package Update
-apt update -y && apt upgrade -y && apt dist-upgrade -y
+apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 
 # Clean up package
-apt autoremove -y
+apt autoremove -y -q
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -794,10 +794,10 @@ ip route show
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntp Package)
-apt remove -y ntp sntp
+apt remove -y -q ntp sntp
 
 # Configure NTP Client software (Install chrony Package)
-apt install -y chrony
+apt install -y -q chrony
 
 apt show chrony
 
@@ -859,7 +859,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation [language-pack-ja]
-	apt install -y task-japanese locales-all task-japanese-desktop fonts-ipafont
+	apt install -y -q task-japanese locales-all task-japanese-desktop fonts-ipafont
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status

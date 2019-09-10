@@ -287,14 +287,14 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	if [ $(compgen -ac | grep jq) ]; then
+	if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
 		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 		StsToken=$(echo $StsCredential | jq -r '.Token')
@@ -302,7 +302,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # AWS Account ID
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 fi
 

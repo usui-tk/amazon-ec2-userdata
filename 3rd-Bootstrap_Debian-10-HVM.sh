@@ -79,24 +79,24 @@ systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit
 export DEBIAN_FRONTEND=noninteractive
 
 # apt repository metadata Clean up
-apt clean -y
+apt clean -y -q
 
 # Default Package Update
-apt update -y && apt upgrade -y && apt dist-upgrade -y
+apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Debian apt Administration Tools (from Debian Official Repository)
-apt install -y apt-transport-https ca-certificates curl gnupg software-properties-common
+apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
-apt install -y cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
-apt install -y open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
-apt install -y apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
-apt install -y pcp pcp-conf pcp-manager 
+apt install -y -q arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
+apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+apt install -y -q pcp pcp-conf pcp-manager 
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -111,14 +111,14 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
 if [ -n "$RoleName" ]; then
 	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
-	if [ $(compgen -ac | grep jq) ]; then
+	if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
 		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
 		StsToken=$(echo $StsCredential | jq -r '.Token')
@@ -126,14 +126,14 @@ if [ -n "$RoleName" ]; then
 fi
 
 # AWS Account ID
-if [ $(compgen -ac | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
     AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-apt install -y awscli python3-botocore python3-aws-requests-auth
+apt install -y -q awscli python3-botocore python3-aws-requests-auth
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
@@ -446,7 +446,7 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-apt install -y ansible
+apt install -y -q ansible
 
 ansible --version
 
@@ -471,11 +471,11 @@ ansible localhost -m setup
 # sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-buster-prod buster main" > /etc/apt/sources.list.d/microsoft.list'
 
 # # Update the list of products
-# apt clean -y
-# apt update -y
+# apt clean -y -q
+# apt update -y -q
 
 # # Install PowerShell
-# apt install -y powershell
+# apt install -y -q powershell
 
 # apt show powershell
 
@@ -496,7 +496,7 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-apt clean -y
+apt clean -y -q
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -559,7 +559,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Configure NTP Client software (Install chrony Package)
-apt install -y chrony
+apt install -y -q chrony
 
 apt show chrony
 
@@ -596,7 +596,7 @@ chronyc sourcestats -v
 #-------------------------------------------------------------------------------
 
 # Configure ACPI daemon software (Install acpid Package)
-apt install -y acpid acpitool
+apt install -y -q acpid acpitool
 
 apt show acpid 
 
