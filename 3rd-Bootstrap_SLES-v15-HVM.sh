@@ -737,9 +737,10 @@ sed -i 's/#log measurements statistics tracking/log measurements statistics trac
 systemctl restart chronyd
 
 sleep 3
-
 chronyc tracking
+sleep 3
 chronyc sources -v
+sleep 3
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------

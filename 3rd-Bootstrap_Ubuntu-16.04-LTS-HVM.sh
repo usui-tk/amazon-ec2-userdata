@@ -374,6 +374,10 @@ systemctl status -l cfn-hup
 
 snap list --all
 
+snap refresh
+
+snap list --all
+
 snap install amazon-ssm-agent --classic
 
 snap list amazon-ssm-agent
@@ -649,10 +653,62 @@ cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 systemctl restart chronyd
 
 sleep 3
-
 chronyc tracking
+sleep 3
 chronyc sources -v
+sleep 3
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned
+apt install -y -q tuned tuned-utils
+
+apt show tuned
+
+systemctl daemon-reload
+
+# Configure Tuned software (Start Daemon tuned)
+if [ $(systemctl is-enabled tuned) = "disabled" ]; then
+	systemctl enable tuned
+	systemctl is-enabled tuned
+fi
+
+systemctl restart tuned
+
+systemctl status -l tuned
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
+# Configure ACPI daemon (Advanced Configuration and Power Interface)
+#-------------------------------------------------------------------------------
+
+# Configure ACPI daemon software (Install acpid Package)
+apt install -y -q acpid acpitool
+
+apt show acpid 
+
+systemctl daemon-reload
+
+systemctl status -l acpid 
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled acpid) = "disabled" ]; then
+	systemctl enable acpid
+	systemctl is-enabled acpid
+fi
+
+systemctl restart acpid
+
+systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # System Setting

@@ -535,9 +535,10 @@ chkconfig --list chronyd
 
 # Configure NTP Client software (Time adjustment)
 sleep 3
-
 chronyc tracking
+sleep 3
 chronyc sources -v
+sleep 3
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------

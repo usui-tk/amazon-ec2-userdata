@@ -727,9 +727,10 @@ cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 systemctl restart chronyd
 
 sleep 3
-
 chronyc tracking
+sleep 3
 chronyc sources -v
+sleep 3
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------

@@ -89,8 +89,15 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 # Package Install Ubuntu apt Administration Tools (from Ubuntu Official Repository)
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
-# Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q arptables atop bash-completion binutils debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr-tiny needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
+# Package Install Debian System Administration Tools (from Debian Official Repository)
+apt install -y -q acpid acpitool arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
+apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+apt install -y -q pcp pcp-conf pcp-manager 
+
+# Package Install Python 3 Runtime (from Debian Official Repository)
+apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-ubuntutools python3-wheel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
@@ -315,6 +322,10 @@ fi
 
 snap list --all
 
+snap refresh
+
+snap list --all
+
 snap install amazon-ssm-agent --classic
 
 snap list amazon-ssm-agent
@@ -470,17 +481,17 @@ apt clean -y -q
 apt update -y -q
 
 # Install PowerShell
-# apt install -y -q powershell
+apt install -y -q powershell
 
-# apt show powershell
+apt show powershell
 
 # Check Version
-# pwsh -Version
+pwsh -Version
 
 # Operation check of PowerShell command
-# pwsh -Command "Get-Module -ListAvailable"
+pwsh -Command "Get-Module -ListAvailable"
 
-# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 # pwsh -Command "Get-Module -ListAvailable"
@@ -585,10 +596,62 @@ cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 systemctl restart chronyd
 
 sleep 3
-
 chronyc tracking
+sleep 3
 chronyc sources -v
+sleep 3
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned
+apt install -y -q tuned tuned-utils
+
+apt show tuned
+
+systemctl daemon-reload
+
+# Configure Tuned software (Start Daemon tuned)
+if [ $(systemctl is-enabled tuned) = "disabled" ]; then
+	systemctl enable tuned
+	systemctl is-enabled tuned
+fi
+
+systemctl restart tuned
+
+systemctl status -l tuned
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
+# Configure ACPI daemon (Advanced Configuration and Power Interface)
+#-------------------------------------------------------------------------------
+
+# Configure ACPI daemon software (Install acpid Package)
+apt install -y -q acpid acpitool
+
+apt show acpid 
+
+systemctl daemon-reload
+
+systemctl status -l acpid 
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled acpid) = "disabled" ]; then
+	systemctl enable acpid
+	systemctl is-enabled acpid
+fi
+
+systemctl restart acpid
+
+systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # System Setting
