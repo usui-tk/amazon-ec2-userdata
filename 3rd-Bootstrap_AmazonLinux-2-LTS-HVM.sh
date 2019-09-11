@@ -96,6 +96,9 @@ yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio g
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 
+# Package Install Python 3 Runtime (from Amazon Official Repository)
+yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3-test python3-tools python3-wheel
+
 # Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
 yum install -y ec2-hibinit-agent hibagent 
 
@@ -662,7 +665,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -670,7 +673,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf

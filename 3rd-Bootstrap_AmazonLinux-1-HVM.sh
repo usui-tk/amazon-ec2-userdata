@@ -552,12 +552,12 @@ fi
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=ja_JP.UTF-8' >> /etc/sysconfig/i18n
+	echo 'LANG=ja_JP.utf8' >> /etc/sysconfig/i18n
 	cat /etc/sysconfig/i18n
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=en_US.UTF-8' >> /etc/sysconfig/i18n
+	echo 'LANG=en_US.utf8' >> /etc/sysconfig/i18n
 	cat /etc/sysconfig/i18n
 else
 	echo "# Default Language"
@@ -567,11 +567,10 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-	service ntpd restart
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 

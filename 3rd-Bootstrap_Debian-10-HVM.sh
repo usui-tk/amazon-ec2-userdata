@@ -349,7 +349,7 @@ curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $InspectorInstallStatus -eq 0 ]; then
-    apt show AwsAgent
+	apt show AwsAgent
 	
 	systemctl daemon-reload
 

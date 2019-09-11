@@ -116,7 +116,7 @@ yum install -y setroubleshoot-server setools-console
 yum install -y redhat-lsb-core redhat-support-tool
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
-yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-tools
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
@@ -316,8 +316,8 @@ fi
 # Custom Package Installation [AWS-CLI/Python 3]
 #-------------------------------------------------------------------------------
 
-# yum install -y rh-python36.x86_64 rh-python36-python-pip.noarch rh-python36-python-devel.x86_64
-# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six rh-python36-python-simplejson
+# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
 # /opt/rh/rh-python36/root/usr/bin/python3 -V
 # /opt/rh/rh-python36/root/usr/bin/pip3 -V
@@ -331,14 +331,14 @@ fi
 # alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
 # alternatives --display aws_completer
 
-# Setting Bash-Completion
-# cat > /etc/profile.d/aws-cli.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/aws_completer aws
-# fi
-# __EOF__
+# cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# # Typically that would be added under one of the following paths:
+# # - /etc/bash_completion.d
+# # - /usr/local/etc/bash_completion.d
+# # - /usr/share/bash-completion/completions
 
-# source /etc/profile.d/aws-cli.sh
+# complete -C aws_completer aws
+# __EOF__
 
 # aws --version
 
@@ -403,7 +403,7 @@ curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $InspectorInstallStatus -eq 0 ]; then
-    rpm -qi AwsAgent
+	rpm -qi AwsAgent
 	
 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
 	service awsagent status
@@ -626,12 +626,12 @@ fi
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=ja_JP.UTF-8' >> /etc/sysconfig/i18n
+	echo 'LANG=ja_JP.utf8' >> /etc/sysconfig/i18n
 	cat /etc/sysconfig/i18n
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	cat /dev/null > /etc/sysconfig/i18n
-	echo 'LANG=en_US.UTF-8' >> /etc/sysconfig/i18n
+	echo 'LANG=en_US.utf8' >> /etc/sysconfig/i18n
 	cat /etc/sysconfig/i18n
 else
 	echo "# Default Language"
@@ -641,11 +641,10 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/restrict -6/#restrict -6/g' /etc/ntp.conf
-	service ntpd restart
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
