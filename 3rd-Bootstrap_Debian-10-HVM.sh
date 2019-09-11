@@ -596,6 +596,34 @@ chronyc sources -v
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned
+apt install -y -q tuned tuned-utils
+
+apt show tuned
+
+systemctl daemon-reload
+
+# Configure Tuned software (Start Daemon tuned)
+if [ $(systemctl is-enabled tuned) = "disabled" ]; then
+	systemctl enable tuned
+	systemctl is-enabled tuned
+fi
+
+systemctl restart tuned
+
+systemctl status -l tuned
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
 # Configure ACPI daemon (Advanced Configuration and Power Interface)
 #-------------------------------------------------------------------------------
 
@@ -658,14 +686,14 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
+	localectl set-locale LANG=ja_JP.utf8 LANGUAGE="ja_JP:ja"
 	locale
 	strings /etc/default/locale
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	strings /etc/default/locale
 else
