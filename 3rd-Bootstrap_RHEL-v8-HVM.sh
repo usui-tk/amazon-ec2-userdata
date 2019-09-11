@@ -120,6 +120,10 @@ dnf install -y pcp pcp-zeroconf pcp-system-tools pcp-export-pcp2json pcp-selinux
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 dnf install -y redhat-lsb-core redhat-support-tool
 
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+dnf install -y @python36
+dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+
 # Package Install Red Hat Enterprise Linux Web-Based support tools (from Red Hat Official Repository)
 # dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
@@ -555,20 +559,19 @@ source /etc/profile.d/ec2rl.sh
 
 # ansible localhost -m setup 
 
+# Package Install Ansible (from Python Package Index (PyPI) Repository)
+dnf install -y python3-cryptography python3-pyyaml
+pip3 install ansible
+pip3 show ansible
 
+alternatives --list
+alternatives --install "/usr/bin/ansible" ansible "/usr/local/bin/ansible" 1
+alternatives --list
 
-# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-# pip3 install ansible
-# pip3 show ansible
+which ansible
+ansible --version
 
-# alternatives --list
-# alternatives --install "/usr/bin/ansible" ansible "/usr/local/bin/ansible" 1
-# alternatives --list
-
-# which ansible
-# ansible --version
-
-# ansible localhost -m setup 
+ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
@@ -582,11 +585,11 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # # Register the Microsoft RedHat repository
-# curl https://packages.microsoft.com/config/rhel/8/prod.repo | tee /etc/yum.repos.d/microsoft.repo
+curl https://packages.microsoft.com/config/rhel/8/prod.repo | tee /etc/yum.repos.d/microsoft.repo
 
 # # Cleanup repository information
-# dnf clean all
-# dnf makecache
+dnf clean all
+dnf makecache
 
 # # Install PowerShell
 # dnf install -y powershell
@@ -728,6 +731,29 @@ tuned-adm profile throughput-performance
 tuned-adm active
 
 #-------------------------------------------------------------------------------
+# Configure ACPI daemon (Advanced Configuration and Power Interface)
+#-------------------------------------------------------------------------------
+
+# Configure ACPI daemon software (Install acpid Package)
+yum install -y acpid
+
+rpm -qi acpid
+
+systemctl daemon-reload
+
+systemctl status -l acpid 
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled acpid) = "disabled" ]; then
+	systemctl enable acpid
+	systemctl is-enabled acpid
+fi
+
+systemctl restart acpid
+
+systemctl status -l acpid
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
@@ -772,7 +798,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -780,7 +806,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
