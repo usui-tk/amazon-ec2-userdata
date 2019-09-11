@@ -542,8 +542,6 @@ fi
 
 # Linux Security Information(AppArmor)
 if [ $(command -v aa-status) ]; then
-    # Linux Security Information(AppArmor) [systemctl status -l apparmor]
-	systemctl status -l apparmor
     # Linux Security Information(AppArmor) [aa-status]
     aa-status
 fi
