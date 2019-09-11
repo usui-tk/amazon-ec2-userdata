@@ -610,7 +610,7 @@ fi
 
 # Linux Security Information(AppArmor)
 if [ $(command -v aa-status) ]; then
-	if [ $(cat /proc/cmdline | grep -w apparmor) ]; then
+	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
 		# Linux Security Information(AppArmor) [aa-status]
 		aa-status
 	fi
