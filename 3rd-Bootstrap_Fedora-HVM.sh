@@ -415,9 +415,9 @@ pwsh -Version
 pwsh -Command "Get-Module -ListAvailable"
 
 pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-pwsh -Command "Import-Module AWSPowerShell.NetCore"
+# pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
 # pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"

@@ -96,7 +96,7 @@ yum-config-manager --enable rhui-REGION-client-config-server-7
 yum-config-manager --enable rhui-REGION-rhel-server-extras
 yum-config-manager --enable rhui-REGION-rhel-server-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-# yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
 # yum repository metadata Clean up
 yum clean all
@@ -109,7 +109,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget zip
+yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget zip
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server setools-console
@@ -121,7 +121,7 @@ yum install -y redhat-lsb-core redhat-support-tool
 yum install -y kpatch
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
-yum install -y python3 python3-pip python3-devel
+yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 # Package Install Device driver compatible with Amazon EC2 (from Red Hat Official Repository)
 # - Additional kernel modules up to RHEL v7.6 (not required from RHEL v7.7)
@@ -581,9 +581,9 @@ pwsh -Version
 pwsh -Command "Get-Module -ListAvailable"
 
 pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-pwsh -Command "Import-Module AWSPowerShell.NetCore"
+# pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
 # pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
@@ -748,7 +748,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -756,7 +756,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -769,11 +769,10 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
-	systemctl restart chronyd
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
