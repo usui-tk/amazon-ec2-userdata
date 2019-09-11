@@ -498,7 +498,7 @@ source /etc/profile.d/ec2rl.sh
 
 apt install -y -q software-properties-common
 
-apt-add-repository -y ppa:ansible/ansible
+apt-add-repository --yes --update ppa:ansible/ansible
 apt-key list
 
 apt update -y -q
@@ -684,14 +684,14 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
+	localectl set-locale LANG=ja_JP.utf8 LANGUAGE="ja_JP:ja"
 	locale
 	strings /etc/default/locale
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	strings /etc/default/locale
 else

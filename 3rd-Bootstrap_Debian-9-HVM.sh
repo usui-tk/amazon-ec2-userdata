@@ -617,7 +617,17 @@ systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # Configure AppArmor daemon
+# https://debian-handbook.info/browse/ja-JP/stable/sect.apparmor.html
 #-------------------------------------------------------------------------------
+
+# Configure AppArmor
+cat /etc/default/grub
+
+perl -pi -e 's,GRUB_CMDLINE_LINUX="(.*)"$,GRUB_CMDLINE_LINUX="$1 apparmor=1 security=apparmor",' /etc/default/grub
+
+cat /etc/default/grub
+
+update-grub
 
 # Configure AppArmor daemon (Start Daemon apparmor)
 if [ $(systemctl is-enabled apparmor) = "disabled" ]; then
