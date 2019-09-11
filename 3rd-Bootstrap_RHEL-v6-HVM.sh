@@ -107,10 +107,10 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y acpid dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
-yum install -y setroubleshoot-server setools-console
+yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 yum install -y redhat-lsb-core redhat-support-tool

@@ -89,7 +89,7 @@ yum update -y
 yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget zip
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
-yum install -y setroubleshoot-server setools-console
+yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
 
 # Package Install CentOS support tools (from CentOS Community Repository)
 yum install -y redhat-lsb-core redhat-support-tool
