@@ -548,7 +548,6 @@ chronyc sourcestats -v
 yum install -y tuned tuned-utils tuned-profiles-oracle
 
 # Configure Tuned software (Start Daemon tuned)
-service tuned status
 service tuned restart
 service tuned status
 
