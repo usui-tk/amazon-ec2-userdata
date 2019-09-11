@@ -609,7 +609,7 @@ if [ $(command -v aa-status) ]; then
 	# Linux Security Information(AppArmor) [systemctl status -l apparmor]
 	systemctl daemon-reload
 
-	systemctl restart awsagent
+	systemctl restart apparmor
 
 	sleep 5
 
