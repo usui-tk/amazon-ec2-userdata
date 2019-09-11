@@ -309,24 +309,6 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudFormation Helper Scripts]
-# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
-# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
-#-------------------------------------------------------------------------------
-apt install -y -q python-setuptools
-easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
-
-if [ -L /etc/init.d/cfn-hup ]; then
-	echo "Symbolic link exists"
-else
-	echo "No symbolic link exists"
-	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
-fi
-
-update-rc.d cfn-hup defaults
-service cfn-hup start
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
