@@ -277,14 +277,14 @@ if [ -n "$RoleName" ]; then
 		
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
-		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
     		modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			if [ $(command -v nvme) ]; then
 				echo "# Get NVMe Device(nvme list)"
 				nvme list

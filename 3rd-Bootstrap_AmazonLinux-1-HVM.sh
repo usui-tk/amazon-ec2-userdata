@@ -91,7 +91,10 @@ yum update -y
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
 yum install -y acpid arptables_jf bc bcc collectl dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iotop mlocate mtr nc net-snmp-utils nmap nvme-cli perf rsync sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
 yum install -y aws-efs-utils cifs-utils nfs-utils nfs4-acl-tools
-yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
+yum install -y iscsi-initiator-utils lsscsi
+
+# Package Install Python 3 Runtime (from Amazon Official Repository)
+yum install -y python36 python36-pip python36-setuptools python36-test python36-tools python36-virtualenv
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion
@@ -269,14 +272,14 @@ if [ -n "$RoleName" ]; then
 		
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
-		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
     		modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		if [ $(lsmod | awk '{print $1}' | grep nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			if [ $(command -v nvme) ]; then
 				echo "# Get NVMe Device(nvme list)"
 				nvme list
@@ -329,8 +332,8 @@ curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $InspectorInstallStatus -eq 0 ]; then
-    rpm -qi AwsAgent
-	
+	rpm -qi AwsAgent
+
 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
 	service awsagent status
 	service awsagent restart
@@ -484,7 +487,6 @@ cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
 
 # Configure NTP Client software (Start Daemon chronyd)
-service chronyd status
 service chronyd restart
 service chronyd status
 

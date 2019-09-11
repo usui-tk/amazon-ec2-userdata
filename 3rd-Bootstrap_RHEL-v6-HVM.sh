@@ -532,7 +532,6 @@ sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 # Configure NTP Client software (Start Daemon chronyd)
-service chronyd status
 service chronyd restart
 service chronyd status
 
