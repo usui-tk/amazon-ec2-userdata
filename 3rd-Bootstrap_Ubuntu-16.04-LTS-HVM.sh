@@ -318,19 +318,53 @@ fi
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-hup.html
+# https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/solutions/HelperNonAmaznAmi/ubuntu16.04LTS_cfn-hup.template
 #-------------------------------------------------------------------------------
 apt install -y -q python-setuptools
-easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-if [ -L /etc/init.d/cfn-hup ]; then
-	echo "Symbolic link exists"
-else
-	echo "No symbolic link exists"
-	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+
+mkdir -m 755 -p /etc/cfn/hooks.d
+
+# cfn-hup.conf Configuration File
+cat > /etc/cfn/cfn-hup.conf << __EOF__
+[main]
+stack=
+__EOF__
+
+# cfn-auto-reloader.conf Configuration File
+cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+[hookname]
+triggers=post.update
+path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+action=
+runas=root
+__EOF__
+
+# cfn-hup.service Configuration File
+cat > /lib/systemd/system/cfn-hup.service << __EOF__
+[Unit]
+Description=cfn-hup daemon
+
+[Service]
+Type=simple
+ExecStart=/opt/aws/bin/cfn-hup
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+__EOF__
+
+# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+	systemctl enable cfn-hup
+	systemctl is-enabled cfn-hup
 fi
 
-update-rc.d cfn-hup defaults
-service cfn-hup start
+systemctl restart cfn-hup
+
+systemctl status -l cfn-hup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
