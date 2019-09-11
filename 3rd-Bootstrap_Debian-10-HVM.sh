@@ -92,11 +92,14 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 apt install -y -q pcp pcp-conf pcp-manager 
+
+# Package Install Python 3 Runtime (from Debian Official Repository)
+apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -278,7 +281,7 @@ if [ -n "$RoleName" ]; then
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
-    		modinfo nvme
+			modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)

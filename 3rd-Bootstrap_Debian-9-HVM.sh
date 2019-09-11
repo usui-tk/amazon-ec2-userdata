@@ -92,7 +92,13 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
+apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+
+# Package Install Python 3 Runtime (from Debian Official Repository)
+apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -272,7 +278,7 @@ if [ -n "$RoleName" ]; then
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
-    		modinfo nvme
+			modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
@@ -317,7 +323,6 @@ else
 	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
 fi
 
-chmod +x /etc/init.d/cfn-hup
 update-rc.d cfn-hup defaults
 service cfn-hup start
 
@@ -606,6 +611,29 @@ chronyc sources -v
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
+# Configure ACPI daemon (Advanced Configuration and Power Interface)
+#-------------------------------------------------------------------------------
+
+# Configure ACPI daemon software (Install acpid Package)
+apt install -y -q acpid acpitool
+
+apt show acpid 
+
+systemctl daemon-reload
+
+systemctl status -l acpid 
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled acpid) = "disabled" ]; then
+	systemctl enable acpid
+	systemctl is-enabled acpid
+fi
+
+systemctl restart acpid
+
+systemctl status -l acpid
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
@@ -635,14 +663,14 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
+	localectl set-locale LANG=ja_JP.utf8 LANGUAGE="ja_JP:ja"
 	locale
 	strings /etc/default/locale
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	strings /etc/default/locale
 else

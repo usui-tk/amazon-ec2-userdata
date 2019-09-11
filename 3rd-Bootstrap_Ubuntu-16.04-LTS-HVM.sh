@@ -277,7 +277,7 @@ if [ -n "$RoleName" ]; then
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
-    		modinfo nvme
+			modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
@@ -322,7 +322,6 @@ else
 	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
 fi
 
-chmod +x /etc/init.d/cfn-hup
 update-rc.d cfn-hup defaults
 service cfn-hup start
 

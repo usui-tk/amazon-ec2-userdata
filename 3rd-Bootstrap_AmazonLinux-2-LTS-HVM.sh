@@ -276,7 +276,7 @@ if [ -n "$RoleName" ]; then
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
-    		modinfo nvme
+			modinfo nvme
 		fi
 		
 		# Get NVMe Device(nvme list)
