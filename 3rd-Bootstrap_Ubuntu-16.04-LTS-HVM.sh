@@ -606,8 +606,17 @@ fi
 
 # Linux Security Information(AppArmor)
 if [ $(command -v aa-status) ]; then
-    # Linux Security Information(AppArmor) [aa-status]
-    aa-status
+	# Linux Security Information(AppArmor) [systemctl status -l apparmor]
+	systemctl daemon-reload
+
+	systemctl restart awsagent
+
+	sleep 5
+
+	systemctl status -l apparmor
+	
+	# Linux Security Information(AppArmor) [aa-status]
+	aa-status
 fi
 
 #-------------------------------------------------------------------------------
