@@ -89,8 +89,15 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 # Package Install Ubuntu apt Administration Tools (from Ubuntu Official Repository)
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
-# Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q arptables atop bash-completion binutils debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr-tiny needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip update-motd wget zip
+# Package Install Debian System Administration Tools (from Debian Official Repository)
+apt install -y -q acpid acpitool arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
+apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+apt install -y -q pcp pcp-conf pcp-manager 
+
+# Package Install Python 3 Runtime (from Debian Official Repository)
+apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-ubuntutools python3-wheel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for AWS]
@@ -504,9 +511,9 @@ pwsh -Version
 pwsh -Command "Get-Module -ListAvailable"
 
 pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-pwsh -Command "Import-Module AWSPowerShell.NetCore"
+# pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
 # pwsh -Command "Get-AWSPowerShellVersion"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
