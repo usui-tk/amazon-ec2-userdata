@@ -154,6 +154,7 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 GA"
 	else
 		echo "SUSE Linux Enterprise Server 12 (Unknown)"
+	fi
 fi
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
@@ -221,6 +222,7 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 GA"
 	else
 		echo "SUSE Linux Enterprise Server 12 (Unknown)"
+	fi
 fi
 
 #-------------------------------------------------------------------------------
@@ -337,6 +339,7 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 GA"
 	else
 		echo "SUSE Linux Enterprise Server 12 (Unknown)"
+	fi
 fi
 
 #-------------------------------------------------------------------------------

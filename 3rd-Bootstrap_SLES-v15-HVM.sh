@@ -152,6 +152,7 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA"
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
+	fi
 fi
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
@@ -182,6 +183,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
 		# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+	fi
 fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
@@ -252,6 +254,7 @@ if [ -n "$VERSION_ID" ]; then
 
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
+	fi
 fi
 
 #-------------------------------------------------------------------------------
@@ -308,6 +311,7 @@ if [ -n "$VERSION_ID" ]; then
 
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
+	fi
 fi
 
 #-------------------------------------------------------------------------------
