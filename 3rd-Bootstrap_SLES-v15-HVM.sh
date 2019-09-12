@@ -194,7 +194,7 @@ zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyY
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
 SlesForSapFlag="0"
 SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
-if [ $SlesForSapFlag -gt 0 ];then
+if [ $SlesForSapFlag -ne 0 ];then
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
 
 	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
@@ -734,15 +734,20 @@ ip route show
 
 # Network Information(Firewall Service) [SuSEfirewall2]
 if [ $(command -v SuSEfirewall2) ]; then
-    # Network Information(Firewall Service) [systemctl status SuSEfirewall2_init SuSEfirewall2]
-    systemctl status -l SuSEfirewall2_init SuSEfirewall2
-    # Network Information(Firewall Service) [SuSEfirewall2 status]
-	#   https://en.opensuse.org/SuSEfirewall2
-    SuSEfirewall2 status
+	if [ $(systemctl is-enabled SuSEfirewall2) = "enabled" ]; then
+		# Network Information(Firewall Service) [SuSEfirewall2 status]
+		#   https://en.opensuse.org/SuSEfirewall2
+		SuSEfirewall2 status
+	fi
 fi
 
-# Linux Security Information(AppArmor) [rcapparmor status]
-rcapparmor status
+# Linux Security Information(AppArmor)
+if [ $(command -v rcapparmor) ]; then
+	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
+		# Linux Security Information(AppArmor) [rcapparmor status]
+		rcapparmor status
+	fi
+fi
 
 #-------------------------------------------------------------------------------
 # Configure Amazon Time Sync Service

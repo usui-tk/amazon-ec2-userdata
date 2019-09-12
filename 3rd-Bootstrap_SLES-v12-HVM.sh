@@ -738,15 +738,20 @@ ip route show
 
 # Network Information(Firewall Service) [SuSEfirewall2]
 if [ $(command -v SuSEfirewall2) ]; then
-    # Network Information(Firewall Service) [systemctl status SuSEfirewall2_init SuSEfirewall2]
-    systemctl status -l SuSEfirewall2_init SuSEfirewall2
-    # Network Information(Firewall Service) [SuSEfirewall2 status]
-	#   https://en.opensuse.org/SuSEfirewall2
-    SuSEfirewall2 status
+	if [ $(systemctl is-enabled SuSEfirewall2) = "enabled" ]; then
+		# Network Information(Firewall Service) [SuSEfirewall2 status]
+		#   https://en.opensuse.org/SuSEfirewall2
+		SuSEfirewall2 status
+	fi
 fi
 
-# Linux Security Information(AppArmor) [rcapparmor status]
-rcapparmor status
+# Linux Security Information(AppArmor)
+if [ $(command -v rcapparmor) ]; then
+	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
+		# Linux Security Information(AppArmor) [rcapparmor status]
+		rcapparmor status
+	fi
+fi
 
 #-------------------------------------------------------------------------------
 # Configure Amazon Time Sync Service
