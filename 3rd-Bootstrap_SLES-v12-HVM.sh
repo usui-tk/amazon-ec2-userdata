@@ -761,7 +761,7 @@ fi
 # Replace NTP Client software (Uninstall ntp Package)
 systemctl status -l ntpd
 systemctl stop ntpd
-systemctl status -l ntpd
+
 zypper --quiet --non-interactive remove ntp
 
 # Replace NTP Client software (Install chrony Package)
