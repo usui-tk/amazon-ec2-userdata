@@ -42,6 +42,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/documentation/suse-best-practices/
 #    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
 #
+#    https://scc.suse.com/packages/?name=SUSE%20Linux%20Enterprise%20Server&version=12.5&arch=x86_64&query=&module=
+#
 #    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.json
 #    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.xml
 #
@@ -84,6 +86,9 @@ zypper products > /tmp/command-log_zypper_repository-list.txt
 # Default repository pattern [zypper command]
 zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.txt
 
+# Determine the OS release
+eval $(grep ^VERSION_ID= /etc/os-release)
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -100,6 +105,19 @@ SUSEConnect --list-extensions
 
 # Update default package
 zypper --quiet --non-interactive update --auto-agree-with-licenses
+
+# Apply SLES Service Pack
+# zypper migration << __EOF__
+# 
+# 1
+# 
+# y
+# q
+# yes
+# q
+# yes
+# 
+# __EOF__
 
 # Install recommended packages
 # zypper --quiet --non-interactive install-new-recommends
@@ -121,11 +139,32 @@ zypper --quiet --non-interactive install arptables bash-completion cloud-netconf
 zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --quiet --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "12.5" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP5"
+	elif [ "${VERSION_ID}" = "12.4" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP4"
+	elif [ "${VERSION_ID}" = "12.3" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP3"
+	elif [ "${VERSION_ID}" = "12.2" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP2"
+	elif [ "${VERSION_ID}" = "12.1" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP1"
+	elif [ "${VERSION_ID}" = "12" ]; then
+		echo "SUSE Linux Enterprise Server 12 GA"
+	else
+		echo "SUSE Linux Enterprise Server 12 (Unknown)"
+fi
+
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 #  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
 zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
 zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
 zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
+
+# Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
+zypper --quiet --non-interactive install python3 python3-base python3-setuptools
+zypper --quiet --non-interactive install python3-Babel python3-PyYAML python3-pycurl python3-python-dateutil python3-simplejson python3-six
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
@@ -134,49 +173,54 @@ zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Servic
 #   https://download.opensuse.org/repositories/network/
 #-------------------------------------------------------------------------------
 
-SlesForSp4Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP4")
-if [ $SlesForSp4Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP4"
-fi
+# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "12.5" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP5"
+	elif [ "${VERSION_ID}" = "12.4" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP4"
+	elif [ "${VERSION_ID}" = "12.3" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP3"
 
-SlesForSp3Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP3")
-if [ $SlesForSp3Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP3"
+		# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
+		zypper repos
+		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
+		zypper --gpg-auto-import-keys refresh utilities
 
-	# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
-	zypper repos
-	zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
-	zypper --gpg-auto-import-keys refresh utilities
+		# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
+		zypper repos
+		zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
+		zypper --gpg-auto-import-keys refresh network
 
-	# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
-	zypper repos
-	zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
-	zypper --gpg-auto-import-keys refresh network
+		# Repository Configure openSUSE Build Service Repository
+		zypper repos
+		zypper clean --all
+		zypper refresh -fdb
+		zypper repos
 
-	# Repository Configure openSUSE Build Service Repository
-	zypper repos
-	zypper clean --all
-	zypper refresh -fdb
-	zypper repos
+		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+		zypper --non-interactive install atop jq
 
-	# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-	zypper --non-interactive install atop jq
-fi
+	elif [ "${VERSION_ID}" = "12.2" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP2"
 
-SlesForSp2Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP2")
-if [ $SlesForSp2Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP2"
+		# Add openSUSE Build Service Repository [utilities/SLE_12_SP2_Backports] : Version - SUSE Linux Enterprise 12 SP2
+		zypper repos
+		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP2" "https://download.opensuse.org/repositories/utilities/SLE_12_SP2_Backports/utilities.repo"
+		zypper --gpg-auto-import-keys refresh utilities
 
-	# Add openSUSE Build Service Repository [utilities/SLE_12_SP2_Backports] : Version - SUSE Linux Enterprise 12 SP2
-	zypper repos
-	zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP2" "https://download.opensuse.org/repositories/utilities/SLE_12_SP2_Backports/utilities.repo"
-	zypper --gpg-auto-import-keys refresh utilities
+		# Repository Configure openSUSE Build Service Repository
+		zypper repos
+		zypper clean --all
+		zypper refresh -fdb
+		zypper repos
 
-	# Repository Configure openSUSE Build Service Repository
-	zypper repos
-	zypper clean --all
-	zypper refresh -fdb
-	zypper repos
+	elif [ "${VERSION_ID}" = "12.1" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP1"
+	elif [ "${VERSION_ID}" = "12" ]; then
+		echo "SUSE Linux Enterprise Server 12 GA"
+	else
+		echo "SUSE Linux Enterprise Server 12 (Unknown)"
 fi
 
 #-------------------------------------------------------------------------------
@@ -185,93 +229,114 @@ fi
 #   https://packagehub.suse.com/how-to-use/
 #-------------------------------------------------------------------------------
 
-SlesForSp4Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP4")
-if [ $SlesForSp4Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP4"
+# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "12.5" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP5"
 
-	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
-	# SUSEConnect --status-text
-	# SUSEConnect --list-extensions
-	# SUSEConnect --product "PackageHub/12.4/x86_64"
-	# sleep 5
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP5
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+		# SUSEConnect --product "PackageHub/12.5/x86_64"
+		# sleep 5
 
-	# Repository Configure SUSE Package Hub Repository
-	# SUSEConnect --status-text
-	# SUSEConnect --list-extensions
+		# Repository Configure SUSE Package Hub Repository
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
 
-	# zypper clean --all
-	# zypper --quiet refresh -fdb
+		# zypper clean --all
+		# zypper --quiet refresh -fdb
 
-	# zypper repos
+		# zypper repos
 
-	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-	# zypper --quiet --non-interactive install collectl mtr
-fi
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		# zypper --quiet --non-interactive install collectl mtr
 
-SlesForSp3Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP3")
-if [ $SlesForSp3Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP3"
+	elif [ "${VERSION_ID}" = "12.4" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP4"
 
-	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
-	SUSEConnect --product "PackageHub/12.3/x86_64"
-	sleep 5
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+		# SUSEConnect --product "PackageHub/12.4/x86_64"
+		# sleep 5
 
-	# Repository Configure SUSE Package Hub Repository
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
+		# Repository Configure SUSE Package Hub Repository
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
 
-	zypper clean --all
-	zypper --quiet refresh -fdb
-	zypper repos
+		# zypper clean --all
+		# zypper --quiet refresh -fdb
 
-	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-	zypper --quiet --non-interactive install collectl mtr
-fi
+		# zypper repos
 
-SlesForSp2Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP2")
-if [ $SlesForSp2Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP2"
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		# zypper --quiet --non-interactive install collectl mtr
 
-	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP2
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
-	SUSEConnect --product "PackageHub/12.2/x86_64"
-	sleep 5
+	elif [ "${VERSION_ID}" = "12.3" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP3"
 
-	# Repository Configure SUSE Package Hub Repository
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.3/x86_64"
+		sleep 5
 
-	zypper clean --all
-	zypper --quiet refresh -fdb
-	zypper repos
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-	zypper --quiet --non-interactive install collectl mtr
-fi
+		zypper clean --all
+		zypper --quiet refresh -fdb
+		zypper repos
 
-SlesForSp1Flag=$(find /etc/zypp/repos.d/ | grep -c "SLES12-SP1")
-if [ $SlesForSp1Flag -gt 0 ];then
-	echo "SUSE Linux Enterprise Server 12 SP1"
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
 
-	# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP1
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
-	SUSEConnect --product "PackageHub/12.1/x86_64"
-	sleep 5
+	elif [ "${VERSION_ID}" = "12.2" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP2"
 
-	# Repository Configure SUSE Package Hub Repository
-	SUSEConnect --status-text
-	SUSEConnect --list-extensions
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP2
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.2/x86_64"
+		sleep 5
 
-	zypper clean --all
-	zypper --quiet refresh -fdb
-	zypper repos
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-	# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-	zypper --quiet --non-interactive install collectl mtr
+		zypper clean --all
+		zypper --quiet refresh -fdb
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "12.1" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP1"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP1
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.1/x86_64"
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "12" ]; then
+		echo "SUSE Linux Enterprise Server 12 GA"
+	else
+		echo "SUSE Linux Enterprise Server 12 (Unknown)"
 fi
 
 #-------------------------------------------------------------------------------
@@ -785,7 +850,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
 	# locale
 	# localectl status
-	# localectl set-locale LANG=ja_JP.UTF-8
+	# localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -793,7 +858,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
 	# locale
 	# localectl status
-	# localectl set-locale LANG=en_US.UTF-8
+	# localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
