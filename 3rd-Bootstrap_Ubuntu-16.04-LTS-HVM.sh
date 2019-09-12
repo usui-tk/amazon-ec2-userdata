@@ -665,34 +665,6 @@ sleep 3
 chronyc sourcestats -v
 
 #-------------------------------------------------------------------------------
-# Configure Tuned
-#-------------------------------------------------------------------------------
-
-# Package Install Tuned
-apt install -y -q tuned tuned-utils
-
-apt show tuned
-
-systemctl daemon-reload
-
-systemctl restart tuned
-
-systemctl status -l tuned
-
-# Configure Tuned software (Start Daemon tuned)
-if [ $(systemctl is-enabled tuned) = "disabled" ]; then
-	systemctl enable tuned
-	systemctl is-enabled tuned
-fi
-
-# Configure Tuned software (select profile - throughput-performance)
-tuned-adm list
-
-tuned-adm active
-tuned-adm profile throughput-performance 
-tuned-adm active
-
-#-------------------------------------------------------------------------------
 # Configure ACPI daemon (Advanced Configuration and Power Interface)
 #-------------------------------------------------------------------------------
 
