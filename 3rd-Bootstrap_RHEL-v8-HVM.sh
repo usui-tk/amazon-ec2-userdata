@@ -472,6 +472,8 @@ ssm-cli get-instance-information
 
 # 	systemctl status -l awsagent
 
+#	sleep 15
+
 # 	/opt/aws/awsagent/bin/awsagent status
 # else
 # 	echo "Failed to execute Amazon Inspector Agent installer script"
