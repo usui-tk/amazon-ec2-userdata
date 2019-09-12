@@ -643,17 +643,15 @@ apt show acpid
 
 systemctl daemon-reload
 
-systemctl status -l acpid 
+systemctl restart acpid
+
+systemctl status -l acpid
 
 # Configure NTP Client software (Start Daemon chronyd)
 if [ $(systemctl is-enabled acpid) = "disabled" ]; then
 	systemctl enable acpid
 	systemctl is-enabled acpid
 fi
-
-systemctl restart acpid
-
-systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # System Setting

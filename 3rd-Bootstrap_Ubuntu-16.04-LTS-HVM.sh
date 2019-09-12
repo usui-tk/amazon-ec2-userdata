@@ -635,14 +635,14 @@ apt show chrony
 
 systemctl daemon-reload
 
-systemctl restart chronyd
+systemctl restart chrony
 
-systemctl status -l chronyd
+systemctl status -l chrony
 
 # Configure NTP Client software (Start Daemon chronyd)
-if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
-	systemctl enable chronyd
-	systemctl is-enabled chronyd
+if [ $(systemctl is-enabled chrony) = "disabled" ]; then
+	systemctl enable chrony
+	systemctl is-enabled chrony
 fi
 
 # Configure NTP Client software (Configure chronyd)
@@ -655,7 +655,7 @@ sed -i "20i# use the local instance NTP service, if available\nserver 169.254.16
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 # Configure NTP Client software (Time adjustment)
-systemctl restart chronyd
+systemctl restart chrony
 
 sleep 3
 chronyc tracking
@@ -703,17 +703,15 @@ apt show acpid
 
 systemctl daemon-reload
 
-systemctl status -l acpid 
+systemctl restart acpid
+
+systemctl status -l acpid
 
 # Configure NTP Client software (Start Daemon chronyd)
 if [ $(systemctl is-enabled acpid) = "disabled" ]; then
 	systemctl enable acpid
 	systemctl is-enabled acpid
 fi
-
-systemctl restart acpid
-
-systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # System Setting
