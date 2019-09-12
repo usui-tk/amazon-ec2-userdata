@@ -226,7 +226,7 @@ echo "Distribution type of the machine is ${DIST_TYPE}."
 echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
-echo "BootstrapScript of the distro is ${BootstrapScript}."
+echo "BootstrapScript URL is ${BootstrapScript}"
 
 # Install curl Command
 if [ $(command -v curl) ]; then
@@ -246,7 +246,30 @@ else
         zypper clean --all
         zypper --quiet --non-interactive install curl
     else
-        echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+        echo "Unsupported curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+        exit 1
+    fi
+fi
+
+# Install wget Command
+if [ $(command -v wget) ]; then
+    echo "Preinstalled wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+else 
+    if [ $(command -v yum) ]; then
+        # Package Install wget Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
+        yum clean all
+        yum install -y wget
+    elif [ $(command -v apt-get) ]; then
+        # Package Install wget Tools (Debian, Ubuntu)
+        export DEBIAN_FRONTEND=noninteractive
+        apt clean -y
+        apt install -y wget
+    elif [ $(command -v zypper) ]; then
+        # Package Install wget Tools (SUSE Linux Enterprise Server)
+        zypper clean --all
+        zypper --quiet --non-interactive install wget
+    else
+        echo "Unsupported wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
         exit 1
     fi
 fi
@@ -255,4 +278,21 @@ fi
 # Bootstrap Script Executite
 #-------------------------------------------------------------------------------
 
-bash -vc "$(curl -L ${BootstrapScript})"
+# Script execution method #1 : Use curl command
+if [ $(command -v curl) ]; then
+   echo "Bootstrap Script Executite - ${BootstrapScript}"
+   bash -vc "$(curl -L ${BootstrapScript})"
+fi
+
+# Script execution method #2 : Use wget command
+if [ $(command -v wget) ]; then
+   echo "Bootstrap Script Executite - ${BootstrapScript}"
+   cd /tmp
+   wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript} 
+   chmod 700 BootstrapScript.sh
+   bash -x BootstrapScript.sh
+fi
+
+#-------------------------------------------------------------------------------
+# End of File
+#-------------------------------------------------------------------------------
