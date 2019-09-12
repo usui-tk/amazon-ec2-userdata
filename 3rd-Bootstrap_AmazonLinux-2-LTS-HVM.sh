@@ -116,7 +116,7 @@ AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role & STS Information
 if [ $(compgen -ac | sort | uniq | grep jq) ]; then
-    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+	RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
@@ -131,7 +131,7 @@ fi
 
 # AWS Account ID
 if [ $(compgen -ac | sort | uniq | grep jq) ]; then
-    AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+	AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
 fi
 
 #-------------------------------------------------------------------------------
@@ -216,8 +216,8 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		if [ $(lsmod | awk '{print $1}' | grep ena) ]; then
-    		modinfo ena
+		if [ $(lsmod | awk '{print $1}' | grep -w ena) ]; then
+			modinfo ena
 		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
@@ -226,8 +226,8 @@ if [ -n "$RoleName" ]; then
 		
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		if [ $(lsmod | awk '{print $1}' | grep ixgbevf) ]; then
-    		modinfo ixgbevf
+		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
+			modinfo ixgbevf
 		fi
 	else
 		echo "# Not Target Instance Type :" $InstanceType

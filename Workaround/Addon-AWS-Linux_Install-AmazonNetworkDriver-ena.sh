@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 # Source code acquisition URL and definition of file name and version information
-SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.1.1.tar.gz"
+SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.1.2.tar.gz"
 SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
@@ -35,9 +35,9 @@ InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
 PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
-# IAM Role & STS Information
-if [ $(command -v jq) ]; then
-    RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+# IAM Role Information
+if [ $(compgen -ac | sort | uniq | grep jq) ]; then
+	RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
 
@@ -126,3 +126,12 @@ if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then
     rm -fr /etc/udev/rules.d/70-persistent-net.rules
 fi
 
+#-------------------------------------------------------------------------------
+# For normal termination of SSM "Run Command"
+#-------------------------------------------------------------------------------
+
+exit 0
+
+#-------------------------------------------------------------------------------
+# End of File
+#-------------------------------------------------------------------------------
