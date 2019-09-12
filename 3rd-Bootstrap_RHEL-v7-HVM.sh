@@ -374,34 +374,58 @@ fi
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-hup.html
+# https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/solutions/HelperNonAmaznAmi/RHEL7_cfn-hup.template
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
-yum --enablerepo=epel install -y python2-pip
-pip install --upgrade pip
+yum install -y python-setuptools
 
-pip install pystache
-pip install argparse
-pip install python-daemon
-pip install requests
+easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
+mkdir -m 755 -p /etc/cfn/hooks.d
 
-cd /tmp/aws-cfn-bootstrap-1.4/
-python setup.py build
-python setup.py install
+# cfn-hup.conf Configuration File
+cat > /etc/cfn/cfn-hup.conf << __EOF__
+[main]
+stack=
+__EOF__
 
-chmod 775 /usr/init/redhat/cfn-hup
+# cfn-auto-reloader.conf Configuration File
+cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+[hookname]
+triggers=post.update
+path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+action=
+runas=root
+__EOF__
 
-if [ -L /etc/init.d/cfn-hup ]; then
-	echo "Symbolic link exists"
-else
-	echo "No symbolic link exists"
-	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+# cfn-hup.service Configuration File
+cat > /lib/systemd/system/cfn-hup.service << __EOF__
+[Unit]
+Description=cfn-hup daemon
+
+[Service]
+Type=simple
+ExecStart=/opt/aws/bin/cfn-hup
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+__EOF__
+
+# Execute AWS CloudFormation Helper software
+systemctl daemon-reload
+
+systemctl restart cfn-hup
+
+systemctl status -l cfn-hup
+
+# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+	systemctl enable cfn-hup
+	systemctl is-enabled cfn-hup
 fi
-
-cd /tmp
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
