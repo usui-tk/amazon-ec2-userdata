@@ -341,7 +341,11 @@ ssm-cli get-instance-information
 InspectorInstallStatus="0"
 
 # Run Amazon Inspector Agent installer script
+set +e
+
 curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || InspectorInstallStatus=$?
+
+set -e
 
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $InspectorInstallStatus -eq 0 ]; then
