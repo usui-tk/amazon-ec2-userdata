@@ -374,10 +374,6 @@ if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 	systemctl is-enabled amazon-ssm-agent
 fi
 
-systemctl restart amazon-ssm-agent
-
-systemctl status -l amazon-ssm-agent
-
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
@@ -406,10 +402,6 @@ if [ $InspectorInstallStatus -eq 0 ]; then
 		systemctl enable awsagent
 		systemctl is-enabled awsagent
 	fi
-
-	systemctl restart awsagent
-
-	systemctl status -l awsagent
 
 	sleep 15
 
@@ -599,6 +591,8 @@ rpm -qi chrony
 
 systemctl daemon-reload
 
+systemctl restart chronyd
+
 systemctl status -l chronyd
 
 # Configure NTP Client software (Start Daemon chronyd)
@@ -606,10 +600,6 @@ if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
 	systemctl enable chronyd
 	systemctl is-enabled chronyd
 fi
-
-systemctl restart chronyd
-
-systemctl status -l chronyd
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
@@ -641,15 +631,15 @@ rpm -qi tuned
 
 systemctl daemon-reload
 
+systemctl restart tuned
+
+systemctl status -l tuned
+
 # Configure Tuned software (Start Daemon tuned)
 if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl enable tuned
 	systemctl is-enabled tuned
 fi
-
-systemctl restart tuned
-
-systemctl status -l tuned
 
 # Configure Tuned software (select profile - throughput-performance)
 tuned-adm list

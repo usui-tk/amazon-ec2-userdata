@@ -330,10 +330,6 @@ if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 	systemctl is-enabled amazon-ssm-agent
 fi
 
-systemctl restart amazon-ssm-agent
-
-systemctl status -l amazon-ssm-agent
-
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
@@ -362,10 +358,6 @@ if [ $InspectorInstallStatus -eq 0 ]; then
 		systemctl enable awsagent
 		systemctl is-enabled awsagent
 	fi
-
-	systemctl restart awsagent
-
-	systemctl status -l awsagent
 
 	sleep 15
 
@@ -568,6 +560,8 @@ apt show chrony
 
 systemctl daemon-reload
 
+systemctl restart chronyd
+
 systemctl status -l chronyd
 
 # Configure NTP Client software (Start Daemon chronyd)
@@ -575,10 +569,6 @@ if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
 	systemctl enable chronyd
 	systemctl is-enabled chronyd
 fi
-
-systemctl restart chronyd
-
-systemctl status -l chronyd
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
@@ -606,17 +596,15 @@ apt show acpid
 
 systemctl daemon-reload
 
-systemctl status -l acpid 
+systemctl restart acpid
+
+systemctl status -l acpid
 
 # Configure NTP Client software (Start Daemon chronyd)
 if [ $(systemctl is-enabled acpid) = "disabled" ]; then
 	systemctl enable acpid
 	systemctl is-enabled acpid
 fi
-
-systemctl restart acpid
-
-systemctl status -l acpid
 
 #-------------------------------------------------------------------------------
 # Configure AppArmor daemon

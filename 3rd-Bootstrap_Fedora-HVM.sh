@@ -328,10 +328,6 @@ if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 	systemctl is-enabled amazon-ssm-agent
 fi
 
-systemctl restart amazon-ssm-agent
-
-systemctl status -l amazon-ssm-agent
-
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
@@ -781,6 +777,8 @@ rpm -qi chrony
 
 systemctl daemon-reload
 
+systemctl restart chronyd
+
 systemctl status -l chronyd
 
 # Configure NTP Client software (Start Daemon chronyd)
@@ -788,10 +786,6 @@ if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
 	systemctl enable chronyd
 	systemctl is-enabled chronyd
 fi
-
-systemctl restart chronyd
-
-systemctl status -l chronyd
 
 # Configure NTP Client software (Configure chronyd)
 cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"

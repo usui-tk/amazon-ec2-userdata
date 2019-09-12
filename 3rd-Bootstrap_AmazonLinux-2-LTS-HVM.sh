@@ -329,10 +329,6 @@ if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 	systemctl is-enabled amazon-ssm-agent
 fi
 
-systemctl restart amazon-ssm-agent
-
-systemctl status -l amazon-ssm-agent
-
 ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
@@ -361,10 +357,6 @@ if [ $InspectorInstallStatus -eq 0 ]; then
 		systemctl enable awsagent
 		systemctl is-enabled awsagent
 	fi
-
-	systemctl restart awsagent
-
-	systemctl status -l awsagent
 
 	sleep 15
 
