@@ -356,15 +356,18 @@ Restart=always
 WantedBy=multi-user.target
 __EOF__
 
+# Execute AWS CloudFormation Helper software
+systemctl daemon-reload
+
+systemctl restart cfn-hup
+
+systemctl status -l cfn-hup
+
 # Configure AWS CloudFormation Helper software (Start Daemon awsagent)
 if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
 	systemctl enable cfn-hup
 	systemctl is-enabled cfn-hup
 fi
-
-systemctl restart cfn-hup
-
-systemctl status -l cfn-hup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
