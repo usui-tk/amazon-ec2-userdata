@@ -192,7 +192,7 @@ zypper --quiet --non-interactive install python3 python3-base python3-pip python
 zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycurl python3-python-dateutil python3-pytools python3-simplejson python3-six
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
-SapFlag="0"
+SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
 echo $SapFlag
 
