@@ -393,6 +393,9 @@ snap services amazon-ssm-agent
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
+# Introduction of additional packages for ubuntu
+apt install -y -q libcurl3
+
 # Variable initialization
 InspectorInstallStatus="0"
 
@@ -423,6 +426,9 @@ if [ $InspectorInstallStatus -eq 0 ]; then
 else
 	echo "Failed to execute Amazon Inspector Agent installer script"
 fi
+
+# Cleanup
+apt clean -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
