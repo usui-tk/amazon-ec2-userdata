@@ -140,7 +140,9 @@ zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-ac
 zypper --quiet --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.5" ]; then
+	if [ "${VERSION_ID}" = "12.6" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP6"
+	elif [ "${VERSION_ID}" = "12.5" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP5"
 	elif [ "${VERSION_ID}" = "12.4" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP4"
@@ -176,10 +178,27 @@ zypper --quiet --non-interactive install python3-Babel python3-PyYAML python3-py
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.5" ]; then
+	if [ "${VERSION_ID}" = "12.6" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP6"
+	elif [ "${VERSION_ID}" = "12.5" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP5"
 	elif [ "${VERSION_ID}" = "12.4" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP4"
+
+		# Add openSUSE Build Service Repository [utilities/SLE_12_SP4_Backports] : Version - SUSE Linux Enterprise 12 SP4
+		zypper repos
+		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP4" "https://download.opensuse.org/repositories/utilities/SLE_12_SP4_Backports/utilities.repo"
+		zypper --gpg-auto-import-keys refresh utilities
+
+		# Repository Configure openSUSE Build Service Repository
+		zypper repos
+		zypper clean --all
+		zypper refresh -fdb
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+		zypper --non-interactive install atop jq
+
 	elif [ "${VERSION_ID}" = "12.3" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP3"
 
@@ -233,7 +252,28 @@ fi
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.5" ]; then
+	if [ "${VERSION_ID}" = "12.6" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP6"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP6
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+		# SUSEConnect --product "PackageHub/12.6/x86_64"
+		# sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+
+		# zypper clean --all
+		# zypper --quiet refresh -fdb
+
+		# zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		# zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "12.5" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP5"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP5
@@ -856,17 +896,17 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
-	# locale
+	locale
 	# localectl status
-	# localectl set-locale LANG=ja_JP.utf8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
-	# locale
+	locale
 	# localectl status
-	# localectl set-locale LANG=en_US.utf8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf

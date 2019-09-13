@@ -181,7 +181,7 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
 		#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
 		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-		# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
+		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
 	fi
 fi
@@ -268,6 +268,25 @@ fi
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP2
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+		# SUSEConnect --product "PackageHub/15.2/x86_64"
+		# sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+
+		# zypper clean --all
+		# zypper --quiet refresh -fdb
+
+		# zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		# zypper --quiet --non-interactive install collectl mtr
+
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 
@@ -855,17 +874,17 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
-	# locale
+	locale
 	# localectl status
-	# localectl set-locale LANG=ja_JP.utf8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	# echo "# Setting System Language -> $Language"
-	# locale
+	locale
 	# localectl status
-	# localectl set-locale LANG=en_US.utf8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
