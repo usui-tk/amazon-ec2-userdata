@@ -16,7 +16,7 @@
 			"windows_events": {
 				"collect_list": [
 					{
-						"event_format": "text",
+						"event_format": "xml",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
@@ -25,10 +25,11 @@
 							"CRITICAL"
 						],
 						"event_name": "System",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-system"
+						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-system",
+						"log_stream_name": "{instance_id}"
 					},
 					{
-						"event_format": "text",
+						"event_format": "xml",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
@@ -37,10 +38,11 @@
 							"CRITICAL"
 						],
 						"event_name": "Application",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-application"
+						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-application",
+						"log_stream_name": "{instance_id}"
 					},
 					{
-						"event_format": "text",
+						"event_format": "xml",
 						"event_levels": [
 							"VERBOSE",
 							"INFORMATION",
@@ -49,7 +51,8 @@
 							"CRITICAL"
 						],
 						"event_name": "Security",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-security"
+						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-security",
+						"log_stream_name": "{instance_id}"
 					}
 				]
 			}
