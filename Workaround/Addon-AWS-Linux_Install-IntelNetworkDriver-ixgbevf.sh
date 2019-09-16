@@ -57,9 +57,9 @@ yum --enablerepo=epel install -y dkms
 
 # Set Grub2 Parameter for RHEL v7.x/CentOS v7.x
 if [ $(command -v grub2-mkconfig) ]; then
-    rpm -qa | grep -e '^systemd-[0-9]\+\|^udev-[0-9]\+'
-    sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
-    grub2-mkconfig -o /boot/grub2/grub.cfg
+	rpm -qa | grep -e '^systemd-[0-9]\+\|^udev-[0-9]\+'
+	sed -i '/^GRUB_CMDLINE_LINUX/s/"$/ net.ifnames=0"/' /etc/default/grub
+	grub2-mkconfig -o /boot/grub2/grub.cfg
 fi
 
 # Get Intel Ethernet Driver source code
@@ -122,7 +122,7 @@ fi
 #-------------------------------------------------------------------------------
 
 if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then
-    rm -fr /etc/udev/rules.d/70-persistent-net.rules
+	rm -fr /etc/udev/rules.d/70-persistent-net.rules
 fi
 
 #-------------------------------------------------------------------------------

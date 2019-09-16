@@ -162,10 +162,6 @@ zypper --quiet refresh -fdb
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
-#  - Packages sorted by name
-#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_all
-#  - Packages sorted by group
-#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
@@ -950,7 +946,6 @@ fi
 #-------------------------------------------------------------------------------
 
 # Update default configuration for Zypper
-
 ZypperFlag=0
 ZypperFlag=$(cat /etc/zypp/zypper.conf | grep -w runSearchPackages | grep -w ask | wc -l)
 
