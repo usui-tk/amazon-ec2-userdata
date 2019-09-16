@@ -808,6 +808,7 @@ if [ $(command -v rcapparmor) ]; then
 
 			# Linux Security Information(AppArmor) [aa-status]
 			aa-status || AppArmorStatus=$?
+		fi
 	fi
 fi
 
