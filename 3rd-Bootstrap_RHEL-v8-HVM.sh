@@ -385,35 +385,6 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS CloudFormation Helper Scripts]
-# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
-# https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
-#-------------------------------------------------------------------------------
-# dnf --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# dnf --enablerepo=epel install -y python3-pip
-
-# pip3 install pystache
-# pip3 install argparse
-# pip3 install python-daemon
-# pip3 install requests
-
-# curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-# tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
-
-# cd /tmp/aws-cfn-bootstrap-1.4/
-# python setup.py build
-# python setup.py install
-
-# if [ -L /etc/init.d/cfn-hup ]; then
-# 	echo "Symbolic link exists"
-# else
-# 	echo "No symbolic link exists"
-# 	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
-# fi
-
-# cd /tmp
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
 # https://github.com/aws/amazon-ssm-agent
