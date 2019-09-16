@@ -826,8 +826,15 @@ fi
 # Linux Security Information(AppArmor)
 if [ $(command -v rcapparmor) ]; then
 	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
-		# Linux Security Information(AppArmor) [rcapparmor status]
-		rcapparmor status
+		if [ $(aa-enabled) = "Yes" ]; then
+			# Variable initialization
+			AppArmorStatus="0"
+
+			# Linux Security Information(AppArmor) [rcapparmor status]
+			rcapparmor status || AppArmorStatus=$?
+
+			# Linux Security Information(AppArmor) [aa-status]
+			aa-status || AppArmorStatus=$?
 	fi
 fi
 
