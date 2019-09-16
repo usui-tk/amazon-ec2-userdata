@@ -188,7 +188,7 @@ fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-testtools python3-tools python3-virtualenv python3-wheel
-zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycurl python3-python-dateutil python3-simplejson python3-six
+zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-simplejson python3-six python3-urllib3
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
 SapFlag=0
@@ -205,7 +205,7 @@ if [ $SapFlag -gt 0 ]; then
 	zypper --quiet --non-interactive install sapconf saptune insserv-compat
 	zypper --quiet --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
 else
-	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
 fi
 
 #-------------------------------------------------------------------------------
@@ -651,8 +651,10 @@ source /etc/profile.d/ec2rl.sh
 
 /opt/aws/ec2rl/ec2rl version-check
 
+/opt/aws/ec2rl/ec2rl list
+
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com

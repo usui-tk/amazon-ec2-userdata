@@ -441,6 +441,8 @@ source /etc/profile.d/ec2rl.sh
 
 /opt/aws/ec2rl/ec2rl version-check
 
+/opt/aws/ec2rl/ec2rl list
+
 # Required Software Package
 /opt/aws/ec2rl/ec2rl software-check
 

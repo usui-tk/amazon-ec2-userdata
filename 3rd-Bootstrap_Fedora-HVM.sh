@@ -94,7 +94,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh
+dnf install -y acpid arptables atop bash-completion bc bcc-tools bind-utils collectl crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl pciutils smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -368,6 +368,8 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl version
 
 /opt/aws/ec2rl/ec2rl version-check
+
+/opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
 /opt/aws/ec2rl/ec2rl software-check
@@ -742,6 +744,55 @@ sleep 3
 chronyc sources -v
 sleep 3
 chronyc sourcestats -v
+
+#-------------------------------------------------------------------------------
+# Configure Tuned
+#-------------------------------------------------------------------------------
+
+# Package Install Tuned (from Fedora Official Repository)
+yum install -y tuned tuned-utils
+
+rpm -qi tuned
+
+systemctl daemon-reload
+
+systemctl restart tuned
+
+systemctl status -l tuned
+
+# Configure Tuned software (Start Daemon tuned)
+if [ $(systemctl is-enabled tuned) = "disabled" ]; then
+	systemctl enable tuned
+	systemctl is-enabled tuned
+fi
+
+# Configure Tuned software (select profile - throughput-performance)
+tuned-adm list
+
+tuned-adm active
+tuned-adm profile throughput-performance 
+tuned-adm active
+
+#-------------------------------------------------------------------------------
+# Configure ACPI daemon (Advanced Configuration and Power Interface)
+#-------------------------------------------------------------------------------
+
+# Configure ACPI daemon software (Install acpid Package)
+yum install -y acpid
+
+rpm -qi acpid
+
+systemctl daemon-reload
+
+systemctl restart acpid
+
+systemctl status -l acpid
+
+# Configure NTP Client software (Start Daemon chronyd)
+if [ $(systemctl is-enabled acpid) = "disabled" ]; then
+	systemctl enable acpid
+	systemctl is-enabled acpid
+fi
 
 #-------------------------------------------------------------------------------
 # System Setting
