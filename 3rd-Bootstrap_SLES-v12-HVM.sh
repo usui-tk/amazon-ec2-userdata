@@ -107,17 +107,53 @@ SUSEConnect --list-extensions
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply SLES Service Pack
-# zypper migration << __EOF__
-# 
-# 1
-# 
-# y
-# q
-# yes
-# q
-# yes
-# 
-# __EOF__
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "12.6" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP6 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12.5" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP5 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12.4" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP4 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12.3" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP3 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12.2" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP2 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12.1" ]; then
+		echo "SUSE Linux Enterprise Server 12 SP1 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "12" ]; then
+		echo "SUSE Linux Enterprise Server 12 GA -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		cat /etc/os-release
+
+	else
+		echo "SUSE Linux Enterprise Server 12 (Unknown)"
+	fi
+fi
 
 # Install recommended packages
 # zypper --quiet --non-interactive install-new-recommends
