@@ -386,14 +386,16 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 # https://github.com/awslabs/aws-ec2rescue-linux
 #-------------------------------------------------------------------------------
 
-# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
-curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+# Package Amazon EC2 Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl-bundled.tgz" -o "/tmp/ec2rl-bundled.tgz"
 
 mkdir -p "/opt/aws"
 
-tar -xzf "/tmp/ec2rl.tgz" -C "/opt/aws"
+rm -rf /opt/aws/ec2rl*
 
-mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
+tar -xzf "/tmp/ec2rl-bundled.tgz" -C "/opt/aws"
+
+mv --force /opt/aws/ec2rl* "/opt/aws/ec2rl"
 
 cat > /etc/profile.d/ec2rl.sh << __EOF__
 export PATH=\$PATH:/opt/aws/ec2rl
@@ -403,8 +405,6 @@ source /etc/profile.d/ec2rl.sh
 
 # Check Version
 /opt/aws/ec2rl/ec2rl version
-
-/opt/aws/ec2rl/ec2rl version-check
 
 /opt/aws/ec2rl/ec2rl list
 

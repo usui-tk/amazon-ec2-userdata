@@ -219,7 +219,7 @@ fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
-zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-simplejson python3-six python3-urllib3
+zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
 SapFlag=0
@@ -659,17 +659,16 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 # https://github.com/awslabs/aws-ec2rescue-linux
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository)
-zypper --quiet --non-interactive install python-curses
-
-# Package Download Amazon Linux System Administration Tools (from S3 Bucket)
-curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl.tgz" -o "/tmp/ec2rl.tgz"
+# Package Amazon EC2 Administration Tools (from S3 Bucket)
+curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl-bundled.tgz" -o "/tmp/ec2rl-bundled.tgz"
 
 mkdir -p "/opt/aws"
 
-tar -xzf "/tmp/ec2rl.tgz" -C "/opt/aws"
+rm -rf /opt/aws/ec2rl*
 
-mv --force /opt/aws/ec2rl-* "/opt/aws/ec2rl"
+tar -xzf "/tmp/ec2rl-bundled.tgz" -C "/opt/aws"
+
+mv --force /opt/aws/ec2rl* "/opt/aws/ec2rl"
 
 cat > /etc/profile.d/ec2rl.sh << __EOF__
 export PATH=\$PATH:/opt/aws/ec2rl
@@ -680,12 +679,10 @@ source /etc/profile.d/ec2rl.sh
 # Check Version
 /opt/aws/ec2rl/ec2rl version
 
-/opt/aws/ec2rl/ec2rl version-check
-
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-# /opt/aws/ec2rl/ec2rl software-check
+/opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
