@@ -107,47 +107,84 @@ SUSEConnect --list-extensions
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply SLES Service Pack
+ZypperMigrationStatus="0"
+
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "12.6" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP6 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12.5" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP5 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12.4" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP4 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12.3" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP3 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12.2" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP2 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12.1" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP1 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "12" ]; then
 		echo "SUSE Linux Enterprise Server 12 GA -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	else
@@ -827,7 +864,6 @@ fi
 if [ $(command -v rcapparmor) ]; then
 	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
 		if [ $(aa-enabled) = "Yes" ]; then
-			# Variable initialization
 			AppArmorStatus="0"
 
 			# Linux Security Information(AppArmor) [rcapparmor status]

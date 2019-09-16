@@ -106,23 +106,40 @@ SUSEConnect --list-extensions
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply SLES Service Pack
+ZypperMigrationStatus="0"
+
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "15" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
 		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	else
@@ -784,7 +801,6 @@ fi
 if [ $(command -v rcapparmor) ]; then
 	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
 		if [ $(aa-enabled) = "Yes" ]; then
-			# Variable initialization
 			AppArmorStatus="0"
 
 			# Linux Security Information(AppArmor) [rcapparmor status]
