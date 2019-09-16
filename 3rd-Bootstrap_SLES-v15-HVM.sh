@@ -187,7 +187,6 @@ if [ -n "$VERSION_ID" ]; then
 fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
-zypper --quiet --non-interactive install patterns-devel-python-devel_python3
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-testtools python3-tools python3-virtualenv python3-wheel
 zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycurl python3-python-dateutil python3-pytools python3-simplejson python3-six
 
