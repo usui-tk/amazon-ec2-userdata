@@ -127,7 +127,7 @@ unset HISTFILE
 [ -f /home/ssm-user/.bash_history ] && rm -rf /home/ssm-user/.bash_history
 
 # Shutdown
-# shutdown -h now
+shutdown -h now
 
 #-------------------------------------------------------------------------------
 # For normal termination of SSM "Run Command"
