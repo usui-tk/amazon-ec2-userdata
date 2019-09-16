@@ -139,17 +139,19 @@ zypper --quiet --non-interactive install --type pattern enhanced_base
 zypper --quiet --non-interactive install arptables bash-completion bcc-tools cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kexec-tools kmod-bash-completion lsb-release lzop net-snmp nmap nvme-cli sdparm seccheck supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unrar unzip zypper-log
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
-zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
 		zypper --quiet --non-interactive install jq
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 		zypper --quiet --non-interactive install jq
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA"
+		zypper --quiet --non-interactive install pcp pcp-conf
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
 	fi
