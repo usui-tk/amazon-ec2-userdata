@@ -124,6 +124,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
@@ -135,6 +136,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
@@ -146,6 +148,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
