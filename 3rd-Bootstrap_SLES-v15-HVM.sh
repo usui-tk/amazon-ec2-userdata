@@ -95,15 +95,6 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 # Default Package Update
 #-------------------------------------------------------------------------------
 
-# Update default configuration for Zypper
-cat /etc/zypp/zypper.conf | grep -w runSearchPackages
-
-if [ $(cat /etc/zypp/zypper.conf | grep -w runSearchPackages | grep -w ask) ]; then
-	sed -i 's/# runSearchPackages = ask/runSearchPackages = never/g' /etc/zypp/zypper.conf
-fi
-
-cat /etc/zypp/zypper.conf | grep -w runSearchPackages
-
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
@@ -957,6 +948,15 @@ fi
 #-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
+
+# Update default configuration for Zypper
+if [ -f /etc/zypp/zypper.conf ]; then
+	if [ $(cat /etc/zypp/zypper.conf | grep -w runSearchPackages | grep -w ask) ]; then
+		cat /etc/zypp/zypper.conf | grep -w runSearchPackages
+		sed -i 's/# runSearchPackages = ask/runSearchPackages = never/g' /etc/zypp/zypper.conf
+		cat /etc/zypp/zypper.conf | grep -w runSearchPackages
+	fi
+fi
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
