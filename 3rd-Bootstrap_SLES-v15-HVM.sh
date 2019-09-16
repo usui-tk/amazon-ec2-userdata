@@ -219,6 +219,8 @@ fi
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
+
+
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 
@@ -428,7 +430,7 @@ fi
 # https://www.suse.com/c/suse-public-cloud-image-life-cycle/
 # https://github.com/SUSE-Enceladus/public-cloud-info-client
 if [ $(command -v pint) ]; then
-    pint amazon images --active --json --region=${Region}
+	pint amazon images --active --json --region=${Region}
 fi
 
 # Get EC2 Instance Information

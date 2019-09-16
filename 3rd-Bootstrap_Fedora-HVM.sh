@@ -62,6 +62,15 @@ dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
+# Default repository list [dnf command]
+dnf repolist all > /tmp/command-log_dnf_repository-list.txt
+
+# Default repository module [dnf command]
+dnf module list > /tmp/command-log_dnf_module-list.txt
+
+# Determine the OS release
+eval $(grep ^VERSION_ID= /etc/os-release)
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -71,16 +80,11 @@ dnf clean all
 
 # Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
 dnf install -y bash dnf dnf-conf dnf-utils
-dnf clean all
-dnf makecache
-
-# Package Install DNF Administration Tools (from Fedora Official Repository)
 dnf install -y dnf-plugins-core dnf-plugin-system-upgrade
+
+# Cleanup repository information
 dnf clean all
 dnf makecache
-
-# --- Workaround ---
-# dnf install -y glibc-langpack* langpacks-*
 
 # Default Package Update
 dnf update -y
@@ -90,14 +94,23 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh
+dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
-dnf install -y setroubleshoot-server setools-console
+dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+dnf install -y pcp pcp-zeroconf pcp-system-tools pcp-export-pcp2json pcp-selinux
+
+# Package Install Fedora support tools (from Fedora Official Repository)
+dnf install -y redhat-lsb-core
+
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+
+# Package Install Fedora Web-Based support tools (from Fedora Official Repository)
+# dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
-dnf install -y rpmdevtools
-# dnf group install -y "RPM Development Tools"
+dnf install -y rpmdevtools rpmconf
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -367,7 +380,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y ansible ansible-doc ansible-lint
+dnf install -y ansible ansible-doc
 
 ansible --version
 
@@ -378,7 +391,7 @@ ansible localhost -m setup
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
 # 
-# https://packages.microsoft.com/rhel/7/prod/
+# https://packages.microsoft.com/fedora/
 # 
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
@@ -388,7 +401,7 @@ ansible localhost -m setup
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 
 # Register the Microsoft RedHat repository
-curl https://packages.microsoft.com/config/rhel/7/prod.repo | tee /etc/yum.repos.d/microsoft.repo
+curl https://packages.microsoft.com/config/fedora/30/prod.repo | tee /etc/yum.repos.d/microsoft.repo
 
 # Update the list of products
 dnf clean all
@@ -407,10 +420,10 @@ rpm -qi powershell
 # Check Version
 pwsh -Version
 
-# Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
+# # Operation check of PowerShell command
+# pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 # pwsh -Command "Get-Module -ListAvailable"
@@ -419,143 +432,46 @@ pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Docker - Fedora Repository]
+# Custom Package Installation [Docker]
 #-------------------------------------------------------------------------------
 
 # Package Install Docker Enviroment Tools (from Fedora Official Repository)
-dnf install -y docker fedora-dockerfiles
+dnf install -y docker
+
+rpm -qi docker 
 
 systemctl daemon-reload
 
-systemctl status -l docker
-systemctl enable docker
-systemctl is-enabled docker
-
 systemctl restart docker
+
 systemctl status -l docker
+
+# Configure Docker software (Start Daemon docker)
+if [ $(systemctl is-enabled docker) = "disabled" ]; then
+	systemctl enable docker
+	systemctl is-enabled docker
+fi
 
 # Docker Deamon Information
 docker --version
+
 docker info
 
 # Docker Pull Image (from Docker Hub)
-docker pull fedora:latest
-docker pull amazonlinux:latest                   # Amazon Linux
-docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
-docker pull centos:latest                        # CentOS v7
-
-# Docker Run (Amazon Linux)
-# docker run -it amazonlinux:latest /bin/bash
-# cat /etc/system-release
-# cat /etc/image-id 
-# exit
+docker pull fedora:latest                        # Fedora
+docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
 
 # Docker Run (Amazon Linux 2 LTS)
-# docker run -it amazonlinux:2017.12.0.20171212.2 bash
+# docker run -it amazonlinux:latest bash
 # cat /etc/system-release
 # cat /etc/image-id 
 # exit
-
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
-#-------------------------------------------------------------------------------
-
-# Package Uninstall Docker Enviroment Tools (from Fedora Official Repository)
-# dnf remove -y docker docker-common docker-selinux docker-engine-selinux docker-engine
-
-# Package Install Docker Enviroment Tools (from Docker Community Edition Official Repository)
-# dnf repolist
-
-# dnf config-manager --add-repo "https://download.docker.com/linux/fedora/docker-ce.repo"
-# dnf config-manager --set-enabled docker-ce-edge
-
-# dnf makecache
-
-# sleep 5
-
-# dnf repolist
-# dnf makecache
-
-# dnf install -y docker-ce
-
-# systemctl daemon-reload
-
-# systemctl status -l docker
-# systemctl enable docker
-# systemctl is-enabled docker
-
-# systemctl restart docker
-# systemctl status -l docker
-
-# Docker Deamon Information
-# docker --version
-
-# docker info
-
-# Docker Configuration
-# usermod -a -G docker fedora
-
-# Docker Pull Image (from Docker Hub)
-# docker pull fedora:latest
-# docker pull amazonlinux:latest                   # Amazon Linux
-# docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
-# docker pull centos:latest                        # CentOS v7
-
-# Docker Run (Amazon Linux)
-# docker run -it amazonlinux:latest /bin/bash
-# cat /etc/system-release
-# exit
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Fluentd (td-agent)]
-#-------------------------------------------------------------------------------
-
-# curl -L https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh| bash
-rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
-
-cat > /etc/yum.repos.d/td.repo << __EOF__
-[treasuredata]
-name=TreasureData
-baseurl=http://packages.treasuredata.com/3/redhat/7/x86_64/
-gpgcheck=1
-gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
-__EOF__
-
-dnf clean all
-dnf makecache
-
-# Install Treasure Agent
-dnf install -y td-agent
-
-# Package Information
-rpm -qi td-agent
-
-systemctl daemon-reload
-
-systemctl status -l td-agent
-systemctl enable td-agent
-systemctl is-enabled td-agent
-
-systemctl restart td-agent
-systemctl status -l td-agent
-
-# Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-/opt/td-agent/embedded/bin/fluent-gem list --local
-
-/opt/td-agent/embedded/bin/fluent-gem search -r fluent-plugin
-
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis-firehose
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-s3
-
-/opt/td-agent/embedded/bin/fluent-gem list --local
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Node.js & Serverless Framework]
 #-------------------------------------------------------------------------------
+
+# Package Install Node.js NPM Enviroment Tools (from Fedora Official Repository)
 dnf install -y nodejs npm
 
 # Package Information
@@ -579,23 +495,39 @@ npm -v
 # sam --version
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.6]
-#-------------------------------------------------------------------------------
-dnf install -y python3
-
-/usr/bin/python3 -V
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Go 1.9]
+# Custom Package Installation [Go]
 #-------------------------------------------------------------------------------
 dnf install -y golang golang-github-aws-aws-sdk-go-devel
 
-/usr/bin/go version
+rpm -qi golang
+
+go version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
-dnf group install -y "Fedora Workstation"
+dnf group install -y "GNOME"
+
+echo "exec /usr/bin/gnome-session" >> ~/.xinitrc
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for XRDP Server
+#-------------------------------------------------------------------------------
+dnf install -y xrdp
+
+rpm -qi xrdp
+
+systemctl daemon-reload
+
+systemctl restart xrdp
+
+systemctl status -l xrdp
+
+# Configure XRDP Server software (Start Daemon xrdp)
+if [ $(systemctl is-enabled xrdp) = "disabled" ]; then
+	systemctl enable xrdp
+	systemctl is-enabled xrdp
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for VNC Server
@@ -605,53 +537,60 @@ dnf group install -y "Fedora Workstation"
 #-------------------------------------------------------------------------------
 dnf install -y tigervnc-server
 
-# Configure VNC Server for "fedora" user
-cat > /home/fedora/vnc-setup.sh << __EOF__
-#!/bin/bash
-
-VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
-
-vncpasswd << 'EOF';
-\$VNC_PASSWORD
-\$VNC_PASSWORD
-n
-EOF
-
-echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
-__EOF__
-
-chmod 777 /home/fedora/vnc-setup.sh
-
-su - "fedora" -c "/home/fedora/vnc-setup.sh"
-
-# Pre-operation test of VNC server
-su - "fedora" -c "vncserver :1 -geometry 1024x768 -depth 32"
-
-sleep 10
-
-su - "fedora" -c "vncserver -kill :1"
-
-cat /home/fedora/.vnc/xstartup
-cat /home/fedora/.vnc/config
-
-# Systemd's VNC Server configuration 
-cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
-
-cat /etc/systemd/system/vncserver@:1.service
-
-sed -i 's@<USER>@fedora@g' /etc/systemd/system/vncserver@:1.service
-
-cat /etc/systemd/system/vncserver@:1.service
+rpm -qi tigervnc-server
 
 systemctl daemon-reload
 
-# Systemd's VNC Server startup
-systemctl status vncserver@:1.service
-systemctl start vncserver@:1.service
-systemctl status vncserver@:1.service
+# # Configure VNC Server for "fedora" user
+# cat > /home/fedora/vnc-setup.sh << __EOF__
+# #!/bin/bash
 
-systemctl enable vncserver@:1.service
-systemctl is-enabled vncserver@:1.service
+# VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+
+# vncpasswd << 'EOF';
+# \$VNC_PASSWORD
+# \$VNC_PASSWORD
+# n
+# EOF
+
+# echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+# __EOF__
+
+# chmod 777 /home/fedora/vnc-setup.sh
+
+# su - "fedora" -c "/home/fedora/vnc-setup.sh"
+
+# # Pre-operation test of VNC server
+# su - "fedora" -c "vncserver :1 -geometry 1024x768 -depth 32"
+
+# sleep 15
+
+# su - "fedora" -c "vncserver -kill :1"
+
+# cat /home/fedora/.vnc/xstartup
+# cat /home/fedora/.vnc/config
+
+# # Systemd's VNC Server configuration 
+# cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
+
+# cat /etc/systemd/system/vncserver@:1.service
+
+# sed -i 's@<USER>@fedora@g' /etc/systemd/system/vncserver@:1.service
+
+# cat /etc/systemd/system/vncserver@:1.service
+
+# systemctl daemon-reload
+
+# # Systemd's VNC Server startup
+# systemctl start vncserver@:1.service
+
+# systemctl status -l vncserver@:1.service
+
+# # Configure XRDP Server software (Start Daemon xrdp)
+# if [ $(systemctl is-enabled vncserver@:1.service) = "disabled" ]; then
+# 	systemctl enable vncserver@:1.service
+# 	systemctl is-enabled vncserver@:1.service
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Application [Google Chrome]
@@ -667,11 +606,13 @@ gpgcheck=1
 gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
 __EOF__
 
+# Cleanup repository information
 dnf clean all
 dnf makecache
 
 # Install Google Chrome Stable version
 dnf install -y google-chrome-stable
+
 rpm -qi google-chrome-stable
 
 # Install Google Chrome Beta version
@@ -698,6 +639,7 @@ gpgcheck=1
 gpgkey=https://packages.microsoft.com/keys/microsoft.asc
 __EOF__
 
+# Cleanup repository information
 dnf clean all
 dnf makecache
 
@@ -712,9 +654,8 @@ rpm -qi code
 dnf clean all
 
 #-------------------------------------------------------------------------------
-# RPM Package Configuration Check
+# System information collection
 #-------------------------------------------------------------------------------
-rpmconf --all
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -753,11 +694,8 @@ ip route show
 if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
-
-	systemctl disable firewalld
-	systemctl is-enabled firewalld
-
-	systemctl status -l firewalld
+    # Network Information(Firewall Service) [firewall-cmd --list-all]
+    firewall-cmd --list-all
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]
@@ -846,7 +784,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -854,7 +792,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_SG.utf8
 	locale
 	# localectl status
 	cat /etc/locale.conf
@@ -867,9 +805,7 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	# Setting NTP Deamon
-	sed -i 's/bindcmdaddress ::1/#bindcmdaddress ::1/g' /etc/chrony.conf
-	systemctl restart chronyd
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
 	# Disable IPv6 Kernel Parameter

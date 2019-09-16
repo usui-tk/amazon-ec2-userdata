@@ -578,10 +578,10 @@ ansible localhost -m setup
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
 
-# # Register the Microsoft RedHat repository
+# Register the Microsoft RedHat repository
 curl https://packages.microsoft.com/config/rhel/8/prod.repo | tee /etc/yum.repos.d/microsoft.repo
 
-# # Cleanup repository information
+# Cleanup repository information
 dnf clean all
 dnf makecache
 
