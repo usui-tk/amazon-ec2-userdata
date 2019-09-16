@@ -950,12 +950,14 @@ fi
 #-------------------------------------------------------------------------------
 
 # Update default configuration for Zypper
-if [ -f /etc/zypp/zypper.conf ]; then
-	if [ $(cat /etc/zypp/zypper.conf | grep -w runSearchPackages | grep -w ask) ]; then
-		cat /etc/zypp/zypper.conf | grep -w runSearchPackages
-		sed -i 's/# runSearchPackages = ask/runSearchPackages = never/g' /etc/zypp/zypper.conf
-		cat /etc/zypp/zypper.conf | grep -w runSearchPackages
-	fi
+
+ZypperFlag=0
+ZypperFlag=$(cat /etc/zypp/zypper.conf | grep -w runSearchPackages | grep -w ask | wc -l)
+
+if [ $ZypperFlag -gt 0 ]; then
+	cat /etc/zypp/zypper.conf | grep -w runSearchPackages
+	sed -i 's/# runSearchPackages = ask/runSearchPackages = never/g' /etc/zypp/zypper.conf
+	cat /etc/zypp/zypper.conf | grep -w runSearchPackages
 fi
 
 # Setting SystemClock and Timezone
