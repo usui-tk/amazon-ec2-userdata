@@ -402,8 +402,10 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
-SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
-if [ $SlesForSapFlag -gt 0 ];then
+SapFlag=0
+SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
+
+if [ $SapFlag -gt 0 ]; then
 	if [ -n "$RoleName" ]; then
 		echo "SUSE Linux Enterprise Server for SAP Applications 15"
 		echo "# Get Newest AMI Information from Public AMI (AWS Martketplace/PAYG)"
@@ -423,7 +425,7 @@ else
 		NewestAmiId=$(aws ec2 describe-images --owner 013907871322 --filter "Name=name,Values=suse-sles-15-*-hvm-ssd-x86_64" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)' --output text --region ${Region} | grep -v byos | grep -v ecs | grep -v sapcal | sort -k 3 --reverse | head -n 1 | awk '{print $1}')
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 	fi
-fi 
+fi
 
 # Get the latest AMI information of the OS type of this EC2 instance from SUSE Public Cloud Info Service
 # https://www.suse.com/c/suse-public-cloud-image-life-cycle/
@@ -829,8 +831,10 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 fi
 
 # Configure Tuned software
-SlesForSapFlag=$(find /etc/zypp/repos.d/ | grep -c "SLE-Product-SLES_SAP15")
-if [ $SlesForSapFlag -gt 0 ];then
+SapFlag=0
+SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
+
+if [ $SapFlag -gt 0 ]; then
 	echo "SUSE Linux Enterprise Server for SAP Applications 15"
 	# Configure Tuned software (select profile - sapconf)
 	tuned-adm list
