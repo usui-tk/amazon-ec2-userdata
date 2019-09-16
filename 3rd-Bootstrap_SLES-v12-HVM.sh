@@ -106,6 +106,9 @@ SUSEConnect --list-extensions
 # Update default package
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
+# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
+zypper --quiet --non-interactive install hostinfo
+
 # Apply SLES Service Pack
 ZypperMigrationStatus="0"
 
