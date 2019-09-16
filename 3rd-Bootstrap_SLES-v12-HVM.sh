@@ -80,11 +80,14 @@ zypper search > /tmp/command-log_zypper_repository-package-list.txt
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
-# Default repository list [zypper command]
-zypper products > /tmp/command-log_zypper_repository-list.txt
+# Default repository products list [zypper command]
+zypper products > /tmp/command-log_zypper_repository-products-list.txt
 
-# Default repository pattern [zypper command]
-zypper search --type pattern > /tmp/command-log_zypper_repository-patterm-list.txt
+# Default repository patterns list [zypper command]
+zypper patterns > /tmp/command-log_zypper_repository-patterns-list.txt
+
+# Default repository packages list [zypper command]
+zypper packages > /tmp/command-log_zypper_repository-packages-list.txt
 
 # Determine the OS release
 eval $(grep ^VERSION_ID= /etc/os-release)
@@ -877,15 +880,13 @@ fi
 # Linux Security Information(AppArmor)
 if [ $(command -v rcapparmor) ]; then
 	if [ $(systemctl is-enabled apparmor) = "enabled" ]; then
-		if [ $(aa-enabled) = "Yes" ]; then
-			AppArmorStatus="0"
+		AppArmorStatus="0"
 
-			# Linux Security Information(AppArmor) [rcapparmor status]
-			rcapparmor status || AppArmorStatus=$?
+		# Linux Security Information(AppArmor) [rcapparmor status]
+		rcapparmor status || AppArmorStatus=$?
 
-			# Linux Security Information(AppArmor) [aa-status]
-			aa-status || AppArmorStatus=$?
-		fi
+		# Linux Security Information(AppArmor) [aa-status]
+		aa-status || AppArmorStatus=$?
 	fi
 fi
 
