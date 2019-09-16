@@ -66,6 +66,10 @@ apt list > /tmp/command-log_apt_repository-package-list.txt
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
+# Determine the OS release
+eval $(grep ^VERSION_ID= /etc/os-release)
+VersionYear=$(echo $VERSION_ID | sed -e "s/\.[^.]*$//g")
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -73,32 +77,35 @@ systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit
 # Command Non-Interactive Mode
 export DEBIAN_FRONTEND=noninteractive
 
-# --- Workaround ---
-# Change apt repo list
-cat /etc/apt/sources.list
-
-# sed -i 's@http://http.kali.org/kali@http://repo.kali.org/kali@g' /etc/apt/sources.list
-
-cat /etc/apt/sources.list
-
 # apt repository metadata Clean up
 apt clean -y -q
+
+# apt repository mirrors site information
+curl -sI "http://http.kali.org/README"
+# curl -s "http://http.kali.org/README.mirrorlist"
 
 # Default Package Update
 apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 
-# --- Workaround ---
-apt --fix-broken install -y -q
+# apt repository metadata Clean up
+apt clean -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Debian apt Administration Tools (from Debian Official Repository)
+# Package Install Debian apt Administration Tools (from Kali Linux Official Repository)
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q arptables atop bash-completion binutils collectl curl debian-goodies dstat ebtables fio gdisk git hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfswatch
+apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
+apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+apt install -y -q pcp pcp-conf pcp-manager 
+
+# Package Install Python 3 Runtime (from Debian Official Repository)
+apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Special package for Kali]
@@ -107,7 +114,7 @@ apt install -y -q arptables atop bash-completion binutils collectl curl debian-g
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux Meta-Package
-apt install -y -q kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensic kali-linux-pwtools
+apt install -y -q kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensics kali-linux-pwtools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -146,13 +153,14 @@ fi
 #-------------------------------------------------------------------------------
 apt install -y -q awscli
 
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
-__EOF__
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
 
-source /etc/profile.d/aws-cli.sh
+complete -C aws_completer aws
+__EOF__
 
 aws --version
 
@@ -419,84 +427,35 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 apt install -y -q ansible
 
+apt show ansible
+
 ansible --version
 
 ansible localhost -m setup 
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [PowerShell Core(pwsh)]
-# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
-# https://github.com/PowerShell/PowerShell
-# 
-# https://packages.microsoft.com/repos/microsoft-debian-stretch-prod
-# 
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
-# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
+# Custom Package Installation [Docker]
 #-------------------------------------------------------------------------------
 
-# Install system components
-apt update -y -q
-apt install -y -q curl gnupg apt-transport-https libunwind8 libicu57
-
-# Import the public repository GPG keys
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-apt-key list
-
-# Register the Microsoft Product feed
-sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list'
-
-# Update the list of products
-apt clean -y
-apt update -y
-
-# Install PowerShell
-apt install -y -q powershell
-
-apt show powershell
-
-# Check Version
-pwsh -Version
-
-# Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
-
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-# pwsh -Command "Import-Module AWSPowerShell.NetCore"
-
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Get-AWSPowerShellVersion"
-# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Docker Community Edition - Docker.inc Repository]
-#-------------------------------------------------------------------------------
-
-# install dependencies 4 cert
+# install dependencies
 apt install -y -q apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
-# add Docker repo gpg key
-curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+# install docker
+apt install -y -q docker-compose
 
-echo "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable" > /etc/apt/sources.list.d/docker-ce.list
-
-# apt repository metadata Clean up
-apt clean -y
-
-# Update and install Docker CE version
-apt update -y -q && apt install -y docker-ce -q
-
-# Package Information
-apt show docker-ce
+apt show docker-compose
 
 systemctl daemon-reload
 
-systemctl status -l docker
-systemctl enable docker
-systemctl is-enabled docker
-
 systemctl restart docker
+
 systemctl status -l docker
+
+# Configure Docker software (Start Daemon docker)
+if [ $(systemctl is-enabled docker) = "disabled" ]; then
+	systemctl enable docker
+	systemctl is-enabled docker
+fi
 
 # Docker Deamon Information
 docker --version
@@ -504,107 +463,26 @@ docker --version
 docker info
 
 # manage Docker as a non-root user
-groupadd docker
+cat /etc/group | grep docker
+
 usermod -aG docker ec2-user
 
+cat /etc/group | grep docker
+
 # Docker Pull Image (from Docker Hub)
-docker pull kalilinux/kali-linux-docker
-docker pull amazonlinux:latest                   # Amazon Linux
-docker pull amazonlinux:2017.12.0.20171212.2     # Amazon Linux 2 LTS [2017.12.0]
-docker pull centos:latest                        # CentOS v7
+docker pull kalilinux/kali-linux-docker          # Kali Linux
+docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
 
 # Docker Run (Kali Linux)
 # docker run -it kalilinux/kali-linux-docker /bin/bash
 # cat /etc/os-release
 # exit
 
-# Docker Run (Amazon Linux)
-# docker run -it amazonlinux:latest /bin/bash
-# cat /etc/system-release
-# cat /etc/image-id 
-# exit
-
 # Docker Run (Amazon Linux 2 LTS)
-# docker run -it amazonlinux:2017.12.0.20171212.2 bash
+# docker run -it amazonlinux:latest bash
 # cat /etc/system-release
 # cat /etc/image-id 
 # exit
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Fluentd (td-agent)]
-# https://td-agent-package-browser.herokuapp.com/3/debian/stretch/pool/contrib/t/td-agent
-#-------------------------------------------------------------------------------
-
-# Package Install fluentd Tools (from TreasureData Official Repository)
-curl -L https://toolbelt.treasuredata.com/sh/install-ubuntu-xenial-td-agent3.sh | sh
-
-# Package Information
-apt show td-agent
-
-systemctl daemon-reload
-
-systemctl status -l td-agent
-systemctl enable td-agent
-systemctl is-enabled td-agent
-
-systemctl restart td-agent
-systemctl status -l td-agent
-
-# Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-/opt/td-agent/embedded/bin/fluent-gem list --local
-
-/opt/td-agent/embedded/bin/fluent-gem search -r fluent-plugin
-
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-aws-elasticsearch-service
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-cloudwatch-logs
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-kinesis-firehose
-/opt/td-agent/embedded/bin/fluent-gem install fluent-plugin-s3
-
-/opt/td-agent/embedded/bin/fluent-gem list --local
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Node.js & Serverless Application Framework]
-#  https://nodejs.org/ja/download/package-manager/#debian-and-ubuntu-based-linux-distributions-debian-ubuntu-linux
-#-------------------------------------------------------------------------------
-
-# Package Install node.js/npm Tools (from node.js Official Repository)
-curl -sL https://deb.nodesource.com/setup_9.x | bash -
-
-apt install -y -q nodejs
-
-# Package Information
-apt show nodejs
-
-node -v
-npm -v
-
-# Install Serverless Framework
-# https://serverless.com/
-# https://github.com/serverless/serverless
-# npm install -g serverless
-
-# sls -v
-
-# Install AWS Serverless Application Model (SAM) - SAM Local
-# https://docs.aws.amazon.com/lambda/latest/dg/sam-cli-requirements.html
-# npm install -g aws-sam-local
-
-# sam --version
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.6]
-#-------------------------------------------------------------------------------
-apt install -y -q python3
-
-/usr/bin/python3 -V
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Go 1.9]
-#-------------------------------------------------------------------------------
-apt install -y -q golang golang-github-aws-aws-sdk-go-dev
-
-/usr/bin/go version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
@@ -617,6 +495,25 @@ apt install -y -q kali-desktop-gnome
 apt install -y -q task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation for XRDP Server
+#-------------------------------------------------------------------------------
+apt install -y -q xrdp
+
+apt show xrdp
+
+systemctl daemon-reload
+
+systemctl restart xrdp
+
+systemctl status -l xrdp
+
+# Configure XRDP Server software (Start Daemon xrdp)
+if [ $(systemctl is-enabled xrdp) = "disabled" ]; then
+	systemctl enable xrdp
+	systemctl is-enabled xrdp
+fi
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation for VNC Server
 #
 #  - VNC Server User : ec2-user [cloud-init default user]
@@ -624,65 +521,60 @@ apt install -y -q task-japanese task-japanese-desktop locales-all fonts-ipafont 
 #-------------------------------------------------------------------------------
 apt install -y -q vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
 
-# Configure VNC Server for "ec2-user" user
-cat > /home/ec2-user/vnc-setup.sh << __EOF__
-#!/bin/bash
-
-VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
-
-vncpasswd << 'EOF';
-\$VNC_PASSWORD
-\$VNC_PASSWORD
-n
-EOF
-
-echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
-__EOF__
-
-chmod 777 /home/ec2-user/vnc-setup.sh
-
-su - "ec2-user" -c "/home/ec2-user/vnc-setup.sh"
-
-# Pre-operation test of VNC server
-su - "ec2-user" -c "vncserver :1 -geometry 1024x768 -depth 32"
-
-sleep 10
-
-su - "ec2-user" -c "vncserver -kill :1"
-
-cat /home/ec2-user/.vnc/xstartup
-cat /home/ec2-user/.vnc/config
-
-# Systemd's VNC Server configuration 
-cat > /etc/systemd/system/vncserver@:1.service << __EOF__
-[Unit]
-Description=Remote desktop service (VNC)
-After=syslog.target network.target
-
-[Service]
-Type=forking
-
-ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
-ExecStart=/usr/sbin/runuser -l ec2-user -c "/usr/bin/vncserver %i"
-PIDFile=/home/ec2-user/.vnc/%H%i.pid
-ExecStop=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
-
-[Install]
-WantedBy=multi-user.target
-
-__EOF__
-
-cat /etc/systemd/system/vncserver@:1.service
-
 systemctl daemon-reload
 
-# Systemd's VNC Server startup
-systemctl status vncserver@:1.service
-systemctl start vncserver@:1.service
-systemctl status vncserver@:1.service
+# # Configure VNC Server for "ec2-user" user
+# cat > /home/ec2-user/vnc-setup.sh << __EOF__
+# #!/bin/bash
 
-systemctl enable vncserver@:1.service
-systemctl is-enabled vncserver@:1.service
+# VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+
+# vncpasswd << 'EOF';
+# \$VNC_PASSWORD
+# \$VNC_PASSWORD
+# n
+# EOF
+
+# # echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+# __EOF__
+
+# chmod 777 /home/ec2-user/vnc-setup.sh
+
+# su - "ec2-user" -c "/home/ec2-user/vnc-setup.sh"
+
+
+# # Pre-operation test of VNC server
+# su - "ec2-user" -c "vncserver :1 -geometry 1024x768 -depth 32"
+
+# sleep 10
+
+# su - "ec2-user" -c "vncserver -kill :1"
+
+# # cat /home/ec2-user/.vnc/xstartup
+# # cat /home/ec2-user/.vnc/config
+
+# # Systemd's VNC Server configuration 
+# cat > /etc/systemd/system/vncserver@:1.service << __EOF__
+# [Unit]
+# Description=Remote desktop service (VNC)
+# After=syslog.target network.target
+
+# [Service]
+# Type=forking
+
+# ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+# ExecStart=/usr/sbin/runuser -l ec2-user -c "/usr/bin/vncserver %i"
+# PIDFile=/home/ec2-user/.vnc/%H%i.pid
+# ExecStop=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
+
+# [Install]
+# WantedBy=multi-user.target
+
+# __EOF__
+
+# cat /etc/systemd/system/vncserver@:1.service
+
+# systemctl daemon-reload
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Application [Google Chrome]
@@ -694,7 +586,7 @@ cd /tmp
 # Import GPG Key File
 curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
 
-# Add the Google Chrome Repository
+# Add the Google Chrome Repository (Temporary)
 echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list
 
 # apt repository metadata Clean up
@@ -706,7 +598,7 @@ apt update -y -q && apt install -y -q google-chrome-stable
 # Package Information
 apt show google-chrome-stable
 
-# Clean up repository file
+# Clean up Temporary repository file
 ls -l /etc/apt/sources.list.d/
 rm -rf /etc/apt/sources.list.d/google.list
 ls -l /etc/apt/sources.list.d/
@@ -797,18 +689,18 @@ apt remove -y -q ntp sntp
 # Configure NTP Client software (Install chrony Package)
 apt install -y -q chrony
 
-apt show chrony
+rpm -qi chrony
 
 systemctl daemon-reload
 
-systemctl restart chronyd
+systemctl restart chrony
 
-systemctl status -l chronyd
+systemctl status -l chrony
 
-# Configure NTP Client software (Start Daemon chronyd)
-if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
-	systemctl enable chronyd
-	systemctl is-enabled chronyd
+# Configure NTP Client software (Start Daemon chrony)
+if [ $(systemctl is-enabled chrony) = "disabled" ]; then
+	systemctl enable chrony
+	systemctl is-enabled chrony
 fi
 
 # Configure NTP Client software (Configure chronyd)
@@ -821,7 +713,7 @@ sed -i "1i# use the local instance NTP service, if available\nserver 169.254.169
 cat /etc/chrony/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
 
 # Configure NTP Client software (Time adjustment)
-systemctl restart chronyd
+systemctl restart chrony
 
 sleep 3
 chronyc tracking
@@ -860,7 +752,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=ja_JP.UTF-8
+	localectl set-locale LANG=ja_JP.utf8
 	locale
 	strings /etc/default/locale
 	dpkg-reconfigure --frontend noninteractive locales
@@ -868,7 +760,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
 	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
+	localectl set-locale LANG=en_US.utf8
 	locale
 	strings /etc/default/locale
 	dpkg-reconfigure --frontend noninteractive locales
@@ -920,35 +812,6 @@ else
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
 fi
-
-#-------------------------------------------------------------------------------
-# System Setting (Root Disk Extension)
-#-------------------------------------------------------------------------------
-# Disk Information(Partition) [parted -l]
-parted -l
-
-# Disk Information(Partition) [file -s]
-file -s /dev/xvd*
-
-# Disk Information(MountPoint) [lsblk]
-lsblk
-
-# Disk Information(File System) [df -h]
-df -h
-
-# Expansion of disk partition
-parted -l
-
-/sbin/parted ---pretend-input-tty /dev/xvda resizepart 1 yes 100%
-
-parted -l
-
-# Expansion of disk partition
-df -h
-
-resize2fs /dev/xvda1
-
-df -h
 
 #-------------------------------------------------------------------------------
 # System Reboot
