@@ -197,7 +197,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop collectl zstd
+yum --enablerepo=epel install -y atop bash-completion-extras collectl zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]

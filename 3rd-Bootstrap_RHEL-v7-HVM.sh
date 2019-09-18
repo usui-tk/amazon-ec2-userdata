@@ -151,7 +151,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop collectl jq zstd
+yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
