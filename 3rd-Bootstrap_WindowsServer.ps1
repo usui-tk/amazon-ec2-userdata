@@ -1964,8 +1964,8 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
 # Initialize Parameter [# Depends on PowerShell v6.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.2/PowerShell-6.2.2-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.2-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.3/PowerShell-6.2.3-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.3-win-x64.msi"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -2562,7 +2562,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.4.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.4.1-0-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.5.0-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.5.0-0-x64.msi"
     }
 }
 
@@ -2597,6 +2597,13 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Session Manager Plugin for the AWS CLI)"
     Get-WebContentToFile -Uri 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe' -OutFile "$TOOL_DIR\SessionManagerPluginSetup.exe"
+}
+
+# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)
+# https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
+    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.1.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.1.0.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
