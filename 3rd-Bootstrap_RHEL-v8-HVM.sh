@@ -68,6 +68,9 @@ dnf list installed > /tmp/command-log_dnf_installed-package.txt
 # Default repository package [dnf command]
 dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 
+# Default repository package group [dnf command]
+dnf group list -v > /tmp/command-log_dnf_repository-package-group-list.txt
+
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 
@@ -96,8 +99,7 @@ dnf config-manager --enable rhel-8-appstream-rhui-rpms
 dnf config-manager --enable rhui-client-config-server-8
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
-# dnf config-manager --enable rhel-8-supplementary-rhui-rpms
-# dnf config-manager --enable rhui-codeready-builder-for-rhel-8-rhui-rpms
+dnf config-manager --enable rhui-codeready-builder-for-rhel-8-rhui-rpms
 
 # Cleanup repository information
 dnf clean all
@@ -152,8 +154,8 @@ egrep '^\[|enabled' /etc/yum.repos.d/epel*
 dnf clean all
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y iftop
-# dnf --enablerepo=epel install -y atop collectl
+dnf --enablerepo=epel install -y atop iftop
+# dnf --enablerepo=epel install -y collectl
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

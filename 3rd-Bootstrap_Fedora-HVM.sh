@@ -59,6 +59,9 @@ dnf list installed > /tmp/command-log_dnf_installed-package.txt
 # Default repository package [dnf command]
 dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 
+# Default repository package group [dnf command]
+dnf group list -v > /tmp/command-log_dnf_repository-package-group-list.txt
+
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 

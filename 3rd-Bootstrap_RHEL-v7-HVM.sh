@@ -70,6 +70,9 @@ yum list installed > /tmp/command-log_yum_installed-package.txt
 # Default repository package [yum command]
 yum list all > /tmp/command-log_yum_repository-package-list.txt
 
+# Default repository package group [yum command]
+yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
+
 # systemd service config
 systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
 

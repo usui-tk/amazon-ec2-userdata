@@ -68,6 +68,9 @@ yum list installed > /tmp/command-log_yum_installed-package.txt
 # Default repository package [yum command]
 yum list all > /tmp/command-log_yum_repository-package-list.txt
 
+# Default repository package group [yum command]
+yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
+
 # Special package information
 yum --enablerepo=amzn-preview list | grep amzn-preview
 
