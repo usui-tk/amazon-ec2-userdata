@@ -91,11 +91,6 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS System Administration Tools use Yum Group (from CentOS Community Repository)
-yum grouplist
-yum groupinstall -y base console-internet directory-client hardware-monitoring large-systems network-file-system-client network-tools performance security-tools server-platform storage-client-iscsi
-yum grouplist
-
 # Package Install Pre-installation package difference of CentOS and RHEL (from CentOS Community Repository)
 yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
 

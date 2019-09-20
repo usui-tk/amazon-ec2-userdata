@@ -140,11 +140,6 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Linux System Administration Tools use Yum Group (from Oracle Linux Community Repository)
-yum grouplist
-yum groupinstall -y base console-internet directory-client hardware-monitoring large-systems network-file-system-client network-tools performance security-tools server-platform storage-client-iscsi
-yum grouplist
-
 # Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
 yum install -y abrt abrt-cli blktrace cloud-utils-growpart system-config-network-tui time tmpwatch unzip zip
 
