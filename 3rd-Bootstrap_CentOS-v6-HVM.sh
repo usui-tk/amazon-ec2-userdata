@@ -100,7 +100,7 @@ yum grouplist
 yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y acpid dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y acpid dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf psmisc rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
