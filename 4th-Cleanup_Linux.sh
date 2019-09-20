@@ -126,6 +126,13 @@ unset HISTFILE
 # Remove Bash History (for AWS Service and Tool User)
 [ -f /home/ssm-user/.bash_history ] && rm -rf /home/ssm-user/.bash_history
 
+# Waiting time
+sleep 15
+
+#-------------------------------------------------------------------------------
+# Stop instance
+#-------------------------------------------------------------------------------
+
 # Shutdown
 shutdown -h now
 
