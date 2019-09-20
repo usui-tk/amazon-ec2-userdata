@@ -78,7 +78,7 @@ systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit
 dnf repolist all > /tmp/command-log_dnf_repository-list.txt
 
 # Default repository module [dnf command]
-dnf module list > /tmp/command-log_dnf_module-list.txt
+# dnf module list > /tmp/command-log_dnf_module-list.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -113,7 +113,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh
+dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced wget zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -155,7 +155,7 @@ dnf clean all
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop iftop
-# dnf --enablerepo=epel install -y collectl
+# dnf --enablerepo=epel install -y collectl zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
