@@ -69,7 +69,7 @@ yum list installed > /tmp/command-log_yum_installed-package.txt
 yum list all > /tmp/command-log_yum_repository-package-list.txt
 
 # Default repository package group [yum command]
-yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
+yum grouplist -v > /tmp/command-log_yum_repository-package-group-list.txt
 
 # upstartd service config [chkconfig command]
 chkconfig --list > /tmp/command-log_chkconfig_list.txt
@@ -108,6 +108,11 @@ yum update -y
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
+
+# Package Install RHEL System Administration Tools use Yum Group (from Red Hat Official Repository)
+yum grouplist
+yum groupinstall -y base console-internet directory-client hardware-monitoring large-systems network-file-system-client network-tools performance security-tools server-platform storage-client-iscsi
+yum grouplist
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 yum install -y acpid dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
