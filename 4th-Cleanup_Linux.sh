@@ -84,32 +84,32 @@ fi
 
 # Remove SSH Authorized Keys (Root User) for All Linux Distribution
 if [ -f /root/.ssh/authorized_keys ]; then
-    shred -u --force /root/.ssh/authorized_keys
+	shred -u --force /root/.ssh/authorized_keys
 fi
 
 # Remove SSH Authorized Keys (ec2-user User) for Amazon Linux, Red Hat Enterprise Linux (RHEL), SUSE Linux Enterprise Server (SLES)
 if [ -f /home/ec2-user/.ssh/authorized_keys ]; then
-    shred -u --force /home/ec2-user/.ssh/authorized_keys
+	shred -u --force /home/ec2-user/.ssh/authorized_keys
 fi
 
-# Remove SSH Authorized Keys (ec2-user User) for CentOS
+# Remove SSH Authorized Keys (centos User) for CentOS
 if [ -f /home/centos/.ssh/authorized_keys ]; then
-    shred -u --force /home/centos/.ssh/authorized_keys
+	shred -u --force /home/centos/.ssh/authorized_keys
 fi
 
 # Remove SSH Authorized Keys (fedora User) for fedora
 if [ -f /home/fedora/.ssh/authorized_keys ]; then
-    shred -u --force /home/fedora/.ssh/authorized_keys
+	shred -u --force /home/fedora/.ssh/authorized_keys
 fi
 
 # Remove SSH Authorized Keys (ubuntu User) for Ubuntu
 if [ -f /home/ubuntu/.ssh/authorized_keys ]; then
-    shred -u --force /home/ubuntu/.ssh/authorized_keys
+	shred -u --force /home/ubuntu/.ssh/authorized_keys
 fi
 
 # Remove SSH Authorized Keys (admin User) for Debian
 if [ -f /home/admin/.ssh/authorized_keys ]; then
-    shred -u --force /home/admin/.ssh/authorized_keys
+	shred -u --force /home/admin/.ssh/authorized_keys
 fi
 
 # Remove Bash History
