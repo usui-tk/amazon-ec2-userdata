@@ -132,7 +132,7 @@ function Convert-SCSITargetIdToDeviceName {
 
 
 function Set-TimeZoneCompatible {
-    [CmdletBinding(SupportsShouldProcess = $True)]
+    [CmdletBinding(SupportsShouldProcess=$True)]
     param( 
         [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
         [ValidateSet("Dateline Standard Time", "UTC-11", "Hawaiian Standard Time", "Alaskan Standard Time", "Pacific Standard Time (Mexico)", "Pacific Standard Time", "US Mountain Standard Time", "Mountain Standard Time (Mexico)", "Mountain Standard Time", "Central America Standard Time", "Central Standard Time", "Central Standard Time (Mexico)", "Canada Central Standard Time", "SA Pacific Standard Time", "Eastern Standard Time", "US Eastern Standard Time", "Venezuela Standard Time", "Paraguay Standard Time", "Atlantic Standard Time", "Central Brazilian Standard Time", "SA Western Standard Time", "Pacific SA Standard Time", "Newfoundland Standard Time", "E. South America Standard Time", "Argentina Standard Time", "SA Eastern Standard Time", "Greenland Standard Time", "Montevideo Standard Time", "Bahia Standard Time", "UTC-02", "Mid-Atlantic Standard Time", "Azores Standard Time", "Cape Verde Standard Time", "Morocco Standard Time", "UTC", "GMT Standard Time", "Greenwich Standard Time", "W. Europe Standard Time", "Central Europe Standard Time", "Romance Standard Time", "Central European Standard Time", "W. Central Africa Standard Time", "Namibia Standard Time", "Jordan Standard Time", "GTB&nbsp;Standard Time", "Middle East Standard Time", "Egypt Standard Time", "Syria Standard Time", "E. Europe Standard Time", "South Africa Standard Time", "FLE&nbsp;Standard Time", "Turkey Standard Time", "Israel Standard Time", "Arabic Standard Time", "Kaliningrad Standard Time", "Arab Standard Time", "E. Africa Standard Time", "Iran Standard Time", "Arabian Standard Time", "Azerbaijan Standard Time", "Russian Standard Time", "Mauritius Standard Time", "Georgian Standard Time", "Caucasus Standard Time", "Afghanistan Standard Time", "Pakistan Standard Time", "West Asia Standard Time", "India Standard Time", "Sri Lanka Standard Time", "Nepal Standard Time", "Central Asia Standard Time", "Bangladesh Standard Time", "Ekaterinburg Standard Time", "Myanmar Standard Time", "SE Asia Standard Time", "N. Central Asia Standard Time", "China Standard Time", "North Asia Standard Time", "Singapore Standard Time", "W. Australia Standard Time", "Taipei Standard Time", "Ulaanbaatar Standard Time", "North Asia East Standard Time", "Tokyo Standard Time", "Korea Standard Time", "Cen. Australia Standard Time", "AUS Central Standard Time", "E. Australia Standard Time", "AUS Eastern Standard Time", "West Pacific Standard Time", "Tasmania Standard Time", "Yakutsk&nbsp;Standard Time", "Central Pacific Standard Time", "Vladivostok Standard Time", "New Zealand Standard Time", "UTC+12", "Fiji Standard Time", "Magadan&nbsp;Standard Time", "Tonga Standard Time", "Samoa Standard Time")]
@@ -751,8 +751,8 @@ if ($PowerShellSecurityProtocol -match "^Ssl3|^Tls") {
     # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
     [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
 
-    # Set PowerShell SecurityProtocol [TLS v1.2]
-    # [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12;
+    # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+    # [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
 }
 
 # Get PowerShell SecurityProtocol
@@ -927,7 +927,7 @@ if ($RoleName) {
 #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c5.*|^c5d.*|^c5n.*|^e3.*|^f1.*|^g3.*|^g3s.*|^h1.*|^i3.*|^i3en.*|^i3p.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^p3dn.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^m4.16xlarge|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
+    if ($InstanceType -match "^a1.*|^c5.*|^c5d.*|^c5n.*|^e3.*|^f1.*|^g3.*|^g3s.*|^g4dn.*|^h1.*|^i3.*|^i3en.*|^i3p.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^p3dn.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^m4.16xlarge|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
         # Get EC2 Instance Attribute(Elastic Network Adapter Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
         Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
@@ -952,7 +952,7 @@ if ($RoleName) {
 #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
 #
 if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^c5n.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^g3s.*|^h1.*|^i2.*|^i3.*|^i3en.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^r3.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
+    if ($InstanceType -match "^a1.*|^c1.*|^c3.*|^c4.*|^c5.*|^c5d.*|^c5n.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^g3s.*|^g4dn.*|^h1.*|^i2.*|^i3.*|^i3en.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^p2.*|^p3.*|^r3.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^u-6tb1.metal|^u-9tb1.metal|^u-12tb1.metal") {
         # Get EC2 Instance Attribute(EBS-optimized instance Status)
         Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
         Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
@@ -2099,6 +2099,15 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=75
 #    -> [pfid] Tesla M60 : 783
 #
+#  [Amazon EC2 G4 Instance Family]
+#  NVIDIA T4 Tensor Core GPU
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] T-Series : 110
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=110
+#    -> [pfid] Tesla T4 : 883
+#
 #  [Amazon EC2 P2 Instance Family]
 #  NVIDIA Tesla K80
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
@@ -2129,6 +2138,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 #    -> Windows Server 2012       : 32
 #    -> Windows Server 2012 R2 64 : 44
 #    -> Windows Server 2016       : 74
+#    -> Windows Server 2019       : 119
 #
 #=======================================================================================================================
 #
@@ -2147,8 +2157,8 @@ Write-Log "# [CUDA] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 # Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/P2/P3 Instance Family)
 # http://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html
 # https://developer.nvidia.com/cuda-downloads
-if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
-    Write-Log "# Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/P2/P3 Instance Family)"
+if ($InstanceType -match "^g2.*|^g3.*|^g4dn.*|^p2.*|^p3.*") {
+    Write-Log "# Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/G4/P2/P3 Instance Family)"
     if ($WindowsOSVersion) {
         if ($WindowsOSVersion -eq "6.3") {
             # [Windows Server 2012 R2]
@@ -2275,6 +2285,48 @@ if ($InstanceType -match "^g3.*") {
 }
 
 
+Write-Log "# [GPU Driver:NVIDIA T4 Tensor Core GPU] Check Amazon EC2 G4 Instance Family"
+
+# Package Download NVIDIA T4 Tensor Core GPU Driver (for Amazon EC2 G4 Instance Family)
+# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+if ($InstanceType -match "^g4dn.*") {
+    Write-Log "# Package Download NVIDIA T4 Tensor Core GPU Driver (for Amazon EC2 G4 Instance Family)"
+    if ($WindowsOSVersion) {
+        if ($WindowsOSVersion -eq "6.3") {
+            # [Windows Server 2012 R2]
+            $T4_drivers = Invoke-RestMethod -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=110&pfid=883&osid=44&lid=1&whql=1&lang=en-us&ctk=0'
+            $T4_driverversion = $($T4_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $T4_driverurl = "http://us.download.nvidia.com/tesla/" + ${T4_driverversion} + "/" + ${T4_driverversion} + "-tesla-desktop-winserver2008-2012r2-64bit-international.exe"
+            Write-Log ("# [Information] Package Download NVIDIA T4 Tensor Core GPU Driver URL : " + $T4_driverurl)
+            Get-WebContentToFile -Uri $T4_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-T4-GPU-Driver_for_WindowsServer2012R2.exe"
+        }
+        elseif ($WindowsOSVersion -eq "10.0") {
+            # [Windows Server 2016]
+            $T4_drivers = Invoke-RestMethod -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=110&pfid=883&osid=74&lid=1&whql=1&lang=en-us&ctk=0'
+            $T4_driverversion = $($T4_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            $T4_driverurl = "http://us.download.nvidia.com/tesla/" + ${T4_driverversion} + "/" + ${T4_driverversion} + "-tesla-desktop-winserver-2019-2016-international.exe"
+            Write-Log ("# [Information] Package Download NVIDIA T4 Tensor Core GPU Driver URL : " + $T4_driverurl)
+            Get-WebContentToFile -Uri $T4_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-T4-GPU-Driver_for_WindowsServer2016.exe"
+
+            # [Windows Server 2019]
+            # $T4_drivers = Invoke-RestMethod -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=110&pfid=883&osid=119&lid=1&whql=1&lang=en-us&ctk=0'
+            # $T4_driverversion = $($T4_drivers -match '<td class="gridItem">(\d\d\d\.\d\d)</td>' | Out-Null; $Matches[1])
+            # $T4_driverurl = "http://us.download.nvidia.com/tesla/" + ${T4_driverversion} + "/" + ${T4_driverversion} + "-tesla-desktop-winserver-2019-2016-international.exe"
+            # Write-Log ("# [Information] Package Download NVIDIA T4 Tensor Core GPU Driver URL : " + $T4_driverurl)
+            # Get-WebContentToFile -Uri $T4_driverurl -OutFile "$TOOL_DIR\NVIDIA-Tesla-T4-GPU-Driver_for_WindowsServer2019.exe"
+        }
+        else {
+            # [No Target Server OS]
+            Write-Log ("# [Information] [NVIDIA T4 Tensor Core GPU Driver] No Target Server OS Version : " + $WindowsOSVersion)
+        }
+    }
+    else {
+        # [Undefined Server OS]
+        Write-Log "# [Warning] [NVIDIA T4 Tensor Core GPU Driver] Undefined Server OS"
+    }
+}
+
+
 Write-Log "# [GPU Driver:NVIDIA Tesla K80] Check Amazon EC2 P2 Instance Family"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
@@ -2353,11 +2405,11 @@ if ($InstanceType -match "^p3.*") {
 }
 
 
-Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
+Write-Log "# [GPU Profiler] Check Amazon EC2 G2 & G3 & G4 & P2 & P3 Instance Family"
 
 # Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2/P3 Instance Family)
 # https://github.com/JeremyMain/GPUProfiler
-if ($InstanceType -match "^g2.*|^g3.*|^p2.*|^p3.*") {
+if ($InstanceType -match "^g2.*|^g3.*|^g4dn.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA GPUProfiler (for Amazon EC2 G2/G3/P2 Instance Family)"
     Get-WebContentToFile -Uri 'https://github.com/JeremyMain/GPUProfiler/releases/download/v1.07a/GPUProfiler_v1.07a_x64.zip' -OutFile "$TOOL_DIR\GPUProfiler_v1.07a_x64.zip"
 }
