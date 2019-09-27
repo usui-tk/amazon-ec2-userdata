@@ -44,6 +44,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://github.com/amazonlinux
 #
+#    https://hub.docker.com/_/amazonlinux/
+#
 #    http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-linux-ami-basics.html
 #-------------------------------------------------------------------------------
 
