@@ -37,6 +37,10 @@ echo $VpcNetwork
 #
 #-------------------------------------------------------------------------------
 
+# Cleanup repository information
+dnf clean all
+dnf makecache
+
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
     lsb_release -a

@@ -45,6 +45,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #-------------------------------------------------------------------------------
 
+# Cleanup repository information
+yum clean all
+
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
     lsb_release -a

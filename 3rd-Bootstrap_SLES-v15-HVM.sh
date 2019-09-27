@@ -56,6 +56,10 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://github.com/SUSE-Enceladus
 #-------------------------------------------------------------------------------
 
+# Cleanup repository information
+zypper clean --all
+zypper --quiet refresh -fdb
+
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
     lsb_release -a

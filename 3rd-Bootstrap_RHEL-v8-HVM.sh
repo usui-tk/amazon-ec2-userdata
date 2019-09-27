@@ -46,6 +46,10 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #-------------------------------------------------------------------------------
 
+# Cleanup repository information
+dnf clean all
+dnf makecache
+
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
     lsb_release -a
@@ -78,7 +82,7 @@ systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit
 dnf repolist all > /tmp/command-log_dnf_repository-list.txt
 
 # Default repository module [dnf command]
-# dnf module list > /tmp/command-log_dnf_module-list.txt
+dnf module list > /tmp/command-log_dnf_module-list.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -154,8 +158,8 @@ egrep '^\[|enabled' /etc/yum.repos.d/epel*
 dnf clean all
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop iftop
-# dnf --enablerepo=epel install -y collectl zstd
+dnf --enablerepo=epel install -y atop iftop zstd
+# dnf --enablerepo=epel install -y collectl
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -392,7 +396,7 @@ fi
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 
-dnf localinstall --nogpgcheck -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
@@ -449,7 +453,7 @@ ssm-cli get-instance-information
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
 #-------------------------------------------------------------------------------
 
-dnf localinstall --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm"
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 rpm -qi amazon-cloudwatch-agent
 
