@@ -690,21 +690,38 @@ fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	
 	# Custom Package Installation
-	apt -y install task-japanese locales-all
+	apt install -y -q task-japanese locales-all
+	
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status
+	
+	localectl list-locales | grep -w ja_JP
 	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
-	locale
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 elif [ "${Language}" = "en_US.UTF-8" ]; then
+
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
-	locale
+	localectl status
+	
+	localectl list-locales | grep -w en_US
+	localectl set-locale LANG=en_US.utf8
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 else
 	echo "# Default Language"
 	locale
