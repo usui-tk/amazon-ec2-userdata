@@ -93,7 +93,7 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -698,23 +698,23 @@ fi
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone Asia/Tokyo
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone UTC
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 else
 	echo "# Default SystemClock and Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 fi

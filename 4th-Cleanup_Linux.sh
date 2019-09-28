@@ -70,7 +70,10 @@ if [ $(command -v apt-get) ]; then
 		echo "Target operating system"
 		uname -r
 		dpkg --get-selections | grep linux-image
-		purge-old-kernels --keep 1 -qy
+
+		purge-old-kernels
+		# purge-old-kernels --keep 1 -qy
+		
 		sleep 5
 		dpkg --get-selections | grep linux-image
 		# Reconfigure GRUB 2 config file
