@@ -216,6 +216,10 @@ if [ -n "$VERSION_ID" ]; then
 	fi
 fi
 
+# SUSE Linux Enterprise Server Software repository metadata Clean up
+zypper clean --all
+zypper --quiet refresh -fdb
+
 # Install recommended packages
 # zypper --quiet --non-interactive install-new-recommends
 
@@ -265,6 +269,28 @@ zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Servic
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-setuptools
 zypper --quiet --non-interactive install python3-Babel python3-PyYAML python3-pycurl python3-python-dateutil python3-simplejson python3-six
+
+# SUSE Linux Enterprise Server Software repository metadata Clean up
+zypper clean --all
+zypper --quiet refresh -fdb
+
+# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
+SapFlag=0
+SapFlag=$(find /etc/zypp/repos.d/ -name "*SUSE_Linux_Enterprise_Server_for_SAP_Applications_x86_64*" | wc -l)
+
+if [ $SapFlag -gt 0 ]; then
+	echo "SUSE Linux Enterprise Server for SAP Applications 12"
+
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
+	zypper --quiet --non-interactive install --type pattern sap_server
+	zypper --quiet --non-interactive install --type pattern sap-hana
+
+	# Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository - Select package)
+	zypper --quiet --non-interactive install sapconf saptune insserv-compat
+	zypper --quiet --non-interactive install libz1-32bit libcurl4-32bit libX11-6-32bit libidn11-32bit libgcc_s1-32bit libopenssl1_0_0 glibc-32bit glibc-i18ndata glibc-locale-32bit
+else
+	echo "SUSE Linux Enterprise Server 12 (non SUSE Linux Enterprise Server for SAP Applications 12)"
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
@@ -900,8 +926,10 @@ fi
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntp Package)
-systemctl status -l ntpd
-systemctl stop ntpd
+if [ $(systemctl is-enabled ntpd) = "enabled" ]; then
+	systemctl status -l ntpd
+	systemctl stop ntpd
+fi
 
 zypper --quiet --non-interactive remove ntp
 
@@ -962,12 +990,26 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl is-enabled tuned
 fi
 
-# Configure Tuned software (select profile - throughput-performance)
-tuned-adm list
+# Configure Tuned software
+SapFlag=0
+SapFlag=$(find /etc/zypp/repos.d/ -name "*SUSE_Linux_Enterprise_Server_for_SAP_Applications_x86_64*" | wc -l)
 
-tuned-adm active
-tuned-adm profile throughput-performance 
-tuned-adm active
+if [ $SapFlag -gt 0 ]; then
+	echo "SUSE Linux Enterprise Server for SAP Applications 12"
+	# Configure Tuned software (select profile - sapconf)
+	tuned-adm list
+	tuned-adm active
+	tuned-adm profile sapconf
+	# tuned-adm profile saptune
+	tuned-adm active
+else
+	echo "SUSE Linux Enterprise Server 12 (non SUSE Linux Enterprise Server for SAP Applications 12)"  
+	# Configure Tuned software (select profile - throughput-performance)
+	tuned-adm list
+	tuned-adm active
+	tuned-adm profile throughput-performance 
+	tuned-adm active
+fi 
 
 #-------------------------------------------------------------------------------
 # System Setting
@@ -977,20 +1019,20 @@ tuned-adm active
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone Asia/Tokyo
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone UTC
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	date
 else
 	echo "# Default SystemClock and Timezone"
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	date
 fi
 
