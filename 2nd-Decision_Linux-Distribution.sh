@@ -13,8 +13,10 @@ ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-user
 ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
+ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
+ScriptForOracleLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v8-HVM.sh"
 ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
 ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
@@ -116,7 +118,10 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST}" = "CentOS" ] || [ "${DIST_TYPE}" = "centos" ]; then
-        if [ "${REV}" = "7" ]; then
+        if [ "${REV}" = "8" ]; then
+           # Bootstrap Script for CentOS v8.x
+           BootstrapScript=${ScriptForCentOSv8}
+        elif [ "${REV}" = "7" ]; then
            # Bootstrap Script for CentOS v7.x
            BootstrapScript=${ScriptForCentOSv7}
         elif [ $(echo ${REV} | grep -e '6.') ]; then
@@ -126,7 +131,10 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST}" = "Oracle Linux Server" ] || [ "${DIST_TYPE}" = "ol" ]; then
-        if [ $(echo ${REV} | grep -e '7.') ]; then
+        if [ $(echo ${REV} | grep -e '8.') ]; then
+           # Bootstrap Script for Oracle Linux v8.x
+           BootstrapScript=${ScriptForOracleLinuxv8}
+        elif [ $(echo ${REV} | grep -e '7.') ]; then
            # Bootstrap Script for Oracle Linux v7.x
            BootstrapScript=${ScriptForOracleLinuxv7}
         elif [ $(echo ${REV} | grep -e '6.') ]; then
@@ -278,19 +286,19 @@ fi
 # Bootstrap Script Executite
 #-------------------------------------------------------------------------------
 
-# Script execution method #1 : Use curl command
-if [ $(command -v curl) ]; then
-   echo "Bootstrap Script Executite - ${BootstrapScript}"
-   bash -vc "$(curl -L ${BootstrapScript})"
-fi
-
-# Script execution method #2 : Use wget command
-if [ $(command -v wget) ]; then
-   echo "Bootstrap Script Executite - ${BootstrapScript}"
-   cd /tmp
-   wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript} 
-   chmod 700 BootstrapScript.sh
-   bash -x BootstrapScript.sh
+if [ -n "${BootstrapScript}" ]; then
+    # Script execution method #1 : Use curl command
+    if [ $(command -v curl) ]; then
+        echo "Bootstrap Script Executite - ${BootstrapScript}"
+        bash -vc "$(curl -L ${BootstrapScript})"
+    # Script execution method #2 : Use wget command
+    elif [ $(command -v wget) ]; then
+        echo "Bootstrap Script Executite - ${BootstrapScript}"
+        cd /tmp
+        wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript} 
+        chmod 700 BootstrapScript.sh
+        bash -x BootstrapScript.sh
+    fi
 fi
 
 #-------------------------------------------------------------------------------
