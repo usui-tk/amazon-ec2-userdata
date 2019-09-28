@@ -1,6 +1,6 @@
 #!/bin/bash -v
 
-set -e -x
+# set -e -x
 
 # Logger
 exec > >(tee /var/log/user-data-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
@@ -690,7 +690,7 @@ apt remove -y -q ntp sntp
 # Configure NTP Client software (Install chrony Package)
 apt install -y -q chrony
 
-rpm -qi chrony
+apt show chrony
 
 systemctl daemon-reload
 
