@@ -61,8 +61,6 @@ uname -a
 # Show Linux distribution release Information
 cat /etc/os-release
 
-cat /etc/lsb-release
-
 # Default installation package [apt command]
 apt list --installed > /tmp/command-log_apt_installed-package.txt
 
