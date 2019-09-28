@@ -698,7 +698,7 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	locale
 	localectl status
 	
-	localectl list-locales | grep -w ja_JP
+	# localectl list-locales | grep -w ja_JP
 	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
 
 	strings /etc/default/locale
@@ -713,7 +713,7 @@ elif [ "${Language}" = "en_US.UTF-8" ]; then
 	locale
 	localectl status
 	
-	localectl list-locales | grep -w en_US
+	# localectl list-locales | grep -w en_US
 	localectl set-locale LANG=en_US.utf8
 
 	strings /etc/default/locale
