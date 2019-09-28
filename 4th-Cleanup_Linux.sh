@@ -63,6 +63,26 @@ if [ $(command -v yum) ]; then
 	fi
 fi
 
+# Removing old kernel packages (Use zypper/purge-kernels commands)
+if [ $(command -v zypper) ]; then
+	if [ $(command -v purge-kernels) ]; then
+		# Removing old kernel packages
+		echo "Target operating system"
+		uname -r
+		rpm -qa | grep kernel | sort
+		cat /etc/zypp/zypp.conf | grep multiversion.kernels
+		purge-kernels
+		sleep 5
+		rpm -qa | grep kernel | sort
+		# Reconfigure GRUB 2 config file
+		if [ $(command -v grub2-mkconfig) ]; then
+			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+		fi
+		# Cleanup repository information
+		zypper clean --all
+	fi
+fi
+
 # Removing old kernel packages (Use apt-get/purge-old-kernels commands)
 if [ $(command -v apt-get) ]; then
 	if [ $(command -v purge-old-kernels) ]; then
