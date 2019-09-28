@@ -699,37 +699,57 @@ if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
 	timedatectl set-timezone Asia/Tokyo
-	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
 	timedatectl set-timezone UTC
-	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 else
 	echo "# Default SystemClock and Timezone"
 	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	
 	# Custom Package Installation [language-pack-ja]
 	apt install -y -q language-pack-ja-base language-pack-ja fonts-ipafont
+	
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status
+	
+	# localectl list-locales | grep -w ja_JP
 	localectl set-locale LANG=ja_JP.utf8 LANGUAGE="ja_JP:ja"
-	locale
+	dpkg-reconfigure --frontend noninteractive locales
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 elif [ "${Language}" = "en_US.UTF-8" ]; then
+
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status
+	
+	# localectl list-locales | grep -w en_US
 	localectl set-locale LANG=en_US.utf8
-	locale
+	dpkg-reconfigure --frontend noninteractive locales
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 else
 	echo "# Default Language"
 	locale

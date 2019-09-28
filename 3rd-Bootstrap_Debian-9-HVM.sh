@@ -95,7 +95,7 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -644,37 +644,57 @@ if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
 	timedatectl set-timezone Asia/Tokyo
-	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
 	timedatectl set-timezone UTC
-	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 else
 	echo "# Default SystemClock and Timezone"
 	date
 	dpkg-reconfigure --frontend noninteractive tzdata
+	date
 fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	
 	# Custom Package Installation
-	apt -y install task-japanese locales-all
+	apt install -y -q task-japanese
+	
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status
+	
+	# localectl list-locales | grep -w ja_JP
 	localectl set-locale LANG=ja_JP.UTF-8 LANGUAGE="ja_JP:ja"
-	locale
+	dpkg-reconfigure --frontend noninteractive locales
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 elif [ "${Language}" = "en_US.UTF-8" ]; then
+
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
-	localectl set-locale LANG=en_US.UTF-8
-	locale
+	localectl status
+	
+	# localectl list-locales | grep -w en_US
+	localectl set-locale LANG=en_US.utf8
+	dpkg-reconfigure --frontend noninteractive locales
+
 	strings /etc/default/locale
+	source /etc/default/locale
+	
+	locale
+	localectl status
+
 else
 	echo "# Default Language"
 	locale
