@@ -82,7 +82,7 @@ zypper search --installed-only > /tmp/command-log_zypper_installed-package.txt
 zypper search > /tmp/command-log_zypper_repository-package-list.txt
 
 # systemd service config
-systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 # Default repository products list [zypper command]
 zypper products > /tmp/command-log_zypper_repository-products-list.txt

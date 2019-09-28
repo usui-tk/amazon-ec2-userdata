@@ -73,7 +73,7 @@ yum list all > /tmp/command-log_yum_repository-package-list.txt
 yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 
 # systemd service config
-systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
 # Yum Configuration

@@ -76,7 +76,7 @@ dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 dnf group list -v > /tmp/command-log_dnf_repository-package-group-list.txt
 
 # systemd service config
-systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 # Default repository list [dnf command]
 dnf repolist all > /tmp/command-log_dnf_repository-list.txt
@@ -745,45 +745,52 @@ update-crypto-policies --show
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
+	timedatectl status --all --no-pager
 	timedatectl set-timezone Asia/Tokyo
+	timedatectl status --all --no-pager
 	date
-	# timedatectl status
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	# timedatectl status
+	timedatectl status --all --no-pager
 	timedatectl set-timezone UTC
+	timedatectl status --all --no-pager
 	date
-	# timedatectl status
 else
 	echo "# Default SystemClock and Timezone"
-	# timedatectl status
+	timedatectl status --all --no-pager
 	date
 fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
+	# Custom Package Installation
 	dnf install -y langpacks-ja glibc-langpack-ja
+
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status --no-pager
+	localectl list-locales --no-pager | grep ja_
 	localectl set-locale LANG=ja_JP.utf8
+	localectl status --no-pager
 	locale
-	# localectl status
-	cat /etc/locale.conf
+	strings /etc/locale.conf
+	source /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
 	echo "# Setting System Language -> $Language"
 	locale
-	# localectl status
+	localectl status --no-pager
+	localectl list-locales --no-pager | grep en_
 	localectl set-locale LANG=en_US.utf8
+	localectl status --no-pager
 	locale
-	# localectl status
-	cat /etc/locale.conf
+	strings /etc/locale.conf
+	source /etc/locale.conf
 else
 	echo "# Default Language"
 	locale
-	cat /etc/locale.conf
+	localectl status --no-pager
+	strings /etc/locale.conf
 fi
 
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)

@@ -83,7 +83,7 @@ yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 amazon-linux-extras list
 
 # systemd service config
-systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update

@@ -44,6 +44,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #-------------------------------------------------------------------------------
 
+# Command Non-Interactive Mode
+export DEBIAN_FRONTEND=noninteractive
+
 # Cleanup repository information
 apt clean -y -q
 
@@ -67,7 +70,7 @@ apt list --installed > /tmp/command-log_apt_installed-package.txt
 apt list > /tmp/command-log_apt_repository-package-list.txt
 
 # systemd service config
-systemctl list-unit-files --no-pager -all > /tmp/command-log_systemctl_list-unit-files.txt
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 # Determine the OS release
 eval $(grep ^VERSION_ID= /etc/os-release)
@@ -76,9 +79,6 @@ VersionYear=$(echo $VERSION_ID | sed -e "s/\.[^.]*$//g")
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-
-# Command Non-Interactive Mode
-export DEBIAN_FRONTEND=noninteractive
 
 # apt repository metadata Clean up
 apt clean -y -q
