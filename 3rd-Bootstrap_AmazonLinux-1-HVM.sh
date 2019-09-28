@@ -484,8 +484,11 @@ chkconfig --list ip6tables
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntpd Package)
-chkconfig --list ntpd
-service ntpd stop
+if [ $(chkconfig --list | awk '{print $1}' | grep -w ntpd) ]; then
+	chkconfig --list ntpd
+	service ntpd stop
+fi
+
 yum erase -y ntp*
 
 # Replace NTP Client software (Install chrony Package)

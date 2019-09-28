@@ -565,7 +565,7 @@ sestatus
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntpd Package)
-if [ $(chkconfig --list | grep -w ntpd) ]; then
+if [ $(chkconfig --list | awk '{print $1}' | grep -w ntpd) ]; then
 	chkconfig --list ntpd
 	service ntpd stop
 fi
