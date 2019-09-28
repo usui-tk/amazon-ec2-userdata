@@ -160,7 +160,7 @@ unset HISTFILE
 [ -f /home/ssm-user/.bash_history ] && rm -rf /home/ssm-user/.bash_history
 
 # Waiting time
-sleep 15
+sleep 30
 
 #-------------------------------------------------------------------------------
 # Stop instance
