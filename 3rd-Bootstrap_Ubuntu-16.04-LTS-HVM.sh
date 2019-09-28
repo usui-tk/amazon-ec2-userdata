@@ -608,16 +608,18 @@ ip route show
 
 # Network Information(Firewall Service) [Uncomplicated firewall]
 if [ $(command -v ufw) ]; then
-    # Network Information(Firewall Service) [systemctl status -l ufw]
-    systemctl status -l ufw
-    # Network Information(Firewall Service Status) [ufw status]
-    ufw status verbose
-    # Network Information(Firewall Service Disabled) [ufw disable]
-    ufw disable
-    # Network Information(Firewall Service Status) [systemctl status -l ufw]
-	systemctl status -l ufw
-	systemctl disable ufw
-	systemctl status -l ufw
+	if [ $(systemctl is-enabled ufw) = "enabled" ]; then
+		# Network Information(Firewall Service Status) [ufw status]
+		ufw status verbose
+
+		# Network Information(Firewall Service Disabled) [ufw disable]
+		ufw disable
+
+		# Network Information(Firewall Service Status) [systemctl status -l ufw]
+		systemctl status -l ufw
+		systemctl disable ufw
+		systemctl status -l ufw
+	fi
 fi
 
 # Linux Security Information(AppArmor)
