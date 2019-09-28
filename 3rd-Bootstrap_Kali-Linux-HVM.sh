@@ -733,61 +733,57 @@ chronyc sourcestats -v
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
+	timedatectl status --all --no-pager
 	timedatectl set-timezone Asia/Tokyo
+	timedatectl status --all --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
+	timedatectl status --all --no-pager
 	timedatectl set-timezone UTC
+	timedatectl status --all --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 else
 	echo "# Default SystemClock and Timezone"
 	date
+	timedatectl status --all --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 fi
 
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
-	
 	# Custom Package Installation
 	apt install -y -q task-japanese task-japanese-desktop fonts-ipafont
 	
 	echo "# Setting System Language -> $Language"
 	locale
-	localectl status
-	
-	# localectl list-locales | grep -w ja_JP
+	localectl status --no-pager
+	localectl list-locales --no-pager | grep ja_
 	localectl set-locale LANG=ja_JP.utf8
 	dpkg-reconfigure --frontend noninteractive locales
-
+	localectl status --no-pager
+	locale
 	strings /etc/default/locale
 	source /etc/default/locale
-	
-	locale
-	localectl status
-
 elif [ "${Language}" = "en_US.UTF-8" ]; then
-
 	echo "# Setting System Language -> $Language"
 	locale
-	localectl status
-	
-	# localectl list-locales | grep -w en_US
+	localectl status --no-pager
+	localectl list-locales --no-pager | grep en_
 	localectl set-locale LANG=en_US.utf8
 	dpkg-reconfigure --frontend noninteractive locales
-
+	localectl status --no-pager
+	locale
 	strings /etc/default/locale
 	source /etc/default/locale
-	
-	locale
-	localectl status
-
 else
 	echo "# Default Language"
 	locale
+	localectl status --no-pager
 	strings /etc/default/locale
 fi
 
