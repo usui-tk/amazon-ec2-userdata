@@ -105,6 +105,9 @@ Clear-History -ErrorAction SilentlyContinue
 
 Write-MessageSeparator "Complete Script Execution Cleanup Script"
 
+# Waiting time
+Start-Sleep -Seconds 30
+
 #---------------------------------------------------------------------------------------------------------------------------
 
 Write-MessageSeparator "# Execution of Sysprep processing"
@@ -156,3 +159,12 @@ if (Test-Path -Path $EC2LaunchExeFile1) {
     Start-Sleep -Seconds 10
 }
 
+#-------------------------------------------------------------------------------
+# For normal termination of SSM "Run Command"
+#-------------------------------------------------------------------------------
+
+# exit 0
+
+#-------------------------------------------------------------------------------
+# End of File
+#-------------------------------------------------------------------------------
