@@ -78,9 +78,6 @@ rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log
 # Default installation package [zypper command]
 zypper search --installed-only > /tmp/command-log_zypper_installed-package.txt
 
-# Default repository package [zypper command]
-zypper search > /tmp/command-log_zypper_repository-package-list.txt
-
 # systemd service config
 systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
