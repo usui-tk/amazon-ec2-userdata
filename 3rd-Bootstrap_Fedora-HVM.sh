@@ -810,6 +810,11 @@ cat /etc/selinux/config
 setenforce 0
 getenforce
 
+# Setting System crypto policy (Default -> FUTURE)
+update-crypto-policies --show
+# update-crypto-policies --set FUTURE
+# update-crypto-policies --is-applied
+
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
