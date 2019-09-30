@@ -2608,6 +2608,13 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.2-Setup.exe"
 }
 
+# Package Download System Utility (Anaconda Distribution)
+# https://www.anaconda.com/distribution/
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (Anaconda Distribution)"
+    Get-WebContentToFile -Uri 'https://repo.anaconda.com/archive/Anaconda3-2019.07-Windows-x86_64.exe' -OutFile "$TOOL_DIR\Anaconda3-2019.07-Windows-x86_64.exe"
+}
+
 # Package Download System Utility (Fluentd)
 # https://www.fluentd.org/
 # https://td-agent-package-browser.herokuapp.com/3/windows
