@@ -2608,6 +2608,14 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.2-Setup.exe"
 }
 
+# Package Download System Utility (Python3)
+# https://www.python.org/
+# https://www.python.org/downloads/windows/
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (Python3)"
+    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/3.7.4/python-3.7.4-amd64.exe' -OutFile "$TOOL_DIR\python-3.7.4-amd64.exe"
+}
+
 # Package Download System Utility (Anaconda Distribution)
 # https://www.anaconda.com/distribution/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
