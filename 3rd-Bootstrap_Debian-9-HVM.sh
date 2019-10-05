@@ -95,7 +95,7 @@ apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
 apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils bpfcc-tools byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted python3-bpfcc snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-completion binutils bpfcc-tools byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted python3-bpfcc snmp sosreport sysstat tcpdump traceroute unzip wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor

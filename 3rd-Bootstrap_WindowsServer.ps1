@@ -2608,6 +2608,13 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.2-Setup.exe"
 }
 
+# Package Download System Utility (CloudBerry Explorer for Amazon S3)
+# https://www.cloudberrylab.com/explorer/windows/amazon-s3.aspx
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (CloudBerry Explorer for Amazon S3)"
+    Get-WebContentToFile -Uri 'https://www.cloudberrylab.com/download/CloudBerryExplorerSetup_v5.9.1.192_netv4.0.exe' -OutFile "$TOOL_DIR\CloudBerryExplorerSetup_v5.9.1.192_netv4.0.exe"
+}
+
 # Package Download System Utility (Python3)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/

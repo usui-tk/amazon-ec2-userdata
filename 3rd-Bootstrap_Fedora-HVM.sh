@@ -462,7 +462,7 @@ if [ $(systemctl is-enabled docker) = "disabled" ]; then
 fi
 
 # Docker Deamon Information
-docker --version
+docker version --format '{{json .}}' | jq .
 
 docker info
 

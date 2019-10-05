@@ -117,7 +117,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils crypto-policies curl dstat ebtables ethtool fio gdisk git hdparm jq kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nftables nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump tlog tree traceroute unzip vim-enhanced xfsdump xfsprogs wget zip zsh
+dnf install -y acpid arptables bash-completion bc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysstat tcpdump tlog traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -125,6 +125,9 @@ dnf install -y pcp pcp-zeroconf pcp-system-tools pcp-export-pcp2json pcp-selinux
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 dnf install -y redhat-lsb-core redhat-support-tool
+
+# Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
+dnf install -y kpatch
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
 dnf install -y @python36
@@ -198,10 +201,10 @@ fi
 #-------------------------------------------------------------------------------
 
 # Python package introduction and setting
-dnf module list | grep python
+dnf module list | grep python3
 dnf install -y @python36
 dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
-dnf module list | grep python
+dnf module list | grep python3
 
 alternatives --list
 alternatives --set python "/usr/bin/python3"
