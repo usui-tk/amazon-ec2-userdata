@@ -77,8 +77,14 @@ yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 # Special package information
 yum --enablerepo=amzn-preview list | grep amzn-preview
 
-# upstartd service config
-chkconfig --list
+# upstartd service config [chkconfig command]
+chkconfig --list > /tmp/command-log_chkconfig_list.txt
+
+# Default repository list [yum command]
+yum repolist all > /tmp/command-log_yum_repository-list.txt
+
+# EPEL repository package [yum command]
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -103,7 +109,7 @@ yum install -y iscsi-initiator-utils lsscsi
 yum install -y python36 python36-pip python36-setuptools python36-test python36-tools python36-virtualenv
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion
+yum --enablerepo=epel install -y bash-completion iperf3 zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

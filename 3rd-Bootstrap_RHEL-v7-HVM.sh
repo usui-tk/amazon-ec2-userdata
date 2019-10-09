@@ -119,6 +119,7 @@ yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebt
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 yum install -y redhat-lsb-core redhat-support-tool
@@ -152,6 +153,9 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 # yum-config-manager --disable epel epel-debuginfo epel-source
 
 yum clean all
+
+# EPEL repository package [yum command]
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
