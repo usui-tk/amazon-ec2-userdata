@@ -124,7 +124,7 @@ dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy
 dnf install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
-dnf install -y redhat-lsb-core redhat-support-tool
+dnf install -y redhat-lsb-core redhat-support-tool insights-client
 
 # Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
 dnf install -y kpatch
@@ -299,7 +299,7 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|g4dn.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|e3.*|f1.*|g3.*|g3s.*|g4dn.*|h1.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p2.*|p3.*|p3dn.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|m4.16xlarge|u-*tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(Elastic Network Adapter Status)
 		echo "# Get EC2 Instance Attribute(Elastic Network Adapter Status)"
 		aws ec2 describe-instances --instance-id ${InstanceId} --query Reservations[].Instances[].EnaSupport --output json --region ${Region}
@@ -333,7 +333,7 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|g4dn.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c1.*|c3.*|c4.*|c5.*|c5d.*|c5n.*|d2.*|e3.*|f1.*|g2.*|g3.*|g3s.*|g4dn.*|h1.*|i2.*|i3.*|i3en.*|i3p.*|m1.*|m2.*|m3.*|m4.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p2.*|p3.*|p3dn.*|r3.*|r4.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|x1.*|x1e.*|z1d.*|u-*tb1.metal)$ ]]; then
 		# Get EC2 Instance Attribute(EBS-optimized instance Status)
 		echo "# Get EC2 Instance Attribute(EBS-optimized instance Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute ebsOptimized --output json --region ${Region}
@@ -361,7 +361,7 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ssd-instance-store.html
 #
 if [ -n "$RoleName" ]; then
-	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|t3.*|t3a.*|z1d.*|u-6tb1.metal|u-9tb1.metal|u-12tb1.metal)$ ]]; then
+	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
 		
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
@@ -615,11 +615,11 @@ free
 # Disk Information(Partition) [parted -l]
 parted -l
 
-# Disk Information(MountPoint) [lsblk]
-lsblk
+# Disk Information(MountPoint) [lsblk -f]
+lsblk -f
 
-# Disk Information(File System) [df -h]
-df -h
+# Disk Information(File System) [df -khT]
+df -khT
 
 # Network Information(Network Interface) [ip addr show]
 ip addr show
