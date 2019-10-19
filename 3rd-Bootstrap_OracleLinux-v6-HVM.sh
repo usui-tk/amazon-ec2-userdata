@@ -82,18 +82,17 @@ yum clean all
 yum update -y yum
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y rhn-client-tools yum-plugin-fastestmirror yum-utils
-
-# yum repository metadata Clean up
+yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 rhn-client-tools yum-plugin-fastestmirror yum-utils
 yum clean all
+
+# Update AMI Defalut YUM Repositories File
+/usr/bin/ol_yum_configure.sh
+
+yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
 rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
-
-# Add Oralce Linux v6 Public YUM Repositories File
-curl -sS "http://public-yum.oracle.com/public-yum-ol6.repo" -o "/etc/yum.repos.d/public-yum-ol6.repo"
-
-cat "/etc/yum.repos.d/public-yum-ol6.repo" | grep -E "\[|enable" | xargs -n 2 | awk '{print $2, $1}'
+yum clean all
 
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v6)
@@ -127,7 +126,7 @@ yum-config-manager --enable ol6_developer
 
 # Latest Unbreakable Enterprise Kernel Release 2 packages for Oracle Linux 6.
 #  http://yum.oracle.com/repo/OracleLinux/OL6/UEK/latest/x86_64/index.html
-yum-config-manager --disable ol6_UEK_latest
+# yum-config-manager --disable ol6_UEK_latest
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -156,6 +155,9 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-system-tools
 # Package Install Oracle Linux support tools (from Oracle Linux Community Repository)
 yum install -y redhat-lsb-core
 
+# Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
+yum install -y ovm-template-config*
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
@@ -181,6 +183,22 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq zstd
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Oracle Database]
+#-------------------------------------------------------------------------------
+
+# Package Install Oracle Database Utility (from Oracle Linux Official Repository)
+yum install -y kmod-oracleasm oracleasm-support
+yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall
+
+# Latest packages for Oracle Instant Client on Oracle Linux 6 (x86_64).
+#  http://public-yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
+
+yum-config-manager --enable ol6_oracle_instantclient
+
+# Package Install Oracle Instant Client (from Oracle Linux Official Repository)
+yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -740,32 +758,56 @@ fi
 #-------------------------------------------------------------------------------
 # System Setting (Root Disk Extension)
 #-------------------------------------------------------------------------------
+
 # Disk Information(Partition) [parted -l]
 parted -l
 
-# Disk Information(Partition) [file -s]
-file -s /dev/xvd*
-
-# Disk Information(MountPoint) [lsblk]
-lsblk
+# Disk Information(MountPoint) [lsblk -al]
+lsblk -al
 
 # Disk Information(File System) [df -h]
 df -h
 
-# Expansion of disk partition
-parted -l
+# Configure cloud-init/growpart module
+cat /etc/cloud/cloud.cfg
 
-LANG=C growpart --dry-run /dev/xvda 1
-LANG=C growpart /dev/xvda 1
+if ! grep -q growpart /etc/cloud/cloud.cfg; then
+	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
+fi
 
-parted -l
+cat /etc/cloud/cloud.cfg
 
-# Expansion of disk partition
-df -h
+# Expansion of disk partition (Non-Nitro Hypervisor)
+if [ -f /dev/xvda ]; then
+	parted -l
+	LANG=C growpart --dry-run /dev/xvda 1
+	LANG=C growpart /dev/xvda 1
+	parted -l
 
-resize2fs /dev/xvda1
+	sleep 15
 
-df -h
+	df -h
+
+	resize2fs /dev/xvda1
+
+	df -h
+fi
+
+# Expansion of disk partition (Nitro Hypervisor)
+if [ -f /dev/nvme0n1 ]; then
+	parted -l
+	LANG=C growpart --dry-run /dev/nvme0n1 1
+	LANG=C growpart /dev/nvme0n1 1
+	parted -l
+
+	sleep 15
+
+	df -h
+
+	resize2fs /dev/nvme0n1p1
+
+	df -h
+fi
 
 #-------------------------------------------------------------------------------
 # Reboot

@@ -79,7 +79,7 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 # Yum Configuration
 #-------------------------------------------------------------------------------
 yum clean all
-yum install -y oraclelinux-release-el7 rhn-client-tools yum-utils
+yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 rhn-client-tools yum-utils
 yum clean all
 
 # Update AMI Defalut YUM Repositories File
@@ -130,6 +130,9 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
+# Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
+yum install -y abrt abrt-cli blktrace cloud-utils-growpart time tmpwatch unzip zip
+
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
 yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced xfsdump xfsprogs yum-priorities yum-plugin-versionlock yum-utils wget zip
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
@@ -139,6 +142,9 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroco
 
 # Package Install Oracle Linux support tools (from Oracle Linux Official Repository)
 yum install -y redhat-lsb-core
+
+# Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
+yum install -y ovm-template-config*
 
 # Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Official Repository)
 # yum install -y kpatch
@@ -155,15 +161,7 @@ yum install -y python3 python3-pip python3-devel
 
 # Latest packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
-
-cat > /etc/yum.repos.d/oracle-developer-ol7.repo << __EOF__
-[ol7_developer]
-name=Packages for test and development - Oracle Linux $releasever Packages ($basearch)
-baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/developer/\$basearch/
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-gpgcheck=1
-enabled=1
-__EOF__
+yum-config-manager --enable ol7_developer
 
 # Latest EPEL packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
@@ -176,9 +174,6 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 gpgcheck=1
 enabled=1
 __EOF__
-
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
-yum --enablerepo=ol7_developer_EPEL install -y jq cloud-utils-growpart
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -204,7 +199,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl zstd
+yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]
@@ -212,10 +207,10 @@ yum --enablerepo=epel install -y atop bash-completion-extras collectl zstd
 
 # Package Install Oracle Database Utility (from Oracle Linux Official Repository)
 yum install -y kmod-oracleasm oracleasm-support
-yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall oracle-database-server-12cR2-preinstall oracle-database-preinstall-18c oracle-database-preinstall-19c
+yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall
 
 # Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
-#  http://yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
+#  http://public-yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 
 cat > /etc/yum.repos.d/oracle-instantclient-ol7.repo << __EOF__
 [ol7_instantclient]
@@ -227,7 +222,7 @@ enabled=1
 __EOF__
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
-yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
+yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -917,32 +912,56 @@ fi
 #-------------------------------------------------------------------------------
 # System Setting (Root Disk Extension)
 #-------------------------------------------------------------------------------
+
 # Disk Information(Partition) [parted -l]
 parted -l
 
-# Disk Information(Partition) [file -s]
-file -s /dev/xvd*
-
-# Disk Information(MountPoint) [lsblk]
-lsblk
+# Disk Information(MountPoint) [lsblk -al]
+lsblk -al
 
 # Disk Information(File System) [df -h]
 df -h
 
-# Expansion of disk partition
-parted -l
+# Configure cloud-init/growpart module
+cat /etc/cloud/cloud.cfg
 
-LANG=C growpart --dry-run /dev/xvda 1
-LANG=C growpart /dev/xvda 1
+if ! grep -q growpart /etc/cloud/cloud.cfg; then
+	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
+fi
 
-parted -l
+cat /etc/cloud/cloud.cfg
 
-# Expansion of disk partition
-df -h
+# Expansion of disk partition (Non-Nitro Hypervisor)
+if [ -f /dev/xvda ]; then
+	parted -l
+	LANG=C growpart --dry-run /dev/xvda 1
+	LANG=C growpart /dev/xvda 1
+	parted -l
 
-resize2fs /dev/xvda1
+	sleep 15
 
-df -h
+	df -h
+
+	resize2fs /dev/xvda1
+
+	df -h
+fi
+
+# Expansion of disk partition (Nitro Hypervisor)
+if [ -f /dev/nvme0n1 ]; then
+	parted -l
+	LANG=C growpart --dry-run /dev/nvme0n1 1
+	LANG=C growpart /dev/nvme0n1 1
+	parted -l
+
+	sleep 15
+
+	df -h
+
+	resize2fs /dev/nvme0n1p1
+
+	df -h
+fi
 
 #-------------------------------------------------------------------------------
 # Reboot
