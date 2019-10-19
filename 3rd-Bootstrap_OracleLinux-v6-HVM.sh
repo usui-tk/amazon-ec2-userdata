@@ -82,7 +82,7 @@ yum clean all
 # Default Package Update (Packages Related to yum)
 yum update -y yum yum-plugin-fastestmirror yum-utils
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
 yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6

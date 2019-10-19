@@ -75,7 +75,7 @@ yum grouplist -v > /tmp/command-log_yum_repository-package-group-list.txt
 chkconfig --list > /tmp/command-log_chkconfig_list.txt
 
 #-------------------------------------------------------------------------------
-# Default Package Update
+# Yum Configuration
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
@@ -83,6 +83,39 @@ yum clean all
 
 # Default Package Update (Packages Related to yum)
 yum update -y yum yum-plugin-fastestmirror yum-utils
+
+# Package Install CentOS yum repository Files (from CentOS Community Repository)
+find /etc/yum.repos.d/
+
+yum search centos-release
+yum install -y centos-release centos-release-scl
+
+find /etc/yum.repos.d/
+
+#-------------------------------------------------------------------------------
+# Enable Repositories (CentOS v6)
+#  http://mirror.centos.org/centos-6/6/
+#-------------------------------------------------------------------------------
+
+# CentOS-Base.repo
+yum-config-manager --enable base
+yum-config-manager --enable updates
+yum-config-manager --enable extras
+
+#-------------------------------------------------------------------------------
+# Disable Repositories (CentOS v6)
+#  http://mirror.centos.org/centos-6/6/
+#-------------------------------------------------------------------------------
+
+# CentOS-SCLo-scl.repo
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
+
+# CentOS-SCLo-scl-rh.repo
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
+
+#-------------------------------------------------------------------------------
+# Default Package Update
+#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
