@@ -86,7 +86,7 @@ yum clean all
 yum update -y yum yum-plugin-fastestmirror yum-utils
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6
+yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7
 yum clean all
 
 # Update AMI Defalut YUM Repositories File
