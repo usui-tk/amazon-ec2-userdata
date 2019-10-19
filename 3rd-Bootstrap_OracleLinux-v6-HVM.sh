@@ -73,14 +73,24 @@ yum grouplist -v > /tmp/command-log_yum_repository-package-group-list.txt
 chkconfig --list > /tmp/command-log_chkconfig_list.txt
 
 #-------------------------------------------------------------------------------
-# Yum Configuration
+# Default Package Update
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-plugin-fastestmirror yum-utils
+yum update -y yum yum-utils
+
+# Default Package Update
+yum update -y
+
+#-------------------------------------------------------------------------------
+# Yum Configuration
+#-------------------------------------------------------------------------------
+
+# yum repository metadata Clean up
+yum clean all
 
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
@@ -135,16 +145,6 @@ yum-config-manager --enable ol6_developer
 # Latest Unbreakable Enterprise Kernel Release 2 packages for Oracle Linux 6.
 #  http://yum.oracle.com/repo/OracleLinux/OL6/UEK/latest/x86_64/index.html
 # yum-config-manager --disable ol6_UEK_latest
-
-#-------------------------------------------------------------------------------
-# Default Package Update
-#-------------------------------------------------------------------------------
-
-# yum repository metadata Clean up
-yum clean all
-
-# Default Package Update
-yum update -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation

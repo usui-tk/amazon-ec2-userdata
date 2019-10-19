@@ -76,21 +76,30 @@ yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
-# Yum Configuration
+# Default Package Update
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-plugin-fastestmirror yum-utils
+yum update -y yum yum-utils
+
+# Default Package Update
+yum update -y
+
+#-------------------------------------------------------------------------------
+# Yum Configuration
+#-------------------------------------------------------------------------------
+
+# yum repository metadata Clean up
+yum clean all
 
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
 yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7
 yum install -y oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-olcne-release-el7
-yum clean all
 
 find /etc/yum.repos.d/
 
