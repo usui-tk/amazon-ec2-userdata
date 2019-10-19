@@ -126,9 +126,14 @@ yum-config-manager --enable ol7_addons
 #  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
 # yum-config-manager --enable ol7_software_collections
 
+#-------------------------------------------------------------------------------
+# Disable Repositories (Oracle Linux v6)
+#  http://yum.oracle.com/oracle-linux-6.html
+#-------------------------------------------------------------------------------
+
 # Latest packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
-# yum-config-manager --enable ol7_developer
+yum-config-manager --disable ol7_developer
 
 #-------------------------------------------------------------------------------
 # Default Package Update
