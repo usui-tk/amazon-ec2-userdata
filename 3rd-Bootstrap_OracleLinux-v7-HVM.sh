@@ -945,21 +945,6 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 
 	cat /etc/cloud/cloud.cfg
 
-	# Initial RAM disk reorganization of the currently running Linux-kernel
-	ls -l /boot/
-	lsinitrd /boot/initramfs-$(uname -r).img | grep -ie "growroot" -ie "growpart"
-	dracut --force --add growroot /boot/initramfs-$(uname -r).img
-	lsinitrd /boot/initramfs-$(uname -r).img | grep -ie "growroot" -ie "growpart"
-	ls -l /boot/
-
-	# Initial RAM disk reorganization of latest Linux-kernel
-	eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
-	ls -l /boot/
-	lsinitrd /boot/initramfs-$(rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1).img | grep -ie "growroot" -ie "growpart"
-	rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1 | xargs -I {} dracut --force --add growroot /boot/initramfs-{}.img {}
-	lsinitrd /boot/initramfs-$(rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1).img | grep -ie "growroot" -ie "growpart"
-	ls -l /boot/
-
 	# Expansion of disk partition
 	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
