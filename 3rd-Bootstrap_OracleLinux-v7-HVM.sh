@@ -86,8 +86,13 @@ yum clean all
 yum update -y yum yum-plugin-fastestmirror yum-utils
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
+find /etc/yum.repos.d/
+
 yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7
+yum install -y oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-olcne-release-el7
 yum clean all
+
+find /etc/yum.repos.d/
 
 # Update AMI Defalut YUM Repositories File
 /usr/bin/ol_yum_configure.sh
@@ -122,18 +127,26 @@ yum-config-manager --enable ol7_optional_latest
 #  http://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/index.html
 yum-config-manager --enable ol7_addons
 
-# Latest Software Collection Library packages for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
-# yum-config-manager --enable ol7_software_collections
-
 #-------------------------------------------------------------------------------
-# Disable Repositories (Oracle Linux v6)
-#  http://yum.oracle.com/oracle-linux-6.html
+# Disable Repositories (Oracle Linux v7)
+#  http://yum.oracle.com/oracle-linux-7.html
 #-------------------------------------------------------------------------------
 
 # Latest packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
 yum-config-manager --disable ol7_developer
+
+# Latest EPEL packages for test and development for Oracle Linux 7.
+#  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
+yum-config-manager --disable ol7_developer_EPEL
+
+# Latest Software Collection 3.0 packages for Oracle Linux 7 (x86_64)
+#  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
+yum-config-manager --disable ol7_software_collections
+
+# Developer Preview packages for Oracle Linux Cloud Native Environment Oracle Linux 7 (x86_64)
+#  https://yum.oracle.com/repo/OracleLinux/OL7/developer/olcne/x86_64/index.html
+yum-config-manager --disable ol7_developer_olcne
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -178,18 +191,6 @@ yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 # Package Install Python 3 Runtime (from Oracle Linux Official Repository)
 yum install -y python3 python3-pip python3-devel
 
-# Latest EPEL packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
-
-cat > /etc/yum.repos.d/oracle-developer-epel-ol7.repo << __EOF__
-[ol7_developer_EPEL]
-name=EPEL packages for test and development - Oracle Linux $releasever Packages ($basearch)
-baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/developer_EPEL/\$basearch/
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-gpgcheck=1
-enabled=1
-__EOF__
-
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
@@ -226,15 +227,7 @@ yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-pr
 
 # Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
 #  http://public-yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
-
-cat > /etc/yum.repos.d/oracle-instantclient-ol7.repo << __EOF__
-[ol7_instantclient]
-name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
-baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/\$basearch/
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-gpgcheck=1
-enabled=1
-__EOF__
+yum install -y oracle-release-el7
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
@@ -937,11 +930,11 @@ lsblk -al
 # Disk Information(File System) [df -h]
 df -h
 
-# Configure cloud-init/growpart module
+# Configure cloud-init/disk_setup module
 cat /etc/cloud/cloud.cfg
 
-if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
-	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
+if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
+	sed -i 's/ - migrator/ - disk_setup\n - migrator/' /etc/cloud/cloud.cfg
 
 	cat /etc/cloud/cloud.cfg
 
