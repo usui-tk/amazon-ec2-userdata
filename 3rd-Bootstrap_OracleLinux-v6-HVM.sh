@@ -75,14 +75,15 @@ chkconfig --list > /tmp/command-log_chkconfig_list.txt
 #-------------------------------------------------------------------------------
 # Yum Configuration
 #-------------------------------------------------------------------------------
+
 # yum repository metadata Clean up
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum
+yum update -y yum yum-plugin-fastestmirror yum-utils
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 rhn-client-tools yum-plugin-fastestmirror yum-utils
+yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6
 yum clean all
 
 # Update AMI Defalut YUM Repositories File
@@ -91,7 +92,10 @@ yum clean all
 yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
+find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
+find /etc/yum.repos.d/
+
 yum clean all
 
 #-------------------------------------------------------------------------------
@@ -143,7 +147,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
-yum install -y abrt abrt-cli blktrace cloud-utils-growpart system-config-network-tui time tmpwatch unzip zip
+yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Community Repository)
 yum install -y acpid dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf psmisc rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
@@ -195,7 +199,14 @@ yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-pr
 # Latest packages for Oracle Instant Client on Oracle Linux 6 (x86_64).
 #  http://public-yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 
-yum-config-manager --enable ol6_oracle_instantclient
+cat > /etc/yum.repos.d/oracle-instantclient-ol6.repo << __EOF__
+[ol6_instantclient]
+name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
+baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
@@ -771,42 +782,47 @@ df -h
 # Configure cloud-init/growpart module
 cat /etc/cloud/cloud.cfg
 
-if ! grep -q growpart /etc/cloud/cloud.cfg; then
+if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
-fi
 
-cat /etc/cloud/cloud.cfg
+	cat /etc/cloud/cloud.cfg
 
-# Expansion of disk partition (Non-Nitro Hypervisor)
-if [ -f /dev/xvda ]; then
-	parted -l
-	LANG=C growpart --dry-run /dev/xvda 1
-	LANG=C growpart /dev/xvda 1
-	parted -l
+	# Expansion of disk partition
+	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
+		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
-	sleep 15
+		parted -l
+		LANG=C growpart --dry-run /dev/xvda 1
+		LANG=C growpart /dev/xvda 1
+		parted -l
 
-	df -h
+		sleep 15
 
-	resize2fs /dev/xvda1
+		df -h
+		resize2fs /dev/xvda1
+		df -h
+	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
+		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
-	df -h
-fi
+		parted -l
+		LANG=C growpart --dry-run /dev/nvme0n1 1
+		LANG=C growpart /dev/nvme0n1 1
+		parted -l
 
-# Expansion of disk partition (Nitro Hypervisor)
-if [ -f /dev/nvme0n1 ]; then
-	parted -l
-	LANG=C growpart --dry-run /dev/nvme0n1 1
-	LANG=C growpart /dev/nvme0n1 1
-	parted -l
+		sleep 15
 
-	sleep 15
+		df -h
+		resize2fs /dev/nvme0n1p1
+		df -h
+	else
+		echo "Amazon EC2 Instance type :" $InstanceType
 
-	df -h
+		parted -l
 
-	resize2fs /dev/nvme0n1p1
+		sleep 15
 
-	df -h
+		df -h
+	fi
 fi
 
 #-------------------------------------------------------------------------------

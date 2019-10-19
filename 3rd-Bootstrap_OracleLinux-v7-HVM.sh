@@ -78,8 +78,15 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 #-------------------------------------------------------------------------------
 # Yum Configuration
 #-------------------------------------------------------------------------------
+
+# yum repository metadata Clean up
 yum clean all
-yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 rhn-client-tools yum-utils
+
+# Default Package Update (Packages Related to yum)
+yum update -y yum yum-plugin-fastestmirror yum-utils
+
+# Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
+yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6
 yum clean all
 
 # Update AMI Defalut YUM Repositories File
@@ -88,7 +95,10 @@ yum clean all
 yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
+find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
+find /etc/yum.repos.d/
+
 yum clean all
 
 #-------------------------------------------------------------------------------
@@ -116,6 +126,10 @@ yum-config-manager --enable ol7_addons
 #  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
 # yum-config-manager --enable ol7_software_collections
 
+# Latest packages for test and development for Oracle Linux 7.
+#  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
+# yum-config-manager --enable ol7_developer
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -131,7 +145,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
-yum install -y abrt abrt-cli blktrace cloud-utils-growpart time tmpwatch unzip zip
+yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch tzdata unzip usermode zip
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
 yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced xfsdump xfsprogs yum-priorities yum-plugin-versionlock yum-utils wget zip
@@ -158,10 +172,6 @@ yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 
 # Package Install Python 3 Runtime (from Oracle Linux Official Repository)
 yum install -y python3 python3-pip python3-devel
-
-# Latest packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
-yum-config-manager --enable ol7_developer
 
 # Latest EPEL packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
@@ -925,42 +935,47 @@ df -h
 # Configure cloud-init/growpart module
 cat /etc/cloud/cloud.cfg
 
-if ! grep -q growpart /etc/cloud/cloud.cfg; then
+if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
-fi
 
-cat /etc/cloud/cloud.cfg
+	cat /etc/cloud/cloud.cfg
 
-# Expansion of disk partition (Non-Nitro Hypervisor)
-if [ -f /dev/xvda ]; then
-	parted -l
-	LANG=C growpart --dry-run /dev/xvda 1
-	LANG=C growpart /dev/xvda 1
-	parted -l
+	# Expansion of disk partition
+	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
+		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
-	sleep 15
+		parted -l
+		LANG=C growpart --dry-run /dev/xvda 1
+		LANG=C growpart /dev/xvda 1
+		parted -l
 
-	df -h
+		sleep 15
 
-	resize2fs /dev/xvda1
+		df -h
+		resize2fs /dev/xvda1
+		df -h
+	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
+		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
-	df -h
-fi
+		parted -l
+		LANG=C growpart --dry-run /dev/nvme0n1 1
+		LANG=C growpart /dev/nvme0n1 1
+		parted -l
 
-# Expansion of disk partition (Nitro Hypervisor)
-if [ -f /dev/nvme0n1 ]; then
-	parted -l
-	LANG=C growpart --dry-run /dev/nvme0n1 1
-	LANG=C growpart /dev/nvme0n1 1
-	parted -l
+		sleep 15
 
-	sleep 15
+		df -h
+		resize2fs /dev/nvme0n1p1
+		df -h
+	else
+		echo "Amazon EC2 Instance type :" $InstanceType
 
-	df -h
+		parted -l
 
-	resize2fs /dev/nvme0n1p1
+		sleep 15
 
-	df -h
+		df -h
+	fi
 fi
 
 #-------------------------------------------------------------------------------

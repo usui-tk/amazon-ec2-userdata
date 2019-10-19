@@ -82,7 +82,7 @@ chkconfig --list > /tmp/command-log_chkconfig_list.txt
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-plugin-fastestmirror
+yum update -y yum yum-plugin-fastestmirror yum-utils
 
 # yum repository metadata Clean up
 yum clean all
@@ -679,32 +679,61 @@ fi
 #-------------------------------------------------------------------------------
 # System Setting (Root Disk Extension)
 #-------------------------------------------------------------------------------
+
 # Disk Information(Partition) [parted -l]
 parted -l
 
-# Disk Information(Partition) [file -s]
-file -s /dev/xvd*
-
-# Disk Information(MountPoint) [lsblk]
-lsblk
+# Disk Information(MountPoint) [lsblk -al]
+lsblk -al
 
 # Disk Information(File System) [df -h]
 df -h
 
-# Expansion of disk partition
-parted -l
+# Configure cloud-init/growpart module
+cat /etc/cloud/cloud.cfg
 
-LANG=C growpart --dry-run /dev/xvda 1
-LANG=C growpart /dev/xvda 1
+if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
+	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
 
-parted -l
+	cat /etc/cloud/cloud.cfg
 
-# Expansion of disk partition
-df -h
+	# Expansion of disk partition
+	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
+		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
-resize2fs /dev/xvda1
+		parted -l
+		LANG=C growpart --dry-run /dev/xvda 1
+		LANG=C growpart /dev/xvda 1
+		parted -l
 
-df -h
+		sleep 15
+
+		df -h
+		resize2fs /dev/xvda1
+		df -h
+	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
+		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
+
+		parted -l
+		LANG=C growpart --dry-run /dev/nvme0n1 1
+		LANG=C growpart /dev/nvme0n1 1
+		parted -l
+
+		sleep 15
+
+		df -h
+		resize2fs /dev/nvme0n1p1
+		df -h
+	else
+		echo "Amazon EC2 Instance type :" $InstanceType
+
+		parted -l
+
+		sleep 15
+
+		df -h
+	fi
+fi
 
 #-------------------------------------------------------------------------------
 # Reboot

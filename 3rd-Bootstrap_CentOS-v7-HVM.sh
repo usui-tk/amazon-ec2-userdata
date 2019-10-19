@@ -84,12 +84,21 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 # yum repository metadata Clean up
 yum clean all
 
+# Default Package Update (Packages Related to yum)
+yum update -y yum yum-plugin-fastestmirror yum-utils
+
+# yum repository metadata Clean up
+yum clean all
+
 # Default Package Update
 yum update -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
+
+# Package Install Pre-installation package difference of CentOS and RHEL (from CentOS Community Repository)
+yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch tzdata unzip usermode zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
 yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced xfsdump xfsprogs yum-priorities yum-plugin-versionlock yum-utils wget zip
