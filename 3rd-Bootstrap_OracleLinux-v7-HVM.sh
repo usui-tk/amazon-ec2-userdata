@@ -954,13 +954,10 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 
 	# Initial RAM disk reorganization of latest Linux-kernel
 	eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
-	LastestKernelInformation=$(rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | grep ${DEFAULTKERNEL} | grep -ve "headers" -ve "devel" -ve "firmware" -ve "dracut" | sort --reverse | head -n 1)
-	LastestKernelVersion=$(echo ${LastestKernelInformation} | sed -e "s/^kernel-//" | sed -e "s/^uek-//")
-
 	ls -l /boot/
-	lsinitrd /boot/initramfs-${LastestKernelVersion}.img | grep -ie "growroot" -ie "growpart"
-	dracut --force --add growroot /boot/initramfs-${LastestKernelVersion}.img
-	lsinitrd /boot/initramfs-${LastestKernelVersion}.img | grep -ie "growroot" -ie "growpart"
+	lsinitrd /boot/initramfs-$(rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1).img | grep -ie "growroot" -ie "growpart"
+	rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1 | xargs -I {} dracut --force --add growroot /boot/initramfs-{}.img {}
+	lsinitrd /boot/initramfs-$(rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1).img | grep -ie "growroot" -ie "growpart"
 	ls -l /boot/
 
 	# Expansion of disk partition
