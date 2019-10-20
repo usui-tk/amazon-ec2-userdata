@@ -98,7 +98,7 @@ yum clean all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
-yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7
+yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-release-el7
 
 find /etc/yum.repos.d/
 
@@ -106,18 +106,10 @@ find /etc/yum.repos.d/
 /usr/bin/ol_yum_configure.sh
 
 # [Workaround] Fix BaseURL
-YumReconfigureStatus="0"
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-grep -l 'https://yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|https://yum$ociregion.oracle.com|https://yum.oracle.com|g' || YumReconfigureStatus=$?
-if [ $YumReconfigureStatus -eq 0 ]; then
-	echo YumReconfigureStatus is : $YumReconfigureStatus
-
-	find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-	yum clean all
-	yum makecache
-else
-	echo "Failed to execute Yum repository reconfigure"
-fi
+grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+yum clean all
 
 # Display Yum repository configuration
 yum-config-manager
@@ -127,8 +119,8 @@ find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
 find /etc/yum.repos.d/
 
+# yum repository metadata Clean up
 yum clean all
-yum makecache
 
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v7)
@@ -151,6 +143,14 @@ yum-config-manager --enable ol7_optional_latest
 #  http://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/index.html
 yum-config-manager --enable ol7_addons
 
+# Latest Software Collection 3.0 packages for Oracle Linux 7 (x86_64)
+#  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
+yum-config-manager --enable ol7_software_collections
+
+# Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
+#  http://public-yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
+yum-config-manager --enable ol7_oracle_instantclient
+
 #-------------------------------------------------------------------------------
 # Disable Repositories (Oracle Linux v7)
 #  http://yum.oracle.com/oracle-linux-7.html
@@ -163,14 +163,6 @@ yum-config-manager --disable ol7_developer
 # Latest EPEL packages for test and development for Oracle Linux 7.
 #  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
 yum-config-manager --disable ol7_developer_EPEL
-
-# Latest Software Collection 3.0 packages for Oracle Linux 7 (x86_64)
-#  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
-yum-config-manager --disable ol7_software_collections
-
-# Developer Preview packages for Oracle Linux Cloud Native Environment Oracle Linux 7 (x86_64)
-#  https://yum.oracle.com/repo/OracleLinux/OL7/developer/olcne/x86_64/index.html
-yum-config-manager --disable ol7_developer_olcne
 
 #-------------------------------------------------------------------------------
 # Default Package Update
@@ -242,16 +234,38 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Oracle Linux Cloud Native Environment]
+#-------------------------------------------------------------------------------
+
+# Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
+find /etc/yum.repos.d/
+
+yum install -y oracle-olcne-release-el7
+
+find /etc/yum.repos.d/
+
+# [Workaround] Fix BaseURL
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+
+# Developer Preview packages for Oracle Linux Cloud Native Environment Oracle Linux 7 (x86_64)
+#  https://yum.oracle.com/repo/OracleLinux/OL7/developer/olcne/x86_64/index.html
+yum-config-manager --enable ol7_developer_olcne
+
+# Display Yum repository configuration
+yum-config-manager
+
+# yum repository metadata Clean up
+yum clean all
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Database Utility (from Oracle Linux Official Repository)
 yum install -y kmod-oracleasm oracleasm-support
 yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall
-
-# Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
-#  http://public-yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
-yum install -y oracle-release-el7
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
@@ -976,6 +990,8 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 		df -h
 		resize2fs /dev/xvda1
 		df -h
+
+		sleep 30
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
@@ -989,12 +1005,12 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 		df -h
 		resize2fs /dev/nvme0n1p1
 		df -h
+
+		sleep 30
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
 		parted -l
-
-		sleep 15
 
 		df -h
 	fi

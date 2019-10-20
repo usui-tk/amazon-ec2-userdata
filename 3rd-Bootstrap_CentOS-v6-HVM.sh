@@ -760,6 +760,8 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 		df -h
 		resize2fs /dev/xvda1
 		df -h
+
+		sleep 30
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
@@ -773,12 +775,12 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 		df -h
 		resize2fs /dev/nvme0n1p1
 		df -h
+
+		sleep 30
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
 		parted -l
-
-		sleep 15
 
 		df -h
 	fi
