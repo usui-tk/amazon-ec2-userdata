@@ -46,7 +46,13 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Kernel Module
-yum install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
+if [ -n "$DEFAULTKERNEL" ]; then
+	echo "Linux Kernel Package Name :" $DEFAULTKERNEL
+	yum install -y ${DEFAULTKERNEL}-devel-$(uname -r) ${DEFAULTKERNEL}-headers-$(uname -r)
+else
+	yum install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
+fi
 
 # Package Install Build Tool
 yum install -y gcc make rpm-build rpmdevtools
