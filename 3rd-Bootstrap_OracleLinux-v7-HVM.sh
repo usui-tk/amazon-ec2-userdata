@@ -106,12 +106,18 @@ find /etc/yum.repos.d/
 /usr/bin/ol_yum_configure.sh
 
 # [Workaround] Fix BaseURL
-find /etc/yum.repos.d -type f -print | xargs grep 'https://yum$ociregion.oracle.com'
-grep -l 'https://yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|https://yum$ociregion.oracle.com|https://yum.oracle.com|g'
-find /etc/yum.repos.d -type f -print | xargs grep 'https://yum.oracle.com'
+YumReconfigureStatus="0"
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+grep -l 'https://yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|https://yum$ociregion.oracle.com|https://yum.oracle.com|g' || YumReconfigureStatus=$?
+if [ $YumReconfigureStatus -eq 0 ]; then
+	echo YumReconfigureStatus is : $YumReconfigureStatus
 
-yum clean all
-yum makecache
+	find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+	yum clean all
+	yum makecache
+else
+	echo "Failed to execute Yum repository reconfigure"
+fi
 
 # Display Yum repository configuration
 yum-config-manager
