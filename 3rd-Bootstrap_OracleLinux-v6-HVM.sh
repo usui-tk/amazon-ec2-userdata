@@ -95,7 +95,7 @@ yum clean all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
-yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6
+yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 oracle-softwarecollection-release-el6
 yum clean all
 
 find /etc/yum.repos.d/
@@ -136,7 +136,7 @@ yum-config-manager --enable ol6_developer
 
 # Latest Software Collection Library packages released for Oracle Linux 6.
 #  http://yum.oracle.com/repo/OracleLinux/OL6/SoftwareCollections/x86_64/index.html
-# yum-config-manager --enable ol6_software_collections
+yum-config-manager --enable ol6_software_collections
 
 #-------------------------------------------------------------------------------
 # Disable Repositories (Oracle Linux v6)
@@ -145,7 +145,7 @@ yum-config-manager --enable ol6_developer
 
 # Latest Unbreakable Enterprise Kernel Release 2 packages for Oracle Linux 6.
 #  http://yum.oracle.com/repo/OracleLinux/OL6/UEK/latest/x86_64/index.html
-# yum-config-manager --disable ol6_UEK_latest
+yum-config-manager --disable ol6_UEK_latest
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
@@ -165,7 +165,7 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-system-tools
 yum install -y redhat-lsb-core
 
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
-yum install -y ovm-template-config*
+yum install -y ol-template-config ovm-template-config*
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
@@ -198,8 +198,17 @@ yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Database Utility (from Oracle Linux Official Repository)
-yum install -y kmod-oracleasm oracleasm-support
-yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall
+yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
+
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Official Repository)
+# yum install -y oracle-rdbms-server-11gR2-preinstall
+# yum install -y oracle-rdbms-server-12cR1-preinstall
+# yum install -y oracle-database-server-12cR2-preinstall
+yum install -y oracle-database-preinstall-18c
+
+# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Official Repository)
+# yum install -y oracle-em-agent-12cR1-preinstall
+yum install -y oracle-em-agent-12cR4-preinstall
 
 # Latest packages for Oracle Instant Client on Oracle Linux 6 (x86_64).
 #  http://public-yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
@@ -207,7 +216,7 @@ yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-pr
 cat > /etc/yum.repos.d/oracle-instantclient-ol6.repo << __EOF__
 [ol6_instantclient]
 name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
-baseurl=https://yum\$ociregion.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/\$basearch/
+baseurl=https://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/\$basearch/
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 gpgcheck=1
 enabled=1
@@ -215,6 +224,9 @@ __EOF__
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
+
+# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Official Repository)
+# yum install -y oracle-ebs-server-R12-preinstall
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -814,38 +826,43 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/xvda 1
 		LANG=C growpart /dev/xvda 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/xvda1
-		df -h
+		df -khT
+		resize2fs -F /dev/xvda1
+		df -khT
 
 		sleep 30
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/nvme0n1 1
 		LANG=C growpart /dev/nvme0n1 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/nvme0n1p1
-		df -h
+		df -khT
+		resize2fs -F /dev/nvme0n1p1
+		df -khT
 
 		sleep 30
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
 		parted -l
+		lsblk -al
 
-		df -h
+		df -khT
 	fi
 fi
 

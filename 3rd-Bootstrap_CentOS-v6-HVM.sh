@@ -751,38 +751,43 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/xvda 1
 		LANG=C growpart /dev/xvda 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/xvda1
-		df -h
+		df -khT
+		resize2fs -F /dev/xvda1
+		df -khT
 
 		sleep 30
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/nvme0n1 1
 		LANG=C growpart /dev/nvme0n1 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/nvme0n1p1
-		df -h
+		df -khT
+		resize2fs -F /dev/nvme0n1p1
+		df -khT
 
 		sleep 30
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
 		parted -l
+		lsblk -al
 
-		df -h
+		df -khT
 	fi
 fi
 

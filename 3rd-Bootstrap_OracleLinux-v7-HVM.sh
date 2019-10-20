@@ -273,7 +273,6 @@ yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
 # yum install -y oracle-rdbms-server-12cR1-preinstall
 # yum install -y oracle-database-server-12cR2-preinstall
 # yum install -y oracle-database-preinstall-18c
-# yum install -y oracle-database-preinstall-18c
 yum install -y oracle-database-preinstall-19c
 
 # Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Official Repository)
@@ -1021,38 +1020,43 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/xvda 1
 		LANG=C growpart /dev/xvda 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/xvda1
-		df -h
+		df -khT
+		resize2fs -F /dev/xvda1
+		df -khT
 
 		sleep 30
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
 		parted -l
+		lsblk -al
 		LANG=C growpart --dry-run /dev/nvme0n1 1
 		LANG=C growpart /dev/nvme0n1 1
 		parted -l
+		lsblk -al
 
 		sleep 15
 
-		df -h
-		resize2fs /dev/nvme0n1p1
-		df -h
+		df -khT
+		resize2fs -F /dev/nvme0n1p1
+		df -khT
 
 		sleep 30
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
 		parted -l
+		lsblk -al
 
-		df -h
+		df -khT
 	fi
 fi
 
