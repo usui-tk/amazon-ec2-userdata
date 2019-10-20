@@ -1015,10 +1015,11 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 
 	cat /etc/cloud/cloud.cfg
 
-	# Expansion of disk partition
+	# Extending a Partition and File System
 	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
+		# Extending a Partition
 		parted -l
 		lsblk -al
 		LANG=C growpart --dry-run /dev/xvda 1
@@ -1028,14 +1029,27 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 
 		sleep 15
 
-		df -khT
-		resize2fs -F /dev/xvda1
-		df -khT
+		# Extending the File System
+		if [ $(lsblk -fl | grep xvda1 | awk '{print $2}') = "ext4" ]; then
+			df -khT
+			resize2fs -F /dev/xvda1
+			df -khT
+		elif [ $(lsblk -fl | grep xvda1 | awk '{print $2}') = "xfs" ]; then
+			df -khT
+			xfs_growfs -d /
+			df -khT
+		else
+			df -khT
+			resize2fs -F /dev/xvda1
+			df -khT
+		fi
 
 		sleep 30
+
 	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
+		# Extending a Partition
 		parted -l
 		lsblk -al
 		LANG=C growpart --dry-run /dev/nvme0n1 1
@@ -1045,11 +1059,23 @@ if [ ! $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 
 		sleep 15
 
-		df -khT
-		resize2fs -F /dev/nvme0n1p1
-		df -khT
+		# Extending the File System
+		if [ $(lsblk -fl | grep nvme0n1p1 | awk '{print $2}') = "ext4" ]; then
+			df -khT
+			resize2fs -F /dev/nvme0n1p1
+			df -khT
+		elif [ $(lsblk -fl | grep nvme0n1p1 | awk '{print $2}') = "xfs" ]; then
+			df -khT
+			xfs_growfs -d /
+			df -khT
+		else
+			df -khT
+			resize2fs -F /dev/nvme0n1p1
+			df -khT
+		fi
 
 		sleep 30
+
 	else
 		echo "Amazon EC2 Instance type :" $InstanceType
 
