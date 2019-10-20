@@ -80,7 +80,7 @@ chkconfig --list > /tmp/command-log_chkconfig_list.txt
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-utils
+yum install -y yum yum-utils
 
 # Default Package Update
 yum update -y

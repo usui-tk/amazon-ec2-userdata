@@ -83,7 +83,7 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-utils
+yum install -y yum yum-utils
 
 # Default Package Update
 yum update -y

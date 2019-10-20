@@ -85,7 +85,7 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 yum clean all
 
 # Default Package Update (Packages Related to yum)
-yum update -y yum yum-plugin-fastestmirror yum-utils
+yum install -y yum yum-plugin-fastestmirror yum-utils
 
 # Package Install CentOS yum repository Files (from CentOS Community Repository)
 find /etc/yum.repos.d/
