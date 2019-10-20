@@ -45,6 +45,10 @@ fi
 # Install Kernel module and Configure Dynamic Kernel Module Support (DKMS) 
 #-------------------------------------------------------------------------------
 
+# Operating system support status of AWS Nitro Hypervisor (Before - Install ENA Kernel module)
+# https://github.com/awslabs/aws-support-tools/tree/master/EC2/C5M5InstanceChecks
+curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/C5M5InstanceChecks/c5_m5_checks_script.sh | bash
+
 # Package Install Kernel Module
 yum install -y kernel-devel-$(uname -r) kernel-headers-$(uname -r)
 
@@ -94,6 +98,10 @@ date; dkms build -m amzn-drivers -v ${SourceVersion}; date
 date; dkms install -m amzn-drivers -v ${SourceVersion}; date
 
 modinfo ena
+
+# Operating system support status of AWS Nitro Hypervisor (After - Install ENA Kernel module)
+# https://github.com/awslabs/aws-support-tools/tree/master/EC2/C5M5InstanceChecks
+curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/C5M5InstanceChecks/c5_m5_checks_script.sh | bash
 
 #-------------------------------------------------------------------------------
 # Configure EC2 Instance Support for Amazon ENA Device
