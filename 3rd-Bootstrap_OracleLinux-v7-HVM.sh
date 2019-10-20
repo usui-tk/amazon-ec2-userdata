@@ -108,6 +108,7 @@ find /etc/yum.repos.d/
 # [Workaround] Fix BaseURL
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 yum clean all
 
@@ -192,7 +193,7 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroco
 yum install -y redhat-lsb-core
 
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
-yum install -y ovm-template-config*
+yum install -y ol-template-config ovm-template-config*
 
 # Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Official Repository)
 # yum install -y kpatch
@@ -247,6 +248,7 @@ find /etc/yum.repos.d/
 # [Workaround] Fix BaseURL
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 
 # Developer Preview packages for Oracle Linux Cloud Native Environment Oracle Linux 7 (x86_64)
@@ -260,15 +262,28 @@ yum-config-manager
 yum clean all
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Oracle Database]
+# Custom Package Installation [Oracle Software Product]
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Database Utility (from Oracle Linux Official Repository)
-yum install -y kmod-oracleasm oracleasm-support
-yum install -y oracle-rdbms-server-11gR2-preinstall oracle-rdbms-server-12cR1-preinstall
+yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
+
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Official Repository)
+# yum install -y oracle-rdbms-server-11gR2-preinstall
+# yum install -y oracle-rdbms-server-12cR1-preinstall
+# yum install -y oracle-database-server-12cR2-preinstall
+# yum install -y oracle-database-preinstall-18c
+# yum install -y oracle-database-preinstall-18c
+yum install -y oracle-database-preinstall-19c
+
+# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Official Repository)
+yum install -y oracle-em-agent-13cR2-preinstall
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
+
+# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Official Repository)
+# yum install -y oracle-ebs-server-R12-preinstall
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -476,34 +491,58 @@ fi
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-hup.html
+# https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/solutions/HelperNonAmaznAmi/RHEL7_cfn-hup.template
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
-yum --enablerepo=epel install -y python2-pip
-pip install --upgrade pip
+yum install -y python-setuptools
 
-pip install pystache
-pip install argparse
-pip install python-daemon
-pip install requests
+easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
+mkdir -m 755 -p /etc/cfn/hooks.d
 
-cd /tmp/aws-cfn-bootstrap-1.4/
-python setup.py build
-python setup.py install
+# cfn-hup.conf Configuration File
+cat > /etc/cfn/cfn-hup.conf << __EOF__
+[main]
+stack=
+__EOF__
 
-chmod 775 /usr/init/redhat/cfn-hup
+# cfn-auto-reloader.conf Configuration File
+cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+[hookname]
+triggers=post.update
+path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+action=
+runas=root
+__EOF__
 
-if [ -L /etc/init.d/cfn-hup ]; then
-	echo "Symbolic link exists"
-else
-	echo "No symbolic link exists"
-	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+# cfn-hup.service Configuration File
+cat > /lib/systemd/system/cfn-hup.service << __EOF__
+[Unit]
+Description=cfn-hup daemon
+
+[Service]
+Type=simple
+ExecStart=/opt/aws/bin/cfn-hup
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+__EOF__
+
+# Execute AWS CloudFormation Helper software
+systemctl daemon-reload
+
+systemctl restart cfn-hup
+
+systemctl status -l cfn-hup
+
+# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+	systemctl enable cfn-hup
+	systemctl is-enabled cfn-hup
 fi
-
-cd /tmp
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
@@ -848,6 +887,7 @@ tuned-adm list
 
 tuned-adm active
 tuned-adm profile throughput-performance 
+# tuned-adm profile oracle
 tuned-adm active
 
 #-------------------------------------------------------------------------------

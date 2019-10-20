@@ -658,6 +658,7 @@ tuned-adm list
 
 tuned-adm active
 tuned-adm profile throughput-performance 
+# tuned-adm profile oracle
 tuned-adm active
 
 #-------------------------------------------------------------------------------
