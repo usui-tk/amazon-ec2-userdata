@@ -103,6 +103,7 @@ find /etc/yum.repos.d/
 # Update AMI Defalut YUM Repositories File
 /usr/bin/ol_yum_configure.sh
 
+# Display Yum repository configuration
 yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
@@ -111,6 +112,7 @@ rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
 find /etc/yum.repos.d/
 
 yum clean all
+yum makecache
 
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v6)

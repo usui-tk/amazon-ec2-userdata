@@ -98,14 +98,22 @@ yum clean all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
-yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7
-yum install -y oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-olcne-release-el7
+yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7
 
 find /etc/yum.repos.d/
 
 # Update AMI Defalut YUM Repositories File
 /usr/bin/ol_yum_configure.sh
 
+# [Workaround] Fix BaseURL
+find /etc/yum.repos.d -type f -print | xargs grep 'https://yum$ociregion.oracle.com'
+grep -l 'https://yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|https://yum$ociregion.oracle.com|https://yum.oracle.com|g'
+find /etc/yum.repos.d -type f -print | xargs grep 'https://yum.oracle.com'
+
+yum clean all
+yum makecache
+
+# Display Yum repository configuration
 yum-config-manager
 
 # Delete AMI Defalut YUM Repositories File
@@ -114,6 +122,7 @@ rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
 find /etc/yum.repos.d/
 
 yum clean all
+yum makecache
 
 #-------------------------------------------------------------------------------
 # Enable Repositories (Oracle Linux v7)
