@@ -161,7 +161,7 @@ cat /etc/bash_completion.d/aws_bash_completer
 aws --version
 
 # Setting AWS-CLI default Region & Output format
-aws configure << __EOF__ 
+aws configure << __EOF__
 
 
 ${Region}
@@ -238,7 +238,7 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		
+
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
@@ -274,7 +274,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance attached NVMe Device Information
-# 
+#
 # - Summary of Networking and Storage Features
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 #
@@ -287,13 +287,13 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
-		
+
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			modinfo nvme
 		fi
-		
+
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
@@ -315,7 +315,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get Disk[MountPoint] Information (lsblk -a)"
 			lsblk -a
 		fi
-		
+
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -393,15 +393,15 @@ dnf install -y ansible ansible-doc
 
 ansible --version
 
-ansible localhost -m setup 
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
-# 
+#
 # https://packages.microsoft.com/fedora/
-# 
+#
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
@@ -447,7 +447,7 @@ pwsh -Version
 # Package Install Docker Enviroment Tools (from Fedora Official Repository)
 dnf install -y docker
 
-rpm -qi docker 
+rpm -qi docker
 
 systemctl daemon-reload
 
@@ -473,7 +473,7 @@ docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
 # Docker Run (Amazon Linux 2 LTS)
 # docker run -it amazonlinux:latest bash
 # cat /etc/system-release
-# cat /etc/image-id 
+# cat /etc/image-id
 # exit
 
 #-------------------------------------------------------------------------------
@@ -579,7 +579,7 @@ systemctl daemon-reload
 # cat /home/fedora/.vnc/xstartup
 # cat /home/fedora/.vnc/config
 
-# # Systemd's VNC Server configuration 
+# # Systemd's VNC Server configuration
 # cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
 
 # cat /etc/systemd/system/vncserver@:1.service
@@ -637,7 +637,7 @@ rpm -qi google-chrome-stable
 #-------------------------------------------------------------------------------
 
 rpm --import "https://packages.microsoft.com/keys/microsoft.asc"
- 
+
 # Add the VS Code Repository
 cat > /etc/yum.repos.d/vscode.repo << __EOF__
 [code]
@@ -773,7 +773,7 @@ fi
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance 
+tuned-adm profile throughput-performance
 tuned-adm active
 
 #-------------------------------------------------------------------------------

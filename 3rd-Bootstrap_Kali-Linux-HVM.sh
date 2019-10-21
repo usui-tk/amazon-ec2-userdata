@@ -103,7 +103,7 @@ apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu c
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
-apt install -y -q pcp pcp-conf pcp-manager 
+apt install -y -q pcp pcp-conf pcp-manager
 
 # Package Install Python 3 Runtime (from Debian Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
@@ -166,7 +166,7 @@ __EOF__
 aws --version
 
 # Setting AWS-CLI default Region & Output format
-aws configure << __EOF__ 
+aws configure << __EOF__
 
 
 ${Region}
@@ -243,7 +243,7 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		
+
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
@@ -279,7 +279,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance attached NVMe Device Information
-# 
+#
 # - Summary of Networking and Storage Features
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 #
@@ -292,13 +292,13 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
-		
+
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			modinfo nvme
 		fi
-		
+
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
@@ -320,7 +320,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get Disk[MountPoint] Information (lsblk -a)"
 			lsblk -a
 		fi
-		
+
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -432,7 +432,7 @@ apt show ansible
 
 ansible --version
 
-ansible localhost -m setup 
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Docker]
@@ -482,7 +482,7 @@ docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
 # Docker Run (Amazon Linux 2 LTS)
 # docker run -it amazonlinux:latest bash
 # cat /etc/system-release
-# cat /etc/image-id 
+# cat /etc/image-id
 # exit
 
 #-------------------------------------------------------------------------------
@@ -554,7 +554,7 @@ systemctl daemon-reload
 # # cat /home/ec2-user/.vnc/xstartup
 # # cat /home/ec2-user/.vnc/config
 
-# # Systemd's VNC Server configuration 
+# # Systemd's VNC Server configuration
 # cat > /etc/systemd/system/vncserver@:1.service << __EOF__
 # [Unit]
 # Description=Remote desktop service (VNC)
@@ -614,20 +614,20 @@ apt update -y
 #-------------------------------------------------------------------------------
 cd /tmp
 
-# Download the Microsoft GPG key, and convert it from OpenPGP ASCII 
+# Download the Microsoft GPG key, and convert it from OpenPGP ASCII
 # armor format to GnuPG format
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
 
 # Move the file into your apt trusted keys directory (requires root)
 mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
- 
+
 # Add the VS Code Repository
 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list
 
 # apt repository metadata Clean up
 apt clean -y
 
-# Update and install Visual Studio Code 
+# Update and install Visual Studio Code
 apt update -y && apt install -y -q code
 
 # Package Information
@@ -638,7 +638,7 @@ apt show code
 #-------------------------------------------------------------------------------
 
 # apt repository metadata Clean up
-apt clean -y -q 
+apt clean -y -q
 
 # Default Package Update
 apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
@@ -756,7 +756,7 @@ fi
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
 	apt install -y -q task-japanese task-japanese-desktop fonts-ipafont
-	
+
 	echo "# Setting System Language -> $Language"
 	locale
 	localectl status --no-pager
@@ -788,10 +788,10 @@ fi
 # Setting IP Protocol Stack (IPv4 Only) or (IPv4/IPv6 Dual stack)
 if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
-	
+
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
-	
+
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 

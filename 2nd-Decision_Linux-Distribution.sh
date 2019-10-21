@@ -152,7 +152,7 @@ function get_bootstrap_script () {
            BootstrapScript=${ScriptForUbuntu1604}
         else
            BootstrapScript=""
-        fi    
+        fi
     elif [ "${DIST}" = "SLES" ] || [ "${DIST_TYPE}" = "sles" ]; then
         if [ $(echo ${REV} | grep -e '15') ]; then
            # Bootstrap Script for SUSE Linux Enterprise Server 15
@@ -162,7 +162,7 @@ function get_bootstrap_script () {
            BootstrapScript=${ScriptForSLESv12}
         else
            BootstrapScript=""
-        fi    
+        fi
     elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
         if [ $(echo ${REV} | grep -e '30') ]; then
            # Bootstrap Script for Fedora 30
@@ -178,7 +178,7 @@ function get_bootstrap_script () {
            BootstrapScript=${ScriptForFedora}
         else
            BootstrapScript=""
-        fi    
+        fi
     elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
         if [ $(echo ${REV} | grep -e '10') ]; then
            # Bootstrap Script for Debian GNU/Linux 10 (Buster)
@@ -188,7 +188,7 @@ function get_bootstrap_script () {
            BootstrapScript=${ScriptForDebian9}
         else
            BootstrapScript=""
-        fi    
+        fi
     elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
         if [ $(echo ${REV} | grep -e '2019.') ]; then
            # Bootstrap Script for Kali Linux 2019.x
@@ -201,7 +201,7 @@ function get_bootstrap_script () {
            BootstrapScript=${ScriptForKaliLinux}
         else
            BootstrapScript=""
-        fi    
+        fi
     else
         BootstrapScript=""
     fi
@@ -229,7 +229,7 @@ KERNEL_VERSION=$(uname -r )
 KERNEL_GROUP=$(echo "${KERNEL_VERSION}" | cut -f 1-2 -d'.')
 KERNEL_VERSION_WO_ARCH=$(basename ${KERNEL_VERSION} .x86_64)
 
-echo "Distribution of the machine is ${DIST}." 
+echo "Distribution of the machine is ${DIST}."
 echo "Distribution type of the machine is ${DIST_TYPE}."
 echo "Revision of the distro is ${REV}."
 echo "Kernel version of the machine is ${KERNEL_VERSION}."
@@ -239,7 +239,7 @@ echo "BootstrapScript URL is ${BootstrapScript}"
 # Install curl Command
 if [ $(command -v curl) ]; then
     echo "Preinstalled curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-else 
+else
     if [ $(command -v yum) ]; then
         # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
         yum clean all
@@ -262,7 +262,7 @@ fi
 # Install wget Command
 if [ $(command -v wget) ]; then
     echo "Preinstalled wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-else 
+else
     if [ $(command -v yum) ]; then
         # Package Install wget Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
         yum clean all
@@ -295,7 +295,7 @@ if [ -n "${BootstrapScript}" ]; then
     elif [ $(command -v wget) ]; then
         echo "Bootstrap Script Executite - ${BootstrapScript}"
         cd /tmp
-        wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript} 
+        wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript}
         chmod 700 BootstrapScript.sh
         bash -x BootstrapScript.sh
     fi

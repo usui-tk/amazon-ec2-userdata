@@ -41,7 +41,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.suse.com/ja-jp/documentation/sles-15/
 #    https://www.suse.com/documentation/suse-best-practices/
 #    https://forums.suse.com/forumdisplay.php?94-Amazon-EC2
-#    
+#
 #    https://scc.suse.com/packages/?name=SUSE%20Linux%20Enterprise%20Server&version=15.1&arch=x86_64&query=&module=
 #
 #    https://susepubliccloudinfo.suse.com/v1/amazon/images/active.json
@@ -204,9 +204,9 @@ SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
-		
+
 		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-		
+
 		if [ $SapFlag -gt 0 ]; then
 			echo "SUSE Linux Enterprise Server for SAP Applications 15"
 			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
@@ -220,7 +220,7 @@ if [ -n "$VERSION_ID" ]; then
 			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
 			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
 		fi
-		
+
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 
@@ -459,7 +459,7 @@ fi
 aws --version
 
 # Setting AWS-CLI default Region & Output format
-aws configure << __EOF__ 
+aws configure << __EOF__
 
 
 ${Region}
@@ -505,7 +505,7 @@ if [ $SapFlag -gt 0 ]; then
 	fi
 else
 	if [ -n "$RoleName" ]; then
-		echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+		echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
 		echo "# Get Newest AMI Information from Public AMI"
 		NewestAmiId=$(aws ec2 describe-images --owner 013907871322 --filter "Name=name,Values=suse-sles-15-*-hvm-ssd-x86_64" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)' --output text --region ${Region} | grep -v byos | grep -v ecs | grep -v sapcal | sort -k 3 --reverse | head -n 1 | awk '{print $1}')
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
@@ -561,7 +561,7 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		
+
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
@@ -597,7 +597,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance attached NVMe Device Information
-# 
+#
 # - Summary of Networking and Storage Features
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 #
@@ -610,13 +610,13 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
-		
+
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			modinfo nvme
 		fi
-		
+
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
@@ -638,7 +638,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get Disk[MountPoint] Information (lsblk -a)"
 			lsblk -a
 		fi
-		
+
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -751,15 +751,15 @@ source /etc/profile.d/ec2rl.sh
 
 # ansible --version
 
-# ansible localhost -m setup 
+# ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
-# 
+#
 # https://packages.microsoft.com/sles/15/prod/
-# 
+#
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
@@ -934,13 +934,13 @@ if [ $SapFlag -gt 0 ]; then
 	# tuned-adm profile saptune
 	tuned-adm active
 else
-	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"  
+	echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
 	# Configure Tuned software (select profile - throughput-performance)
 	tuned-adm list
 	tuned-adm active
-	tuned-adm profile throughput-performance 
+	tuned-adm profile throughput-performance
 	tuned-adm active
-fi 
+fi
 
 #-------------------------------------------------------------------------------
 # System Setting

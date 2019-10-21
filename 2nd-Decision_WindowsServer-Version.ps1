@@ -56,7 +56,7 @@ Set-Variable -Name BOOTSTRAP_SCRIPT -Scope Script -Value "3rd-Bootstrap_WindowsS
 
 function Format-Message {
     param([string]$message)
-    
+
     $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
     "$timestamp - $message"
 } # end function Format-Message
@@ -64,7 +64,7 @@ function Format-Message {
 
 function Write-Log {
     param([string]$message, $log = $USERDATA_LOG)
-    
+
     Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 

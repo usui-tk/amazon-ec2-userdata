@@ -326,7 +326,7 @@ rpm -qi awscli
 aws --version
 
 # Setting AWS-CLI default Region & Output format
-aws configure << __EOF__ 
+aws configure << __EOF__
 
 
 ${Region}
@@ -403,7 +403,7 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		
+
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
@@ -439,7 +439,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance attached NVMe Device Information
-# 
+#
 # - Summary of Networking and Storage Features
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 #
@@ -452,13 +452,13 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
-		
+
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			modinfo nvme
 		fi
-		
+
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
@@ -480,7 +480,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get Disk[MountPoint] Information (lsblk -a)"
 			lsblk -a
 		fi
-		
+
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -581,7 +581,7 @@ ssm-cli get-instance-information
 # # Check the exit code of the Amazon Inspector Agent installer script
 # if [ $InspectorInstallStatus -eq 0 ]; then
 # 	rpm -qi AwsAgent
-	
+
 # 	systemctl daemon-reload
 
 # 	systemctl restart awsagent
@@ -686,15 +686,15 @@ yum --enablerepo=epel install -y ansible ansible-doc
 
 ansible --version
 
-ansible localhost -m setup 
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [PowerShell Core(pwsh)]
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
 # https://github.com/PowerShell/PowerShell
-# 
+#
 # https://packages.microsoft.com/rhel/7/prod/
-# 
+#
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-------------------------------------------------------------------------------
@@ -885,7 +885,7 @@ fi
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance 
+tuned-adm profile throughput-performance
 # tuned-adm profile oracle
 tuned-adm active
 

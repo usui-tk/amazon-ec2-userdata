@@ -93,7 +93,7 @@ if [ $(command -v apt-get) ]; then
 
 		purge-old-kernels
 		# purge-old-kernels --keep 1 -qy
-		
+
 		sleep 5
 		dpkg --get-selections | grep linux-image
 		# Reconfigure GRUB 2 config file
@@ -113,10 +113,10 @@ fi
 rm -rf /etc/udev/rules.d/70-persistent-*
 
 # Remove cloud-init status
-rm -rf /var/lib/cloud/* 
+rm -rf /var/lib/cloud/*
 
 # Remove /tmp files
-rm -rf /tmp/* 
+rm -rf /tmp/*
 
 # Remove /var/log files
 find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;

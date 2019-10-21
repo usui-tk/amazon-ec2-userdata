@@ -30,9 +30,9 @@ cd /tmp
 
 # Download Decision_Linux-Distribution.sh
 if [ $(command -v curl) ]; then
-    curl --retry 5 --output Decision_Linux-Distribution.sh ${DecisionScript} 
+    curl --retry 5 --output Decision_Linux-Distribution.sh ${DecisionScript}
 else
-    wget --tries=5 --no-check-certificate --output-document=Decision_Linux-Distribution.sh ${DecisionScript} 
+    wget --tries=5 --no-check-certificate --output-document=Decision_Linux-Distribution.sh ${DecisionScript}
 fi
 
 # Execute Decision_Linux-Distribution.sh

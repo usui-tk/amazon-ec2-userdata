@@ -86,7 +86,7 @@ Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\Pro
 
 function Format-Message {
     param([string]$message)
-    
+
     $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
     "$timestamp - $message"
 } # end function Format-Message
@@ -94,7 +94,7 @@ function Format-Message {
 
 function Write-Log {
     param([string]$message, $log = $USERDATA_LOG)
-    
+
     Format-Message $message | Out-File $log -Append -Force
 } # end function Write-Log
 
@@ -133,18 +133,18 @@ function Convert-SCSITargetIdToDeviceName {
 
 function Set-TimeZoneCompatible {
     [CmdletBinding(SupportsShouldProcess=$True)]
-    param( 
+    param(
         [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
         [ValidateSet("Dateline Standard Time", "UTC-11", "Hawaiian Standard Time", "Alaskan Standard Time", "Pacific Standard Time (Mexico)", "Pacific Standard Time", "US Mountain Standard Time", "Mountain Standard Time (Mexico)", "Mountain Standard Time", "Central America Standard Time", "Central Standard Time", "Central Standard Time (Mexico)", "Canada Central Standard Time", "SA Pacific Standard Time", "Eastern Standard Time", "US Eastern Standard Time", "Venezuela Standard Time", "Paraguay Standard Time", "Atlantic Standard Time", "Central Brazilian Standard Time", "SA Western Standard Time", "Pacific SA Standard Time", "Newfoundland Standard Time", "E. South America Standard Time", "Argentina Standard Time", "SA Eastern Standard Time", "Greenland Standard Time", "Montevideo Standard Time", "Bahia Standard Time", "UTC-02", "Mid-Atlantic Standard Time", "Azores Standard Time", "Cape Verde Standard Time", "Morocco Standard Time", "UTC", "GMT Standard Time", "Greenwich Standard Time", "W. Europe Standard Time", "Central Europe Standard Time", "Romance Standard Time", "Central European Standard Time", "W. Central Africa Standard Time", "Namibia Standard Time", "Jordan Standard Time", "GTB&nbsp;Standard Time", "Middle East Standard Time", "Egypt Standard Time", "Syria Standard Time", "E. Europe Standard Time", "South Africa Standard Time", "FLE&nbsp;Standard Time", "Turkey Standard Time", "Israel Standard Time", "Arabic Standard Time", "Kaliningrad Standard Time", "Arab Standard Time", "E. Africa Standard Time", "Iran Standard Time", "Arabian Standard Time", "Azerbaijan Standard Time", "Russian Standard Time", "Mauritius Standard Time", "Georgian Standard Time", "Caucasus Standard Time", "Afghanistan Standard Time", "Pakistan Standard Time", "West Asia Standard Time", "India Standard Time", "Sri Lanka Standard Time", "Nepal Standard Time", "Central Asia Standard Time", "Bangladesh Standard Time", "Ekaterinburg Standard Time", "Myanmar Standard Time", "SE Asia Standard Time", "N. Central Asia Standard Time", "China Standard Time", "North Asia Standard Time", "Singapore Standard Time", "W. Australia Standard Time", "Taipei Standard Time", "Ulaanbaatar Standard Time", "North Asia East Standard Time", "Tokyo Standard Time", "Korea Standard Time", "Cen. Australia Standard Time", "AUS Central Standard Time", "E. Australia Standard Time", "AUS Eastern Standard Time", "West Pacific Standard Time", "Tasmania Standard Time", "Yakutsk&nbsp;Standard Time", "Central Pacific Standard Time", "Vladivostok Standard Time", "New Zealand Standard Time", "UTC+12", "Fiji Standard Time", "Magadan&nbsp;Standard Time", "Tonga Standard Time", "Samoa Standard Time")]
         [ValidateNotNullOrEmpty()]
         [string]$TimeZone = "Tokyo Standard Time"
-    ) 
+    )
 
-    $process = New-Object System.Diagnostics.Process 
-    $process.StartInfo.WindowStyle = "Hidden" 
-    $process.StartInfo.FileName = "tzutil.exe" 
-    $process.StartInfo.Arguments = "/s `"$TimeZone`"" 
-    $process.Start() | Out-Null 
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo.WindowStyle = "Hidden"
+    $process.StartInfo.FileName = "tzutil.exe"
+    $process.StartInfo.Arguments = "/s `"$TimeZone`""
+    $process.Start() | Out-Null
 } # end function Set-TimeZoneCompatible
 
 
@@ -198,7 +198,7 @@ function Get-AmazonMachineInformation {
         # Write the information to the Log Files
         Write-Log "# [AWS - EC2] Hardware - System BIOS Manufacturer : $BiosSystemManufacturer"
         Write-Log "# [AWS - EC2] Hardware - System BIOS ProductName : $BiosSystemProductName"
-        Write-Log "# [AWS - EC2] Hardware - System BIOS Version : $BiosSystemVersion"        
+        Write-Log "# [AWS - EC2] Hardware - System BIOS Version : $BiosSystemVersion"
     }
 
     # Get System CPU Information
@@ -236,7 +236,7 @@ function Get-DotNetFrameworkVersion {
     foreach ($dotnet_version in $dotnet_versions) {
         # Write the information to the Log Files
         Write-Log ("# [Windows] .NET Framework Information : v{0} - Profile : {1} " -f $dotnet_version.Version, $dotnet_version.PSChildName)
-    }    
+    }
 } # end function Get-DotNetFrameworkVersion
 
 
@@ -256,7 +256,7 @@ function Get-EbsVolumesMappingInformation {
 
     try {
         # Use the metadata service to discover which instance the script is running on
-        
+
         # InstanceId
         if ( [string]::IsNullOrEmpty($InstanceId) ) {
             $InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
@@ -287,14 +287,14 @@ function Get-EbsVolumesMappingInformation {
     catch {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
     }
-    
+
     $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | ForEach-Object {
         $DiskDrive = $_
         $Volumes = Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($DiskDrive.DeviceID)'} WHERE AssocClass=Win32_DiskDriveToDiskPartition" | ForEach-Object {
             $DiskPartition = $_
             Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($DiskPartition.DeviceID)'} WHERE AssocClass=Win32_LogicalDiskToPartition"
         }
-        
+
         if ($DiskDrive.PNPDeviceID -like "*PROD_PVDISK*") {
             $BlockDeviceName = Convert-SCSITargetIdToDeviceName($DiskDrive.SCSITargetId)
             $BlockDevice = $BlockDeviceMappings | Where-Object { $_.DeviceName -eq $BlockDeviceName }
@@ -327,7 +327,7 @@ function Get-EbsVolumesMappingInformation {
             # Write the information to the Log Files
             Write-Log ("# [AWS - EBS] Windows - [Disk - {0}] [Partitions - {1}] [DriveLetter - {2}] [EbsVolumeId - {3}] [Device - {4}] [VirtualDevice - {5}] [VolumeName - {6}]" -f $EBSVolumeList.Disk, $EBSVolumeList.Partitions, $EBSVolumeList.DriveLetter, $EBSVolumeList.EbsVolumeId, $EBSVolumeList.Device, $EBSVolumeList.VirtualDevice, $EBSVolumeList.VolumeName)
         }
-    } 
+    }
 } # end Get-EbsVolumesMappingInformation
 
 
@@ -370,7 +370,7 @@ function Get-Ec2InstanceMetadata {
     # Set IAM Role & STS Information
     Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
     Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
-    
+
     if ($RoleName) {
         Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName) -UseBasicParsing) | ConvertFrom-Json)
         Set-Variable -Name StsAccessKeyId -Scope Script -Value $StsCredential.AccessKeyId
@@ -449,11 +449,11 @@ function Get-Ec2SystemManagerAgentVersion {
 
 function Get-NetAdapterBindingInformation {
     # Get NetAdapter Binding Component
-    $NetAdapterBindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled 
+    $NetAdapterBindings = Get-NetAdapterBinding | Select-Object -Property Name, DisplayName, ComponentID, Enabled
     foreach ($NetAdapterBinding in $NetAdapterBindings) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] NetAdapterBinding : [Name - {0}] [DisplayName - {1}] [ComponentID - {2}] [Enabled - {3}]" -f $NetAdapterBinding.Name, $NetAdapterBinding.DisplayName, $NetAdapterBinding.ComponentID, $NetAdapterBinding.Enabled)
-    }    
+    }
 } # end Get-NetAdapterBindingInformation
 
 
@@ -463,7 +463,7 @@ function Get-NetFirewallProfileInformation {
     foreach ($FirewallProfile in $FirewallProfiles) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] NetFirewallProfile : [Name - {0}] [Enabled - {1}]" -f $FirewallProfile.Name, $FirewallProfile.Enabled)
-    }    
+    }
 } # end Get-NetFirewallProfileInformation
 
 
@@ -471,7 +471,7 @@ function Get-ScriptExecuteByAccount {
     # Get PowerShell Script Execution UserName
     Set-Variable -Name ScriptExecuteByAccountInformation -Scope Local -Value ([Security.Principal.WindowsIdentity]::GetCurrent())
     Set-Variable -Name ScriptExecuteByAccountName -Scope Local -Value ($ScriptExecuteByAccountInformation.Name -split "\" , 0 , "simplematch" | Select-Object -Index 1)
-    
+
     # Test of administrative privileges
     Set-Variable -Name CheckAdministrator -Scope Local -Value (([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
 
@@ -494,7 +494,7 @@ function Get-PageFileInformation {
     foreach ($pagefile in $pagefiles) {
         # Write the information to the Log Files
         Write-Log ("# [Windows - OS Settings] Page File : [Name - {0}] [CurrentUsage - {1}] [AllocatedBaseSize - {2}] [PeakUsage - {3}]" -f $pagefile.Name, $pagefile.CurrentUsage, $pagefile.AllocatedBaseSize, $pagefile.PeakUsage)
-    }    
+    }
 } # end Get-PageFileInformation
 
 
@@ -506,7 +506,7 @@ function Get-PowerPlanInformation {
             # Write the information to the Log Files
             Write-Log ("# [Windows - OS Settings] PowerPlan : [ElementName - {0}] [IsActive - {1}] [Description - {2}]" -f $powerplan.ElementName, $powerplan.IsActive, $powerplan.Description)
         }
-    } 
+    }
 } # end Get-PowerPlanInformation
 
 
@@ -525,7 +525,7 @@ function Get-WindowsDriverInformation {
         ($_.ProviderName -eq 'Amazon Inc.' -or $_.ProviderName -eq 'Citrix Systems, Inc.' -or $_.ProviderName -like 'Intel*' -or $_.ProviderName -eq 'Amazon Web Services, Inc.') }
     $pnp_drivers = Get-CimInstance -ClassName Win32_PnPEntity | Where-Object { $_.Service -eq 'xenvbd' -or `
             $_.Manufacturer -like 'Intel*' -or $_.Manufacturer -eq 'Citrix Systems, Inc.' -or $_.Manufacturer -eq 'Amazon Inc.' -or $_.Manufacturer -eq 'Amazon Web Services, Inc.' }
-    
+
     foreach ($win_driver in $win_drivers) {
         foreach ($pnp_driver in $pnp_drivers) {
             if ($pnp_driver.Service -and $win_driver.OriginalFileName -like ("*{0}*" -f $pnp_driver.Service)) {
@@ -533,7 +533,7 @@ function Get-WindowsDriverInformation {
                 Write-Log ("# [Windows] Amazon EC2 Windows OS Driver Information : {0} v{1} " -f $pnp_driver.Name, $win_driver.Version)
             }
         }
-    }    
+    }
 } # end function Get-WindowsDriverInformation
 
 
@@ -553,7 +553,7 @@ function Get-WebContentToFile {
     else {
         Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] -> [" + $OutFile + "]" )
 
-        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) } 
+        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) }
         Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
 
         Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] -> [" + $OutFile + "]" )
@@ -589,7 +589,7 @@ function Get-WindowsServerInformation {
     Set-Variable -Name serverOptions -Option Constant -Scope Local -Value @{ 0 = "Undefined"; 12 = $serverCore; 13 = $serverCore;
         14 = $serverCore; 29 = $serverCore; 39 = $serverCore; 40 = $serverCore; 41 = $serverCore; 43 = $serverCore;
         44 = $serverCore; 45 = $serverCore; 46 = $serverCore; 63 = $serverCore; 143 = $nanoServer; 144 = $nanoServer;
-        147 = $serverCore; 148 = $serverCore; 
+        147 = $serverCore; 148 = $serverCore;
     }
 
     # Get ProductName and BuildLabEx from HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion
@@ -634,7 +634,7 @@ function Get-WindowsServerInformation {
     Write-Log ("# [Windows] Windows Server OS TimeZone : {0}" -f ([TimeZoneInfo]::Local).StandardName)
     Write-Log ("# [Windows] Windows Server OS Offset : {0}" -f ([TimeZoneInfo]::Local).GetUtcOffset([DateTime]::Now))
 
-    # Set Parameter 
+    # Set Parameter
     Set-Variable -Name WindowsOSVersion -Option Constant -Scope Script -Value ($osVersion.ToString())
     Set-Variable -Name WindowsOSLanguage -Option Constant -Scope Script -Value (([CultureInfo]::CurrentCulture).IetfLanguageTag)
 
@@ -739,7 +739,7 @@ Write-LogSeparator "Change PowerShell SecurityProtocol"
 # Initialize Parameter
 Set-Variable -Name PowerShellSecurityProtocol -Scope Script -Value ($Null)
 
-# Get System Support - PowerShell SecurityProtocol 
+# Get System Support - PowerShell SecurityProtocol
 [enum]::GetNames([Net.SecurityProtocolType])
 
 # Get PowerShell SecurityProtocol
@@ -988,7 +988,7 @@ if ($WindowsOSLanguage) {
             Write-Log ("# [Windows - OS Settings] Display Windows System Locale (Before) : " + (Get-WinSystemLocale).DisplayName + " - " + (Get-WinSystemLocale).Name)
             Set-WinSystemLocale -SystemLocale ja-JP
             Write-Log ("# [Windows - OS Settings] Display Windows System Locale (After) : " + (Get-WinSystemLocale).DisplayName + " - " + (Get-WinSystemLocale).Name)
-            
+
             Write-Log ("# [Windows - OS Settings] Display Windows Home Location (Before) : " + (Get-WinHomeLocation).HomeLocation)
             Set-WinHomeLocation -GeoId 0x7A
             Write-Log ("# [Windows - OS Settings] Display Windows Home Location (After) : " + (Get-WinHomeLocation).HomeLocation)
@@ -1027,11 +1027,11 @@ Write-LogSeparator "Windows Server OS Configuration [Windows & Microsoft Update 
 Write-Log "# [Windows - OS Settings] Change Windows Update Policy (Before)"
 
 if ($WindowsOSVersion -match "^5.*|^6.*") {
-    
+
     # Get Windows Update Policy
     Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update"
 
-    # Change Windows Update Policy 
+    # Change Windows Update Policy
     $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
     $AUSettings.NotificationLevel = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
     # $AUSettings.ScheduledInstallationDay  = 1    # Every Sunday
@@ -1039,7 +1039,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
     $AUSettings.FeaturedUpdatesEnabled = $True     # Enabled
 
-    # Save Windows Update Policy 
+    # Save Windows Update Policy
     $AUSettings.Save()
 
     Start-Sleep -Seconds 5
@@ -1067,7 +1067,7 @@ Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (Before)"
 
 if ($WindowsOSVersion -match "^5.*|^6.*") {
     # Enable Microsoft Update
-    $SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict 
+    $SMSettings = New-Object -ComObject "Microsoft.Update.ServiceManager" -Strict
     $SMSettings.AddService2("7971f918-a847-4430-9279-4a52d1efe18d", 7, "")
     $SMSettings.Services
 
@@ -1107,7 +1107,7 @@ Write-Log "# [Amazon EC2 - Windows] Amazon Time Sync Service - Get Windows Time 
 Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /status /verbose")
 Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /configuration /verbose")
 Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/query /peers /verbose")
-    
+
 # Set Windows Time Service for Amazon Time Sync Service
 Start-Process -FilePath $W32TM -Verb runas -PassThru -Wait -ArgumentList @("/config /update /manualpeerlist:169.254.169.123 /syncfromflags:manual")
 
@@ -1165,7 +1165,7 @@ if (Test-Path -Path $HKLM_FolderOptionRegistry) {
 
 if ( -Not (Test-Path -Path $HKCU_FolderOptionRegistry ) ) {
     Write-Log ("# New-Item - " + $HKCU_FolderOptionRegistry)
-    New-Item -Path $HKCU_FolderOptionRegistry -Force 
+    New-Item -Path $HKCU_FolderOptionRegistry -Force
     Start-Sleep -Seconds 5
 }
 
@@ -1265,11 +1265,11 @@ if (Test-Path -Path $HKLM_DesktopIconRegistrySetting) {
 
 if ( -Not (Test-Path -Path $HKCU_DesktopIconRegistry ) ) {
     Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistry)
-    New-Item -Path $HKCU_DesktopIconRegistry -Force 
+    New-Item -Path $HKCU_DesktopIconRegistry -Force
     Start-Sleep -Seconds 5
 
     Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistrySetting)
-    New-Item -Path $HKCU_DesktopIconRegistrySetting -Force 
+    New-Item -Path $HKCU_DesktopIconRegistrySetting -Force
     Start-Sleep -Seconds 5
 }
 
@@ -1394,7 +1394,7 @@ if ($WindowsOSLanguage -eq "ja-JP") {
     if ($WindowsOSVersion -match "^5.*|^6.*") {
         # Sysprep Answer File
         Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"            
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
         if (Test-Path $SysprepFile) {
             Get-Content -Path $SysprepFile
             Update-SysprepAnswerFile $SysprepFile
@@ -1411,7 +1411,7 @@ if ($WindowsOSLanguage -eq "ja-JP") {
             Get-Content -Path $SysprepFile
             Update-SysprepAnswerFile $SysprepFile
             Get-Content -Path $SysprepFile
-        }     
+        }
         Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
     }
     else {
@@ -1873,7 +1873,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
         Set-Variable -Name ElasticGpuInformation -Scope Script -Value ((Invoke-WebRequest "http://169.254.169.254/latest/meta-data/elastic-gpus/associations/${ElasticGpuId}").content | ConvertFrom-Json)
         Set-Variable -Name ElasticGpuType -Scope Script -Value ($ElasticGpuInformation.elasticGpuType)
         Set-Variable -Name ElasticGpuEniIpAddress -Scope Script -Value ($ElasticGpuInformation.connectionConfig.ipv4Address)
-    
+
         # Logging Amazon EC2 Elastic GPU Information from EC2 Instance MetaData
         Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuId : $ElasticGpuId"
         Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
@@ -1915,7 +1915,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
 
             # Setting Application Path (Amazon EC2 Elastic GPU Software)
             [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Amazon\EC2ElasticGPUs\manager\", [EnvironmentVariableTarget]::Machine)
- 
+
             # Service Automatic Startup Setting (Amazon EC2 Elastic GPU Manager)
             Get-Service -Name EC2ElasticGPUs_Manager
 
@@ -1952,9 +1952,9 @@ else {
 # Custom Package Install (PowerShell Core 6.0)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-Windows?view=powershell-6
 # https://github.com/PowerShell/PowerShell
-# 
+#
 # https://github.com/PowerShell/PowerShell/releases
-# 
+#
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-windows.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2688,7 +2688,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 # Package Download System Utility (AWSLogCollector)
-# 
+#
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWSLogCollector)"
     Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
@@ -2766,7 +2766,7 @@ if ($WindowsOSVersion) {
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 
     }
     elseif ($WindowsOSVersion -eq "6.2") {
@@ -2786,7 +2786,7 @@ if ($WindowsOSVersion) {
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 
     }
     elseif ($WindowsOSVersion -eq "6.3") {
@@ -2806,7 +2806,7 @@ if ($WindowsOSVersion) {
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 
     }
     elseif ($WindowsOSVersion -eq "10.0") {
@@ -2827,7 +2827,7 @@ if ($WindowsOSVersion) {
         Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
 
         # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR 
+        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 
     }
     else {
@@ -2848,14 +2848,14 @@ Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
 Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
 
 # Save Logging Files(Write-Log Function LogFiles)
-Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR 
+Copy-Item -Path $USERDATA_LOG -Destination $LOGS_DIR
 
 # Stop Transcript Logging
 Stop-Transcript
 Start-Sleep -Seconds 15
 
 # Save Logging Files(Start-Transcript Function LogFiles)
-Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR 
+Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR
 
 
 

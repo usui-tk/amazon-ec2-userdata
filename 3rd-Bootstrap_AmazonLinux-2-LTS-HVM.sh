@@ -36,7 +36,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Amazon Linux 2 
+#  - Amazon Linux 2
 #    https://aws.amazon.com/jp/amazon-linux-2/
 #    https://aws.amazon.com/jp/amazon-linux-2/release-notes/
 #    https://aws.amazon.com/jp/amazon-linux-2/faqs/
@@ -109,7 +109,7 @@ yum install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-system-tools pc
 yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3-test python3-tools python3-wheel
 
 # Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
-yum install -y ec2-hibinit-agent hibagent 
+yum install -y ec2-hibinit-agent hibagent
 # yum install -y ec2-instance-connect
 
 #-------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ fi
 aws --version
 
 # Setting AWS-CLI default Region & Output format
-aws configure << __EOF__ 
+aws configure << __EOF__
 
 
 ${Region}
@@ -233,7 +233,7 @@ if [ -n "$RoleName" ]; then
 		# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
 		echo "# Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
 		aws ec2 describe-instance-attribute --instance-id ${InstanceId} --attribute sriovNetSupport --output json --region ${Region}
-		
+
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
@@ -269,7 +269,7 @@ if [ -n "$RoleName" ]; then
 fi
 
 # Get EC2 Instance attached NVMe Device Information
-# 
+#
 # - Summary of Networking and Storage Features
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 #
@@ -282,13 +282,13 @@ fi
 #
 if [ -n "$RoleName" ]; then
 	if [[ "$InstanceType" =~ ^(a1.*|c5.*|c5d.*|c5n.*|f1.*|g4dn.*|i3.*|i3en.*|i3p.*|m5.*|m5a.*|m5ad.*|m5d.*|m5dn.*|m5n.*|p3dn.*|r5.*|r5a.*|r5ad.*|r5d.*|r5dn.*|r5n.*|t3.*|t3a.*|z1d.*|u-*tb1.metal)$ ]]; then
-		
+
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
 		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
 			modinfo nvme
 		fi
-		
+
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
@@ -310,7 +310,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get Disk[MountPoint] Information (lsblk -a)"
 			lsblk -a
 		fi
-		
+
 	else
 		echo "# Not Target Instance Type :" $InstanceType
 	fi
@@ -354,7 +354,7 @@ curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -
 # Check the exit code of the Amazon Inspector Agent installer script
 if [ $InspectorInstallStatus -eq 0 ]; then
     rpm -qi AwsAgent
-	
+
 	systemctl daemon-reload
 
 	systemctl restart awsagent
