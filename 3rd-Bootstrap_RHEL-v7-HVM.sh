@@ -115,7 +115,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced xfsdump xfsprogs yum-priorities yum-plugin-versionlock yum-utils wget zip
+yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -138,7 +138,7 @@ yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
+[epel-bootstrap]
 name=Bootstrap EPEL
 mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
 failovermethod=priority
@@ -146,7 +146,9 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum --enablerepo=epel -y install epel-release
+yum clean all
+
+yum --enablerepo=epel-bootstrap -y install epel-release
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
 
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
@@ -159,6 +161,7 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
+# yum --enablerepo=epel install -y moreutils moreutils-parallel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

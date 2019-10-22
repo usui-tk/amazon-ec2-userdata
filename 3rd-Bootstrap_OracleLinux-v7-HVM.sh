@@ -183,7 +183,7 @@ yum update -y
 yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch tzdata unzip usermode zip
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y acpid arptables bash-completion bc bcc-tools bind-utils dstat ebtables fio gdisk git hdparm kexec-tools libicu lsof lzop iotop iperf3 mlocate mtr nc net-snmp-utils nmap nvme-cli numactl psmisc rsync smartmontools sos strace sysstat tcpdump time tree traceroute unzip uuid vim-enhanced xfsdump xfsprogs yum-priorities yum-plugin-versionlock yum-utils wget zip
+yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -233,6 +233,7 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
+# yum --enablerepo=epel install -y moreutils moreutils-parallel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Linux Cloud Native Environment]
