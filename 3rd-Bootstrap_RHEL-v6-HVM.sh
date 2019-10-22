@@ -396,7 +396,7 @@ fi
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
 
-# yum --enablerepo=epel install -y python-pip
+yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
 
 pip install pystache

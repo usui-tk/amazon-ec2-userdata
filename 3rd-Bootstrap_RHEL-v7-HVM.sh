@@ -133,7 +133,7 @@ yum update -y
 yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
-yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-restorecond
 yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
@@ -406,53 +406,53 @@ fi
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
-yum install -y python-setuptools
+# yum install -y python-setuptools
 
-easy_install --script-dir "/opt/aws/bin/aws-cfn-bootstrap" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+# easy_install --script-dir "/opt/aws/bin/aws-cfn-bootstrap" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-mkdir -m 755 -p /etc/cfn/hooks.d
+# mkdir -m 755 -p /etc/cfn/hooks.d
 
-# cfn-hup.conf Configuration File
-cat > /etc/cfn/cfn-hup.conf << __EOF__
-[main]
-stack=
-__EOF__
+# # cfn-hup.conf Configuration File
+# cat > /etc/cfn/cfn-hup.conf << __EOF__
+# [main]
+# stack=
+# __EOF__
 
-# cfn-auto-reloader.conf Configuration File
-cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
-[hookname]
-triggers=post.update
-path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
-action=
-runas=root
-__EOF__
+# # cfn-auto-reloader.conf Configuration File
+# cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+# [hookname]
+# triggers=post.update
+# path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+# action=
+# runas=root
+# __EOF__
 
-# cfn-hup.service Configuration File
-cat > /lib/systemd/system/cfn-hup.service << __EOF__
-[Unit]
-Description=cfn-hup daemon
+# # cfn-hup.service Configuration File
+# cat > /lib/systemd/system/cfn-hup.service << __EOF__
+# [Unit]
+# Description=cfn-hup daemon
 
-[Service]
-Type=simple
-ExecStart=/opt/aws/aws-cfn-bootstrap/bin/cfn-hup
-Restart=always
+# [Service]
+# Type=simple
+# ExecStart=/opt/aws/aws-cfn-bootstrap/bin/cfn-hup
+# Restart=always
 
-[Install]
-WantedBy=multi-user.target
-__EOF__
+# [Install]
+# WantedBy=multi-user.target
+# __EOF__
 
-# Execute AWS CloudFormation Helper software
-systemctl daemon-reload
+# # Execute AWS CloudFormation Helper software
+# systemctl daemon-reload
 
-systemctl restart cfn-hup
+# systemctl restart cfn-hup
 
-systemctl status -l cfn-hup
+# systemctl status -l cfn-hup
 
-# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
-if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
-	systemctl enable cfn-hup
-	systemctl is-enabled cfn-hup
-fi
+# # Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+# 	systemctl enable cfn-hup
+# 	systemctl is-enabled cfn-hup
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
