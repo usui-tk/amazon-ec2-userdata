@@ -164,7 +164,10 @@ function get_bootstrap_script () {
            BootstrapScript=""
         fi
     elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
-        if [ $(echo ${REV} | grep -e '30') ]; then
+        if [ $(echo ${REV} | grep -e '31') ]; then
+           # Bootstrap Script for Fedora 30
+           BootstrapScript=${ScriptForFedora}
+        elif [ $(echo ${REV} | grep -e '30') ]; then
            # Bootstrap Script for Fedora 30
            BootstrapScript=${ScriptForFedora}
         elif [ $(echo ${REV} | grep -e '29') ]; then

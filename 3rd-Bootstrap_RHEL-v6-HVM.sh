@@ -102,6 +102,19 @@ yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
 yum-config-manager --enable rhui-REGION-rhel-server-supplementary
 yum-config-manager --enable rhui-REGION-rhel-server-rhscl
 
+# yum repository metadata Clean up and Make Cache data
+yum clean all
+yum makecache
+
+# RHEL/RHUI repository package [yum command]
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-releases" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-releases.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-rh-common" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-rh-common.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-client-config-server-6" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-client-config-server-6.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-extras" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-extras.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-releases-optional" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-releases-optional.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-supplementary" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-supplementary.txt
+yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-rhscl" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-rhscl.txt
+
 # yum repository metadata Clean up
 yum clean all
 
@@ -148,7 +161,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # EPEL repository package [yum command]
-yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y bash-completion fio iperf3 jq moreutils zstd

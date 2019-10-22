@@ -229,11 +229,10 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # EPEL repository package [yum command]
-yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
-# yum --enablerepo=epel install -y moreutils moreutils-parallel
+yum --enablerepo=epel install -y atop bash-completion-extras collectl jq moreutils moreutils-parallel zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Linux Cloud Native Environment]
@@ -715,9 +714,9 @@ rpm -qi powershell
 pwsh -Version
 
 # Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 # pwsh -Command "Get-Module -ListAvailable"

@@ -94,15 +94,30 @@ yum update -y rh-amazon-rhui-client
 yum repolist all
 
 # Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases
-yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-yum-config-manager --enable rhui-REGION-client-config-server-7
+yum-config-manager --enable rhel-7-server-rhui-rpms
+yum-config-manager --enable rhel-7-server-rhui-rh-common-rpms
+yum-config-manager --enable rhui-client-config-server-7
 
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-extras
-yum-config-manager --enable rhui-REGION-rhel-server-optional
-yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+yum-config-manager --enable rhel-7-server-rhui-extras-rpms
+yum-config-manager --enable rhel-7-server-rhui-optional-rpms
+yum-config-manager --enable rhel-7-server-rhui-supplementary-rpms
+yum-config-manager --enable rhel-7-server-dotnet-rhui-rpms
+yum-config-manager --enable rhel-server-rhui-rhscl-7-rpms
+
+# yum repository metadata Clean up and Make Cache data
+yum clean all
+yum makecache
+
+# RHEL/RHUI repository package [yum command]
+yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-rpms.txt
+yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-rh-common-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-rh-common-rpms.txt
+yum --disablerepo="*" --enablerepo="rhui-client-config-server-7" list available > /tmp/command-log_yum_repository-package-list_rhui-client-config-server-7.txt
+yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-extras-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-extras-rpms.txt
+yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-optional-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-optional-rpms.txt
+yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-supplementary-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-supplementary-rpms.txt
+yum --disablerepo="*" --enablerepo="rhel-7-server-dotnet-rhui-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-dotnet-rhui-rpms.txt
+yum --disablerepo="*" --enablerepo="rhel-server-rhui-rhscl-7-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-server-rhui-rhscl-7-rpms.txt
 
 # yum repository metadata Clean up
 yum clean all
@@ -157,11 +172,10 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 yum clean all
 
 # EPEL repository package [yum command]
-yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl jq zstd
-# yum --enablerepo=epel install -y moreutils moreutils-parallel
+yum --enablerepo=epel install -y atop bash-completion-extras collectl jq moreutils moreutils-parallel zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -611,9 +625,9 @@ rpm -qi powershell
 pwsh -Version
 
 # Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
+# pwsh -Command "Get-Module -ListAvailable"
 
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
+# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # pwsh -Command "Import-Module AWSPowerShell.NetCore"
 
 # pwsh -Command "Get-Module -ListAvailable"

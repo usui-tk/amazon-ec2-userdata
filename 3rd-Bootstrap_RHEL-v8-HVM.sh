@@ -104,8 +104,15 @@ dnf config-manager --enable rhui-client-config-server-8
 # Enable Channnel (RHEL Server RPM) - [Default Disable]
 dnf config-manager --enable rhui-codeready-builder-for-rhel-8-rhui-rpms
 
-# Red Hat CodeReady Linux Builder for RHEL 8 repository package [dnf command]
-dnf repository-packages rhui-codeready-builder-for-rhel-8-rhui-rpms list > /tmp/command-log_dnf_repository-codeready-builder-package-list.txt
+# Cleanup repository information and Macke Cache data
+dnf clean all
+dnf makecache
+
+# RHEL/RHUI repository package [dnf command]
+dnf repository-packages "rhel-8-baseos-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhel-8-baseos-rhui-rpms.txt
+dnf repository-packages "rhel-8-appstream-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhel-8-appstream-rhui-rpms.txt
+dnf repository-packages "rhui-client-config-server-8" list > /tmp/command-log_dnf_repository-package-list_rhui-client-config-server-8.txt
+dnf repository-packages "rhui-codeready-builder-for-rhel-8-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhui-codeready-builder-for-rhel-8-rhui-rpms.txt
 
 # Cleanup repository information
 dnf clean all
@@ -164,7 +171,7 @@ egrep '^\[|enabled' /etc/yum.repos.d/epel*
 dnf clean all
 
 # EPEL repository package [dnf command]
-dnf repository-packages epel list > /tmp/command-log_dnf_repository-epel-package-list.txt
+dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop iftop zstd
