@@ -199,28 +199,32 @@ if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI/Python 3]
 #-------------------------------------------------------------------------------
 
-yum --enablerepo=epel install -y python-pip python2-colorama python2-rsa python2-jmespath python-futures python-ordereddict
-pip install awscli
-pip show awscli
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
-# Workaround - SSL-Warnings
-# https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
-cat /usr/bin/aws
-sed -i "/import os/a import urllib3" /usr/bin/aws
-sed -i "/import urllib3/a urllib3.disable_warnings()" /usr/bin/aws
-cat /usr/bin/aws
+/opt/rh/rh-python36/root/usr/bin/python3 -V
+/opt/rh/rh-python36/root/usr/bin/pip3 -V
 
-# Setting Bash-Completion
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
+/opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+
+/opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+
+alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
+alternatives --display aws
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
+alternatives --display aws_completer
+
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
 __EOF__
-
-source /etc/profile.d/aws-cli.sh
 
 aws --version
 
@@ -386,41 +390,12 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI/Python 3]
-#-------------------------------------------------------------------------------
-
-# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
-# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
-
-# /opt/rh/rh-python36/root/usr/bin/python3 -V
-# /opt/rh/rh-python36/root/usr/bin/pip3 -V
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 install awscli
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
-
-# alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
-# alternatives --display aws
-# alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
-# alternatives --display aws_completer
-
-# cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# # Typically that would be added under one of the following paths:
-# # - /etc/bash_completion.d
-# # - /usr/local/etc/bash_completion.d
-# # - /usr/share/bash-completion/completions
-
-# complete -C aws_completer aws
-# __EOF__
-
-# aws --version
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
+
 # yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
 

@@ -408,7 +408,7 @@ fi
 
 yum install -y python-setuptools
 
-easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+easy_install --script-dir "/opt/aws/bin/aws-cfn-bootstrap" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
 mkdir -m 755 -p /etc/cfn/hooks.d
 
@@ -434,7 +434,7 @@ Description=cfn-hup daemon
 
 [Service]
 Type=simple
-ExecStart=/opt/aws/bin/cfn-hup
+ExecStart=/opt/aws/aws-cfn-bootstrap/bin/cfn-hup
 Restart=always
 
 [Install]
