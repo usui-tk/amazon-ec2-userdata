@@ -44,6 +44,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://access.redhat.com/articles/3135121
 #
+#    https://aws.amazon.com/marketplace/pp/B07T4SQ5RZ
+#
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information

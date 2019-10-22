@@ -42,7 +42,7 @@ if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Install Kernel module and Configure Dynamic Kernel Module Support (DKMS) 
+# Install Kernel module and Configure Dynamic Kernel Module Support (DKMS)
 #-------------------------------------------------------------------------------
 
 # Package Install Kernel Module
@@ -121,7 +121,7 @@ fi
 # Remove Network Persistent Rules
 #-------------------------------------------------------------------------------
 # [Important]
-# If your instance operating system contains an /etc/udev/rules.d/70-persistent-net.rules file, you must delete it before creating the AMI. 
+# If your instance operating system contains an /etc/udev/rules.d/70-persistent-net.rules file, you must delete it before creating the AMI.
 # This file contains the MAC address for the Ethernet adapter of the original instance.
 # If another instance boots with this file, the operating system will be unable to find the device and eth0 might fail, causing boot issues.
 # This file is regenerated at the next boot cycle, and any instances launched from the AMI create their own version of the file.
