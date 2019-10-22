@@ -131,7 +131,7 @@ yum update -y
 yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y acpid dracut-tools dstat dmidecode ebtables gdisk git hdparm kexec-tools libicu lsof lzop iotop mlocate mtr nc net-snmp-utils nmap numactl perf psmisc rsync sos strace sysstat tcpdump traceroute tree unzip uuid vim-enhanced yum-priorities yum-plugin-versionlock yum-utils wget
+yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -152,7 +152,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-epel-package-list.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq zstd
+yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
