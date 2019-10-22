@@ -118,7 +118,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysstat tcpdump tlog traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
@@ -141,7 +141,7 @@ dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 # dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
+[epel-bootstrap]
 name=Extra Packages for Enterprise Linux \$releasever - \$basearch
 #baseurl=https://download.fedoraproject.org/pub/epel/\$releasever/Everything/\$basearch
 metalink=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch&infra=\$infra&content=\$contentdir
@@ -150,7 +150,9 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-dnf --enablerepo=epel -y install epel-release
+dnf clean all
+
+dnf --enablerepo=epel-bootstrap -y install epel-release
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
 
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
@@ -166,7 +168,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-epel-package
 
 # # Package Install RHEL System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop iftop zstd
-# dnf --enablerepo=epel install -y collectl
+# dnf --enablerepo=epel install -y collectl moreutils moreutils-parallel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
