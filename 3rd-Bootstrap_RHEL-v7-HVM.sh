@@ -145,10 +145,6 @@ yum install -y kpatch
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
 yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
-# Package Install Device driver compatible with Amazon EC2 (from Red Hat Official Repository)
-# - Additional kernel modules up to RHEL v7.6 (not required from RHEL v7.7)
-# yum install -y kmod-redhat-ena
-
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
