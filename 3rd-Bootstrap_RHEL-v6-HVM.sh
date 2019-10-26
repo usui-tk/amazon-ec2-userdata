@@ -173,7 +173,7 @@ yum --enablerepo=epel-bootstrap -y install epel-release
 
 # Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
-# rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
+rm -rf /var/cache/yum/x86_64/6Server/epel-bootstrap*
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
