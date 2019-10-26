@@ -85,6 +85,19 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
+#  - RHEL v7 - Red Hat Yum Repository Default Status (Enable/Disable)
+#
+#    [Default - Enable]
+#        rhel-7-server-rhui-rpms
+#        rhel-7-server-rhui-rh-common-rpms
+#        rhui-client-config-server-7
+#    [Default - Disable]
+#        rhel-7-server-rhui-extras-rpms
+#        rhel-7-server-rhui-optional-rpms
+#        rhel-7-server-rhui-supplementary-rpms
+#        rhel-7-server-dotnet-rhui-rpms
+#        rhel-server-rhui-rhscl-7-rpms
+#-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update
 yum clean all
@@ -93,31 +106,30 @@ yum update -y rh-amazon-rhui-client
 # Checking repository information
 yum repolist all
 
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhel-7-server-rhui-rpms
-yum-config-manager --enable rhel-7-server-rhui-rh-common-rpms
-yum-config-manager --enable rhui-client-config-server-7
+# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test")
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhel-7-server-rhui-extras-rpms
-yum-config-manager --enable rhel-7-server-rhui-optional-rpms
-yum-config-manager --enable rhel-7-server-rhui-supplementary-rpms
-yum-config-manager --enable rhel-7-server-dotnet-rhui-rpms
-yum-config-manager --enable rhel-server-rhui-rhscl-7-rpms
+# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+for repo in $repolist
+do
+echo "[Target repository Name (Enable yum repository)] :" $repo
+yum-config-manager --enable ${repo}
+sleep 3
+done
 
-# yum repository metadata Clean up and Make Cache data
+# Checking repository information
+yum repolist all
+
+# yum repository metadata Clean up
 yum clean all
-yum makecache
 
 # RHEL/RHUI repository package [yum command]
-yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-rpms.txt
-yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-rh-common-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-rh-common-rpms.txt
-yum --disablerepo="*" --enablerepo="rhui-client-config-server-7" list available > /tmp/command-log_yum_repository-package-list_rhui-client-config-server-7.txt
-yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-extras-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-extras-rpms.txt
-yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-optional-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-optional-rpms.txt
-yum --disablerepo="*" --enablerepo="rhel-7-server-rhui-supplementary-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-rhui-supplementary-rpms.txt
-yum --disablerepo="*" --enablerepo="rhel-7-server-dotnet-rhui-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-7-server-dotnet-rhui-rpms.txt
-yum --disablerepo="*" --enablerepo="rhel-server-rhui-rhscl-7-rpms" list available > /tmp/command-log_yum_repository-package-list_rhel-server-rhui-rhscl-7-rpms.txt
+for repo in $repolist
+do
+echo "[Target repository Name (Collect yum repository package list)] :" $repo
+yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+sleep 3
+done
 
 # yum repository metadata Clean up
 yum clean all

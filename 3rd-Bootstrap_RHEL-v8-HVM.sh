@@ -88,6 +88,15 @@ dnf module list > /tmp/command-log_dnf_module-list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
+#  - RHEL v8 - Red Hat Dnf/Yum Repository Default Status (Enable/Disable)
+#
+#    [Default - Enable]
+#        rhel-8-baseos-rhui-rpms
+#        rhel-8-appstream-rhui-rpms
+#        rhui-client-config-server-8
+#    [Default - Disable]
+#        rhui-codeready-builder-for-rhel-8-rhui-rpms
+#-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update
 dnf clean all
@@ -98,23 +107,31 @@ dnf update -y dnf dnf-data dnf-utils
 dnf repolist all
 dnf module list
 
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-dnf config-manager --enable rhel-8-baseos-rhui-rpms
-dnf config-manager --enable rhel-8-appstream-rhui-rpms
-dnf config-manager --enable rhui-client-config-server-8
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-dnf config-manager --enable rhui-codeready-builder-for-rhel-8-rhui-rpms
+# Enable Dnf/Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+for repo in $repolist
+do
+echo "[Target repository Name (Enable dnf/yum repository)] :" $repo
+dnf config-manager --enable ${repo}
+sleep 3
+done
 
-# Cleanup repository information and Macke Cache data
+# Checking repository information
+dnf repolist all
+dnf module list
+
+# Cleanup repository information
 dnf clean all
-dnf makecache
 
 # RHEL/RHUI repository package [dnf command]
-dnf repository-packages "rhel-8-baseos-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhel-8-baseos-rhui-rpms.txt
-dnf repository-packages "rhel-8-appstream-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhel-8-appstream-rhui-rpms.txt
-dnf repository-packages "rhui-client-config-server-8" list > /tmp/command-log_dnf_repository-package-list_rhui-client-config-server-8.txt
-dnf repository-packages "rhui-codeready-builder-for-rhel-8-rhui-rpms" list > /tmp/command-log_dnf_repository-package-list_rhui-codeready-builder-for-rhel-8-rhui-rpms.txt
+for repo in $repolist
+do
+echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
+dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
+sleep 3
+done
 
 # Cleanup repository information
 dnf clean all

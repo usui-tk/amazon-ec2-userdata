@@ -83,6 +83,18 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
+#  - RHEL v6 - Red Hat Yum Repository Default Status (Enable/Disable)
+#
+#    [Default - Enable]
+#        rhui-REGION-rhel-server-releases
+#        rhui-REGION-rhel-server-rh-common
+#        rhui-client-config-server-6
+#    [Default - Disable]
+#        rhui-REGION-rhel-server-extras
+#        rhui-REGION-rhel-server-releases-optional
+#        rhui-REGION-rhel-server-supplementary
+#        rhui-REGION-rhel-server-rhscl
+#-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update
 yum clean all
@@ -91,29 +103,30 @@ yum update -y rh-amazon-rhui-client
 # Checking repository information
 yum repolist all
 
-# Enable Channnel (RHEL Server RPM) - [Default Enable]
-yum-config-manager --enable rhui-REGION-rhel-server-releases
-yum-config-manager --enable rhui-REGION-rhel-server-rh-common
-yum-config-manager --enable rhui-client-config-server-6
+# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test")
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
-# Enable Channnel (RHEL Server RPM) - [Default Disable]
-yum-config-manager --enable rhui-REGION-rhel-server-extras
-yum-config-manager --enable rhui-REGION-rhel-server-releases-optional
-yum-config-manager --enable rhui-REGION-rhel-server-supplementary
-yum-config-manager --enable rhui-REGION-rhel-server-rhscl
+# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+for repo in $repolist
+do
+echo "[Target repository Name (Enable yum repository)] :" $repo
+yum-config-manager --enable ${repo}
+sleep 3
+done
 
-# yum repository metadata Clean up and Make Cache data
+# Checking repository information
+yum repolist all
+
+# yum repository metadata Clean up
 yum clean all
-yum makecache
 
 # RHEL/RHUI repository package [yum command]
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-releases" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-releases.txt
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-rh-common" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-rh-common.txt
-yum --disablerepo="*" --enablerepo="rhui-client-config-server-6" list available > /tmp/command-log_yum_repository-package-list_rhui-client-config-server-6.txt
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-extras" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-extras.txt
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-releases-optional" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-releases-optional.txt
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-supplementary" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-supplementary.txt
-yum --disablerepo="*" --enablerepo="rhui-REGION-rhel-server-rhscl" list available > /tmp/command-log_yum_repository-package-list_rhui-REGION-rhel-server-rhscl.txt
+for repo in $repolist
+do
+echo "[Target repository Name (Collect yum repository package list)] :" $repo
+yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+sleep 3
+done
 
 # yum repository metadata Clean up
 yum clean all
