@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 # Parameter Settings
 #-------------------------------------------------------------------------------
 
-# Parameter Settings(BootstrapScript)
+# Parameter Settings (BootstrapScript - Script dependent on operating system version)
 ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
 ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-1-HVM.sh"
 ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
@@ -25,10 +25,11 @@ ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/
 ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
 ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
+ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-3-HVM.sh"
 
+# Parameter Settings (BootstrapScript - Script independent of operating system version [operation check requires a specific version or higher])
 ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
-ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-3-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -166,7 +167,7 @@ function get_bootstrap_script () {
         fi
     elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
         if [ $(echo ${REV} | grep -e '31') ]; then
-           # Bootstrap Script for Fedora 30
+           # Bootstrap Script for Fedora 31
            BootstrapScript=${ScriptForFedora}
         elif [ $(echo ${REV} | grep -e '30') ]; then
            # Bootstrap Script for Fedora 30
