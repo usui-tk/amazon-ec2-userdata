@@ -108,10 +108,16 @@ yum-config-manager --enable updates
 yum-config-manager --enable extras
 
 # CentOS-SCLo-scl.repo
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
+yum-config-manager --enable centos-sclo-sclo
 
 # CentOS-SCLo-scl-rh.repo
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
+yum-config-manager --enable centos-sclo-rh
 
 # yum repository metadata Clean up
 yum clean all
@@ -159,7 +165,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
+yum --enablerepo=epel install -y bash-completion cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

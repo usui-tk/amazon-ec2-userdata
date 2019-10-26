@@ -91,6 +91,8 @@ yum repolist all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
+yum search oracle-
+
 yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 oracle-softwarecollection-release-el6
 yum clean all
 
@@ -189,7 +191,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-init cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
+yum --enablerepo=epel install -y bash-completion cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]

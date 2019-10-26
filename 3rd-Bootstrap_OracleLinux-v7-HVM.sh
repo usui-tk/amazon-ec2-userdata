@@ -94,6 +94,8 @@ yum repolist all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
+yum search oracle-
+
 yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-release-el7
 yum clean all
 
@@ -165,7 +167,7 @@ yum install -y ol-template-config ovm-template-config*
 # yum install -y kpatch
 
 # Package Install Python 3 Runtime (from Oracle Linux Official Repository)
-yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
