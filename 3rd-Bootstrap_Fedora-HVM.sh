@@ -39,7 +39,6 @@ echo $VpcNetwork
 
 # Cleanup repository information
 dnf clean all
-dnf makecache
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -89,9 +88,11 @@ dnf clean all
 dnf install -y bash dnf dnf-conf dnf-utils
 dnf install -y dnf-plugins-core dnf-plugin-system-upgrade
 
+# Checking repository information
+dnf repolist all
+
 # Cleanup repository information
 dnf clean all
-dnf makecache
 
 # Default Package Update
 dnf update -y
@@ -104,7 +105,7 @@ dnf update -y
 dnf install -y acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pciutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip vim-enhanced wget xfsdump xfsprogs zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
-dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
 dnf install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Fedora support tools (from Fedora Official Repository)
