@@ -98,6 +98,7 @@ find /etc/yum.repos.d/
 
 yum search centos-release
 yum install -y centos-release centos-release-scl
+yum clean all
 
 find /etc/yum.repos.d/
 
