@@ -149,7 +149,7 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-system-tools
 yum install -y redhat-lsb-core redhat-support-tool redhat-access-insights
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
-yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
@@ -215,16 +215,18 @@ fi
 # Custom Package Installation [AWS-CLI/Python 3]
 #-------------------------------------------------------------------------------
 
-yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
 yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
 /opt/rh/rh-python36/root/usr/bin/python3 -V
 /opt/rh/rh-python36/root/usr/bin/pip3 -V
 
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
 /opt/rh/rh-python36/root/usr/bin/pip3 install awscli
 
 /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
 
+# Configuration tools [AWS-CLI/Python3]
 alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
 alternatives --display aws
 alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1

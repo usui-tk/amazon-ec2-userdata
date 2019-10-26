@@ -191,10 +191,13 @@ dnf clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
+dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
-# # Package Install RHEL System Administration Tools (from EPEL Repository)
+# Package Install RHEL System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop iftop zstd
-# dnf --enablerepo=epel install -y collectl moreutils moreutils-parallel
+
+# Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
+# dnf --enablerepo=epel-playground install -y collectd collectd-python collectd-utils moreutils moreutils-parallel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -248,6 +251,7 @@ python --version
 pip3 install awscli
 pip3 show awscli
 
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
 alternatives --list
 alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
 alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1

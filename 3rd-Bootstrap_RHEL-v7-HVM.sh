@@ -155,7 +155,7 @@ yum install -y redhat-lsb-core redhat-support-tool redhat-access-insights
 yum install -y kpatch
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
-yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
@@ -222,12 +222,13 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-# yum install -y python3 python3-pip python3-devel
+# yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 python3 --version
 
 pip3 install awscli
 pip3 show awscli
 
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
 alternatives --list
 alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
 alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1
