@@ -112,16 +112,15 @@ yum-config-manager --enable updates
 yum-config-manager --enable extras
 
 # CentOS-SCLo-scl.repo
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 yum-config-manager --enable centos-sclo-sclo
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 
 # CentOS-SCLo-scl-rh.repo
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
 yum-config-manager --enable centos-sclo-rh
+egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
+
+# Checking repository information
+yum repolist all
 
 # yum repository metadata Clean up
 yum clean all
