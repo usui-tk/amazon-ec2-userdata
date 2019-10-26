@@ -28,6 +28,7 @@ ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/
 
 ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
+ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-3-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Define Function
@@ -205,6 +206,13 @@ function get_bootstrap_script () {
         else
            BootstrapScript=""
         fi
+    elif [ "${DIST}" = "VMware Photon OS" ] || [ "${DIST_TYPE}" = "photon" ]; then
+        if [ $(echo ${REV} | grep -e '3.') ]; then
+           # Bootstrap Script for VMware Photon OS 3.x
+           BootstrapScript=${ScriptForPhotonOS3}
+        else
+           BootstrapScript=""
+        fi
     else
         BootstrapScript=""
     fi
@@ -256,6 +264,10 @@ else
         # Package Install curl Tools (SUSE Linux Enterprise Server)
         zypper clean --all
         zypper --quiet --non-interactive install curl
+    elif [ $(command -v tdnf) ]; then
+        # Package Install curl Tools (VMware Photon OS)
+        tdnf clean all
+        tdnf install -y curl
     else
         echo "Unsupported curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
         exit 1
@@ -279,6 +291,10 @@ else
         # Package Install wget Tools (SUSE Linux Enterprise Server)
         zypper clean --all
         zypper --quiet --non-interactive install wget
+    elif [ $(command -v tdnf) ]; then
+        # Package Install curl Tools (VMware Photon OS)
+        tdnf clean all
+        tdnf install -y wget
     else
         echo "Unsupported wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
         exit 1
