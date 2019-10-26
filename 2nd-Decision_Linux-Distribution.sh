@@ -247,56 +247,29 @@ echo "Kernel version of the machine is ${KERNEL_VERSION}."
 
 echo "BootstrapScript URL is ${BootstrapScript}"
 
-# Install curl Command
-if [ $(command -v curl) ]; then
-    echo "Preinstalled curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+# Install curl/wget Command
+if [ $(command -v curl) || $(command -v wget) ]; then
+    echo "Preinstalled curl/wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
 else
     if [ $(command -v yum) ]; then
-        # Package Install curl Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
+        # Package Install curl/wget Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
         yum clean all
-        yum install -y curl
+        yum install -y curl wget
     elif [ $(command -v apt-get) ]; then
-        # Package Install curl Tools (Debian, Ubuntu)
+        # Package Install curl/wget Tools (Debian, Ubuntu)
         export DEBIAN_FRONTEND=noninteractive
         apt clean -y
-        apt install -y curl
+        apt install -y curl wget
     elif [ $(command -v zypper) ]; then
-        # Package Install curl Tools (SUSE Linux Enterprise Server)
+        # Package Install curl/wget Tools (SUSE Linux Enterprise Server)
         zypper clean --all
-        zypper --quiet --non-interactive install curl
+        zypper --quiet --non-interactive install curl wget
     elif [ $(command -v tdnf) ]; then
-        # Package Install curl Tools (VMware Photon OS)
+        # Package Install curl/wget Tools (VMware Photon OS)
         tdnf clean all
-        tdnf install -y curl
+        tdnf install -y curl wget
     else
-        echo "Unsupported curl command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-        exit 1
-    fi
-fi
-
-# Install wget Command
-if [ $(command -v wget) ]; then
-    echo "Preinstalled wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
-else
-    if [ $(command -v yum) ]; then
-        # Package Install wget Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
-        yum clean all
-        yum install -y wget
-    elif [ $(command -v apt-get) ]; then
-        # Package Install wget Tools (Debian, Ubuntu)
-        export DEBIAN_FRONTEND=noninteractive
-        apt clean -y
-        apt install -y wget
-    elif [ $(command -v zypper) ]; then
-        # Package Install wget Tools (SUSE Linux Enterprise Server)
-        zypper clean --all
-        zypper --quiet --non-interactive install wget
-    elif [ $(command -v tdnf) ]; then
-        # Package Install curl Tools (VMware Photon OS)
-        tdnf clean all
-        tdnf install -y wget
-    else
-        echo "Unsupported wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
+        echo "Unsupported curl/wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
         exit 1
     fi
 fi
