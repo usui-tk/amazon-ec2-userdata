@@ -78,6 +78,9 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
+# Yum Repositories (Oracle Linux v7)
+#  http://yum.oracle.com/oracle-linux-7.html
+#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
@@ -85,20 +88,14 @@ yum clean all
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-utils
 
-# Default Package Update
-yum update -y
-
-#-------------------------------------------------------------------------------
-# Yum Configuration
-#-------------------------------------------------------------------------------
-
-# yum repository metadata Clean up
-yum clean all
+# Checking repository information
+yum repolist all
 
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
 
 yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-release-el7
+yum clean all
 
 find /etc/yum.repos.d/
 
@@ -112,9 +109,6 @@ grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yu
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 yum clean all
 
-# Display Yum repository configuration
-yum-config-manager
-
 # Delete AMI Defalut YUM Repositories File
 find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
@@ -123,51 +117,23 @@ find /etc/yum.repos.d/
 # yum repository metadata Clean up
 yum clean all
 
-#-------------------------------------------------------------------------------
-# Enable Repositories (Oracle Linux v7)
-#  http://yum.oracle.com/oracle-linux-7.html
-#-------------------------------------------------------------------------------
+# Checking repository information
+yum repolist all
 
-# Latest packages released for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/latest/x86_64/index.html
+# Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --enable ol7_latest
-
-# Latest Unbreakable Enterprise Kernel Release 5 packages for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/UEKR5/x86_64/index.html
 yum-config-manager --enable ol7_UEKR5
-
-# Latest packages released for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/optional/latest/x86_64/index.html
 yum-config-manager --enable ol7_optional_latest
-
-# Latest add-on packages for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/index.html
 yum-config-manager --enable ol7_addons
-
-# Latest Software Collection 3.0 packages for Oracle Linux 7 (x86_64)
-#  http://yum.oracle.com/repo/OracleLinux/OL7/SoftwareCollections/x86_64/index.html
 yum-config-manager --enable ol7_software_collections
-
-# Latest packages for Oracle Instant Client on Oracle Linux 7 (x86_64).
-#  http://public-yum.oracle.com/repo/OracleLinux/OL7/oracle/instantclient/x86_64/index.html
 yum-config-manager --enable ol7_oracle_instantclient
 
-#-------------------------------------------------------------------------------
-# Disable Repositories (Oracle Linux v7)
-#  http://yum.oracle.com/oracle-linux-7.html
-#-------------------------------------------------------------------------------
-
-# Latest packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
+# Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_developer
-
-# Latest EPEL packages for test and development for Oracle Linux 7.
-#  http://yum.oracle.com/repo/OracleLinux/OL7/developer_EPEL/x86_64/index.html
 yum-config-manager --disable ol7_developer_EPEL
 
-#-------------------------------------------------------------------------------
-# Default Package Update
-#-------------------------------------------------------------------------------
+# Checking repository information
+yum repolist all
 
 # yum repository metadata Clean up
 yum clean all
@@ -186,7 +152,7 @@ yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch 
 yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
-yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-restorecond
 yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Oracle Linux support tools (from Oracle Linux Official Repository)
@@ -201,11 +167,16 @@ yum install -y ol-template-config ovm-template-config*
 # Package Install Python 3 Runtime (from Oracle Linux Official Repository)
 yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
+[epel-bootstrap]
 name=Bootstrap EPEL
 mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
 failovermethod=priority
@@ -213,23 +184,35 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum --enablerepo=epel -y install epel-release
+yum clean all
+
+yum --enablerepo=epel-bootstrap -y install epel-release
+
+# Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# yum-config-manager --disable epel epel-debuginfo epel-source
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
-# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
+# Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras collectl jq moreutils moreutils-parallel zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Linux Cloud Native Environment]
 #-------------------------------------------------------------------------------
+
+# Checking repository information
+yum repolist all
 
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
@@ -248,8 +231,8 @@ find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 #  https://yum.oracle.com/repo/OracleLinux/OL7/developer/olcne/x86_64/index.html
 yum-config-manager --enable ol7_developer_olcne
 
-# Display Yum repository configuration
-yum-config-manager
+# Checking repository information
+yum repolist all
 
 # yum repository metadata Clean up
 yum clean all
@@ -312,9 +295,29 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum install -y awscli
 
-rpm -qi awscli
+
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
+# yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+python3 --version
+
+pip3 install awscli
+pip3 show awscli
+
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
+alternatives --list
+alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
+alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1
+alternatives --list
+
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
+__EOF__
 
 aws --version
 
@@ -488,53 +491,53 @@ fi
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
-yum install -y python-setuptools
+# yum install -y python-setuptools
 
-easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+# easy_install --script-dir "/opt/aws/bin/aws-cfn-bootstrap" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-mkdir -m 755 -p /etc/cfn/hooks.d
+# mkdir -m 755 -p /etc/cfn/hooks.d
 
-# cfn-hup.conf Configuration File
-cat > /etc/cfn/cfn-hup.conf << __EOF__
-[main]
-stack=
-__EOF__
+# # cfn-hup.conf Configuration File
+# cat > /etc/cfn/cfn-hup.conf << __EOF__
+# [main]
+# stack=
+# __EOF__
 
-# cfn-auto-reloader.conf Configuration File
-cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
-[hookname]
-triggers=post.update
-path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
-action=
-runas=root
-__EOF__
+# # cfn-auto-reloader.conf Configuration File
+# cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+# [hookname]
+# triggers=post.update
+# path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+# action=
+# runas=root
+# __EOF__
 
-# cfn-hup.service Configuration File
-cat > /lib/systemd/system/cfn-hup.service << __EOF__
-[Unit]
-Description=cfn-hup daemon
+# # cfn-hup.service Configuration File
+# cat > /lib/systemd/system/cfn-hup.service << __EOF__
+# [Unit]
+# Description=cfn-hup daemon
 
-[Service]
-Type=simple
-ExecStart=/opt/aws/bin/cfn-hup
-Restart=always
+# [Service]
+# Type=simple
+# ExecStart=/opt/aws/aws-cfn-bootstrap/bin/cfn-hup
+# Restart=always
 
-[Install]
-WantedBy=multi-user.target
-__EOF__
+# [Install]
+# WantedBy=multi-user.target
+# __EOF__
 
-# Execute AWS CloudFormation Helper software
-systemctl daemon-reload
+# # Execute AWS CloudFormation Helper software
+# systemctl daemon-reload
 
-systemctl restart cfn-hup
+# systemctl restart cfn-hup
 
-systemctl status -l cfn-hup
+# systemctl status -l cfn-hup
 
-# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
-if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
-	systemctl enable cfn-hup
-	systemctl is-enabled cfn-hup
-fi
+# # Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+# 	systemctl enable cfn-hup
+# 	systemctl is-enabled cfn-hup
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]

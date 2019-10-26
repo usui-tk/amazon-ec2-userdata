@@ -78,7 +78,10 @@ yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
 
 #-------------------------------------------------------------------------------
-# Yum Configuration
+# Default Package Update
+#-------------------------------------------------------------------------------
+# Yum Repositories (CentOS v7)
+#  http://mirror.centos.org/centos-7/7/
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
@@ -86,6 +89,9 @@ yum clean all
 
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-plugin-fastestmirror yum-utils
+
+# Checking repository information
+yum repolist all
 
 # Package Install CentOS yum repository Files (from CentOS Community Repository)
 find /etc/yum.repos.d/
@@ -95,30 +101,19 @@ yum install -y centos-release centos-release-scl
 
 find /etc/yum.repos.d/
 
-#-------------------------------------------------------------------------------
-# Enable Repositories (CentOS v7)
-#  http://mirror.centos.org/centos-7/7/
-#-------------------------------------------------------------------------------
+# Checking repository information
+yum repolist all
 
 # CentOS-Base.repo
 yum-config-manager --enable base
 yum-config-manager --enable updates
 yum-config-manager --enable extras
 
-#-------------------------------------------------------------------------------
-# Disable Repositories (CentOS v7)
-#  http://mirror.centos.org/centos-7/7/
-#-------------------------------------------------------------------------------
-
 # CentOS-SCLo-scl.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 
 # CentOS-SCLo-scl-rh.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-
-#-------------------------------------------------------------------------------
-# Default Package Update
-#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
@@ -137,7 +132,7 @@ yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch 
 yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
-yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
+yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-restorecond
 yum install -y pcp pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install CentOS support tools (from CentOS Community Repository)
@@ -146,15 +141,23 @@ yum install -y redhat-lsb-core redhat-support-tool
 # Package Install CentOS kernel live-patching tools (from CentOS Community Repository)
 yum install -y kpatch
 
-# Package Install Python 3 Runtime (from CentOS Community Repository)
-yum install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# yum-config-manager --disable epel epel-debuginfo epel-source
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]
@@ -198,9 +201,28 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum install -y awscli
 
-rpm -qi awscli
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
+# yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+python3 --version
+
+pip3 install awscli
+pip3 show awscli
+
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
+alternatives --list
+alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
+alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1
+alternatives --list
+
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
+__EOF__
 
 aws --version
 
@@ -380,53 +402,53 @@ fi
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
-yum install -y python-setuptools
+# yum install -y python-setuptools
 
-easy_install --script-dir "/opt/aws/bin" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+# easy_install --script-dir "/opt/aws/bin/aws-cfn-bootstrap" https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
 
-mkdir -m 755 -p /etc/cfn/hooks.d
+# mkdir -m 755 -p /etc/cfn/hooks.d
 
-# cfn-hup.conf Configuration File
-cat > /etc/cfn/cfn-hup.conf << __EOF__
-[main]
-stack=
-__EOF__
+# # cfn-hup.conf Configuration File
+# cat > /etc/cfn/cfn-hup.conf << __EOF__
+# [main]
+# stack=
+# __EOF__
 
-# cfn-auto-reloader.conf Configuration File
-cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
-[hookname]
-triggers=post.update
-path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
-action=
-runas=root
-__EOF__
+# # cfn-auto-reloader.conf Configuration File
+# cat > /etc/cfn/hooks.d/cfn-auto-reloader.conf << __EOF__
+# [hookname]
+# triggers=post.update
+# path=Resources.EC2Instance.Metadata.AWS::CloudFormation::Init
+# action=
+# runas=root
+# __EOF__
 
-# cfn-hup.service Configuration File
-cat > /lib/systemd/system/cfn-hup.service << __EOF__
-[Unit]
-Description=cfn-hup daemon
+# # cfn-hup.service Configuration File
+# cat > /lib/systemd/system/cfn-hup.service << __EOF__
+# [Unit]
+# Description=cfn-hup daemon
 
-[Service]
-Type=simple
-ExecStart=/opt/aws/bin/cfn-hup
-Restart=always
+# [Service]
+# Type=simple
+# ExecStart=/opt/aws/aws-cfn-bootstrap/bin/cfn-hup
+# Restart=always
 
-[Install]
-WantedBy=multi-user.target
-__EOF__
+# [Install]
+# WantedBy=multi-user.target
+# __EOF__
 
-# Execute AWS CloudFormation Helper software
-systemctl daemon-reload
+# # Execute AWS CloudFormation Helper software
+# systemctl daemon-reload
 
-systemctl restart cfn-hup
+# systemctl restart cfn-hup
 
-systemctl status -l cfn-hup
+# systemctl status -l cfn-hup
 
-# Configure AWS CloudFormation Helper software (Start Daemon awsagent)
-if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
-	systemctl enable cfn-hup
-	systemctl is-enabled cfn-hup
-fi
+# # Configure AWS CloudFormation Helper software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled cfn-hup) = "disabled" ]; then
+# 	systemctl enable cfn-hup
+# 	systemctl is-enabled cfn-hup
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]

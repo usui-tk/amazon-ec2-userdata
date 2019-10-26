@@ -75,6 +75,9 @@ chkconfig --list > /tmp/command-log_chkconfig_list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
+# Yum Repositories (Oracle Linux v6)
+#  http://yum.oracle.com/oracle-linux-6.html
+#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
@@ -82,15 +85,8 @@ yum clean all
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-utils
 
-# Default Package Update
-yum update -y
-
-#-------------------------------------------------------------------------------
-# Yum Configuration
-#-------------------------------------------------------------------------------
-
-# yum repository metadata Clean up
-yum clean all
+# Checking repository information
+yum repolist all
 
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
 find /etc/yum.repos.d/
@@ -103,49 +99,35 @@ find /etc/yum.repos.d/
 # Update AMI Defalut YUM Repositories File
 /usr/bin/ol_yum_configure.sh
 
-# Display Yum repository configuration
-yum-config-manager
-
 # Delete AMI Defalut YUM Repositories File
 find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
 find /etc/yum.repos.d/
 
+# yum repository metadata Clean up
 yum clean all
 
-#-------------------------------------------------------------------------------
-# Enable Repositories (Oracle Linux v6)
-#  http://yum.oracle.com/oracle-linux-6.html
-#-------------------------------------------------------------------------------
+# Checking repository information
+yum repolist all
 
-# Latest packages released for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/latest/x86_64/index.html
+# Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --enable ol6_latest
-
-# Latest Unbreakable Enterprise Kernel Release 4 packages for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/UEKR4/x86_64/index.html
 yum-config-manager --enable ol6_UEKR4
-
-# Latest add-on packages for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/addons/x86_64/index.html
 yum-config-manager --enable ol6_addons
-
-# Latest packages for test and development for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/developer/x86_64/index.html
 yum-config-manager --enable ol6_developer
-
-# Latest Software Collection Library packages released for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/SoftwareCollections/x86_64/index.html
 yum-config-manager --enable ol6_software_collections
 
-#-------------------------------------------------------------------------------
-# Disable Repositories (Oracle Linux v6)
-#  http://yum.oracle.com/oracle-linux-6.html
-#-------------------------------------------------------------------------------
-
-# Latest Unbreakable Enterprise Kernel Release 2 packages for Oracle Linux 6.
-#  http://yum.oracle.com/repo/OracleLinux/OL6/UEK/latest/x86_64/index.html
+# Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol6_UEK_latest
+
+# Checking repository information
+yum repolist all
+
+# yum repository metadata Clean up
+yum clean all
+
+# Default Package Update
+yum update -y
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
@@ -167,11 +149,18 @@ yum install -y redhat-lsb-core
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
 yum install -y ol-template-config ovm-template-config*
 
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel]
+[epel-bootstrap]
 name=Bootstrap EPEL
 mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=\$basearch
 failovermethod=priority
@@ -179,12 +168,21 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum --enablerepo=epel -y install epel-release
+yum clean all
+
+yum --enablerepo=epel-bootstrap -y install epel-release
+
+# Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+rm -rf /var/cache/yum/x86_64/6Server/epel-bootstrap*
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-testing.repo
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]
@@ -213,6 +211,9 @@ yum install -y oracle-em-agent-12cR4-preinstall
 # Latest packages for Oracle Instant Client on Oracle Linux 6 (x86_64).
 #  http://public-yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/x86_64/index.html
 
+# Checking repository information
+yum repolist all
+
 cat > /etc/yum.repos.d/oracle-instantclient-ol6.repo << __EOF__
 [ol6_instantclient]
 name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
@@ -221,6 +222,9 @@ gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 gpgcheck=1
 enabled=1
 __EOF__
+
+# Checking repository information
+yum repolist all
 
 # Package Install Oracle Instant Client (from Oracle Linux Official Repository)
 yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
@@ -263,25 +267,32 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python-pip python2-colorama python2-rsa python2-jmespath python-futures python-ordereddict
-pip install awscli
-pip show awscli
 
-# Workaround - SSL-Warnings
-# https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
-cat /usr/bin/aws
-sed -i "/import os/a import urllib3" /usr/bin/aws
-sed -i "/import urllib3/a urllib3.disable_warnings()" /usr/bin/aws
-cat /usr/bin/aws
+# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
-# Setting Bash-Completion
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
+/opt/rh/rh-python36/root/usr/bin/python3 -V
+/opt/rh/rh-python36/root/usr/bin/pip3 -V
+
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
+/opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+
+/opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
+alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
+alternatives --display aws
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
+alternatives --display aws_completer
+
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
 __EOF__
-
-source /etc/profile.d/aws-cli.sh
 
 aws --version
 
@@ -447,42 +458,13 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI/Python 3]
-#-------------------------------------------------------------------------------
-
-# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
-# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
-
-# /opt/rh/rh-python36/root/usr/bin/python3 -V
-# /opt/rh/rh-python36/root/usr/bin/pip3 -V
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 install awscli
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
-
-# alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
-# alternatives --display aws
-# alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
-# alternatives --display aws_completer
-
-# cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# # Typically that would be added under one of the following paths:
-# # - /etc/bash_completion.d
-# # - /usr/local/etc/bash_completion.d
-# # - /usr/share/bash-completion/completions
-
-# complete -C aws_completer aws
-# __EOF__
-
-# aws --version
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python-pip
+# yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
+
+yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
 
 pip install pystache
@@ -498,7 +480,13 @@ python setup.py build
 python setup.py install
 
 chmod 775 /usr/init/redhat/cfn-hup
-ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+if [ -L /etc/init.d/cfn-hup ]; then
+	echo "Symbolic link exists"
+else
+	echo "No symbolic link exists"
+	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+fi
 
 cd /tmp
 

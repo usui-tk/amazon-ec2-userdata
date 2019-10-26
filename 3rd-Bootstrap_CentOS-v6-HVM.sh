@@ -75,7 +75,10 @@ yum grouplist -v > /tmp/command-log_yum_repository-package-group-list.txt
 chkconfig --list > /tmp/command-log_chkconfig_list.txt
 
 #-------------------------------------------------------------------------------
-# Yum Configuration
+# Default Package Update
+#-------------------------------------------------------------------------------
+# Yum Repositories (CentOS v6)
+#  http://mirror.centos.org/centos-6/6/
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
@@ -83,6 +86,9 @@ yum clean all
 
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-plugin-fastestmirror yum-utils
+
+# Checking repository information
+yum repolist all
 
 # Package Install CentOS yum repository Files (from CentOS Community Repository)
 find /etc/yum.repos.d/
@@ -92,30 +98,19 @@ yum install -y centos-release centos-release-scl
 
 find /etc/yum.repos.d/
 
-#-------------------------------------------------------------------------------
-# Enable Repositories (CentOS v6)
-#  http://mirror.centos.org/centos-6/6/
-#-------------------------------------------------------------------------------
+# Checking repository information
+yum repolist all
 
 # CentOS-Base.repo
 yum-config-manager --enable base
 yum-config-manager --enable updates
 yum-config-manager --enable extras
 
-#-------------------------------------------------------------------------------
-# Disable Repositories (CentOS v6)
-#  http://mirror.centos.org/centos-6/6/
-#-------------------------------------------------------------------------------
-
 # CentOS-SCLo-scl.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 
 # CentOS-SCLo-scl-rh.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
-
-#-------------------------------------------------------------------------------
-# Default Package Update
-#-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
 yum clean all
@@ -140,12 +135,23 @@ yum install -y pcp pcp-manager pcp-pmda* pcp-system-tools
 # Package Install CentOS support tools (from CentOS Community Repository)
 yum install -y redhat-lsb-core
 
+# Package Install Python 3 Runtime (from CentOS Community Repository)
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 yum install -y epel-release
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# yum-config-manager --disable epel epel-debuginfo epel-source
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]
@@ -187,27 +193,34 @@ if [ $(compgen -ac | sort | uniq | grep jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI/Python 3]
 #-------------------------------------------------------------------------------
-yum --enablerepo=epel install -y python-pip python2-colorama python2-rsa python2-jmespath python-futures python-ordereddict
-pip install awscli
-pip show awscli
 
-# Workaround - SSL-Warnings
-# https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings
-cat /usr/bin/aws
-sed -i "/import os/a import urllib3" /usr/bin/aws
-sed -i "/import urllib3/a urllib3.disable_warnings()" /usr/bin/aws
-cat /usr/bin/aws
+# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
-# Setting Bash-Completion
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
-fi
+/opt/rh/rh-python36/root/usr/bin/python3 -V
+/opt/rh/rh-python36/root/usr/bin/pip3 -V
+
+# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
+/opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+
+/opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
+alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
+alternatives --display aws
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
+alternatives --display aws_completer
+
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
 __EOF__
-
-source /etc/profile.d/aws-cli.sh
 
 aws --version
 
@@ -373,42 +386,13 @@ if [ -n "$RoleName" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI/Python 3]
-#-------------------------------------------------------------------------------
-
-# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
-# yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
-
-# /opt/rh/rh-python36/root/usr/bin/python3 -V
-# /opt/rh/rh-python36/root/usr/bin/pip3 -V
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 install awscli
-
-# /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
-
-# alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
-# alternatives --display aws
-# alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
-# alternatives --display aws_completer
-
-# cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# # Typically that would be added under one of the following paths:
-# # - /etc/bash_completion.d
-# # - /usr/local/etc/bash_completion.d
-# # - /usr/share/bash-completion/completions
-
-# complete -C aws_completer aws
-# __EOF__
-
-# aws --version
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [AWS CloudFormation Helper Scripts]
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
-# yum --enablerepo=epel install -y python-pip
+# yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
+
+yum --enablerepo=epel install -y python-pip
 # pip install --upgrade pip
 
 pip install pystache
@@ -424,7 +408,13 @@ python setup.py build
 python setup.py install
 
 chmod 775 /usr/init/redhat/cfn-hup
-ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+
+if [ -L /etc/init.d/cfn-hup ]; then
+	echo "Symbolic link exists"
+else
+	echo "No symbolic link exists"
+	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+fi
 
 cd /tmp
 
