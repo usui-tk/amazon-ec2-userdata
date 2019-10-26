@@ -248,7 +248,7 @@ echo "Kernel version of the machine is ${KERNEL_VERSION}."
 echo "BootstrapScript URL is ${BootstrapScript}"
 
 # Install curl/wget Command
-if [ $(compgen -ac | sort | uniq | grep curl) ] || [ $(compgen -ac | sort | uniq | grep wget) ]; then
+if [ $(compgen -ac | sort | uniq | grep -w curl) ] || [ $(compgen -ac | sort | uniq | grep -w wget) ]; then
     echo "Preinstalled curl/wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
 else
     if [ $(command -v yum) ]; then
