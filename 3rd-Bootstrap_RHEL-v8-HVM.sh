@@ -163,6 +163,10 @@ dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 # Package Install Red Hat Enterprise Linux Web-Based support tools (from Red Hat Official Repository)
 # dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 
@@ -179,14 +183,17 @@ __EOF__
 dnf clean all
 
 dnf --enablerepo=epel-bootstrap -y install epel-release
+
+# Delete dnf/yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
 
+# Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
-# dnf config-manager --disable epel epel-debuginfo epel-source
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# Cleanup repository information
 dnf clean all
 
 # EPEL repository package [dnf command]

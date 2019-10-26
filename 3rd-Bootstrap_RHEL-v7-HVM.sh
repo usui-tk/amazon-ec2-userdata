@@ -157,9 +157,14 @@ yum install -y kpatch
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
 yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 [epel-bootstrap]
 name=Bootstrap EPEL
@@ -172,11 +177,18 @@ __EOF__
 yum clean all
 
 yum --enablerepo=epel-bootstrap -y install epel-release
+
+# Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# yum-config-manager --disable epel epel-debuginfo epel-source
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]

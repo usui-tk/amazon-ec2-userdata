@@ -151,6 +151,10 @@ yum install -y redhat-lsb-core redhat-support-tool redhat-access-insights
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
 yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 
@@ -166,11 +170,18 @@ __EOF__
 yum clean all
 
 yum --enablerepo=epel-bootstrap -y install epel-release
+
+# Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+# rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
 
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-# yum-config-manager --disable epel epel-debuginfo epel-source
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
+# yum repository metadata Clean up
 yum clean all
 
 # EPEL repository package [yum command]
