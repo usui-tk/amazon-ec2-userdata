@@ -113,9 +113,9 @@ repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -
 # Enable Dnf/Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
 do
-echo "[Target repository Name (Enable dnf/yum repository)] :" $repo
-dnf config-manager --enable ${repo}
-sleep 3
+	echo "[Target repository Name (Enable dnf/yum repository)] :" $repo
+	dnf config-manager --enable ${repo}
+	sleep 3
 done
 
 # Checking repository information
@@ -128,9 +128,9 @@ dnf clean all
 # RHEL/RHUI repository package [dnf command]
 for repo in $repolist
 do
-echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
-dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
-sleep 3
+	echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
+	dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
+	sleep 3
 done
 
 # Cleanup repository information

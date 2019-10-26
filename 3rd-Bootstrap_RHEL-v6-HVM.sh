@@ -109,9 +109,9 @@ repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Load
 # Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
 do
-echo "[Target repository Name (Enable yum repository)] :" $repo
-yum-config-manager --enable ${repo}
-sleep 3
+	echo "[Target repository Name (Enable yum repository)] :" $repo
+	yum-config-manager --enable ${repo}
+	sleep 3
 done
 
 # Checking repository information
@@ -123,9 +123,9 @@ yum clean all
 # RHEL/RHUI repository package [yum command]
 for repo in $repolist
 do
-echo "[Target repository Name (Collect yum repository package list)] :" $repo
-yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
-sleep 3
+	echo "[Target repository Name (Collect yum repository package list)] :" $repo
+	yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+	sleep 3
 done
 
 # yum repository metadata Clean up
@@ -226,7 +226,7 @@ yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python
 
 /opt/rh/rh-python36/root/usr/bin/pip3 show awscli
 
-# Configuration tools [AWS-CLI/Python3]
+# Configuration AWS-CLI tools [AWS-CLI/Python3]
 alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
 alternatives --display aws
 alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1

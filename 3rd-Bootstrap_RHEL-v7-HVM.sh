@@ -112,9 +112,9 @@ repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Load
 # Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
 do
-echo "[Target repository Name (Enable yum repository)] :" $repo
-yum-config-manager --enable ${repo}
-sleep 3
+	echo "[Target repository Name (Enable yum repository)] :" $repo
+	yum-config-manager --enable ${repo}
+	sleep 3
 done
 
 # Checking repository information
@@ -126,9 +126,9 @@ yum clean all
 # RHEL/RHUI repository package [yum command]
 for repo in $repolist
 do
-echo "[Target repository Name (Collect yum repository package list)] :" $repo
-yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
-sleep 3
+	echo "[Target repository Name (Collect yum repository package list)] :" $repo
+	yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+	sleep 3
 done
 
 # yum repository metadata Clean up
