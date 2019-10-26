@@ -231,7 +231,7 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		if [ $(lsmod | awk '{print $1}' | grep -w ena) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
 			modinfo ena
 		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
@@ -241,7 +241,7 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x ixgbevf) ]; then
 			modinfo ixgbevf
 		fi
 	else
@@ -290,14 +290,14 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
-		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x nvme) ]; then
 			modinfo nvme
 		fi
 
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x nvme) ]; then
 			if [ $(command -v nvme) ]; then
 				echo "# Get NVMe Device(nvme list)"
 				nvme list

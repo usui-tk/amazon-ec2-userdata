@@ -301,7 +301,7 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
-		if [ $(lsmod | awk '{print $1}' | grep -w ena) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
 			modinfo ena
 		fi
 	elif [[ "$InstanceType" =~ ^(c3.*|c4.*|d2.*|i2.*|r3.*|m4.*)$ ]]; then
@@ -311,7 +311,7 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
-		if [ $(lsmod | awk '{print $1}' | grep -w ixgbevf) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x ixgbevf) ]; then
 			modinfo ixgbevf
 		fi
 	else
@@ -360,14 +360,14 @@ if [ -n "$RoleName" ]; then
 
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
-		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x nvme) ]; then
 			modinfo nvme
 		fi
 
 		# Get NVMe Device(nvme list)
 		# http://www.spdk.io/doc/nvme-cli.html
 		# https://github.com/linux-nvme/nvme-cli
-		if [ $(lsmod | awk '{print $1}' | grep -w nvme) ]; then
+		if [ $(lsmod | awk '{print $1}' | grep -x nvme) ]; then
 			if [ $(command -v nvme) ]; then
 				echo "# Get NVMe Device(nvme list)"
 				nvme list
@@ -567,7 +567,7 @@ sestatus
 #-------------------------------------------------------------------------------
 
 # Replace NTP Client software (Uninstall ntpd Package)
-if [ $(chkconfig --list | awk '{print $1}' | grep -w ntpd) ]; then
+if [ $(chkconfig --list | awk '{print $1}' | grep -x ntpd) ]; then
 	chkconfig --list ntpd
 	service ntpd stop
 fi
@@ -773,7 +773,7 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 	# ls -l /boot/
 
 	# Extending a Partition and File System
-	if [ $(df -hl | awk '{print $1}' | grep -w /dev/xvda1) ]; then
+	if [ $(df -hl | awk '{print $1}' | grep -x /dev/xvda1) ]; then
 		echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
 
 		# Extending a Partition
@@ -803,7 +803,7 @@ if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
 
 		sleep 30
 
-	elif [ $(df -hl | awk '{print $1}' | grep -w /dev/nvme0n1p1) ]; then
+	elif [ $(df -hl | awk '{print $1}' | grep -x /dev/nvme0n1p1) ]; then
 		echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
 
 		# Extending a Partition

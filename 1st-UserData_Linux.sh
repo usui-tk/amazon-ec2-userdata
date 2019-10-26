@@ -29,9 +29,9 @@ __EOF__
 cd /tmp
 
 # Download Decision_Linux-Distribution.sh
-if [ $(command -v curl) ]; then
+if [ $(compgen -ac | sort | uniq | grep -x curl) ]; then
     curl --retry 5 --output Decision_Linux-Distribution.sh ${DecisionScript}
-elif [ $(command -v wget) ]; then
+elif [ $(compgen -ac | sort | uniq | grep -x wget) ]; then
     wget --tries=5 --no-check-certificate --output-document=Decision_Linux-Distribution.sh ${DecisionScript}
 else
     echo "Unsupported curl/wget command"

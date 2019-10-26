@@ -248,7 +248,7 @@ echo "Kernel version of the machine is ${KERNEL_VERSION}."
 echo "BootstrapScript URL is ${BootstrapScript}"
 
 # Install curl/wget Command
-if [ $(compgen -ac | sort | uniq | grep -w curl) ] || [ $(compgen -ac | sort | uniq | grep -w wget) ]; then
+if [ $(compgen -ac | sort | uniq | grep -x curl) ] || [ $(compgen -ac | sort | uniq | grep -x wget) ]; then
     echo "Preinstalled curl/wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
 else
     if [ $(command -v yum) ]; then
@@ -280,11 +280,11 @@ fi
 
 if [ -n "${BootstrapScript}" ]; then
     # Script execution method #1 : Use curl command
-    if [ $(command -v curl) ]; then
+    if [ $(compgen -ac | sort | uniq | grep -x curl) ]; then
         echo "Bootstrap Script Executite - ${BootstrapScript}"
         bash -vc "$(curl -L ${BootstrapScript})"
     # Script execution method #2 : Use wget command
-    elif [ $(command -v wget) ]; then
+    elif [ $(compgen -ac | sort | uniq | grep -x wget) ]; then
         echo "Bootstrap Script Executite - ${BootstrapScript}"
         cd /tmp
         wget --tries=5 --no-check-certificate --output-document=BootstrapScript.sh ${BootstrapScript}
