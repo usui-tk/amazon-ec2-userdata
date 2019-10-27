@@ -820,9 +820,10 @@ df -h
 # Configure cloud-init/growpart module
 cat /etc/cloud/cloud.cfg
 
-if [ ! $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
+if [ $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
+	cat /etc/cloud/cloud.cfg
+else
 	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
-
 	cat /etc/cloud/cloud.cfg
 
 	# # Initial RAM disk reorganization of the currently running Linux-kernel
