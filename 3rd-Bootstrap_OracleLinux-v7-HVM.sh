@@ -1008,7 +1008,7 @@ df -h
 # Configure cloud-init/disk_setup module
 cat /etc/cloud/cloud.cfg
 
-if [ $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
+if [ $(grep -q disk_setup /etc/cloud/cloud.cfg) ]; then
 	cat /etc/cloud/cloud.cfg
 else
 	sed -i 's/ - migrator/ - disk_setup\n - migrator/' /etc/cloud/cloud.cfg
