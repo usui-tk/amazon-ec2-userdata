@@ -136,10 +136,11 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
-yum install -y abrt abrt-cli blktrace parted system-config-network-tui time tmpwatch tzdata unzip usermode zip
+yum install -y abrt abrt-cli blktrace gdisk parted system-config-network-tui time tmpwatch tzdata unzip usermode util-linux-ng zip
+yum install -y cloud-utils-growpart dracut-modules-growroot
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Community Repository)
-yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vim-enhanced wget zip zsh
+yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip util-linux-ng vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -191,7 +192,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion cloud-utils-growpart dracut-modules-growroot fio iperf3 jq moreutils zstd
+yum --enablerepo=epel install -y bash-completion fio iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]

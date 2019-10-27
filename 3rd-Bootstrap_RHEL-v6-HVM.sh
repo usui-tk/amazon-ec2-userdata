@@ -139,7 +139,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip vim-enhanced wget zip zsh
+yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip util-linux-ng vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
@@ -757,6 +757,115 @@ else
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
 	netstat -r -A inet6
+fi
+
+#-------------------------------------------------------------------------------
+# System Setting (Root Disk Extension)
+#-------------------------------------------------------------------------------
+
+# Disk Information(Partition) [parted -l]
+parted -l
+
+# Disk Information(MountPoint) [lsblk -al]
+lsblk -al
+
+# Disk Information(File System) [df -h]
+df -h
+
+# Configure cloud-init/growpart module
+cat /etc/cloud/cloud.cfg
+
+if [ $(grep -q growpart /etc/cloud/cloud.cfg) ]; then
+	cat /etc/cloud/cloud.cfg
+else
+	sed -i 's/ - resizefs/ - growpart\n - resizefs/' /etc/cloud/cloud.cfg
+	cat /etc/cloud/cloud.cfg
+
+	# # Initial RAM disk reorganization of the currently running Linux-kernel
+	# ls -l /boot/
+	# lsinitrd /boot/initramfs-$(uname -r).img | grep -ie "growroot" -ie "growpart"
+	# dracut --force --add growroot /boot/initramfs-$(uname -r).img
+	# lsinitrd /boot/initramfs-$(uname -r).img | grep -ie "growroot" -ie "growpart"
+	# ls -l /boot/
+
+	# # Initial RAM disk reorganization of latest Linux-kernel
+	# eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
+	# LastestKernelVersion=$(rpm -qa ${DEFAULTKERNEL} | sed 's/^kernel-//' | sed 's/^uek-//' | sort --reverse | head -n 1)
+	# ls -l /boot/
+	# lsinitrd /boot/initramfs-${LastestKernelVersion}.img | grep -ie "growroot" -ie "growpart"
+	# dracut --force --add growroot /boot/initramfs-${LastestKernelVersion}.img
+	# lsinitrd /boot/initramfs-${LastestKernelVersion}.img | grep -ie "growroot" -ie "growpart"
+	# ls -l /boot/
+
+	# # Extending a Partition and File System
+	# if [ $(df -hl | awk '{print $1}' | grep -x /dev/xvda1) ]; then
+	# 	echo "Amazon EC2 Instance type (Non-Nitro Hypervisor) :" $InstanceType
+
+	# 	# Extending a Partition
+	# 	parted -l
+	# 	lsblk -al
+	# 	LANG=C growpart --dry-run /dev/xvda 1
+	# 	LANG=C growpart /dev/xvda 1
+	# 	parted -l
+	# 	lsblk -al
+
+	# 	sleep 15
+
+	# 	# Extending the File System
+	# 	if [ $(lsblk -fl | grep xvda1 | awk '{print $2}') = "ext4" ]; then
+	# 		df -khT
+	# 		resize2fs -F /dev/xvda1
+	# 		df -khT
+	# 	elif [ $(lsblk -fl | grep xvda1 | awk '{print $2}') = "xfs" ]; then
+	# 		df -khT
+	# 		xfs_growfs -d /
+	# 		df -khT
+	# 	else
+	# 		df -khT
+	# 		resize2fs -F /dev/xvda1
+	# 		df -khT
+	# 	fi
+
+	# 	sleep 30
+
+	# elif [ $(df -hl | awk '{print $1}' | grep -x /dev/nvme0n1p1) ]; then
+	# 	echo "Amazon EC2 Instance type (Nitro Hypervisor) :" $InstanceType
+
+	# 	# Extending a Partition
+	# 	parted -l
+	# 	lsblk -al
+	# 	LANG=C growpart --dry-run /dev/nvme0n1 1
+	# 	LANG=C growpart /dev/nvme0n1 1
+	# 	parted -l
+	# 	lsblk -al
+
+	# 	sleep 15
+
+	# 	# Extending the File System
+	# 	if [ $(lsblk -fl | grep nvme0n1p1 | awk '{print $2}') = "ext4" ]; then
+	# 		df -khT
+	# 		resize2fs -F /dev/nvme0n1p1
+	# 		df -khT
+	# 	elif [ $(lsblk -fl | grep nvme0n1p1 | awk '{print $2}') = "xfs" ]; then
+	# 		df -khT
+	# 		xfs_growfs -d /
+	# 		df -khT
+	# 	else
+	# 		df -khT
+	# 		resize2fs -F /dev/nvme0n1p1
+	# 		df -khT
+	# 	fi
+
+	# 	sleep 30
+
+	# else
+	# 	echo "Amazon EC2 Instance type :" $InstanceType
+
+	# 	parted -l
+	# 	lsblk -al
+
+	# 	df -khT
+	# fi
 fi
 
 #-------------------------------------------------------------------------------
