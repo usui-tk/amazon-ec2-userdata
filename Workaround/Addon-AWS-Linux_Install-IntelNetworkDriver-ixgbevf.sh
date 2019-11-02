@@ -36,7 +36,7 @@ PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
 # IAM Role Information
-if [ $(compgen -ac | sort | uniq | grep jq) ]; then
+if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 	RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
 	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 fi
