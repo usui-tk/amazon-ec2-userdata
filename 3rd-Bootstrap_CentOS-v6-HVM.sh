@@ -135,8 +135,8 @@ yum install -y abrt abrt-cli blktrace gdisk parted system-config-network-tui tim
 yum install -y acpid bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump traceroute tree unzip util-linux-ng vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
-yum install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils
-yum install -y pcp pcp-manager pcp-pmda* pcp-system-tools
+yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils
+yum install -y pcp pcp-manager "pcp-pmda*" pcp-system-tools
 
 # Package Install CentOS support tools (from CentOS Community Repository)
 yum install -y redhat-lsb-core
