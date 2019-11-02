@@ -629,7 +629,7 @@ systemctl daemon-reload
 cat > /etc/yum.repos.d/google-chrome.repo << __EOF__
 [google-chrome]
 name=google-chrome - \$basearch
-baseurl=http://dl.google.com/linux/chrome/rpm/stable/\$basearch
+baseurl=https://dl.google.com/linux/chrome/rpm/stable/\$basearch
 enabled=1
 gpgcheck=1
 gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub

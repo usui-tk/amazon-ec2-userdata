@@ -102,7 +102,7 @@ apt clean -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
+apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor

@@ -29,6 +29,7 @@ ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdat
 
 # Parameter Settings (BootstrapScript - Script independent of operating system version [operation check requires a specific version or higher])
 ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
+ScriptForOpenSUSE="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-HVM.sh"
 ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
 #-------------------------------------------------------------------------------
@@ -147,10 +148,10 @@ function get_bootstrap_script () {
         fi
     elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
         if [ $(echo ${REV} | grep -e '18.04') ]; then
-           # Bootstrap Script for Ubuntu 18.04 LTS
+           # Bootstrap Script for Ubuntu 18.04 LTS (Bionic Beaver)
            BootstrapScript=${ScriptForUbuntu1804}
         elif [ $(echo ${REV} | grep -e '16.04') ]; then
-           # Bootstrap Script for Ubuntu 16.04 LTS
+           # Bootstrap Script for Ubuntu 16.04 LTS (Xenial Xerus)
            BootstrapScript=${ScriptForUbuntu1604}
         else
            BootstrapScript=""
@@ -162,6 +163,13 @@ function get_bootstrap_script () {
         elif [ $(echo ${REV} | grep -e '12.') ]; then
            # Bootstrap Script for SUSE Linux Enterprise Server 12
            BootstrapScript=${ScriptForSLESv12}
+        else
+           BootstrapScript=""
+        fi
+    elif [ "${DIST}" = "openSUSE Leap" ] || [ "${DIST_TYPE}" = "opensuse-leap" ]; then
+        if [ $(echo ${REV} | grep -e '15.') ]; then
+           # Bootstrap Script for openSUSE Leap 15
+           BootstrapScript=${ScriptForOpenSUSE}
         else
            BootstrapScript=""
         fi
