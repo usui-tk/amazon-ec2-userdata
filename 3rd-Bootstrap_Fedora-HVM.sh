@@ -415,51 +415,6 @@ ansible --version
 ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [PowerShell Core(pwsh)]
-# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
-# https://github.com/PowerShell/PowerShell
-#
-# https://packages.microsoft.com/fedora/
-#
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
-# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
-#-------------------------------------------------------------------------------
-
-# Register the Microsoft signature key
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-
-# Register the Microsoft RedHat repository
-curl https://packages.microsoft.com/config/fedora/30/prod.repo | tee /etc/yum.repos.d/microsoft.repo
-
-# Update the list of products
-dnf clean all
-dnf makecache
-
-dnf update -y
-
-# Install a system component
-dnf install -y compat-openssl10
-
-# Install PowerShell
-dnf install -y powershell
-
-rpm -qi powershell
-
-# Check Version
-pwsh -Version
-
-# # Operation check of PowerShell command
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-# pwsh -Command "Import-Module AWSPowerShell.NetCore"
-
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Get-AWSPowerShellVersion"
-# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
-
-#-------------------------------------------------------------------------------
 # Custom Package Installation [Docker]
 #-------------------------------------------------------------------------------
 

@@ -464,18 +464,19 @@ fi
 # Docker Deamon Information
 docker version --format '{{json .}}' | jq .
 
-docker info
-
 # manage Docker as a non-root user
 cat /etc/group | grep docker
-
 usermod -aG docker ec2-user
-
 cat /etc/group | grep docker
 
 # Docker Pull Image (from Docker Hub)
-docker pull kalilinux/kali-linux-docker          # Kali Linux
-docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+if [ $(docker info > /dev/null 2>&1) ]; then
+	echo "# Docker daemon is running"
+	docker pull kalilinux/kali-linux-docker          # Kali Linux
+	docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+else
+	echo "# Docker daemon is not running"
+fi
 
 # Docker Run (Kali Linux)
 # docker run -it kalilinux/kali-linux-docker /bin/bash
