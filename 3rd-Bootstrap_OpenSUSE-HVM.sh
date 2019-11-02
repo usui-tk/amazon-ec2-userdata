@@ -106,17 +106,17 @@ zypper --quiet refresh -fdb
 # zypper --quiet --non-interactive install-new-recommends
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+# Custom Package Installation (from OpenSUSE Leap community Software repository)
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
+# Package Install SLES System Administration Tools (from OpenSUSE Leap community Software repository - Select pattern)
 zypper --quiet --non-interactive install --type pattern base
 zypper --quiet --non-interactive install --type pattern console
 zypper --quiet --non-interactive install --type pattern yast2_basis
 zypper --quiet --non-interactive install --type pattern apparmor
 zypper --quiet --non-interactive install --type pattern enhanced_base
 
-# Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
+# Package Install SLES System Administration Tools (from OpenSUSE Leap community Software repository - Select package)
 zypper --quiet --non-interactive install arptables atop bash-completion bash-loadables bcc-tools cloud-netconfig-ec2 collectl dstat ebtables git-core glib2-lang glibc-extra hdparm hostinfo iotop kexec-tools kmod-bash-completion lsb-release lzop man-pages-posix mtr net-snmp nmap nvme-cli psutils sdparm seccheck supportutils syslinux sysstat system-group-wheel system-user-bin system-user-daemon systemd-bash-completion systemd-bash-completion time traceroute traceroute tuned unrar unzip zypper-log
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
@@ -142,14 +142,14 @@ fi
 zypper clean --all
 zypper --quiet refresh -fdb
 
-# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
+# Package Install SLES System AWS Tools (from OpenSUSE Leap community Software repository)
 zypper --quiet --non-interactive install python3-susepubliccloudinfo
 
-# Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
+# Package Install Python 3 Runtime (from OpenSUSE Leap community Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
-zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
+zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
 
-# SUSE Linux Enterprise Server Software repository metadata Clean up
+# OpenSUSE Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
 
@@ -573,7 +573,7 @@ chronyc sourcestats -v
 # Configure Tuned
 #-------------------------------------------------------------------------------
 
-# Package Install Tuned (from SUSE Linux Enterprise Server Software repository)
+# Package Install Tuned (from OpenSUSE Leap community Software repository)
 zypper --quiet --non-interactive install tuned tuned-utils tuned-profiles-oracle
 
 rpm -qi tuned
