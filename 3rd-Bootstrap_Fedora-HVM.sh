@@ -102,11 +102,29 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pciutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip vim-enhanced wget xfsdump xfsprogs zip zsh
+dnf install -y acpid atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pciutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip vim-enhanced wget xfsdump xfsprogs zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
 dnf install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
+
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "31" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables-compat
+	elif [ "${VERSION_ID}" = "30" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables
+	elif [ "${VERSION_ID}" = "29" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables
+	elif [ "${VERSION_ID}" = "28" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables
+	else
+		echo "fedora ${VERSION_ID}"
+	fi
+fi
 
 # Package Install Fedora support tools (from Fedora Official Repository)
 dnf install -y redhat-lsb-core
@@ -446,26 +464,67 @@ pwsh -Version
 #-------------------------------------------------------------------------------
 
 # Package Install Docker Enviroment Tools (from Fedora Official Repository)
-dnf install -y docker
-
-rpm -qi docker
-
-systemctl daemon-reload
-
-systemctl restart docker
-
-systemctl status -l docker
-
-# Configure Docker software (Start Daemon docker)
-if [ $(systemctl is-enabled docker) = "disabled" ]; then
-	systemctl enable docker
-	systemctl is-enabled docker
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "31" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y moby-engine
+		rpm -qi moby-engine
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker/moby-engine)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "30" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "29" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "28" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	else
+		echo "fedora ${VERSION_ID}"
+	fi
 fi
-
-# Docker Deamon Information
-docker version --format '{{json .}}' | jq .
-
-docker info
 
 # Docker Pull Image (from Docker Hub)
 docker pull fedora:latest                        # Fedora
@@ -507,7 +566,7 @@ npm -v
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Go]
 #-------------------------------------------------------------------------------
-dnf install -y golang golang-github-aws-aws-sdk-go-devel
+dnf install -y golang
 
 rpm -qi golang
 
