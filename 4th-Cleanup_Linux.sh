@@ -95,8 +95,10 @@ if [ $(command -v rpm) ]; then
 		fi
 
 		# Removing old kernel packages
-		package-cleanup --oldkernels --count="1" -y
-		sleep 5
+		if [ $(command -v package-cleanup) ]; then
+			package-cleanup --oldkernels --count="1" -y
+			sleep 5
+		fi
 
 		# Package Install Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
@@ -131,8 +133,10 @@ if [ $(command -v rpm) ]; then
 
 		# Removing old kernel packages
 		cat /etc/zypp/zypp.conf | grep multiversion.kernels
-		purge-kernels
-		sleep 5
+		if [ $(command -v purge-kernels) ]; then
+			purge-kernels
+			sleep 5
+		fi
 
 		# Package Install Kernel Package
 		rpm -qa | grep -ie "kernel-default" | sort
@@ -199,9 +203,10 @@ if [ $(command -v dpkg) ]; then
 		dpkg --get-selections | grep -ie "linux-image" | sort
 
 		# Removing old kernel packages
-		purge-old-kernels
-		# purge-old-kernels --keep 1 -qy
-		sleep 5
+		if [ $(command -v purge-old-kernels) ]; then
+			purge-old-kernels
+			sleep 5
+		fi
 
 		# Package Install Kernel Package
 		dpkg --get-selections | grep -ie "linux-image" | sort
@@ -212,6 +217,7 @@ if [ $(command -v dpkg) ]; then
 		fi
 
 		# Cleanup repository information
+		apt-get --purge autoremove
 		apt-get clean
 
 	# --------------------------------------------------------------------------
