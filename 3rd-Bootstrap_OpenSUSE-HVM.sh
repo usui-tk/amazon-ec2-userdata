@@ -88,17 +88,111 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 # Default Package Update
 #-------------------------------------------------------------------------------
 
-# OpenSUSE Linux Software repository metadata Clean up
+# OpenSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
 
-# OpenSUSE Linux Software repository information
+# OpenSUSE Leap Linux Software repository information
 zypper repos --uri
 
 # Update default package
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
-# OpenSUSE Linux Software repository metadata Clean up
+# Apply OpenSUSE Leap Linux Service Pack
+# (Service pack information as of 2019.11.1 : OpenSUSE Leap 15.1)
+ServicePackStatus="0"
+
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "15.2" ]; then
+		echo "OpenSUSE Leap ${VERSION_ID}"
+		cat /etc/os-release
+
+		# OpenSUSE Leap Linux Software repository information
+		zypper repos --uri
+
+		# # Backup OpenSUSE Leap Linux Software repository configuration files
+		# cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
+
+		# # Change repository information (15.1 -> 15.1)
+		# sed -i 's/15.1/15.1/g' /etc/zypp/repos.d/*.repo
+
+		# # Renew repository information
+		# zypper --gpg-auto-import-keys --quiet refresh -fdb
+
+		# # Apply OpenSUSE Leap Linux Service Pack
+		# zypper --quiet --non-interactive dist-upgrade --auto-agree-with-licenses || ServicePackStatus=$?
+		# if [ $ServicePackStatus -eq 0 ]; then
+		# 	echo "Successful execution [Zypper dist-upgrade Command]"
+		# 	eval $(grep ^VERSION_ID= /etc/os-release)
+		# 	# Clean up
+		# 	rm -rf /etc/zypp/repos.d.Old
+		# else
+		# 	echo "Failed to execute [Zypper dist-upgrade Command]"
+		# fi
+		# cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.1" ]; then
+		echo "OpenSUSE Leap ${VERSION_ID}"
+		cat /etc/os-release
+
+		# OpenSUSE Leap Linux Software repository information
+		zypper repos --uri
+
+		# # Backup OpenSUSE Leap Linux Software repository configuration files
+		# cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
+
+		# # Change repository information (15.1 -> 15.1)
+		# sed -i 's/15.1/15.1/g' /etc/zypp/repos.d/*.repo
+
+		# # Renew repository information
+		# zypper --gpg-auto-import-keys --quiet refresh -fdb
+
+		# # Apply OpenSUSE Leap Linux Service Pack
+		# zypper --quiet --non-interactive dist-upgrade --auto-agree-with-licenses || ServicePackStatus=$?
+		# if [ $ServicePackStatus -eq 0 ]; then
+		# 	echo "Successful execution [Zypper dist-upgrade Command]"
+		# 	eval $(grep ^VERSION_ID= /etc/os-release)
+		# 	# Clean up
+		# 	rm -rf /etc/zypp/repos.d.Old
+		# else
+		# 	echo "Failed to execute [Zypper dist-upgrade Command]"
+		# fi
+		# cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.0" ]; then
+		echo "OpenSUSE Leap ${VERSION_ID} -> OpenSUSE Leap Lastest ServicePack"
+		cat /etc/os-release
+
+		# OpenSUSE Leap Linux Software repository information
+		zypper repos --uri
+
+		# Backup OpenSUSE Leap Linux Software repository configuration files
+		cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
+
+		# Change repository information (15.0 -> 15.1)
+		sed -i 's/15.0/15.1/g' /etc/zypp/repos.d/*.repo
+
+		# Renew repository information
+		zypper --gpg-auto-import-keys --quiet refresh -fdb
+
+		# Apply OpenSUSE Leap Linux Service Pack
+		zypper --quiet --non-interactive dist-upgrade --auto-agree-with-licenses || ServicePackStatus=$?
+		if [ $ServicePackStatus -eq 0 ]; then
+			echo "Successful execution [Zypper dist-upgrade Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Clean up
+			rm -rf /etc/zypp/repos.d.Old
+		else
+			echo "Failed to execute [Zypper dist-upgrade Command]"
+		fi
+		cat /etc/os-release
+
+	else
+		echo "OpenSUSE Leap ${VERSION_ID}"
+	fi
+fi
+
+# OpenSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
 
@@ -138,7 +232,7 @@ if [ -n "$VERSION_ID" ]; then
 	fi
 fi
 
-# OpenSUSE Linux Software repository metadata Clean up
+# OpenSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
 
@@ -149,7 +243,7 @@ zypper --quiet --non-interactive install python3-susepubliccloudinfo
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
 zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
 
-# OpenSUSE Linux Software repository metadata Clean up
+# OpenSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
 
