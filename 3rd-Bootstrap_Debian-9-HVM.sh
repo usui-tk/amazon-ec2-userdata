@@ -74,8 +74,11 @@ apt list --installed > /tmp/command-log_apt_installed-package.txt
 # Default repository package [apt command]
 apt list > /tmp/command-log_apt_repository-package-list.txt
 
-# systemd service config
+# systemd unit files
 systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
+
+# systemd service config
+systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update

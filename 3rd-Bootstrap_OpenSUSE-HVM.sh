@@ -76,9 +76,6 @@ rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log
 # Default installation package [zypper command]
 zypper search --installed-only > /tmp/command-log_zypper_installed-package.txt
 
-# systemd service config
-systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
-
 # Default repository products list [zypper command]
 zypper products > /tmp/command-log_zypper_repository-products-list.txt
 
@@ -87,6 +84,12 @@ zypper patterns > /tmp/command-log_zypper_repository-patterns-list.txt
 
 # Default repository packages list [zypper command]
 zypper packages > /tmp/command-log_zypper_repository-packages-list.txt
+
+# systemd unit files
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
+
+# systemd service config
+systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
 # Determine the OS release
 eval $(grep ^VERSION_ID= /etc/os-release)

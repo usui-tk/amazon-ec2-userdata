@@ -76,11 +76,14 @@ yum list all > /tmp/command-log_yum_repository-package-list.txt
 # Default repository package group [yum command]
 yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 
-# systemd service config
-systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
-
 # Default repository list [yum command]
 yum repolist all > /tmp/command-log_yum_repository-list.txt
+
+# systemd unit files
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
+
+# systemd service config
+systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update

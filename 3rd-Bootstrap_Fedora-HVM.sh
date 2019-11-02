@@ -65,14 +65,17 @@ dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 # Default repository package group [dnf command]
 dnf group list -v > /tmp/command-log_dnf_repository-package-group-list.txt
 
-# systemd service config
-systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
-
 # Default repository list [dnf command]
 dnf repolist all > /tmp/command-log_dnf_repository-list.txt
 
 # Default repository module [dnf command]
 dnf module list > /tmp/command-log_dnf_module-list.txt
+
+# systemd unit files
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
+
+# systemd service config
+systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
 # Determine the OS release
 eval $(grep ^VERSION_ID= /etc/os-release)

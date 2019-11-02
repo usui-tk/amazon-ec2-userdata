@@ -68,11 +68,14 @@ tdnf list installed > /tmp/command-log_tdnf_installed-package.txt
 # Default repository package [tdnf command]
 tdnf list all > /tmp/command-log_tdnf_repository-package-list.txt
 
-# systemd service config
-systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
-
 # Default repository list [tdnf command]
 tdnf repolist all > /tmp/command-log_tdnf_repository-list.txt
+
+# systemd unit files
+systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-unit-files.txt
+
+# systemd service config
+systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
 #-------------------------------------------------------------------------------
 # Default Package Update
