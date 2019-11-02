@@ -93,7 +93,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 zypper clean --all
 zypper --quiet refresh -fdb
 
-zypper repos
+zypper repos --uri
 
 # Update default package
 zypper --quiet --non-interactive update --auto-agree-with-licenses
@@ -130,9 +130,9 @@ if [ -n "$VERSION_ID" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
 		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools pcp-zeroconf
-	elif [ "${VERSION_ID}" = "15" ]; then
+	elif [ "${VERSION_ID}" = "15.0" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools pcp-zeroconf
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
 	fi
