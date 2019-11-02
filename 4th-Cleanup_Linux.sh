@@ -25,6 +25,15 @@ if [ -f /etc/sysconfig/kernel ]; then
 	echo "Linux Kernel Package Name :" $DEFAULTKERNEL
 fi
 
+# Show Machine Boot Program Information
+if [ -d /sys/firmware/efi ]; then
+	BootProgram="UEFI"
+	echo "Machine Boot Program :" $BootProgram
+else
+	BootProgram="BIOS"
+	echo "Machine Boot Program :" $BootProgram
+fi
+
 #-------------------------------------------------------------------------------
 # Cleanup process for old kernel Package (RPM package ecosystem)
 #-------------------------------------------------------------------------------
@@ -59,7 +68,13 @@ if [ $(command -v rpm) ]; then
 
 		# Reconfigure GRUB 2 config file
 		if [ $(command -v grub2-mkconfig) ]; then
-			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			if [ $BootProgram = "UEFI" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ie "efi" -ie "EFI" | grep -w grub.cfg)
+			elif [ $BootProgram = "BIOS" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ve "efi" -ve "EFI" | grep -w grub.cfg)
+			else
+				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			fi
 		fi
 
 		# Cleanup repository information
@@ -92,7 +107,13 @@ if [ $(command -v rpm) ]; then
 
 		# Reconfigure GRUB 2 config file
 		if [ $(command -v grub2-mkconfig) ]; then
-			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			if [ $BootProgram = "UEFI" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ie "efi" -ie "EFI" | grep -w grub.cfg)
+			elif [ $BootProgram = "BIOS" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ve "efi" -ve "EFI" | grep -w grub.cfg)
+			else
+				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			fi
 		fi
 
 		# Cleanup repository information
@@ -118,7 +139,13 @@ if [ $(command -v rpm) ]; then
 
 		# Reconfigure GRUB 2 config file
 		if [ $(command -v grub2-mkconfig) ]; then
-			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			if [ $BootProgram = "UEFI" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ie "efi" -ie "EFI" | grep -w grub.cfg)
+			elif [ $BootProgram = "BIOS" ]; then
+				grub2-mkconfig -o $(find /boot | grep -ve "efi" -ve "EFI" | grep -w grub.cfg)
+			else
+				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+			fi
 		fi
 
 		# Cleanup repository information
@@ -281,12 +308,12 @@ unset HISTFILE
 
 # Remove Bash History (Root User) for All Linux Distribution
 if [ -f /root/.bash_history ]; then
-	rm -rf /root/.bash_history
+	rm -fv /root/.bash_history
 fi
 
 # Remove Bash History (for AWS Systems Manager/OS Local User)
 if [ -f /home/ssm-user/.bash_history ]; then
-	rm -rf /home/ssm-user/.bash_history
+	rm -fv /home/ssm-user/.bash_history
 fi
 
 # Remove Bash History (General user)
@@ -300,7 +327,7 @@ if [ $BashHistoryFlag -gt 0 ]; then
 	for BashHistory in $BashHistoryList
 	do
     	echo "[Remove Bash History] :" $BashHistory
-		rm -rf $BashHistory
+		rm -fv $BashHistory
     	sleep 1
 	done
 fi
