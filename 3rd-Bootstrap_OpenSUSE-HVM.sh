@@ -51,7 +51,6 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 # Cleanup repository information
 zypper clean --all
-zypper --quiet refresh -fdb
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -93,6 +92,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 zypper clean --all
 zypper --quiet refresh -fdb
 
+# OpenSUSE Linux Software repository information
 zypper repos --uri
 
 # Update default package
