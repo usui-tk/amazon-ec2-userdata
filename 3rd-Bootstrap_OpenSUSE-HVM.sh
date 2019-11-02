@@ -43,6 +43,12 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://wiki.geeko.jp/
 #
 #    https://en.opensuse.org/YaST_Software_Management
+
+#    https://build.opensuse.org/project
+#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.0
+#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.1
+#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.2
+
 #
 #    https://aws.amazon.com/marketplace/seller-profile?id=730aa725-c0c9-4d1d-863f-8e7325fccad4
 #    https://aws.amazon.com/marketplace/pp/openSUSE-openSUSE-Leap/B01N4R3GJI
@@ -220,14 +226,17 @@ if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools pcp-zeroconf
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools pcp-zeroconf
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.0" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
 	fi

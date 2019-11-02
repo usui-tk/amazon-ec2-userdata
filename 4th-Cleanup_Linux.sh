@@ -80,6 +80,9 @@ if [ $(command -v zypper) ]; then
 		fi
 		# Cleanup repository information
 		zypper clean --all
+		# Cleanup Machine information
+		rm -fv /var/lib/dbus/machine-id
+		rm -fv /var/lib/zypp/AnonymousUniqueId
 	fi
 fi
 
