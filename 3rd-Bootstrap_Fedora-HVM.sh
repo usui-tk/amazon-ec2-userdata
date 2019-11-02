@@ -470,8 +470,8 @@ if [ -n "$VERSION_ID" ]; then
 		dnf install -y moby-engine
 		rpm -qi moby-engine
 		systemctl daemon-reload
-		systemctl restart docker
-		systemctl status -l docker
+		# systemctl restart docker
+		# systemctl status -l docker
 		# Configure Docker software (Start Daemon docker/moby-engine)
 		if [ $(systemctl is-enabled docker) = "disabled" ]; then
 			systemctl enable docker
@@ -527,8 +527,13 @@ if [ -n "$VERSION_ID" ]; then
 fi
 
 # Docker Pull Image (from Docker Hub)
-docker pull fedora:latest                        # Fedora
-docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+if [ $(docker info > /dev/null 2>&1) ]; then
+	echo "# Docker daemon is running"
+	docker pull fedora:latest                        # Fedora
+	docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+else
+	echo "# Docker daemon is not running"
+fi
 
 # Docker Run (Amazon Linux 2 LTS)
 # docker run -it amazonlinux:latest bash
