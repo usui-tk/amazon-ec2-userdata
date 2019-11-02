@@ -19,93 +19,199 @@ if [ -f /etc/os-release ]; then
 	cat /etc/os-release
 fi
 
-#-------------------------------------------------------------------------------
-# Cleanup process for old kernel Package
-#-------------------------------------------------------------------------------
-
-# Removing old kernel packages (Use dnf commands)
-if [ $(command -v dnf) ]; then
-	# Removing old kernel packages
-	echo "Target operating system"
-	uname -r
-	dnf --showduplicate list kernel
-	dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
-	sleep 5
-	dnf --showduplicate list kernel
-	# Reconfigure GRUB 2 config file
-	if [ $(command -v grub2-mkconfig) ]; then
-		grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
-	fi
-	# Cleanup repository information
-	dnf clean all
+# Show Linux kernel package name Information
+if [ -f /etc/sysconfig/kernel ]; then
+	eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
+	echo "Linux Kernel Package Name :" $DEFAULTKERNEL
 fi
 
-# Removing old kernel packages (Use yum/package-cleanup commands)
-if [ $(command -v yum) ]; then
-	if [ $(command -v package-cleanup) ]; then
-		if [ $(command -v dnf) ]; then
-			echo "Excluded operating systems"
-		else
-			# Removing old kernel packages
-			echo "Target operating system"
-			uname -r
-			yum --showduplicate list kernel
-			package-cleanup --oldkernels --count="1" -y
-			sleep 5
-			yum --showduplicate list kernel
-			# Reconfigure GRUB 2 config file
-			if [ $(command -v grub2-mkconfig) ]; then
-				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
-			fi
-			# Cleanup repository information
-			yum clean all
-		fi
-	fi
-fi
+#-------------------------------------------------------------------------------
+# Cleanup process for old kernel Package (RPM package ecosystem)
+#-------------------------------------------------------------------------------
+if [ $(command -v rpm) ]; then
 
-# Removing old kernel packages (Use zypper/purge-kernels commands)
-if [ $(command -v zypper) ]; then
-	if [ $(command -v purge-kernels) ]; then
-		# Removing old kernel packages
+	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (RPM package ecosystem) START"
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Linux distributions using DNF package manager)
+	# --------------------------------------------------------------------------
+	if [ $(command -v dnf) ]; then
 		echo "Target operating system"
 		uname -r
-		rpm -qa | grep kernel | sort
-		cat /etc/zypp/zypp.conf | grep multiversion.kernels
-		purge-kernels
+
+		# Package Install Kernel Package
+		if [ -n "$DEFAULTKERNEL" ]; then
+			dnf --showduplicate list ${DEFAULTKERNEL}
+		else
+			rpm -qa | grep -ie "kernel" | sort
+		fi
+
+		# Removing old kernel packages
+		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
 		sleep 5
-		rpm -qa | grep kernel | sort
+
+		# Package Install Kernel Package
+		if [ -n "$DEFAULTKERNEL" ]; then
+			dnf --showduplicate list ${DEFAULTKERNEL}
+		else
+			rpm -qa | grep -ie "kernel" | sort
+		fi
+
 		# Reconfigure GRUB 2 config file
 		if [ $(command -v grub2-mkconfig) ]; then
 			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
 		fi
+
+		# Cleanup repository information
+		dnf clean all
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Linux distributions using YUM package manager)
+	# --------------------------------------------------------------------------
+	elif [ $(command -v yum) ]; then
+		echo "Target operating system"
+		uname -r
+
+		# Package Install Kernel Package
+		if [ -n "$DEFAULTKERNEL" ]; then
+			yum --showduplicate list ${DEFAULTKERNEL}
+		else
+			rpm -qa | grep -ie "kernel" | sort
+		fi
+
+		# Removing old kernel packages
+		package-cleanup --oldkernels --count="1" -y
+		sleep 5
+
+		# Package Install Kernel Package
+		if [ -n "$DEFAULTKERNEL" ]; then
+			yum --showduplicate list ${DEFAULTKERNEL}
+		else
+			rpm -qa | grep -ie "kernel" | sort
+		fi
+
+		# Reconfigure GRUB 2 config file
+		if [ $(command -v grub2-mkconfig) ]; then
+			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+		fi
+
+		# Cleanup repository information
+		yum clean all
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Linux distributions using ZYPPER package manager)
+	# --------------------------------------------------------------------------
+	elif [ $(command -v zypper) ]; then
+		echo "Target operating system"
+		uname -r
+
+		# Package Install Kernel Package
+		rpm -qa | grep -ie "kernel-default" | sort
+
+		# Removing old kernel packages
+		cat /etc/zypp/zypp.conf | grep multiversion.kernels
+		purge-kernels
+		sleep 5
+
+		# Package Install Kernel Package
+		rpm -qa | grep -ie "kernel-default" | sort
+
+		# Reconfigure GRUB 2 config file
+		if [ $(command -v grub2-mkconfig) ]; then
+			grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+		fi
+
 		# Cleanup repository information
 		zypper clean --all
+
 		# Cleanup Machine information
 		rm -fv /var/lib/dbus/machine-id
 		rm -fv /var/lib/zypp/AnonymousUniqueId
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Unsupported Linux distributions)
+	# --------------------------------------------------------------------------
+	else
+		echo "Unsupported Linux distributions"
+		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		fi
+
+		# Show Linux System Information
+		uname -a
+
+		# Show Linux distribution release Information
+		if [ -f /etc/os-release ]; then
+			cat /etc/os-release
+		fi
 	fi
+
+	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (RPM package ecosystem) COMPLETE"
+
 fi
 
-# Removing old kernel packages (Use apt-get/purge-old-kernels commands)
-if [ $(command -v apt-get) ]; then
-	if [ $(command -v purge-old-kernels) ]; then
+
+
+#-------------------------------------------------------------------------------
+# Cleanup process for old kernel Package (DEB package ecosystem)
+#-------------------------------------------------------------------------------
+if [ $(command -v dpkg) ]; then
+
+	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (DEB package ecosystem) START"
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Linux distributions using APT-GET package manager)
+	# --------------------------------------------------------------------------
+	if [ $(command -v apt-get) ]; then
 		# Removing old kernel packages
 		echo "Target operating system"
 		uname -r
-		dpkg --get-selections | grep linux-image
 
+		# Package Install Kernel Package
+		dpkg --get-selections | grep -ie "linux-image" | sort
+
+		# Removing old kernel packages
 		purge-old-kernels
 		# purge-old-kernels --keep 1 -qy
-
 		sleep 5
-		dpkg --get-selections | grep linux-image
+
+		# Package Install Kernel Package
+		dpkg --get-selections | grep -ie "linux-image" | sort
+
 		# Reconfigure GRUB 2 config file
 		if [ $(command -v update-grub) ]; then
 			update-grub
 		fi
+
 		# Cleanup repository information
 		apt-get clean
+
+	# --------------------------------------------------------------------------
+	# Removing old kernel packages (Unsupported Linux distributions)
+	# --------------------------------------------------------------------------
+	else
+		echo "Unsupported Linux distributions"
+		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		fi
+
+		# Show Linux System Information
+		uname -a
+
+		# Show Linux distribution release Information
+		if [ -f /etc/os-release ]; then
+			cat /etc/os-release
+		fi
 	fi
+
+	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (DEB package ecosystem) COMPLETE"
+
 fi
 
 #-------------------------------------------------------------------------------
@@ -127,6 +233,10 @@ find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;
 # Remove /var/log/user-data_*.log files
 rm -rf /var/log/user-data_*.log
 
+#-------------------------------------------------------------------------------
+# Cleanup process for SSH Host Key, SSH Public Key, SSH Authorized Keys
+#-------------------------------------------------------------------------------
+
 # Remove SSH Host Key Pairs
 HostKeyFlag=$(find /etc/ssh/ -name "*_key" | wc -l)
 PublicKeyFlag=$(find /etc/ssh/ -name "*_key.pub" | wc -l)
@@ -146,51 +256,61 @@ if [ -f /root/.ssh/authorized_keys ]; then
 	shred -u --force /root/.ssh/authorized_keys
 fi
 
-# Remove SSH Authorized Keys (ec2-user User) for Amazon Linux, Red Hat Enterprise Linux (RHEL), SUSE Linux Enterprise Server (SLES)
-if [ -f /home/ec2-user/.ssh/authorized_keys ]; then
-	shred -u --force /home/ec2-user/.ssh/authorized_keys
+# Remove SSH Authorized Keys (General user)
+SshKeyFlag=$(find /home -name "authorized_keys" | wc -l)
+
+if [ $SshKeyFlag -gt 0 ]; then
+	# SSH Authorized Keys File List
+	SshKeyList=$(find /home -name "authorized_keys")
+
+	# Remove SSH Authorized Keys (General user)
+	for SshKey in $SshKeyList
+	do
+    	echo "[Remove SSH Authorized Keys] :" $SshKey
+		shred -u --force $SshKey
+    	sleep 1
+	done
 fi
 
-# Remove SSH Authorized Keys (centos User) for CentOS
-if [ -f /home/centos/.ssh/authorized_keys ]; then
-	shred -u --force /home/centos/.ssh/authorized_keys
-fi
-
-# Remove SSH Authorized Keys (fedora User) for fedora
-if [ -f /home/fedora/.ssh/authorized_keys ]; then
-	shred -u --force /home/fedora/.ssh/authorized_keys
-fi
-
-# Remove SSH Authorized Keys (ubuntu User) for Ubuntu
-if [ -f /home/ubuntu/.ssh/authorized_keys ]; then
-	shred -u --force /home/ubuntu/.ssh/authorized_keys
-fi
-
-# Remove SSH Authorized Keys (admin User) for Debian
-if [ -f /home/admin/.ssh/authorized_keys ]; then
-	shred -u --force /home/admin/.ssh/authorized_keys
-fi
+#-------------------------------------------------------------------------------
+# Cleanup process for Bash History
+#-------------------------------------------------------------------------------
 
 # Remove Bash History
 unset HISTFILE
 
-# Remove Bash History (for Default User)
-[ -f /root/.bash_history ] && rm -rf /root/.bash_history
-[ -f /home/ec2-user/.bash_history ] && rm -rf /home/ec2-user/.bash_history
-[ -f /home/centos/.bash_history ] && rm -rf /home/centos/.bash_history
-[ -f /home/fedora/.bash_history ] && rm -rf /home/fedora/.bash_history
-[ -f /home/ubuntu/.bash_history ] && rm -rf /home/ubuntu/.bash_history
-[ -f /home/admin/.bash_history ] && rm -rf /home/admin/.bash_history
+# Remove Bash History (Root User) for All Linux Distribution
+if [ -f /root/.bash_history ]; then
+	rm -rf /root/.bash_history
+fi
 
-# Remove Bash History (for AWS Service and Tool User)
-[ -f /home/ssm-user/.bash_history ] && rm -rf /home/ssm-user/.bash_history
+# Remove Bash History (for AWS Systems Manager/OS Local User)
+if [ -f /home/ssm-user/.bash_history ]; then
+	rm -rf /home/ssm-user/.bash_history
+fi
 
-# Waiting time
-sleep 30
+# Remove Bash History (General user)
+BashHistoryFlag=$(find /home -name ".bash_history" | wc -l)
+
+if [ $BashHistoryFlag -gt 0 ]; then
+	# Bash History File List
+	BashHistoryList=$(find /home -name ".bash_history")
+
+	# Remove Bash History (General user)
+	for BashHistory in $BashHistoryList
+	do
+    	echo "[Remove Bash History] :" $BashHistory
+		rm -rf $BashHistory
+    	sleep 1
+	done
+fi
 
 #-------------------------------------------------------------------------------
 # Stop instance
 #-------------------------------------------------------------------------------
+
+# Waiting time
+sleep 30
 
 # Shutdown
 shutdown -h now
