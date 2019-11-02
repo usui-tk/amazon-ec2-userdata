@@ -229,16 +229,13 @@ if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools pcp-zeroconf
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools pcp-zeroconf
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.0" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-system-tools
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
