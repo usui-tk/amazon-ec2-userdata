@@ -128,6 +128,22 @@ dnf module list
 # Red Hat Update Infrastructure Client Package Update
 dnf clean all
 dnf update -y rh-amazon-rhui-client
+dnf update -y dnf dnf-data dnf-utils
+
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+# Enable Dnf/Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+for repo in $repolist
+do
+	echo "[Target repository Name (Enable dnf/yum repository)] :" $repo
+	dnf config-manager --enable ${repo}
+	sleep 3
+done
+
+# Checking repository information
+dnf repolist all
+dnf module list
 
 # RHEL/RHUI repository package [dnf command]
 for repo in $repolist
