@@ -125,8 +125,9 @@ done
 dnf repolist all
 dnf module list
 
-# Cleanup repository information
+# Red Hat Update Infrastructure Client Package Update
 dnf clean all
+dnf update -y rh-amazon-rhui-client
 
 # RHEL/RHUI repository package [dnf command]
 for repo in $repolist
@@ -147,7 +148,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog traceroute tree unzip util-linux util-linux-user vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
 dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
@@ -204,10 +205,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop iftop zstd
+dnf --enablerepo=epel install -y atop collectd collectd-python collectd-utils iftop zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y collectd collectd-python collectd-utils moreutils moreutils-parallel
+# dnf --enablerepo=epel-playground install -y moreutils moreutils-parallel
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -577,20 +578,9 @@ source /etc/profile.d/ec2rl.sh
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 # dnf install -y ansible ansible-doc rhel-system-roles
 
-# ansible --version
+# Package Install Ansible (from EPEL Repository)
+dnf --enablerepo=epel install -y ansible ansible-doc
 
-# ansible localhost -m setup
-
-# Package Install Ansible (from Python Package Index (PyPI) Repository)
-dnf install -y python3-cryptography python3-pyyaml
-pip3 install ansible
-pip3 show ansible
-
-alternatives --list
-alternatives --install "/usr/bin/ansible" ansible "/usr/local/bin/ansible" 1
-alternatives --list
-
-which ansible
 ansible --version
 
 ansible localhost -m setup
@@ -607,11 +597,11 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 
 # Register the Microsoft RedHat repository
-curl https://packages.microsoft.com/config/rhel/8/prod.repo | tee /etc/yum.repos.d/microsoft.repo
+# curl https://packages.microsoft.com/config/rhel/8/prod.repo | tee /etc/yum.repos.d/microsoft.repo
 
-# Cleanup repository information
-dnf clean all
-dnf makecache
+# # Cleanup repository information
+# dnf clean all
+# dnf makecache
 
 # # Install PowerShell
 # dnf install -y powershell

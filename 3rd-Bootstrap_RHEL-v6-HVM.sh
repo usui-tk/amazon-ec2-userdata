@@ -117,8 +117,9 @@ done
 # Checking repository information
 yum repolist all
 
-# yum repository metadata Clean up
+# Red Hat Update Infrastructure Client Package Update
 yum clean all
+yum update -y rh-amazon-rhui-client
 
 # RHEL/RHUI repository package [yum command]
 for repo in $repolist

@@ -123,8 +123,9 @@ done
 # Checking repository information
 yum repolist all
 
-# yum repository metadata Clean up
+# Red Hat Update Infrastructure Client Package Update
 yum clean all
+yum update -y rh-amazon-rhui-client
 
 # RHEL/RHUI repository package [yum command]
 for repo in $repolist
@@ -613,7 +614,7 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Red Hat Official Repository)
+# Package Install Ansible (from Red Hat Official Repository)
 # yum install -y ansible ansible-doc rhel-system-roles
 
 # Package Install Ansible (from EPEL Repository)
