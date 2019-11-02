@@ -224,7 +224,7 @@ if [ -n "$RoleName" ]; then
 	ProductCodes=$(curl -s "http://169.254.169.254/latest/meta-data/product-codes")
 	if [ -n "$ProductCodes" ]; then
 		echo "# Get Newest AMI Information from Public AMI (AWS Martketplace)"
-		NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=${ProductCodes}" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region {$Region})
+		NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=${ProductCodes}" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 	else
 		echo "# Get Newest AMI Information from Public AMI"
