@@ -106,7 +106,7 @@ yum update -y
 yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iperf3 iotop mlocate mtr nc net-snmp-utils nmap nvme-cli numactl perf psmisc rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
-yum install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-system-tools pcp-zeroconf
+yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools pcp-zeroconf
 
 # Package Install Python 3 Runtime (from Amazon Official Repository)
 yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3-test python3-tools python3-wheel
