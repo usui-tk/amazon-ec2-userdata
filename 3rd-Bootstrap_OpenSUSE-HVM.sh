@@ -39,6 +39,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #  - OpenSUSE
 #
 #    https://en.opensuse.org
+#    https://mirrors.opensuse.org/
 #    https://wiki.geeko.jp/
 #
 #    https://en.opensuse.org/YaST_Software_Management
@@ -219,14 +220,14 @@ if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.2" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools pcp-zeroconf
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		zypper --quiet --non-interactive install jq
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools pcp-zeroconf
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 	elif [ "${VERSION_ID}" = "15.0" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager pcp-pmda-* pcp-system-tools
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
 	fi
@@ -235,9 +236,6 @@ fi
 # OpenSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
-
-# Package Install SLES System AWS Tools (from OpenSUSE Leap community Software repository)
-zypper --quiet --non-interactive install python3-susepubliccloudinfo
 
 # Package Install Python 3 Runtime (from OpenSUSE Leap community Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
