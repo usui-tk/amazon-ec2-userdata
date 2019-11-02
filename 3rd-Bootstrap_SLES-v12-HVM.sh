@@ -101,7 +101,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 zypper clean --all
 zypper --quiet refresh -fdb
 
-zypper repos
+zypper repos --uri
 
 # Package Configure SLES Modules
 #   https://www.suse.com/products/server/features/modules/
@@ -306,15 +306,15 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP4"
 
 		# Add openSUSE Build Service Repository [utilities/SLE_12_SP4_Backports] : Version - SUSE Linux Enterprise 12 SP4
-		zypper repos
+		zypper repos --uri
 		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP4" "https://download.opensuse.org/repositories/utilities/SLE_12_SP4_Backports/utilities.repo"
 		zypper --gpg-auto-import-keys refresh utilities
 
 		# Repository Configure openSUSE Build Service Repository
-		zypper repos
+		zypper repos --uri
 		zypper clean --all
 		zypper refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 		zypper --non-interactive install atop jq
@@ -323,20 +323,20 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP3"
 
 		# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
-		zypper repos
+		zypper repos --uri
 		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
 		zypper --gpg-auto-import-keys refresh utilities
 
 		# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
-		zypper repos
+		zypper repos --uri
 		zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
 		zypper --gpg-auto-import-keys refresh network
 
 		# Repository Configure openSUSE Build Service Repository
-		zypper repos
+		zypper repos --uri
 		zypper clean --all
 		zypper refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 		zypper --non-interactive install atop jq
@@ -345,15 +345,15 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP2"
 
 		# Add openSUSE Build Service Repository [utilities/SLE_12_SP2_Backports] : Version - SUSE Linux Enterprise 12 SP2
-		zypper repos
+		zypper repos --uri
 		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP2" "https://download.opensuse.org/repositories/utilities/SLE_12_SP2_Backports/utilities.repo"
 		zypper --gpg-auto-import-keys refresh utilities
 
 		# Repository Configure openSUSE Build Service Repository
-		zypper repos
+		zypper repos --uri
 		zypper clean --all
 		zypper refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 	elif [ "${VERSION_ID}" = "12.1" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP1"
@@ -388,7 +388,7 @@ if [ -n "$VERSION_ID" ]; then
 		# zypper clean --all
 		# zypper --quiet refresh -fdb
 
-		# zypper repos
+		# zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		# zypper --quiet --non-interactive install collectl mtr
@@ -409,7 +409,7 @@ if [ -n "$VERSION_ID" ]; then
 		# zypper clean --all
 		# zypper --quiet refresh -fdb
 
-		# zypper repos
+		# zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		# zypper --quiet --non-interactive install collectl mtr
@@ -430,7 +430,7 @@ if [ -n "$VERSION_ID" ]; then
 		# zypper clean --all
 		# zypper --quiet refresh -fdb
 
-		# zypper repos
+		# zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		# zypper --quiet --non-interactive install collectl mtr
@@ -450,7 +450,7 @@ if [ -n "$VERSION_ID" ]; then
 
 		zypper clean --all
 		zypper --quiet refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		zypper --quiet --non-interactive install collectl mtr
@@ -470,7 +470,7 @@ if [ -n "$VERSION_ID" ]; then
 
 		zypper clean --all
 		zypper --quiet refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		zypper --quiet --non-interactive install collectl mtr
@@ -490,7 +490,7 @@ if [ -n "$VERSION_ID" ]; then
 
 		zypper clean --all
 		zypper --quiet refresh -fdb
-		zypper repos
+		zypper repos --uri
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		zypper --quiet --non-interactive install collectl mtr
@@ -827,7 +827,7 @@ zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-12" "https://pac
 rpm --import https://packages.microsoft.com/keys/microsoft.asc
 zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
 
-zypper repos
+zypper repos --uri
 
 # Update the list of products
 # zypper clean --all
