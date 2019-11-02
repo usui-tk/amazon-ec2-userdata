@@ -347,7 +347,6 @@ if [ $InspectorInstallStatus -eq 0 ]; then
 	rpm -qi AwsAgent
 
 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-	service awsagent status
 	service awsagent restart
 	service awsagent status
 

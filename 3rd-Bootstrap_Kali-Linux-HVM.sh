@@ -78,15 +78,21 @@ VersionYear=$(echo $VERSION_ID | sed -e "s/\.[^.]*$//g")
 # Default Package Update
 #-------------------------------------------------------------------------------
 
-# apt repository metadata Clean up
-apt clean -y -q
-
 # apt repository mirrors site information
 curl -sI "http://http.kali.org/README"
 # curl -s "http://http.kali.org/README.mirrorlist"
 
+# apt repository metadata Clean up
+apt clean -y -q
+
+# apt repository metadata update
+apt update -y -q
+
+# Package Install Debian apt Administration Tools (from Kali Linux Official Repository)
+apt install -y -q apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
 # Default Package Update
-apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
+apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 
 # apt repository metadata Clean up
 apt clean -y -q
@@ -94,9 +100,6 @@ apt clean -y -q
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
-
-# Package Install Debian apt Administration Tools (from Kali Linux Official Repository)
-apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
 apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip
@@ -641,7 +644,7 @@ apt show code
 apt clean -y -q
 
 # Default Package Update
-apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
+apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 
 # Clean up package
 apt autoremove -y -q

@@ -723,41 +723,28 @@ pwsh -Version
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Oracle Developer Package:td-agent]
+# Custom Package Installation [fluentd]
+# https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Development Repository)
-# yum --enablerepo=ol7_developer install -y td-agent
+curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
+rpm -qi td-agent
 
-# /opt/td-agent/usr/sbin/td-agent --version
-# /opt/td-agent/usr/bin/td --version
+systemctl daemon-reload
 
-# cat /etc/td-agent/td-agent.conf
+systemctl restart td-agent
 
-# systemctl daemon-reload
+systemctl status -l td-agent
 
-# systemctl status -l td-agent
-# systemctl enable td-agent
-# systemctl is-enabled td-agent
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# systemctl restart td-agent
-# systemctl status -l td-agent
-
-# Package Install Fluentd (td-agent) Gem Packages (from Ruby Gem Package)
-
-# /opt/td-agent/usr/sbin/td-agent-gem list
-
-# /opt/td-agent/usr/sbin/td-agent-gem search -r fluent-plugin
-
-# /opt/td-agent/usr/sbin/td-agent-gem install fluent-plugin-aws-elasticsearch-service
-# /opt/td-agent/usr/sbin/td-agent-gem install fluent-plugin-cloudwatch-logs
-# /opt/td-agent/usr/sbin/td-agent-gem install fluent-plugin-kinesis
-# /opt/td-agent/usr/sbin/td-agent-gem install fluent-plugin-kinesis-firehose
-
-# /opt/td-agent/usr/sbin/td-agent-gem update fluent-plugin-s3
-
-# /opt/td-agent/usr/sbin/td-agent-gem list
+# Package bundled ruby gem package information
+/opt/td-agent/embedded/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Developer Package:Terraform]

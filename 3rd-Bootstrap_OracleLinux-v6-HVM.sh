@@ -525,7 +525,6 @@ ssm-cli get-instance-information
 # 	rpm -qi AwsAgent
 
 # 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-# 	service awsagent status
 # 	service awsagent restart
 # 	service awsagent status
 
@@ -580,6 +579,26 @@ yum --enablerepo=epel install -y ansible ansible-doc
 ansible --version
 
 ansible localhost -m setup
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [fluentd]
+# https://docs.fluentd.org/installation/install-by-rpm
+#-------------------------------------------------------------------------------
+
+curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+
+rpm -qi td-agent
+
+# Configure fluentd software (Start Daemon awsagent)
+service td-agent restart
+service td-agent status
+
+chkconfig --list td-agent
+chkconfig td-agent on
+chkconfig --list td-agent
+
+# Package bundled ruby gem package information
+/opt/td-agent/embedded/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

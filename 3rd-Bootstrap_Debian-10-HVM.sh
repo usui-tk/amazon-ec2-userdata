@@ -84,15 +84,18 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 # apt repository metadata Clean up
 apt clean -y -q
 
+# apt repository metadata update
+apt update -y -q
+
+# Package Install Debian apt Administration Tools (from Debian Official Repository)
+apt install -y -q apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
 # Default Package Update
-apt update -y -q && apt upgrade -y -q && apt dist-upgrade -y -q
+apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
-
-# Package Install Debian apt Administration Tools (from Debian Official Repository)
-apt install -y -q apt-transport-https ca-certificates curl gnupg software-properties-common
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
 apt install -y -q acpid acpitool arptables atop bash-completion binutils bpfcc-tools byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted python3-bpfcc snmp sosreport sysstat tcpdump traceroute unzip wget zip zstd
@@ -500,9 +503,41 @@ ansible localhost -m setup
 # pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [fluentd]
+# https://docs.fluentd.org/installation/install-by-deb
+#-------------------------------------------------------------------------------
+
+curl -L "https://toolbelt.treasuredata.com/sh/install-debian-buster-td-agent3.sh" | sh
+
+apt show td-agent
+
+systemctl daemon-reload
+
+systemctl restart td-agent
+
+systemctl status -l td-agent
+
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
+
+# Package bundled ruby gem package information
+/opt/td-agent/embedded/bin/fluent-gem list
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
+
+# apt repository metadata Clean up
 apt clean -y -q
+
+# Default Package Update
+apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
+
+# Clean up package
+apt autoremove -y -q
 
 #-------------------------------------------------------------------------------
 # System information collection

@@ -508,6 +508,30 @@ amazon-linux-extras list
 rpm -qi bcc
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [fluentd]
+# https://docs.fluentd.org/installation/install-by-rpm
+#-------------------------------------------------------------------------------
+
+curl -L "https://toolbelt.treasuredata.com/sh/install-amazon2-td-agent3.sh" | sh
+
+rpm -qi td-agent
+
+systemctl daemon-reload
+
+systemctl restart td-agent
+
+systemctl status -l td-agent
+
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
+
+# Package bundled ruby gem package information
+/opt/td-agent/embedded/bin/fluent-gem list
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all
