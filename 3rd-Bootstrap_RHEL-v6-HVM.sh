@@ -132,6 +132,9 @@ do
 	sleep 3
 done
 
+# Checking repository information
+yum repolist all
+
 # RHEL/RHUI repository package [yum command]
 for repo in $repolist
 do
@@ -200,7 +203,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion fio iperf3 jq moreutils zstd
+yum --enablerepo=epel install -y bash-completion fio inotify-tools iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

@@ -192,7 +192,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion fio iperf3 jq moreutils zstd
+yum --enablerepo=epel install -y bash-completion fio inotify-tools iperf3 jq moreutils zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]
