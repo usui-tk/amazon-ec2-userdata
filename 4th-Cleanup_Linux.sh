@@ -290,18 +290,36 @@ rm -rf /var/log/user-data_*.log
 # Cleanup process for SSH Host Key, SSH Public Key, SSH Authorized Keys
 #-------------------------------------------------------------------------------
 
-# Remove SSH Host Key Pairs
+# Remove SSH Host Key
 HostKeyFlag=$(find /etc/ssh/ -name "*_key" | wc -l)
-PublicKeyFlag=$(find /etc/ssh/ -name "*_key.pub" | wc -l)
 
 if [ $HostKeyFlag -gt 0 ]; then
-	# Remove SSH Host Key Pairs
-	shred -u --force /etc/ssh/*_key
+	# SSH Host Key File List
+	HostKeyList=$(find /etc/ssh/ -name "*_key")
+
+	# Remove SSH Host Key
+	for HostKey in $HostKeyList
+	do
+		echo "[Remove SSH Host Key] :" $HostKey
+		shred -u --force $HostKey
+		sleep 1
+	done
 fi
 
+# Remove SSH Public Key
+PublicKeyFlag=$(find /etc/ssh/ -name "*_key.pub" | wc -l)
+
 if [ $PublicKeyFlag -gt 0 ]; then
-	# Remove SSH Public Key Pairs
-	shred -u --force /etc/ssh/*_key.pub
+	# SSH Public Key File List
+	PublicKeyList=$(find /etc/ssh/ -name "*_key.pub")
+
+	# Remove SSH Public Key
+	for PublicKey in $PublicKeyList
+	do
+		echo "[Remove SSH Public Key] :" $PublicKey
+		shred -u --force $PublicKey
+		sleep 1
+	done
 fi
 
 # Remove SSH Authorized Keys (Root User) for All Linux Distribution
@@ -319,9 +337,9 @@ if [ $SshKeyFlag -gt 0 ]; then
 	# Remove SSH Authorized Keys (General user)
 	for SshKey in $SshKeyList
 	do
-    	echo "[Remove SSH Authorized Keys] :" $SshKey
+		echo "[Remove SSH Authorized Key] :" $SshKey
 		shred -u --force $SshKey
-    	sleep 1
+		sleep 1
 	done
 fi
 
@@ -334,11 +352,13 @@ unset HISTFILE
 
 # Remove Bash History (Root User) for All Linux Distribution
 if [ -f /root/.bash_history ]; then
+	echo "[Remove Bash History] : rm -fv /root/.bash_history"
 	rm -fv /root/.bash_history
 fi
 
 # Remove Bash History (for AWS Systems Manager/OS Local User)
 if [ -f /home/ssm-user/.bash_history ]; then
+	echo "[Remove Bash History] : /home/ssm-user/.bash_history"
 	rm -fv /home/ssm-user/.bash_history
 fi
 
@@ -352,9 +372,9 @@ if [ $BashHistoryFlag -gt 0 ]; then
 	# Remove Bash History (General user)
 	for BashHistory in $BashHistoryList
 	do
-    	echo "[Remove Bash History] :" $BashHistory
+		echo "[Remove Bash History] :" $BashHistory
 		rm -fv $BashHistory
-    	sleep 1
+		sleep 1
 	done
 fi
 
