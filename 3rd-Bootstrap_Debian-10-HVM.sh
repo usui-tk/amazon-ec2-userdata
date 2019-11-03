@@ -101,7 +101,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils bpfcc-tools byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools locales-all lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted python3-bpfcc snmp sosreport sysstat tcpdump traceroute unzip wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-completion bcc binutils blktrace bpfcc-tools byobu chrony collectd collectd-utils collectl crash cryptol curl debian-goodies dstat ebtables ethtool expect fio gdisk git glances hardinfo hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng ipv6toolkit jnettop jq kexec-tools kexec-tools lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync secure-delete snmp sosreport strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip usermode util-linux wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
