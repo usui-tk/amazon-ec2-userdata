@@ -110,8 +110,8 @@ dnf update -y dnf dnf-data dnf-utils
 dnf repolist all
 dnf module list
 
-# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test")
-repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Enable Dnf/Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
@@ -130,8 +130,8 @@ dnf clean all
 dnf update -y rh-amazon-rhui-client
 dnf update -y dnf dnf-data dnf-utils
 
-# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test")
-repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Enable Dnf/Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist

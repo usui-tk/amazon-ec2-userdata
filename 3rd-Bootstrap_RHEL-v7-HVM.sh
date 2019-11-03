@@ -109,8 +109,8 @@ yum update -y rh-amazon-rhui-client
 # Checking repository information
 yum repolist all
 
-# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test")
-repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
@@ -127,8 +127,8 @@ yum repolist all
 yum clean all
 yum update -y rh-amazon-rhui-client
 
-# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test")
-repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
 for repo in $repolist
