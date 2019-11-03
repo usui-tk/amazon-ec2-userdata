@@ -46,7 +46,13 @@ if [ $(command -v rpm) ]; then
 	# --------------------------------------------------------------------------
 	if [ $(command -v dnf) ]; then
 		echo "Target operating system"
-		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		else
+			uname -a
+		fi
 
 		# Package Install Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
@@ -85,7 +91,13 @@ if [ $(command -v rpm) ]; then
 	# --------------------------------------------------------------------------
 	elif [ $(command -v yum) ]; then
 		echo "Target operating system"
-		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		else
+			uname -a
+		fi
 
 		# Package Install Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
@@ -126,7 +138,13 @@ if [ $(command -v rpm) ]; then
 	# --------------------------------------------------------------------------
 	elif [ $(command -v zypper) ]; then
 		echo "Target operating system"
-		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		else
+			uname -a
+		fi
 
 		# Package Install Kernel Package
 		rpm -qa | grep -ie "kernel-default" | sort
@@ -164,15 +182,13 @@ if [ $(command -v rpm) ]; then
 	# --------------------------------------------------------------------------
 	else
 		echo "Unsupported Linux distributions"
-		uname -r
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
 			lsb_release -a
+		else
+			uname -a
 		fi
-
-		# Show Linux System Information
-		uname -a
 
 		# Show Linux distribution release Information
 		if [ -f /etc/os-release ]; then
@@ -192,12 +208,18 @@ if [ $(command -v dpkg) ]; then
 	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (DEB package ecosystem) START"
 
 	# --------------------------------------------------------------------------
-	# Removing old kernel packages (Linux distributions using APT-GET package manager)
+	# Removing old kernel packages (Linux distributions using APT package manager)
 	# --------------------------------------------------------------------------
-	if [ $(command -v apt-get) ]; then
+	if [ $(command -v apt) ]; then
 		# Removing old kernel packages
 		echo "Target operating system"
-		uname -r
+
+		# Show Linux Distribution/Distro information
+		if [ $(command -v lsb_release) ]; then
+			lsb_release -a
+		else
+			uname -a
+		fi
 
 		# Package Install Kernel Package
 		dpkg --get-selections | grep -ie "linux-image" | sort
@@ -216,24 +238,24 @@ if [ $(command -v dpkg) ]; then
 			update-grub
 		fi
 
-		# Cleanup repository information
-		apt-get --purge autoremove
-		apt-get clean
+		# apt repository metadata Clean up
+		apt clean -y -q
+
+		# Clean up package
+		apt autoremove -y -q
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Unsupported Linux distributions)
 	# --------------------------------------------------------------------------
 	else
 		echo "Unsupported Linux distributions"
-		uname -r
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
 			lsb_release -a
+		else
+			uname -a
 		fi
-
-		# Show Linux System Information
-		uname -a
 
 		# Show Linux distribution release Information
 		if [ -f /etc/os-release ]; then
