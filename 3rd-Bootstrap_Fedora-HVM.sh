@@ -105,11 +105,11 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y acpid atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm inotify-tools intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli patchutils pciutils pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump tlog traceroute tree unzip vim-enhanced wget xfsdump xfsprogs zip zsh zstd
+dnf install -y abrt abrt-cli acpid atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng jnettop jq kexec-tools libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils patchutils pciutils pmempool psacct psmisc python3-dnf-plugin-versionlock python3-dnf-plugins-extras-common rsync smartmontools sos srm strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget xfsdump xfsprogs zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils
-dnf install -y setroubleshoot-server selinux-policy* setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
-dnf install -y pcp pcp-export-pcp2json pcp-manager pcp-pmda* pcp-selinux pcp-system-tools pcp-zeroconf
+dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
+dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "31" ]; then
