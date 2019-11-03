@@ -236,7 +236,7 @@ zypper --quiet --non-interactive install --type pattern base
 zypper --quiet --non-interactive install --type pattern apparmor
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --quiet --non-interactive install arptables bash-completion cloud-netconfig-ec2 dstat ebtables git-core hdparm hostinfo iotop kexec-tools lsb-release lzop net-snmp nmap nvme-cli sdparm supportutils supportutils-plugin-suse-public-cloud sysstat systemd-bash-completion time traceroute tuned unzip zypper-log
+zypper --quiet --non-interactive install arptables bash-completion bc bind-utils blktrace cloud-netconfig-ec2 curl dstat ebtables ethtool expect fio gdisk git-core hdparm hostinfo intltool iotop iotop kexec-tools libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nmap numactl nvme-cli nvmetcli parted patchutils psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
 zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 zypper --quiet --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
