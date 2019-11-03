@@ -51,6 +51,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://aws.amazon.com/marketplace/pp/B00PMM9322
 #    http://d36cz9buwru1tt.cloudfront.net/SUSE_Linux_Enterprise_Server_on_Amazon_EC2_White_Paper.pdf
 #
+#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_all
+#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
 #
 #    https://en.opensuse.org/YaST_Software_Management
 #
@@ -225,15 +227,17 @@ zypper --quiet refresh -fdb
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
-#  - Packages sorted by name
-#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_all
-#  - Packages sorted by group
-#    https://www.suse.com/LinuxPackages/packageRouter.jsp?product=server&version=12&service_pack=&architecture=x86_64&package_name=index_group
+#  - Pattern : Basic
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
 zypper --quiet --non-interactive install --type pattern base
 zypper --quiet --non-interactive install --type pattern apparmor
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Package : Individual package
+#-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
 zypper --quiet --non-interactive install arptables bash-completion bc bind-utils blktrace cloud-netconfig-ec2 curl dstat ebtables ethtool expect fio gdisk git-core hdparm hostinfo intltool iotop iotop kexec-tools libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nmap numactl nvme-cli nvmetcli parted patchutils psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
@@ -260,12 +264,6 @@ if [ -n "$VERSION_ID" ]; then
 	fi
 fi
 
-# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
-#  zypper --non-interactive install patterns-public-cloud-Amazon-Web-Services
-zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Init
-zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Instance-Tools
-zypper --quiet --non-interactive install patterns-public-cloud-Amazon-Web-Services-Tools
-
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-setuptools
 zypper --quiet --non-interactive install python3-Babel python3-PyYAML python3-pycurl python3-python-dateutil python3-simplejson python3-six
@@ -273,6 +271,22 @@ zypper --quiet --non-interactive install python3-Babel python3-PyYAML python3-py
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Pattern : Amazon Web Services
+#-------------------------------------------------------------------------------
+
+# Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
+# zypper --quiet --non-interactive install --type pattern Amazon-Web-Services
+zypper --quiet --non-interactive install --type pattern Amazon-Web-Services-Instance-Init
+zypper --quiet --non-interactive install --type pattern Amazon-Web-Services-Instance-Tools
+zypper --quiet --non-interactive install --type pattern Amazon-Web-Services-Tools
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Pattern : SAP
+#-------------------------------------------------------------------------------
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
 SapFlag=0

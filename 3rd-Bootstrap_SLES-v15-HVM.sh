@@ -166,6 +166,7 @@ zypper --quiet refresh -fdb
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Pattern : Basic
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select pattern)
@@ -173,6 +174,11 @@ zypper --quiet --non-interactive install --type pattern base
 zypper --quiet --non-interactive install --type pattern yast2_basis
 zypper --quiet --non-interactive install --type pattern apparmor
 zypper --quiet --non-interactive install --type pattern enhanced_base
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Package : Individual package
+#-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
 zypper --quiet --non-interactive install arptables bash-completion bc bcc-tools bind-utils blktrace cloud-netconfig-ec2 curl dstat ebtables ethtool expect fio gdisk git-core hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
@@ -196,9 +202,18 @@ if [ -n "$VERSION_ID" ]; then
 	fi
 fi
 
+# Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
+zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
+zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
+
 # SUSE Linux Enterprise Server Software repository metadata Clean up
 zypper clean --all
 zypper --quiet refresh -fdb
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Pattern : Amazon Web Services
+#-------------------------------------------------------------------------------
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 SapFlag=0
@@ -212,16 +227,16 @@ if [ -n "$VERSION_ID" ]; then
 
 		if [ $SapFlag -gt 0 ]; then
 			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		else
 			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		fi
 
 	elif [ "${VERSION_ID}" = "15.1" ]; then
@@ -231,16 +246,16 @@ if [ -n "$VERSION_ID" ]; then
 
 		if [ $SapFlag -gt 0 ]; then
 			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		else
 			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		fi
 
 	elif [ "${VERSION_ID}" = "15" ]; then
@@ -249,34 +264,31 @@ if [ -n "$VERSION_ID" ]; then
 
 		if [ $SapFlag -gt 0 ]; then
 			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		else
 			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-			# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-			zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 		fi
 
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-		#  zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services
-		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Init
-		# zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Instance-Tools
-		zypper --quiet --non-interactive install patterns-public-cloud-15-Amazon-Web-Services-Tools
+		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 	fi
 fi
 
-# Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
-zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
-zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyYAML python3-pycrypto python3-pycurl python3-cryptography python3-python-dateutil python3-requests-aws python3-simplejson python3-six python3-urllib3
-
-# SUSE Linux Enterprise Server Software repository metadata Clean up
-zypper clean --all
-zypper --quiet refresh -fdb
+#-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
+#  - Pattern : SAP
+#-------------------------------------------------------------------------------
 
 # Package Install SAP Utility and Tools (from SUSE Linux Enterprise Server Software repository
 SapFlag=0
