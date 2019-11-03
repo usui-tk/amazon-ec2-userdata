@@ -98,14 +98,14 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion binutils byobu collectl debian-goodies dstat ebtables fio gdisk git hardinfo hdparm ipv6toolkit jq kexec-tools lsof lzop iotop mtr needrestart netcat nmap nvme-cli parted snmp sosreport sysstat tcpdump traceroute unzip wget zip zstd
+# Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
+apt install -y -q acpid acpitool arptables atop bash-completion bcc binutils blktrace byobu chrony collectd collectd-utils collectl crash cryptol curl debian-goodies dstat ebtables ethtool expect fio gdisk git glances hardinfo hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng ipv6toolkit jnettop jq kexec-tools kexec-tools lsb-release lsof lvm2 lzop manpages mc mcelog mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nmap numactl numatop nvme-cli parted psmisc rsync rsyncrypto secure-delete snmp sosreport strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip usermode util-linux wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 apt install -y -q pcp pcp-conf pcp-manager
 
-# Package Install Python 3 Runtime (from Debian Official Repository)
+# Package Install Python 3 Runtime (from Ubuntu Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-ubuntutools python3-wheel
 
 #-------------------------------------------------------------------------------
