@@ -681,23 +681,23 @@ fi
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone Asia/Tokyo
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 elif [ "${Timezone}" = "UTC" ]; then
 	echo "# Setting SystemClock and Timezone -> $Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	timedatectl set-timezone UTC
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 else
 	echo "# Default SystemClock and Timezone"
 	date
-	timedatectl status --all --no-pager
+	timedatectl status --no-pager
 	dpkg-reconfigure --frontend noninteractive tzdata
 	date
 fi
