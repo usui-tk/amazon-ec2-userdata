@@ -210,7 +210,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl htop iftop inotify-tools jq moreutils moreutils-parallel ncdu srm zstd
+yum --enablerepo=epel install -y atop bash-completion-extras collectl glances htop iftop inotify-tools jnettop jq moreutils moreutils-parallel ncdu srm zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Linux Cloud Native Environment]
