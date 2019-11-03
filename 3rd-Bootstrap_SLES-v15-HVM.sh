@@ -309,6 +309,17 @@ else
 fi
 
 #-------------------------------------------------------------------------------
+# Default Package Update
+#-------------------------------------------------------------------------------
+
+# SUSE Linux Enterprise Server Software repository metadata Clean up
+zypper clean --all
+zypper --quiet refresh -fdb
+
+# Update default package
+zypper --quiet --non-interactive update --auto-agree-with-licenses
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
 #   https://download.opensuse.org/repositories/utilities/SLE_15/
