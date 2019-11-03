@@ -136,10 +136,10 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Pre-installation package difference of CentOS and RHEL (from CentOS Community Repository)
-yum install -y abrt abrt-cli blktrace cloud-utils-growpart parted time tmpwatch tzdata unzip usermode zip
+yum install -y cloud-utils-growpart parted tzdata usermode
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools libicu lsof lvm2 lzop man-pages mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time traceroute tree unzip util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree unzip util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-restorecond
@@ -174,7 +174,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl inotify-tools jq moreutils moreutils-parallel zstd
+yum --enablerepo=epel install -y atop bash-completion-extras collectl htop iftop inotify-tools jq moreutils moreutils-parallel ncdu srm zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
