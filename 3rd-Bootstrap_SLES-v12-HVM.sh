@@ -849,13 +849,13 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Add the Microsoft Product repository
-zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-12" "https://packages.microsoft.com/config/sles/12/prod.repo"
+# zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-12" "https://packages.microsoft.com/config/sles/12/prod.repo"
 
 # Register the Microsoft signature key
-rpm --import https://packages.microsoft.com/keys/microsoft.asc
-zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
+# rpm --import https://packages.microsoft.com/keys/microsoft.asc
+# zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
 
-zypper repos
+# zypper repos
 
 # Update the list of products
 # zypper clean --all
