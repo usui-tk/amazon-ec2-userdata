@@ -190,16 +190,13 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
 		zypper --quiet --non-interactive install jq
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-		zypper --quiet --non-interactive install pcp
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 		zypper --quiet --non-interactive install jq
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-		zypper --quiet --non-interactive install pcp
 	elif [ "${VERSION_ID}" = "15" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA"
 		# zypper --quiet --non-interactive install pcp pcp-conf
-		zypper --quiet --non-interactive install pcp
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
 	fi
