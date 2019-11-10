@@ -246,7 +246,7 @@ dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-p
 dnf --enablerepo=epel install -y atop collectd collectd-utils htop iftop inotify-tools moreutils moreutils-parallel ncdu tcping zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances jnettop nload srm
+# dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

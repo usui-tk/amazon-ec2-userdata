@@ -142,7 +142,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl glances iftop inotify-tools jnettop moreutils moreutils-parallel ncdu nload srm tcping
+yum --enablerepo=epel install -y atop bash-completion-extras collectl glances httping iftop inotify-tools jnettop moreutils moreutils-parallel ncdu nload srm tcping
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
