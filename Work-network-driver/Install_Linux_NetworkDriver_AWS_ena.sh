@@ -4,13 +4,14 @@
 # Custom Package Installation [Amazon Network Driver(ena)]
 #
 # Target Linux Distribution
-#  - Red Hat Enterprise Linux v6.x, v7.x
-#  - CentOS v6.x, v7,x
+#  - Red Hat Enterprise Linux v6.x
+#  - CentOS v6.x
 #
 # Reference
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/instance-types.html
 #  https://github.com/amzn/amzn-drivers
+#  https://github.com/amzn/amzn-drivers/releases
 #  https://github.com/amzn/amzn-drivers/blob/master/kernel/linux/rpm/README-rpm.txt
 #-------------------------------------------------------------------------------
 
@@ -19,7 +20,7 @@
 #-------------------------------------------------------------------------------
 
 # Source code acquisition URL and definition of file name and version information
-SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.1.2.tar.gz"
+SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.1.3.tar.gz"
 SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 

@@ -4,8 +4,8 @@
 # Custom Package Installation [Intel Network Driver(ixgbevf)]
 #
 # Target Linux Distribution
-#  - Red Hat Enterprise Linux v6.x, v7.x
-#  - CentOS v6.x, v7,x
+#  - Red Hat Enterprise Linux v6.x
+#  - CentOS v6.x
 #
 # Reference
 #  http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/enhanced-networking.html
