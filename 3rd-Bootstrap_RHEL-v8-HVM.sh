@@ -104,7 +104,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 # Red Hat Update Infrastructure Client Package Update
 dnf clean all
 dnf update -y rh-amazon-rhui-client
-dnf update -y dnf dnf-data dnf-utils
+dnf update -y dnf dnf-data
 
 # Checking repository information
 dnf repolist all
@@ -128,7 +128,7 @@ dnf module list
 # Red Hat Update Infrastructure Client Package Update
 dnf clean all
 dnf update -y rh-amazon-rhui-client
-dnf update -y dnf dnf-data dnf-utils
+dnf update -y dnf dnf-data
 
 # Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel")
 repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
@@ -164,14 +164,14 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 iptraf-ng jq kexec-tools libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
-dnf install -y iscsi-initiator-utils lsscsi sg3_utils
-dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
+dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
+dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond udica
 dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
-dnf install -y redhat-lsb-core redhat-support-tool insights-client
+dnf install -y redhat-lsb-core redhat-support-tool insights-client rhel-system-roles
 
 # Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
 dnf install -y kpatch
@@ -206,6 +206,7 @@ dnf --enablerepo=epel-bootstrap -y install epel-release
 
 # Delete dnf/yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
+rm -rf /var/cache/dnf/epel-bootstrap*
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
@@ -221,10 +222,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop collectd collectd-utils iftop inotify-tools zstd
+dnf --enablerepo=epel install -y atop collectd collectd-utils htop iftop inotify-tools moreutils moreutils-parallel ncdu zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances htop jnettop moreutils moreutils-parallel ncdu srm
+# dnf --enablerepo=epel-playground install -y glances jnettop srm
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -643,24 +644,24 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-# curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
-# rpm -qi td-agent
+rpm -qi td-agent
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart td-agent
+systemctl restart td-agent
 
-# systemctl status -l td-agent
+systemctl status -l td-agent
 
-# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-# if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-# 	systemctl enable td-agent
-# 	systemctl is-enabled td-agent
-# fi
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# # Package bundled ruby gem package information
-# /opt/td-agent/embedded/bin/fluent-gem list
+# Package bundled ruby gem package information
+/opt/td-agent/embedded/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -758,7 +759,7 @@ chronyc sourcestats -v
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from Red Hat Official Repository)
-dnf install -y tuned tuned-utils tuned-profiles-oracle
+dnf install -y tuned tuned-utils tuned-profiles-oracle tuned-profiles-mssql
 
 rpm -qi tuned
 
