@@ -176,17 +176,33 @@ dnf install -y redhat-lsb-core redhat-support-tool insights-client rhel-system-r
 # Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
 dnf install -y kpatch
 
-# Package Install Python 3 Runtime (from Red Hat Official Repository)
-dnf module list | grep python3
-
-dnf install -y @python36
-
-dnf module list | grep python3
-
-dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
-
 # Package Install Red Hat Enterprise Linux Web-Based support tools (from Red Hat Official Repository)
 # dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python3]
+#-------------------------------------------------------------------------------
+
+# DNF-Module Enable Python 3 Runtime (from Red Hat Official Repository)
+dnf module list | grep python3
+dnf install -y @python36
+dnf module list | grep python3
+
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
+dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
+
+# Version Information (Python3)
+python3 -V
+pip3 -V
+
+# Python package introduction and setting
+alternatives --list
+alternatives --set python "/usr/bin/python3"
+alternatives --list
+
+which python
+python --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
@@ -227,10 +243,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop collectd collectd-utils htop iftop inotify-tools moreutils moreutils-parallel ncdu zstd
+dnf --enablerepo=epel install -y atop collectd collectd-utils htop iftop inotify-tools moreutils moreutils-parallel ncdu tcping zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances jnettop srm
+# dnf --enablerepo=epel-playground install -y glances jnettop nload srm
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -265,29 +281,31 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI/Python3]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-bundle.html
 #-------------------------------------------------------------------------------
 
-# Python package introduction and setting
-dnf module list | grep python3
-dnf install -y @python36
-dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
-dnf module list | grep python3
+# Package download AWS-CLI v1 Tools (from Bundle Installer)
+curl -sS "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "/tmp/awscli-bundle.zip"
+unzip "/tmp/awscli-bundle.zip" -d /tmp/
 
-alternatives --list
-alternatives --set python "/usr/bin/python3"
-alternatives --list
-which python
-python --version
+# [Workaround] Specify Python3 command
+if [ $(compgen -ac | sort | uniq | grep -x python3) ]; then
+	python3 --version
 
-# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-pip3 install awscli
-pip3 show awscli
+	cat /tmp/awscli-bundle/install
+	sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|g' /tmp/awscli-bundle/install
+	cat /tmp/awscli-bundle/install
+fi
 
-# Configuration AWS-CLI tools [AWS-CLI/Python3]
+# Package Install AWS-CLI v1 Tools (from Bundle Installer)
+/tmp/awscli-bundle/install -i "/opt/aws/awscli" -b "/bin/aws"
+
+aws --version
+
+# Configuration AWS-CLI tools
 alternatives --list
-alternatives --install "/usr/bin/aws" aws "/usr/local/bin/aws" 1
-alternatives --install "/usr/bin/aws_completer" aws_completer "/usr/local/bin/aws_completer" 1
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
 alternatives --list
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
@@ -298,8 +316,6 @@ cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 
 complete -C aws_completer aws
 __EOF__
-
-aws --version
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__

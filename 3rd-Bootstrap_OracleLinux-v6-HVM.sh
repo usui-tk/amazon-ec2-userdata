@@ -143,7 +143,7 @@ yum install -y abrt abrt-cli acpid bc bind-utils blktrace crash-trace-command cr
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils
-yum install -y pcp pcp-manager "pcp-pmda*" pcp-system-tools
+yum install -y pcp pcp-conf pcp-manager "pcp-pmda*" pcp-system-tools
 
 # Package Install Oracle Linux support tools (from Oracle Linux Community Repository)
 yum install -y redhat-lsb-core
@@ -151,8 +151,24 @@ yum install -y redhat-lsb-core
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
 yum install -y ol-template-config ovm-template-config*
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python3]
+#-------------------------------------------------------------------------------
+
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
 yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
+
+# Version Information (Python3/RHSCL)
+/opt/rh/rh-python36/root/usr/bin/python3 -V
+/opt/rh/rh-python36/root/usr/bin/pip3 -V
+
+# Configuration Python3 Runtime
+alternatives --install "/usr/bin/python3" python3 "/opt/rh/rh-python36/root/usr/bin/python3" 1
+alternatives --display python3
+
+alternatives --install "/usr/bin/pip3" pip3 "/opt/rh/rh-python36/root/usr/bin/pip3" 1
+alternatives --display pip3
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
@@ -191,7 +207,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion fio htop iftop inotify-tools iperf3 iptraf-ng jq moreutils ncdu netsniff-ng srm zstd
+yum --enablerepo=epel install -y atop bash-completion fio htop iftop inotify-tools iperf3 iptraf-ng jq moreutils ncdu netsniff-ng nload srm tcping zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Database]
@@ -267,25 +283,32 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI/Python3]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-bundle.html
 #-------------------------------------------------------------------------------
 
-# yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
-yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
+# Package download AWS-CLI v1 Tools (from Bundle Installer)
+curl -sS "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "/tmp/awscli-bundle.zip"
+unzip "/tmp/awscli-bundle.zip" -d /tmp/
 
-/opt/rh/rh-python36/root/usr/bin/python3 -V
-/opt/rh/rh-python36/root/usr/bin/pip3 -V
+# [Workaround] Specify Python3 command
+if [ $(compgen -ac | sort | uniq | grep -x python3) ]; then
+	python3 --version
 
-# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-/opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+	cat /tmp/awscli-bundle/install
+	sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|g' /tmp/awscli-bundle/install
+	cat /tmp/awscli-bundle/install
+fi
 
-/opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+# Package Install AWS-CLI v1 Tools (from Bundle Installer)
+/tmp/awscli-bundle/install -i "/opt/aws/awscli" -b "/bin/aws"
 
-# Configuration AWS-CLI tools [AWS-CLI/Python3]
-alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
-alternatives --display aws
-alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
-alternatives --display aws_completer
+aws --version
+
+# Configuration AWS-CLI tools
+alternatives --list
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
+alternatives --list
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
@@ -295,8 +318,6 @@ cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 
 complete -C aws_completer aws
 __EOF__
-
-aws --version
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__

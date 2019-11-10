@@ -103,7 +103,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iperf3 iotop mlocate mtr nc net-snmp-utils nmap nvme-cli numactl perf psmisc rsync strace sysstat system-lsb-core tcpdump traceroute tree uuid vim-enhanced yum-plugin-versionlock yum-utils wget zstd
+yum install -y acpid arptables bash-completion bc bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psmisc rsync smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools pcp-zeroconf
@@ -114,6 +114,35 @@ yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3
 # Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
 yum install -y ec2-hibinit-agent hibagent
 # yum install -y ec2-instance-connect
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL]
+#-------------------------------------------------------------------------------
+
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package (from Extras Library Repository)
+amazon-linux-extras list
+
+amazon-linux-extras install -y epel
+
+amazon-linux-extras list
+
+# Package Information [epel-release]
+rpm -qi epel-release
+
+# Disable EPEL yum repository
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
+sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
+egrep '^\[|enabled' /etc/yum.repos.d/epel*
+
+# yum repository metadata Clean up
+yum clean all
+
+# EPEL repository package [yum command]
+yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
+
+# Package Install RHEL System Administration Tools (from EPEL Repository)
+yum --enablerepo=epel install -y atop bash-completion-extras collectl glances iftop inotify-tools jnettop moreutils moreutils-parallel ncdu nload srm tcping
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
