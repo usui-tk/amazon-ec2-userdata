@@ -296,8 +296,9 @@ rm -rf /etc/udev/rules.d/70-persistent-*
 # Remove cloud-init status
 rm -rf /var/lib/cloud/*
 
-# Remove /tmp files
+# Remove /tmp/, /var/tmp/ files
 rm -rf /tmp/*
+rm -rf /var/tmp/*
 
 # Remove /var/log files
 find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;
@@ -398,11 +399,18 @@ if [ $BashHistoryFlag -gt 0 ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Stop instance
+# Wait for cache data to be written to disk
 #-------------------------------------------------------------------------------
+
+# Make sure we wait until all the data is written to disk, otherwise script might quite too early before the large files are deleted
+sync
 
 # Waiting time
 sleep 30
+
+#-------------------------------------------------------------------------------
+# Stop instance
+#-------------------------------------------------------------------------------
 
 # Shutdown
 shutdown -h now
