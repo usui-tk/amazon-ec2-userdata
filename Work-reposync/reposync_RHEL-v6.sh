@@ -29,6 +29,7 @@ echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Preparing the execution environme
 
 # Red Hat Update Infrastructure Client Package Update
 yum clean all
+yum install -y yum yum-utils
 yum update -y rh-amazon-rhui-client
 
 # Checking repository information
@@ -76,6 +77,25 @@ yum clean all
 
 # Default Package Update
 yum update -y
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python3]
+#-------------------------------------------------------------------------------
+
+# Package Install Python 3 Runtime (from Red Hat Official Repository)
+yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
+yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
+
+# Version Information (Python3/RHSCL)
+/opt/rh/rh-python36/root/usr/bin/python3 -V
+/opt/rh/rh-python36/root/usr/bin/pip3 -V
+
+# Configuration Python3 Runtime
+alternatives --install "/usr/bin/python3" python3 "/opt/rh/rh-python36/root/usr/bin/python3" 1
+alternatives --display python3
+
+alternatives --install "/usr/bin/pip3" pip3 "/opt/rh/rh-python36/root/usr/bin/pip3" 1
+alternatives --display pip3
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
@@ -138,10 +158,10 @@ yum --enablerepo=epel install -y bash-completion jq repoview zstd
 # yum clean all
 
 #-------------------------------------------------------------------------------
-# Installing tools required for uploading to S3 bucket [AWS-CLI/Python 3]
+# Get EC2 Instance MetaData
 #-------------------------------------------------------------------------------
 
-# Get Instance MetaData
+# Get EC2 Instance MetaData
 AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
 Region=$(echo $AZ | sed -e 's/.$//g')
 InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
@@ -149,22 +169,31 @@ InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
 PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
 AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 
-# Package Install Python 3 Runtime (from Red Hat Official Repository)
-yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
-yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-CLI/Python3]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-bundle.html
+#-------------------------------------------------------------------------------
 
-/opt/rh/rh-python36/root/usr/bin/python3 -V
-/opt/rh/rh-python36/root/usr/bin/pip3 -V
+# Package download AWS-CLI v1 Tools (from Bundle Installer)
+curl -sS "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "/tmp/awscli-bundle.zip"
+unzip "/tmp/awscli-bundle.zip" -d /tmp/
 
-# Installing tools [AWS-CLI/Python3]
-/opt/rh/rh-python36/root/usr/bin/pip3 install awscli
+# [Workaround] Specify Python3 command
+if [ $(compgen -ac | sort | uniq | grep -x python3) ]; then
+	python3 --version
 
-/opt/rh/rh-python36/root/usr/bin/pip3 show awscli
+	cat /tmp/awscli-bundle/install
+	sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|g' /tmp/awscli-bundle/install
+	cat /tmp/awscli-bundle/install
+fi
 
-# Configuration tools [AWS-CLI/Python3]
-alternatives --install "/usr/bin/aws" aws "/opt/rh/rh-python36/root/usr/bin/aws" 1
-alternatives --display aws
-alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/rh/rh-python36/root/usr/bin/aws_completer" 1
+# Package Install AWS-CLI v1 Tools (from Bundle Installer)
+/tmp/awscli-bundle/install -i "/opt/aws/awscli" -b "/bin/aws"
+
+aws --version
+
+# Configuration AWS-CLI tools
+alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
 alternatives --display aws_completer
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
@@ -175,8 +204,6 @@ cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 
 complete -C aws_completer aws
 __EOF__
-
-aws --version
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
@@ -357,14 +384,9 @@ echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Create archive file of clone data
 
 # Make Public Access
 
-
-
 #-------------------------------------------------------------------------------
 # Stop instance
 #-------------------------------------------------------------------------------
 
-# Waiting time
-sleep 30
-
 # Shutdown
-# shutdown -h now
+shutdown -h now
