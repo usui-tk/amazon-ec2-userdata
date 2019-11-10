@@ -236,9 +236,8 @@ fi
 aws --version
 
 # Configuration AWS-CLI tools
-alternatives --list
 alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
-alternatives --list
+alternatives --display aws_completer
 
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
