@@ -177,7 +177,12 @@ dnf install -y redhat-lsb-core redhat-support-tool insights-client rhel-system-r
 dnf install -y kpatch
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
+dnf module list | grep python3
+
 dnf install -y @python36
+
+dnf module list | grep python3
+
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 # Package Install Red Hat Enterprise Linux Web-Based support tools (from Red Hat Official Repository)
@@ -845,7 +850,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
-	dnf install -y langpacks-ja glibc-langpack-ja
+	dnf install -y langpacks-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
 
 	echo "# Setting System Language -> $Language"
 	locale
