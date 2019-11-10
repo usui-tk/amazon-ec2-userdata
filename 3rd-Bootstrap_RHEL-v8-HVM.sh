@@ -654,7 +654,7 @@ systemctl restart td-agent
 
 systemctl status -l td-agent
 
-# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+# Configure fluentd software (Start Daemon td-agent)
 if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
 	systemctl enable td-agent
 	systemctl is-enabled td-agent

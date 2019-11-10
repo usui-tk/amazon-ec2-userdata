@@ -559,7 +559,7 @@ curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
 rpm -qi td-agent
 
-# Configure fluentd software (Start Daemon awsagent)
+# Configure fluentd software (Start Daemon td-agent)
 service td-agent restart
 service td-agent status
 
