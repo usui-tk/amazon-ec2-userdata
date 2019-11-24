@@ -88,7 +88,7 @@ yum install -y yum yum-utils
 # Checking repository information
 yum repolist all
 
-# Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
+# Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
 yum search oracle-
@@ -135,27 +135,27 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
+# Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Repository)
 yum install -y cloud-utils-growpart dracut-modules-growroot
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Community Repository)
+# Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
 yum install -y abrt abrt-cli acpid bc bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl numatop parted psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat system-config-network-tui tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux-ng vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils
 yum install -y pcp pcp-conf pcp-manager "pcp-pmda*" pcp-system-tools
 
-# Package Install Oracle Linux support tools (from Oracle Linux Community Repository)
+# Package Install Oracle Linux support tools (from Oracle Linux Repository)
 yum install -y redhat-lsb-core
 
-# Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 yum install -y ol-template-config ovm-template-config*
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3 Runtime (from Red Hat Official Repository)
+# Package Install Python 3 Runtime (from Oracle Linux Repository)
 yum install -y rh-python36 rh-python36-python-pip rh-python36-python-devel rh-python36-python-setuptools rh-python36-python-setuptools rh-python36-python-simplejson rh-python36-python-test rh-python36-python-tools rh-python36-python-virtualenv rh-python36-python-wheel
 yum install -y rh-python36-PyYAML rh-python36-python-docutils rh-python36-python-six
 
@@ -213,16 +213,16 @@ yum --enablerepo=epel install -y atop bash-completion byobu colordiff fio fping 
 # Custom Package Installation [Oracle Database]
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Database Utility (from Oracle Linux Official Repository)
+# Package Install Oracle Database Utility (from Oracle Linux Repository)
 yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
 
-# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-rdbms-server-11gR2-preinstall
 # yum install -y oracle-rdbms-server-12cR1-preinstall
 # yum install -y oracle-database-server-12cR2-preinstall
 yum install -y oracle-database-preinstall-18c
 
-# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-em-agent-12cR1-preinstall
 yum install -y oracle-em-agent-12cR4-preinstall
 
@@ -244,10 +244,10 @@ __EOF__
 # Checking repository information
 yum repolist all
 
-# Package Install Oracle Instant Client (from Oracle Linux Official Repository)
+# Package Install Oracle Instant Client (from Oracle Linux Repository)
 yum install -y oracle-instantclient18.5-basic oracle-instantclient18.5-devel oracle-instantclient18.5-jdbc oracle-instantclient18.5-sqlplus oracle-instantclient18.5-tools
 
-# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-ebs-server-R12-preinstall
 
 #-------------------------------------------------------------------------------
@@ -713,7 +713,7 @@ chronyc sourcestats -v
 # Configure Tuned
 #-------------------------------------------------------------------------------
 
-# Package Install Tuned (from Red Hat Official Repository)
+# Package Install Tuned (from Oracle Linux Repository)
 yum install -y tuned tuned-utils tuned-profiles-oracle
 
 # Configure Tuned software (Start Daemon tuned)

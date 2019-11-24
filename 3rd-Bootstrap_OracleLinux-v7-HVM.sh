@@ -94,7 +94,7 @@ yum install -y yum yum-utils
 # Checking repository information
 yum repolist all
 
-# Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
+# Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
 yum search oracle-
@@ -150,30 +150,30 @@ yum update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Community Repository)
+# Package Install Pre-installation package difference of Oracle Linux and RHEL (from Oracle Linux Repository)
 yum install -y cloud-utils-growpart
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
 yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-restorecond
 yum install -y pcp pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
-# Package Install Oracle Linux support tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux support tools (from Oracle Linux Repository)
 yum install -y redhat-lsb-core
 
-# Package Install Oracle Linux Cleanup tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 yum install -y ol-template-config ovm-template-config*
 
-# Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Official Repository)
+# Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Repository)
 # yum install -y kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3 Runtime (from Red Hat Official Repository)
+# Package Install Python 3 Runtime (from Oracle Linux Repository)
 yum install -y python3 python3-pip python3-devel python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 # Version Information (Python3)
@@ -227,7 +227,7 @@ yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colo
 # Checking repository information
 yum repolist all
 
-# Package Install Oracle Linux yum repository Files (from Oracle Linux Official Repository)
+# Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
 yum install -y oracle-olcne-release-el7
@@ -254,23 +254,23 @@ yum clean all
 # Custom Package Installation [Oracle Software Product]
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Database Utility (from Oracle Linux Official Repository)
+# Package Install Oracle Database Utility (from Oracle Linux Repository)
 yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
 
-# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-rdbms-server-11gR2-preinstall
 # yum install -y oracle-rdbms-server-12cR1-preinstall
 # yum install -y oracle-database-server-12cR2-preinstall
 # yum install -y oracle-database-preinstall-18c
 yum install -y oracle-database-preinstall-19c
 
-# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Repository)
 yum install -y oracle-em-agent-13cR2-preinstall
 
-# Package Install Oracle Instant Client (from Oracle Linux Official Repository)
+# Package Install Oracle Instant Client (from Oracle Linux Repository)
 yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
 
-# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Official Repository)
+# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-ebs-server-R12-preinstall
 
 #-------------------------------------------------------------------------------
@@ -870,7 +870,7 @@ chronyc sourcestats -v
 # Configure Tuned
 #-------------------------------------------------------------------------------
 
-# Package Install Tuned (from Oracle Linux Official Repository)
+# Package Install Tuned (from Oracle Linux Repository)
 yum install -y tuned tuned-utils tuned-profiles-oracle
 
 rpm -qi tuned
