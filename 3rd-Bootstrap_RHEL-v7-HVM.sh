@@ -102,7 +102,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #        rhel-server-rhui-rhscl-7-rpms
 #-------------------------------------------------------------------------------
 
-# Red Hat Update Infrastructure Client Package Update
+# Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
 yum clean all
 yum install -y yum yum-utils
 yum update -y rh-amazon-rhui-client
@@ -124,7 +124,7 @@ done
 # Checking repository information
 yum repolist all
 
-# Red Hat Update Infrastructure Client Package Update
+# Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
 yum clean all
 yum update -y rh-amazon-rhui-client
 
@@ -161,7 +161,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-restorecond
@@ -222,7 +222,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl glances htop httping iftop inotify-tools jnettop jq moreutils moreutils-parallel ncdu nload srm tcping zstd
+yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

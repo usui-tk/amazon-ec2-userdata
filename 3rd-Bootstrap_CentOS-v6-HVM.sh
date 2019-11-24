@@ -129,7 +129,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y abrt abrt-cli acpid bc bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl numatop parted psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat system-config-network-tui tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux-ng vim-enhanced wget zip zsh
+yum install -y abrt abrt-cli acpid bc bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl numatop parted psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat system-config-network-tui tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux-ng vim-enhanced wget zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils
@@ -177,7 +177,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion fio htop httping iftop inotify-tools iperf3 iptraf-ng jq moreutils ncdu netsniff-ng nload srm tcping zstd
+yum --enablerepo=epel install -y atop bash-completion byobu colordiff fio fping htop httping iftop inotify-tools iperf3 iptraf-ng ipv6calc jq moreutils ncdu netsniff-ng nload srm tcping wdiff zstd
 yum --enablerepo=epel install -y cloud-utils-growpart dracut-modules-growroot
 
 #-------------------------------------------------------------------------------

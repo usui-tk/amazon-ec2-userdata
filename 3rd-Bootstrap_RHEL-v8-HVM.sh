@@ -101,7 +101,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #        rhui-codeready-builder-for-rhel-8-rhui-rpms
 #-------------------------------------------------------------------------------
 
-# Red Hat Update Infrastructure Client Package Update
+# Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
 dnf clean all
 dnf update -y rh-amazon-rhui-client
 dnf update -y dnf dnf-data
@@ -125,7 +125,7 @@ done
 dnf repolist all
 dnf module list
 
-# Red Hat Update Infrastructure Client Package Update
+# Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
 dnf clean all
 dnf update -y rh-amazon-rhui-client
 dnf update -y dnf dnf-data
@@ -164,7 +164,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget xfsdump xfsprogs yum-utils zip zsh
+dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond udica
@@ -243,10 +243,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop collectd collectd-utils htop iftop inotify-tools moreutils moreutils-parallel ncdu tcping zstd
+dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu screen tcping zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm
+# dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm wdiff
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

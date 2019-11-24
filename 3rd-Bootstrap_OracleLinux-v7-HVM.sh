@@ -154,7 +154,7 @@ yum update -y
 yum install -y cloud-utils-growpart
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Official Repository)
-yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-restorecond
@@ -218,7 +218,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl glances htop httping iftop inotify-tools jnettop jq moreutils moreutils-parallel ncdu nload srm tcping zstd
+yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Linux Cloud Native Environment]
