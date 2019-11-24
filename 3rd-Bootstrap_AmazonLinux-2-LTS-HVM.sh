@@ -103,7 +103,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psmisc rsync smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
+yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng jq kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools pcp-zeroconf
@@ -142,7 +142,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras collectl glances httping iftop inotify-tools jnettop moreutils moreutils-parallel ncdu nload srm tcping
+yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances httping iftop inotify-tools ipv6calc jnettop moreutils moreutils-parallel ncdu nload srm tcping wdiff
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
