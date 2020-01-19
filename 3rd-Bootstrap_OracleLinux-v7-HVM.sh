@@ -37,8 +37,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
 #  - Oracle Linux v7
-#    https://docs.oracle.com/cd/E77565_01/index.html
-#    https://docs.oracle.com/cd/E52668_01/index.html
+#    https://www.oracle.com/technetwork/server-storage/linux/documentation/index.html
+#    https://docs.oracle.com/en/operating-systems/oracle-linux/7/
 #    http://yum.oracle.com/oracle-linux-7.html
 #
 #-------------------------------------------------------------------------------
