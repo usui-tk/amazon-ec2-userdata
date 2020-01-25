@@ -37,6 +37,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
 #  - CentOS v7
+#    https://docs.centos.org/en-US/docs/
 #    https://wiki.centos.org/Documentation
 #    https://wiki.centos.org/Cloud/AWS
 #
@@ -109,21 +110,25 @@ find /etc/yum.repos.d/
 # Checking repository information
 yum repolist all
 
-# CentOS-Base.repo
+# Checking repository information (repository configuration file)
+find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
+
+# Enable repository in repository configuration file:[CentOS-Base.repo]
 yum-config-manager --enable base
 yum-config-manager --enable updates
 yum-config-manager --enable extras
 
-# CentOS-SCLo-scl.repo
+# Enable repository in repository configuration file:[CentOS-SCLo-scl.repo]
 yum-config-manager --enable centos-sclo-sclo
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl.repo
 
-# CentOS-SCLo-scl-rh.repo
+# Enable repository in repository configuration file:[CentOS-SCLo-scl-rh.repo]
 yum-config-manager --enable centos-sclo-rh
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo
 
 # Checking repository information
 yum repolist all
+
+# Checking repository information (repository configuration file)
+find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
 
 # yum repository metadata Clean up
 yum clean all

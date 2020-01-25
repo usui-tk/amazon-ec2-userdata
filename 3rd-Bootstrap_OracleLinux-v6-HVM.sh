@@ -149,7 +149,7 @@ yum install -y pcp pcp-conf pcp-manager "pcp-pmda*" pcp-system-tools
 yum install -y redhat-lsb-core
 
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
-yum install -y ol-template-config ovm-template-config*
+# yum install -y ol-template-config ovm-template-config*
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]
