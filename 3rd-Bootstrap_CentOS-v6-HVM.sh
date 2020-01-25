@@ -111,6 +111,8 @@ yum-config-manager --enable base
 yum-config-manager --enable updates
 yum-config-manager --enable extras
 
+yum-config-manager --disable centosplus
+
 # Enable repository in repository configuration file:[CentOS-SCLo-scl.repo]
 yum-config-manager --enable centos-sclo-sclo
 
