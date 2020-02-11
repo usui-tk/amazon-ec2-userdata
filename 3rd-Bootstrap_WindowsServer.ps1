@@ -770,14 +770,35 @@ Write-LogSeparator "Test Network Connection"
 # Initialize Parameter
 Set-Variable -Name FlagInternetConnection -Scope Script -Value ($Null)
 
-# Test Connecting to the Internet (Google Public DNS:8.8.8.8)
+# Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
 #  https://developers.google.com/speed/public-dns/
-$FlagInternetConnection = Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction SilentlyContinue
-if ($FlagInternetConnection -eq $TRUE) {
+$FlagInternetConnectionByIPAddress = Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction SilentlyContinue
+if ($FlagInternetConnectionByIPAddress -eq $TRUE) {
     Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection OK]"
 }
 else {
     Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection NG]"
+}
+
+# Test Connecting to the Internet (Google Public NTP : time.google.com)
+#  https://developers.google.com/time/guides
+$FlagInternetConnectionByFQDN = Test-Connection -ComputerName time.google.com -Count 1 -Quiet -ErrorAction SilentlyContinue
+if ($FlagInternetConnectionByFQDN -eq $TRUE) {
+    Write-Log "# [Network Connection] Google Public NTP : time.google.com - [Connection OK]"
+}
+else {
+    Write-Log "# [Network Connection] Google Public NTP : time.google.com - [Connection NG]"
+}
+
+# Test HTTPS Connecting to the Internet (AWS Check IP Address service : https://checkip.amazonaws.com/)
+#  https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/get-set-up-for-aws-batch.html#create-a-base-security-group
+$FlagInternetConnectionByHTTPS = Invoke-WebRequest -Uri "https://checkip.amazonaws.com/" -UseBasicParsing
+if ($FlagInternetConnectionByHTTPS.StatusCode -eq 200) {
+    Write-Log "# [Network Connection] AWS Check IP Address service : checkip.amazonaws.com - [Connection OK]"
+    Write-Log ("# [Network Connection] AWS Check IP Address service : Public IP Address is " + ($FlagInternetConnectionByHTTPS.RawContent | Select-String -Pattern '\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b' -AllMatches -Encoding default | ForEach-Object { $_.Matches } | ForEach-Object { $_.Value }))
+}
+else {
+    Write-Log "# [Network Connection] AWS Check IP Address service : checkip.amazonaws.com - [Connection NG]"
 }
 
 
@@ -1963,8 +1984,8 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 6.0)"
 
 # Initialize Parameter [# Depends on PowerShell v6.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\6\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.3/PowerShell-6.2.3-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.3-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v6.2.4/PowerShell-6.2.4-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-6.2.4-win-x64.msi"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -2001,7 +2022,7 @@ Write-LogSeparator "Package Install System Utility (Windows Admin Center)"
 
 # Initialize Parameter
 Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdownload"
-Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1904.1"
+Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1910.msi"
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
 # Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
@@ -2485,7 +2506,7 @@ Write-LogSeparator "Custom Package Installation (Application)"
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
     Set-Variable -Name CHROME_INSTALLER_URL -Scope Script -Value "https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi"
-    Set-Variable -Name CHROME_INSTALLER_FILE -Scope Script -Value "googlechrome.msi"
+    Set-Variable -Name CHROME_INSTALLER_FILE -Scope Script -Value "GoogleChrome.msi"
 
     # Package Download Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
@@ -2493,7 +2514,24 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Package Install Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Install Modern Web Browser (Google Chrome 64bit Edition)"
-    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$CHROME_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_ChromeSetup.log")
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$CHROME_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_GoogleChromeSetup.log")
+    Start-Sleep -Seconds 5
+}
+
+# Custom Package Installation (Microsoft Edge 64bit Edition)
+# https://www.microsoft.com/en-us/edge/business/download
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter
+    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/0af31313-0430-454d-908a-d55ce3df7b69/MicrosoftEdgeEnterpriseX64.msi"
+    Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value "MicrosoftEdgeEnterpriseX64.msi"
+
+    # Package Download Modern Web Browser (Microsoft Edge 64bit Edition)
+    Write-Log "# Package Download Modern Web Browser (Microsoft Edge 64bit Edition)"
+    Get-WebContentToFile -Uri "$EDGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$EDGE_INSTALLER_FILE"
+
+    # Package Install Modern Web Browser (Microsoft Edge 64bit Edition)
+    Write-Log "# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)"
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$EDGE_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_MicrosoftEdgeSetup.log")
     Start-Sleep -Seconds 5
 }
 
@@ -2519,8 +2557,8 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on Tera Term version information]
-    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://ja.osdn.net/frs/redir.php?m=iij&f=ttssh2%2F71232%2Fteraterm-4.103.exe"
-    Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value "teraterm-4.103.exe"
+    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://ja.osdn.net/frs/redir.php?m=ymu&f=ttssh2%2F72009%2Fteraterm-4.105.exe"
+    Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value "teraterm-4.105.exe"
 
     # Package Download Terminal emulator (Tera Term)
     Write-Log "# Package Download Terminal emulator (Tera Term)"
@@ -2538,10 +2576,10 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Initialize Parameter [# Depends on IrfanView version information]
-    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview453_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value "iview453_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview453_plugins_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value "iview453_plugins_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview454_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value "iview454_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview454_plugins_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value "iview454_plugins_x64_setup.exe"
 
     # Package Download Graphic Viewer (IrfanView)
     Write-Log "# Package Download Graphic Viewer (IrfanView)"
@@ -2624,7 +2662,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
-    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.1.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.1.0.exe"
+    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.4.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.4.0.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
@@ -2681,14 +2719,15 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.2-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.2-Setup.exe"
+    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.9-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.9-Setup.exe"
 }
 
-# Package Download System Utility (CloudBerry Explorer for Amazon S3)
-# https://www.cloudberrylab.com/explorer/windows/amazon-s3.aspx
+# Package Download System Utility (Wireshark)
+# https://www.wireshark.org/
+# https://www.wireshark.org/download.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (CloudBerry Explorer for Amazon S3)"
-    Get-WebContentToFile -Uri 'https://www.cloudberrylab.com/download/CloudBerryExplorerSetup_v5.9.1.192_netv4.0.exe' -OutFile "$TOOL_DIR\CloudBerryExplorerSetup_v5.9.1.192_netv4.0.exe"
+    Write-Log "# Package Download System Utility (Wireshark)"
+    Get-WebContentToFile -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-latest.exe' -OutFile "$TOOL_DIR\Wireshark-win64-latest.exe"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2697,7 +2736,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.5.0-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.5.0-0-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.5.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.5.1-0-x64.msi"
     }
 }
 
@@ -2709,20 +2748,12 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi' -OutFile "$TOOL_DIR\python-2.7.17.amd64.msi"
 }
 
-# Package Download System Utility (Python 3.7)
-# https://www.python.org/
-# https://www.python.org/downloads/windows/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (Python 3.7)"
-    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/3.7.5/python-3.7.5-amd64.exe' -OutFile "$TOOL_DIR\python-3.7.5-amd64.exe"
-}
-
 # Package Download System Utility (Python 3.8)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Python 3.8)"
-    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/3.8.0/python-3.8.0-amd64.exe' -OutFile "$TOOL_DIR\python-3.8.0-amd64.exe"
+    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe' -OutFile "$TOOL_DIR\python-3.8.1-amd64.exe"
 }
 
 # Package Download System Utility (WinMerge)
@@ -2736,7 +2767,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmergejp.bitbucket.io/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
-    Get-WebContentToFile -Uri 'https://osdn.net/dl/winmerge-jp/WinMerge-2.16.4-jp-7-x64-Setup.exe' -OutFile "$TOOL_DIR\WinMerge-2.16.4-jp-7-x64-Setup.exe"
+    Get-WebContentToFile -Uri 'https://jaist.dl.osdn.jp/winmerge-jp/72291/WinMerge-2.16.4-jp-13-x64-Setup.exe' -OutFile "$TOOL_DIR\WinMerge-2.16.4-jp-13-x64-Setup.exe"
 }
 
 
