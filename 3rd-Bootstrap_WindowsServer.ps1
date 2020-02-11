@@ -1549,25 +1549,24 @@ Get-PowerPlanInformation
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (AWS-CLI)
+# Custom Package Install (AWS-CLI v2)
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (AWS-CLI)"
+Write-LogSeparator "Package Install System Utility (AWS-CLI v2)"
 
 # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
-    # Package Download System Utility (AWS-CLI)
+    # Package Download System Utility (AWS-CLI v2)
     # https://aws.amazon.com/jp/cli/
-    # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/install-windows.html
-    Write-Log "# Package Download System Utility (AWS-CLI)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLI64PY3.msi' -OutFile "$TOOL_DIR\AWSCLI64PY3.msi"
-    # Get-WebContentToFile -Uri 'https://s3.amazonaws.com/aws-cli/AWSCLISetup.exe' -OutFile "$TOOL_DIR\AWSCLISetup.exe"
+    # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-windows.html
+    Write-Log "# Package Download System Utility (AWS-CLI v2)"
+    Get-WebContentToFile -Uri 'https://awscli.amazonaws.com/AWSCLIV2.msi' -OutFile "$TOOL_DIR\AWSCLIV2.msi"
 
-    # Package Install System Utility (AWS-CLI)
-    Write-Log "# Package Install System Utility (AWS-CLI)"
-    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\AWSCLI64PY3.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWSCLISetup.log")
+    # Package Install System Utility (AWS-CLI v2)
+    Write-Log "# Package Install System Utility (AWS-CLI v2)"
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\AWSCLIV2.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWSCLI_V2_Setup.log")
 
     Start-Sleep -Seconds 5
 }
