@@ -103,7 +103,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng jq kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
+yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng jq kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget wireshark xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools pcp-zeroconf
@@ -112,8 +112,7 @@ yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools 
 yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3-test python3-tools python3-wheel
 
 # Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
-yum install -y ec2-hibinit-agent hibagent
-# yum install -y ec2-instance-connect
+yum install -y ec2-hibinit-agent ec2-instance-connect hibagent
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
@@ -177,9 +176,34 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
+
+# Package Uninstall AWS-CLI v1 Tools (from RPM Package)
 aws --version
+which aws
+
+yum remove -y awscli
+
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
+
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/bin"
+
+aws --version
+
+# Configuration AWS-CLI tools
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
+__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__

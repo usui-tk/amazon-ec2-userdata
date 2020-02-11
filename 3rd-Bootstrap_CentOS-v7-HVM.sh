@@ -146,7 +146,7 @@ yum update -y
 yum install -y cloud-utils-growpart
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget xfsdump xfsprogs zip zsh
+yum install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-utils curl dstat ebtables ethtool expect fio gdisk git hdparm intltool iotop iperf3 iptraf-ng kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted pmempool psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux vdo vim-enhanced wget wireshark xfsdump xfsprogs zip zsh
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi sdparm sg3_utils
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-restorecond
@@ -224,33 +224,20 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI/Python3]
-# https://docs.aws.amazon.com/cli/latest/userguide/install-bundle.html
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
-# Package download AWS-CLI v1 Tools (from Bundle Installer)
-curl -sS "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "/tmp/awscli-bundle.zip"
-unzip "/tmp/awscli-bundle.zip" -d /tmp/
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
 
-# [Workaround] Specify Python3 command
-if [ $(compgen -ac | sort | uniq | grep -x python3) ]; then
-	python3 --version
-
-	cat /tmp/awscli-bundle/install
-	sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|g' /tmp/awscli-bundle/install
-	cat /tmp/awscli-bundle/install
-fi
-
-# Package Install AWS-CLI v1 Tools (from Bundle Installer)
-/tmp/awscli-bundle/install -i "/opt/aws/awscli" -b "/bin/aws"
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/bin"
 
 aws --version
 
 # Configuration AWS-CLI tools
-alternatives --list
-alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
-alternatives --list
-
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
 # - /etc/bash_completion.d
