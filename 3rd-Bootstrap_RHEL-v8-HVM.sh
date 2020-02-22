@@ -316,6 +316,9 @@ __EOF__
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
 
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
+
 # Getting AWS-CLI default Region & Output format
 aws configure list
 cat ~/.aws/config
@@ -652,7 +655,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
 rpm -qi td-agent
 

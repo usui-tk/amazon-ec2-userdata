@@ -36,7 +36,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Oracle Linux v7
+#  - Oracle Linux v8
 #    https://www.oracle.com/technetwork/server-storage/linux/documentation/index.html
 #    https://docs.oracle.com/en/operating-systems/oracle-linux/8/
 #    http://yum.oracle.com/oracle-linux-8.html
@@ -225,10 +225,10 @@ dnf clean all
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
-# Package Install RHEL System Administration Tools (from EPEL Repository)
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu screen tcping zstd
 
-# Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
+# Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm wdiff
 
 #-------------------------------------------------------------------------------
@@ -298,6 +298,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
@@ -583,8 +586,8 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from Oracle Linux Repository)
-# dnf install -y ansible ansible-doc rhel-system-roles
+# Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
+# dnf install -y ansible ansible-doc
 
 # Package Install Ansible (from EPEL Repository)
 dnf --enablerepo=epel install -y ansible ansible-doc
@@ -635,7 +638,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
 rpm -qi td-agent
 

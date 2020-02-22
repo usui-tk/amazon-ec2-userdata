@@ -510,7 +510,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-curl -L "https://toolbelt.treasuredata.com/sh/install-debian-buster-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-debian-buster-td-agent3.sh" | sh
 
 apt show td-agent
 

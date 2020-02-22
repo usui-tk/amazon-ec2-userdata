@@ -519,7 +519,7 @@ pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-curl -L "https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent3.sh" | sh
 
 apt show td-agent
 

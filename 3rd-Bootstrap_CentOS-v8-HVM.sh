@@ -160,20 +160,20 @@ dnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Linux System Administration Tools (from CentOS Community Repository)
+# Package Install CentOS System Administration Tools (from CentOS Community Repository)
 dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond udica
 dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
-# Package Install Oracle Linux support tools (from CentOS Community Repository)
+# Package Install CentOS support tools (from CentOS Community Repository)
 dnf install -y redhat-lsb-core
 
-# Package Install Oracle Linux kernel live-patching tools (from CentOS Community Repository)
+# Package Install CentOS kernel live-patching tools (from CentOS Community Repository)
 dnf install -y kpatch
 
-# Package Install Oracle Linux Web-Based support tools (from CentOS Community Repository)
+# Package Install CentOS Web-Based support tools (from CentOS Community Repository)
 dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 #-------------------------------------------------------------------------------
@@ -221,10 +221,10 @@ dnf clean all
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
-# Package Install RHEL System Administration Tools (from EPEL Repository)
+# Package Install CentOS System Administration Tools (from EPEL Repository)
 dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu screen tcping zstd
 
-# Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
+# Package Install CentOS System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm wdiff
 
 #-------------------------------------------------------------------------------
@@ -294,6 +294,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
@@ -579,8 +582,8 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install RHEL System Administration Tools (from CentOS Community Repository)
-# dnf install -y ansible ansible-doc rhel-system-roles
+# Package Install CentOS System Administration Tools (from CentOS Community Repository)
+# dnf install -y ansible ansible-doc
 
 # Package Install Ansible (from EPEL Repository)
 dnf --enablerepo=epel install -y ansible ansible-doc
@@ -631,7 +634,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -L "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
 
 rpm -qi td-agent
 
