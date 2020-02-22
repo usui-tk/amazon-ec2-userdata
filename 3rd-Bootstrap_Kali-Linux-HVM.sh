@@ -97,15 +97,12 @@ apt install -y -q apt-transport-https ca-certificates curl gnupg-agent software-
 # Default Package Update
 apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 
-# apt repository metadata Clean up
-apt clean -y -q
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bcc binutils blktrace byobu chrony collectl crash cryptol curl debian-goodies dstat ebtables ethtool expect fio gdisk git glances hardinfo hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng ipv6toolkit jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nmap numactl numatop nvme-cli parted psmisc rsync secure-delete snmp sosreport strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip usermode util-linux wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bcc binutils blktrace byobu chrony collectl colordiff crash cryptol curl debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc rsync screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfswatch
 apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -156,10 +153,31 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
-apt install -y -q awscli
 
+# Package Uninstall AWS-CLI v1 Tools (from DEB Package)
+if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
+	aws --version
+
+	which aws
+
+	apt show awscli
+
+	apt remove -y -q awscli
+fi
+
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
+
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
+
+aws --version
+
+# Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
 # - /etc/bash_completion.d
@@ -168,8 +186,6 @@ cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 
 complete -C aws_completer aws
 __EOF__
-
-aws --version
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
@@ -182,6 +198,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list

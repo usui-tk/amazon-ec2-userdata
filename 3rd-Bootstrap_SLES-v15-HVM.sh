@@ -480,10 +480,44 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
+# Package Uninstall AWS-CLI v1 Tools (from RPM Package)
+if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
+	aws --version
+
+	which aws
+
+	rpm -qi aws-cli
+
+	zypper --quiet --non-interactive remove aws-cli
+fi
+
+# Prohibit installation of AWS-CLI v1 package from repository
+zypper --quiet --non-interactive locks
+zypper --quiet --non-interactive addlock aws-cli
+zypper --quiet --non-interactive locks
+
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
+
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
+
 aws --version
+
+# Configuration AWS-CLI tools
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
+__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
@@ -496,6 +530,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list

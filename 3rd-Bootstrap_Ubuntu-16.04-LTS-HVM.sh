@@ -99,7 +99,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion bcc binutils blktrace byobu chrony collectd collectd-utils collectl crash cryptol curl debian-goodies dstat ebtables ethtool expect fio gdisk git glances hardinfo hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng ipv6toolkit jnettop jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mcelog mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nmap numactl numatop nvme-cli parted psmisc rsync rsyncrypto secure-delete snmp sosreport strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip usermode util-linux wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-completion bcc binutils blktrace byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mcelog mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -148,19 +148,39 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
-apt install -y -q awscli
 
-cat > /etc/profile.d/aws-cli.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/aws_completer aws
+# Package Uninstall AWS-CLI v1 Tools (from DEB Package)
+if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
+	aws --version
+
+	which aws
+
+	apt show awscli
+
+	apt remove -y -q awscli
 fi
-__EOF__
 
-source /etc/profile.d/aws-cli.sh
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
+
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
 
 aws --version
+
+# Configuration AWS-CLI tools
+cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
+# Typically that would be added under one of the following paths:
+# - /etc/bash_completion.d
+# - /usr/local/etc/bash_completion.d
+# - /usr/share/bash-completion/completions
+
+complete -C aws_completer aws
+__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
@@ -173,6 +193,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
@@ -729,6 +752,28 @@ if [ $(systemctl is-enabled acpid) = "disabled" ]; then
 	systemctl enable acpid
 	systemctl is-enabled acpid
 fi
+
+#-------------------------------------------------------------------------------
+# Configure Disable automatic processing (apt-daily.timer), (apt-daily-upgrade.timer)
+#-------------------------------------------------------------------------------
+
+# Configure Disable automatic processing (apt-daily.timer)
+systemctl cat apt-daily.timer
+
+sed -i 's/Persistent=true/Persistent=false/g' /lib/systemd/system/apt-daily.timer
+
+systemctl cat apt-daily.timer
+
+systemctl daemon-reload
+
+# Configure Disable automatic processing (apt-daily-upgrade.timer)
+systemctl cat apt-daily-upgrade.timer
+
+sed -i 's/Persistent=true/Persistent=false/g' /lib/systemd/system/apt-daily-upgrade.timer
+
+systemctl cat apt-daily-upgrade.timer
+
+systemctl daemon-reload
 
 #-------------------------------------------------------------------------------
 # System Setting

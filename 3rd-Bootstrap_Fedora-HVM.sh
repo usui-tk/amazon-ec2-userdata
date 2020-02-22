@@ -179,17 +179,22 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Uninstall AWS-CLI v1 Tools (from RPM Package)
-aws --version
-which aws
+if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
+	aws --version
 
-dnf remove -y awscli
+	which aws
+
+	rpm -qi awscli
+
+	dnf remove -y awscli
+fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
 unzip "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/bin"
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
 
 aws --version
 
