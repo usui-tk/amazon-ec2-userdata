@@ -148,14 +148,17 @@ if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [AWS-CLI]
+# Custom Package Installation [AWS-CLI v2]
+# https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
-# Package Install AWS-CLI Tools (from Python Package Index (PyPI) Repository)
-pip3 install awscli
-pip3 show awscli
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip "/tmp/awscliv2.zip" -d /tmp/
 
-# Configuration AWS-CLI tools [AWS-CLI/Python3]
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
+
 aws --version
 
 # Setting AWS-CLI default Region & Output format
@@ -169,6 +172,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
