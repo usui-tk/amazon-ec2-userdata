@@ -2662,7 +2662,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
-    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.4.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB+(Preview)-win-0.4.0.exe"
+    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB-win-1.0.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB-win-1.0.0.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
