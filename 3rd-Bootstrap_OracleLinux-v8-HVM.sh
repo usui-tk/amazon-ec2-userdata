@@ -103,7 +103,7 @@ find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y oraclelinux-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-developer-release-el8
 dnf clean all
 
 find /etc/yum.repos.d/
@@ -124,12 +124,14 @@ dnf module list
 
 # Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-enabled ol8_baseos_latest
+dnf config-manager --set-enabled ol8_UEKR6
 dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_developer
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+dnf config-manager --set-disabled ol8_developer_EPEL
 dnf config-manager --set-disabled ol8_developer_UEKR6
 
 # Checking repository information
@@ -142,12 +144,16 @@ dnf clean all
 # Default Package Update
 dnf update -y
 
+# Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
+# https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
+dnf install -y kernel-uek kernel-uek-devel
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
-dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
+dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond udica
@@ -226,10 +232,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu screen tcping zstd
+dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances httping jnettop nload srm wdiff
+# dnf --enablerepo=epel-playground install -y glances jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData

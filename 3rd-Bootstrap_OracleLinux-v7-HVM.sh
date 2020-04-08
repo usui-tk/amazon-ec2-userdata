@@ -128,6 +128,7 @@ yum repolist all
 # Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --enable ol7_latest
 yum-config-manager --enable ol7_UEKR5
+yum-config-manager --enable ol7_UEKR6
 yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
@@ -145,6 +146,10 @@ yum clean all
 
 # Default Package Update
 yum update -y
+
+# Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
+# https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
+dnf install -y kernel-uek kernel-uek-devel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
