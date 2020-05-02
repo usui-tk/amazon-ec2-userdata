@@ -103,7 +103,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect fio gdisk git hdparm htop intltool iotop iperf3 iptraf-ng jq kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted perf psacct psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget wireshark xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
+yum install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect finger fio gdisk git gnutls-utils hdparm htop intltool iotop iperf3 ipset iptraf-ng jq kexec-tools latencytop-tui libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted patchutils perf psacct psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget wireshark xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
 yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools pcp-zeroconf
@@ -510,6 +510,32 @@ source /etc/profile.d/ec2rl.sh
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [kernel-livepatch]
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/al2-live-patching.html
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux Kernel Live Patching (yum plugin)
+yum install -y yum-plugin-kernel-livepatch
+
+yum kernel-livepatch enable -y
+
+# Package Install Amazon Linux Kernel Live Patching (Dynamic kernel patching)
+yum install -y kpatch-runtime
+
+# Configure Dynamic kernel patching software (Start Daemon kpatch)
+if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+	systemctl enable kpatch
+	systemctl is-enabled kpatch
+fi
+
+# Package Install Amazon Linux Kernel Live Patching (kernel-livepatch)
+amazon-linux-extras list
+
+amazon-linux-extras enable livepatch
+
+amazon-linux-extras list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel-ng]
