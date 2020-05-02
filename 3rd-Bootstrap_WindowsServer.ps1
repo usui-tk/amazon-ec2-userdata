@@ -2522,7 +2522,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.microsoft.com/en-us/edge/business/download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
-    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/0af31313-0430-454d-908a-d55ce3df7b69/MicrosoftEdgeEnterpriseX64.msi"
+    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/40e309b4-5d46-4ae8-b839-bd74b4cff36e/MicrosoftEdgeEnterpriseX64.msi"
     Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value "MicrosoftEdgeEnterpriseX64.msi"
 
     # Package Download Modern Web Browser (Microsoft Edge 64bit Edition)
@@ -2736,7 +2736,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.5.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.5.1-0-x64.msi"
+        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.7.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.7.1-0-x64.msi"
     }
 }
 
