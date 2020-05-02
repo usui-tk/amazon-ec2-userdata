@@ -47,8 +47,8 @@ fi
 #-------------------------------------------------------------------------------
 
 # Operating system support status of AWS Nitro Hypervisor (Before - Install ENA Kernel module)
-# https://github.com/awslabs/aws-support-tools/tree/master/EC2/C5M5InstanceChecks
-curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/C5M5InstanceChecks/c5_m5_checks_script.sh | bash
+# https://github.com/awslabs/aws-support-tools/tree/master/EC2/NitroInstanceChecks
+curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh | bash
 
 # Package Install Kernel Module
 eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
@@ -108,7 +108,7 @@ modinfo ena
 
 # Operating system support status of AWS Nitro Hypervisor (After - Install ENA Kernel module)
 # https://github.com/awslabs/aws-support-tools/tree/master/EC2/C5M5InstanceChecks
-curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/C5M5InstanceChecks/c5_m5_checks_script.sh | bash
+curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh | bash
 
 #-------------------------------------------------------------------------------
 # Configure EC2 Instance Support for Amazon ENA Device
