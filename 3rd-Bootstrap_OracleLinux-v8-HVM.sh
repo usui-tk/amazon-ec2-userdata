@@ -207,12 +207,6 @@ systemctl restart cockpit
 
 systemctl status -l cockpit
 
-# Configure cockpit software (Start Daemon cockpit)
-if [ $(systemctl is-enabled cockpit) = "disabled" ]; then
-	systemctl enable cockpit
-	systemctl is-enabled cockpit
-fi
-
 # Configure cockpit.socket
 if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
 	systemctl enable --now cockpit.socket
@@ -254,7 +248,7 @@ python --version
 # dnf module list | grep python3
 
 # Package Install Python 3.6 Runtime (from Oracle Linux Repository)
-# dnf install -y python38 python38-pip python38-rpm-macros python38-setuptools python38-test python38-wheel
+# dnf install -y python38 python38-devel python38-pip python38-rpm-macros python38-setuptools python38-test python38-wheel
 # dnf install -y python38-asn1crypto python38-pyyaml python38-six python38-urllib3
 
 # Version Information (Python 3.8)
