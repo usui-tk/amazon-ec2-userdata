@@ -37,6 +37,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
 #  - Ubuntu 16.04 LTS
+#	 https://wiki.ubuntu.com/XenialXerus/ReleaseNotes
+#
 #    https://help.ubuntu.com/
 #    https://help.ubuntu.com/lts/serverguide/index.html
 #    https://help.ubuntu.com/lts/installation-guide/amd64/index.html
@@ -113,7 +115,11 @@ apt install -y -q python3 python3-pip python3-setuptools python3-testtools pytho
 #-------------------------------------------------------------------------------
 
 # Package Install Special package for AWS (from Ubuntu Official Repository)
-apt install -y -q linux-aws linux-image-aws linux-tools-aws
+apt install -y -q linux-tools-aws
+
+# Package Install Special package for Linux-Kernel[linux-aws@Default] (from Ubuntu Official Repository)
+# https://packages.ubuntu.com/en/xenial/linux-aws
+apt install -y -q linux-aws linux-image-aws
 
 #-------------------------------------------------------------------------------
 # Set AWS Instance MetaData
@@ -158,9 +164,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	apt show awscli
+	if [ $(dpkg -l awscli) ]; then
+		apt show awscli
 
-	apt remove -y -q awscli
+		apt remove -y -q awscli
+	fi
+
 fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
@@ -555,47 +564,6 @@ apt show ansible
 ansible --version
 
 ansible localhost -m setup
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [PowerShell Core(pwsh)]
-# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
-# https://github.com/PowerShell/PowerShell
-#
-# https://packages.microsoft.com/ubuntu/16.04/prod/
-#
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
-# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
-#-------------------------------------------------------------------------------
-
-# Import the public repository GPG keys
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-apt-key list
-
-# Register the Microsoft Ubuntu repository
-curl https://packages.microsoft.com/config/ubuntu/16.04/prod.list | tee /etc/apt/sources.list.d/microsoft.list
-
-# Update the list of products
-apt clean -y -q
-apt update -y -q
-
-# Install PowerShell
-apt install -y -q powershell
-
-apt show powershell
-
-# Check Version
-pwsh -Version
-
-# Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
-
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-# pwsh -Command "Import-Module AWSPowerShell.NetCore"
-
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Get-AWSPowerShellVersion"
-# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]

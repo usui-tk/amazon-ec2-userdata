@@ -184,9 +184,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	rpm -qi awscli
+	if [ $(rpm -qa | grep awscli) ]; then
+		rpm -qi awscli
 
-	dnf remove -y awscli
+		dnf remove -y awscli
+	fi
+
 fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)

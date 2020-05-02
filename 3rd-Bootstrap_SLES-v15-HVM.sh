@@ -490,9 +490,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	rpm -qi aws-cli
+	if [ $(rpm -qa | grep aws-cli) ]; then
+		rpm -qi aws-cli
 
-	zypper --quiet --non-interactive remove aws-cli
+		zypper --quiet --non-interactive remove aws-cli
+	fi
+
 fi
 
 # Prohibit installation of AWS-CLI v1 package from repository
@@ -816,51 +819,6 @@ source /etc/profile.d/ec2rl.sh
 # ansible --version
 
 # ansible localhost -m setup
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [PowerShell Core(pwsh)]
-# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
-# https://github.com/PowerShell/PowerShell
-#
-# https://packages.microsoft.com/sles/15/prod/
-#
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
-# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
-#-------------------------------------------------------------------------------
-
-# Add the Microsoft Product repository
-# zypper addrepo --check --refresh --name "Microsoft-Paclages-SLE-15" "https://packages.microsoft.com/config/sles/15/prod.repo"
-
-# Register the Microsoft signature key
-# rpm --import https://packages.microsoft.com/keys/microsoft.asc
-# zypper --gpg-auto-import-keys refresh packages-microsoft-com-prod
-
-# zypper repos
-
-# Update the list of products
-# zypper clean --all
-# zypper --quiet refresh -fdb
-
-# zypper --quiet --non-interactive update
-
-# Install PowerShell
-# zypper --quiet --non-interactive install powershell
-
-# rpm -qi powershell
-
-# Check Version
-# pwsh -Version
-
-# Operation check of PowerShell command
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-# pwsh -Command "Import-Module AWSPowerShell.NetCore"
-
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Get-AWSPowerShellVersion"
-# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

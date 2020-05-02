@@ -163,9 +163,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	apt show awscli
+	if [ $(dpkg -l awscli) ]; then
+		apt show awscli
 
-	apt remove -y -q awscli
+		apt remove -y -q awscli
+	fi
+
 fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)

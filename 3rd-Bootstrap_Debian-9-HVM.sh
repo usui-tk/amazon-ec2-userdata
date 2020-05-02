@@ -152,9 +152,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	apt show awscli
+	if [ $(dpkg -l awscli) ]; then
+		apt show awscli
 
-	apt remove -y -q awscli
+		apt remove -y -q awscli
+	fi
+
 fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
@@ -484,47 +487,6 @@ apt install -y -q ansible
 ansible --version
 
 ansible localhost -m setup
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [PowerShell Core(pwsh)]
-# https://docs.microsoft.com/ja-jp/powershell/scripting/setup/Installing-PowerShell-Core-on-macOS-and-Linux?view=powershell-6
-# https://github.com/PowerShell/PowerShell
-#
-# https://packages.microsoft.com/repos/microsoft-debian-stretch-prod
-#
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-linux-mac.html
-# https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
-#-------------------------------------------------------------------------------
-
-# Import the public repository GPG keys
-curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-apt-key list
-
-# Register the Microsoft Product feed
-sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main" > /etc/apt/sources.list.d/microsoft.list'
-
-# Update the list of products
-apt clean -y -q
-apt update -y -q
-
-# Install PowerShell
-apt install -y -q powershell
-
-apt show powershell
-
-# Check Version
-pwsh -Version
-
-# Operation check of PowerShell command
-pwsh -Command "Get-Module -ListAvailable"
-
-pwsh -Command "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force"
-# pwsh -Command "Import-Module AWSPowerShell.NetCore"
-
-# pwsh -Command "Get-Module -ListAvailable"
-
-# pwsh -Command "Get-AWSPowerShellVersion"
-# pwsh -Command "Get-AWSPowerShellVersion -ListServiceVersionInfo"
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]

@@ -297,9 +297,12 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 	which aws
 
-	rpm -qi aws-cli
+	if [ $(rpm -qa | grep aws-cli) ]; then
+		rpm -qi aws-cli
 
-	zypper --quiet --non-interactive remove aws-cli
+		zypper --quiet --non-interactive remove aws-cli
+	fi
+
 fi
 
 # Prohibit installation of AWS-CLI v1 package from repository
