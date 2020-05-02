@@ -182,7 +182,7 @@ fi
 kpatch list
 
 # Package List (kernel live-patch)
-yum list installed | grep kpatch-patch
+yum list installed | grep kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]

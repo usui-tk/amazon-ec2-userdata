@@ -189,7 +189,7 @@ dnf install -y redhat-lsb-core
 # kpatch list
 
 # Package List (kernel live-patch)
-# dnf list installed | grep kpatch-patch
+# dnf list installed | grep kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
