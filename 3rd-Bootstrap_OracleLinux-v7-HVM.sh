@@ -171,8 +171,34 @@ yum install -y redhat-lsb-core
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 # yum install -y ol-template-config ovm-template-config*
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [kernel live-patching tools]
+# https://access.redhat.com/solutions/2206511
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/kernel_administration_guide/applying_patches_with_kernel_live_patching
+#-------------------------------------------------------------------------------
+
 # Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Repository)
 # yum install -y kpatch
+
+# rpm -qi kpatch
+
+# systemctl daemon-reload
+
+# systemctl restart kpatch
+
+# systemctl status -l kpatch
+
+# Configure kpatch software (Start Daemon kpatch)
+# if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+# 	systemctl enable kpatch
+# 	systemctl is-enabled kpatch
+# fi
+
+# kpatch information
+# kpatch list
+
+# Package List (kernel live-patch)
+# yum list installed | grep kpatch-patch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]

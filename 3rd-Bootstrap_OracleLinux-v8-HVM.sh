@@ -156,32 +156,83 @@ dnf install -y kernel-uek kernel-uek-devel
 dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
-dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond udica
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
 dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Oracle Linux support tools (from Oracle Linux Repository)
 dnf install -y redhat-lsb-core
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [kernel live-patching tools]
+# https://access.redhat.com/solutions/2206511
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/managing_monitoring_and_updating_the_kernel/applying-patches-with-kernel-live-patching_managing-monitoring-and-updating-the-kernel
+#-------------------------------------------------------------------------------
+
 # Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Repository)
 # dnf install -y kpatch
+
+# rpm -qi kpatch
+
+# systemctl daemon-reload
+
+# systemctl restart kpatch
+
+# systemctl status -l kpatch
+
+# Configure kpatch software (Start Daemon kpatch)
+# if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+# 	systemctl enable kpatch
+# 	systemctl is-enabled kpatch
+# fi
+
+# kpatch information
+# kpatch list
+
+# Package List (kernel live-patch)
+# dnf list installed | grep kpatch-patch
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Cockpit]
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/managing_systems_using_the_rhel_8_web_console/index
+#-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux Web-Based support tools (from Oracle Linux Repository)
 dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
+rpm -qi cockpit
+
+systemctl daemon-reload
+
+systemctl restart cockpit
+
+systemctl status -l cockpit
+
+# Configure cockpit software (Start Daemon cockpit)
+if [ $(systemctl is-enabled cockpit) = "disabled" ]; then
+	systemctl enable cockpit
+	systemctl is-enabled cockpit
+fi
+
+# Configure cockpit.socket
+if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
+	systemctl enable --now cockpit.socket
+	systemctl is-enabled cockpit.socket
+fi
+
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Python3]
+# Custom Package Installation [Python 3.6]
 #-------------------------------------------------------------------------------
 
-# DNF-Module Enable Python 3 Runtime (from Oracle Linux Repository)
+# DNF-Module Enable Python 3.6 Runtime (from Oracle Linux Repository)
 dnf module list | grep python3
 dnf install -y @python36
 dnf module list | grep python3
 
-# Package Install Python 3 Runtime (from Oracle Linux Repository)
+# Package Install Python 3.6 Runtime (from Oracle Linux Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
-dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pip python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
+dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
 
-# Version Information (Python3)
+# Version Information (Python 3.6)
 python3 -V
 pip3 -V
 
@@ -192,6 +243,23 @@ alternatives --list
 
 which python
 python --version
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python 3.8]
+#-------------------------------------------------------------------------------
+
+# DNF-Module Enable Python 3.8 Runtime (from Oracle Linux Repository)
+# dnf module list | grep python3
+# dnf install -y @python38
+# dnf module list | grep python3
+
+# Package Install Python 3.6 Runtime (from Oracle Linux Repository)
+# dnf install -y python38 python38-pip python38-rpm-macros python38-setuptools python38-test python38-wheel
+# dnf install -y python38-asn1crypto python38-pyyaml python38-six python38-urllib3
+
+# Version Information (Python 3.8)
+# python3.8 -V
+# pip3.8 -V
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]

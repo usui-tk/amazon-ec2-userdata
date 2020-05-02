@@ -155,8 +155,34 @@ yum install -y pcp pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zero
 # Package Install CentOS support tools (from CentOS Community Repository)
 yum install -y redhat-lsb-core redhat-support-tool
 
+#-------------------------------------------------------------------------------
+# Custom Package Installation [kernel live-patching tools]
+# https://access.redhat.com/solutions/2206511
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/kernel_administration_guide/applying_patches_with_kernel_live_patching
+#-------------------------------------------------------------------------------
+
 # Package Install CentOS kernel live-patching tools (from CentOS Community Repository)
 yum install -y kpatch
+
+rpm -qi kpatch
+
+systemctl daemon-reload
+
+systemctl restart kpatch
+
+systemctl status -l kpatch
+
+# Configure kpatch software (Start Daemon kpatch)
+if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+	systemctl enable kpatch
+	systemctl is-enabled kpatch
+fi
+
+# kpatch information
+kpatch list
+
+# Package List (kernel live-patch)
+yum list installed | grep kpatch-patch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python3]

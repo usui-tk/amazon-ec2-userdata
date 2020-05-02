@@ -115,6 +115,32 @@ yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3
 yum install -y ec2-hibinit-agent ec2-instance-connect hibagent
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [kernel-livepatch]
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/al2-live-patching.html
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux Kernel Live Patching (yum plugin)
+yum install -y yum-plugin-kernel-livepatch
+
+yum kernel-livepatch enable -y
+
+# Package Install Amazon Linux Kernel Live Patching (Dynamic kernel patching)
+yum install -y kpatch-runtime
+
+# Configure Dynamic kernel patching software (Start Daemon kpatch)
+if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+	systemctl enable kpatch
+	systemctl is-enabled kpatch
+fi
+
+# Package Install Amazon Linux Kernel Live Patching (kernel-livepatch)
+amazon-linux-extras list
+
+amazon-linux-extras enable livepatch
+
+amazon-linux-extras list
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
 #-------------------------------------------------------------------------------
 
@@ -513,32 +539,6 @@ source /etc/profile.d/ec2rl.sh
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [kernel-livepatch]
-# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/al2-live-patching.html
-#-------------------------------------------------------------------------------
-
-# Package Install Amazon Linux Kernel Live Patching (yum plugin)
-yum install -y yum-plugin-kernel-livepatch
-
-yum kernel-livepatch enable -y
-
-# Package Install Amazon Linux Kernel Live Patching (Dynamic kernel patching)
-yum install -y kpatch-runtime
-
-# Configure Dynamic kernel patching software (Start Daemon kpatch)
-if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
-	systemctl enable kpatch
-	systemctl is-enabled kpatch
-fi
-
-# Package Install Amazon Linux Kernel Live Patching (kernel-livepatch)
-amazon-linux-extras list
-
-amazon-linux-extras enable livepatch
-
-amazon-linux-extras list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel-ng]
