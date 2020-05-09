@@ -149,7 +149,7 @@ yum update -y
 
 # Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
 # https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
-dnf install -y kernel-uek kernel-uek-devel
+yum install -y kernel-uek kernel-uek-devel
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
