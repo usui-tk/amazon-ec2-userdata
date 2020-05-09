@@ -99,7 +99,7 @@ find /etc/yum.repos.d/
 
 yum search oracle-
 
-yum install -y oraclelinux-release-el7 oraclelinux-developer-release-el7 oracle-epel-release-el7 oracle-softwarecollection-release-el7 oracle-release-el7
+yum install -y oraclelinux-release-el7 oracle-epel-release-el7 oracle-olcne-release-el7 oracle-release-el7 oracle-softwarecollection-release-el7 oraclelinux-developer-release-el7
 yum clean all
 
 find /etc/yum.repos.d/
@@ -133,10 +133,14 @@ yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
 yum-config-manager --enable ol7_oracle_instantclient
+yum-config-manager --enable ol7_olcne11
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_developer
 yum-config-manager --disable ol7_developer_EPEL
+yum-config-manager --disable ol7_developer_UEKR5
+yum-config-manager --disable ol7_developer_UEKR6
+yum-config-manager --disable ol7_developer_olcne
 
 # Checking repository information
 yum repolist all
@@ -250,36 +254,6 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Oracle Linux Cloud Native Environment]
-#-------------------------------------------------------------------------------
-
-# Checking repository information
-yum repolist all
-
-# Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
-find /etc/yum.repos.d/
-
-yum install -y oracle-olcne-release-el7
-
-find /etc/yum.repos.d/
-
-# [Workaround] Fix BaseURL
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
-grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-
-# Developer Preview packages for Oracle Linux Cloud Native Environment Oracle Linux 7 (x86_64)
-#  https://yum.oracle.com/repo/OracleLinux/OL7/developer/olcne/x86_64/index.html
-yum-config-manager --enable ol7_developer_olcne
-
-# Checking repository information
-yum repolist all
-
-# yum repository metadata Clean up
-yum clean all
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
