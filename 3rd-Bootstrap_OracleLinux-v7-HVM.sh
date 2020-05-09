@@ -299,7 +299,7 @@ yum install -y oracle-database-preinstall-19c
 yum install -y oracle-em-agent-13cR2-preinstall
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
-yum install -y oracle-instantclient19.3-basic oracle-instantclient19.3-devel oracle-instantclient19.3-jdbc oracle-instantclient19.3-sqlplus oracle-instantclient19.3-tools
+yum install -y oracle-instantclient19.6-basic oracle-instantclient19.6-devel oracle-instantclient19.6-jdbc oracle-instantclient19.6-sqlplus oracle-instantclient19.6-tools
 
 # Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-ebs-server-R12-preinstall
