@@ -280,24 +280,20 @@ fi
 #-------------------------------------------------------------------------------
 
 # Remove the udev persistent rules file
-rm -rf "/etc/udev/rules.d/70-persistent-*"
+rm -rf /etc/udev/rules.d/70-persistent-*
 
 # Remove cloud-init status
-rm -rf "/var/lib/cloud/*"
+rm -rf /var/lib/cloud/*
 
 # Remove temporary files
-rm -rf "/tmp/*"
-rm -rf "/var/tmp/*"
-
-# Remove crash dump files
-rm -rf "/var/crash/*"
-rm -rf "/var/log/dump/*"
+rm -rf /tmp/*
+rm -rf /var/tmp/*
 
 # Remove /var/log files
-find "/var/log/" -type f -name \* -exec cp -f /dev/null {} \;
+find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;
 
 # Remove /var/log/user-data_*.log files
-rm -rf "/var/log/user-data_*.log"
+rm -rf /var/log/user-data_*.log
 
 #-------------------------------------------------------------------------------
 # Cleanup process for Machine ID
