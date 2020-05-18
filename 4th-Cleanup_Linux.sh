@@ -197,7 +197,7 @@ if [ $(command -v rpm) ]; then
 
 		# Show Linux distribution release Information
 		if [ -f /etc/os-release ]; then
-			cat /etc/os-release
+			cat "/etc/os-release"
 		fi
 	fi
 
