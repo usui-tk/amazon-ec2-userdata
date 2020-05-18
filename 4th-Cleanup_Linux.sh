@@ -311,15 +311,15 @@ if [ -f /etc/machine-id ]; then
 fi
 
 # Cleanup Machine ID for Yum package manager
-# if [ -f /var/lib/yum/uuid ]; then
-# 	echo "[Cleanup Machine information] : /var/lib/yum/uuid"
+if [ -f /var/lib/yum/uuid ]; then
+	echo "[Cleanup Machine information] : /var/lib/yum/uuid"
 
-# 	cat "/var/lib/yum/uuid"
+	cat "/var/lib/yum/uuid"
 
-# 	cat /dev/null > "/var/lib/yum/uuid"
+	cat /dev/null > "/var/lib/yum/uuid"
 
-# 	cat "/var/lib/yum/uuid"
-# fi
+	cat "/var/lib/yum/uuid"
+fi
 
 # Cleanup Machine ID for Zypper package manager
 if [ -f /var/lib/zypp/AnonymousUniqueId ]; then
