@@ -233,6 +233,7 @@ dnf module list | grep python3
 # Package Install Python 3.6 Runtime (from CentOS Community Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 dnf install -y python3-asn1crypto python3-dateutil python3-docutils python3-humanize python3-jmespath python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
+dnf install -y python3-argcomplete
 
 # Version Information (Python 3.6)
 python3 -V
@@ -245,6 +246,9 @@ alternatives --list
 
 which python
 python --version
+
+# Python package setting (python3-argcomplete)
+activate-global-python-argcomplete
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.8]
@@ -331,7 +335,7 @@ curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 unzip "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
 
 aws --version
 

@@ -177,7 +177,7 @@ curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/aws
 unzip "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin"
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
 
 aws --version
 
