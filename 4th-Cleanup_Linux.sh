@@ -15,7 +15,7 @@ fi
 
 # Show Linux distribution release Information
 if [ -f /etc/os-release ]; then
-	cat /etc/os-release
+	cat "/etc/os-release"
 fi
 
 # Show Linux kernel package name Information
@@ -179,17 +179,6 @@ if [ $(command -v rpm) ]; then
 		# Cleanup repository information
 		zypper clean --all
 
-		# Cleanup Machine information
-		if [ -f /var/lib/dbus/machine-id ]; then
-			echo "[Cleanup Machine information] : rm -fv /var/lib/dbus/machine-id"
-			rm -fv /var/lib/dbus/machine-id
-		fi
-
-		if [ -f /var/lib/zypp/AnonymousUniqueId ]; then
-			echo "[Cleanup Machine information] : rm -fv /var/lib/zypp/AnonymousUniqueId"
-			rm -fv /var/lib/zypp/AnonymousUniqueId
-		fi
-
 		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using ZYPPER package manager) COMPLETE"
 
 	# --------------------------------------------------------------------------
@@ -278,7 +267,7 @@ if [ $(command -v dpkg) ]; then
 
 		# Show Linux distribution release Information
 		if [ -f /etc/os-release ]; then
-			cat /etc/os-release
+			cat "/etc/os-release"
 		fi
 	fi
 
@@ -291,20 +280,61 @@ fi
 #-------------------------------------------------------------------------------
 
 # Remove the udev persistent rules file
-rm -rf /etc/udev/rules.d/70-persistent-*
+rm -rf "/etc/udev/rules.d/70-persistent-*"
 
 # Remove cloud-init status
-rm -rf /var/lib/cloud/*
+rm -rf "/var/lib/cloud/*"
 
-# Remove /tmp/, /var/tmp/ files
-rm -rf /tmp/*
-rm -rf /var/tmp/*
+# Remove temporary files
+rm -rf "/tmp/*"
+rm -rf "/var/tmp/*"
+
+# Remove crash dump files
+rm -rf "/var/crash/*"
+rm -rf "/var/log/dump/*"
 
 # Remove /var/log files
-find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;
+find "/var/log/" -type f -name \* -exec cp -f /dev/null {} \;
 
 # Remove /var/log/user-data_*.log files
-rm -rf /var/log/user-data_*.log
+rm -rf "/var/log/user-data_*.log"
+
+#-------------------------------------------------------------------------------
+# Cleanup process for Machine ID
+#-------------------------------------------------------------------------------
+
+# Cleanup Machine information
+if [ -f /etc/machine-id ]; then
+	echo "[Cleanup Machine information] : /etc/machine-id"
+
+	cat "/etc/machine-id"
+
+	cat /dev/null > "/etc/machine-id"
+
+	cat "/etc/machine-id"
+fi
+
+# Cleanup Machine ID for Yum package manager
+if [ -f /var/lib/yum/uuid ]; then
+	echo "[Cleanup Machine information] : /var/lib/yum/uuid"
+
+	cat "/var/lib/yum/uuid"
+
+	cat /dev/null > "/var/lib/yum/uuid"
+
+	cat "/var/lib/yum/uuid"
+fi
+
+# Cleanup Machine ID for Zypper package manager
+if [ -f /var/lib/zypp/AnonymousUniqueId ]; then
+	echo "[Cleanup Machine information] : /var/lib/zypp/AnonymousUniqueId"
+
+	cat "/var/lib/zypp/AnonymousUniqueId"
+
+	cat /dev/null > "/var/lib/zypp/AnonymousUniqueId"
+
+	cat "/var/lib/zypp/AnonymousUniqueId"
+fi
 
 #-------------------------------------------------------------------------------
 # Cleanup process for SSH Host Key, SSH Public Key, SSH Authorized Keys
@@ -344,7 +374,7 @@ fi
 
 # Remove SSH Authorized Keys (Root User) for All Linux Distribution
 if [ -f /root/.ssh/authorized_keys ]; then
-	shred -u --force /root/.ssh/authorized_keys
+	shred -u --force "/root/.ssh/authorized_keys"
 fi
 
 # Remove SSH Authorized Keys (General user)
@@ -373,13 +403,13 @@ unset HISTFILE
 # Remove Bash History (Root User) for All Linux Distribution
 if [ -f /root/.bash_history ]; then
 	echo "[Remove Bash History] : rm -fv /root/.bash_history"
-	rm -fv /root/.bash_history
+	rm -fv "/root/.bash_history"
 fi
 
 # Remove Bash History (for AWS Systems Manager/OS Local User)
 if [ -f /home/ssm-user/.bash_history ]; then
 	echo "[Remove Bash History] : /home/ssm-user/.bash_history"
-	rm -fv /home/ssm-user/.bash_history
+	rm -fv "/home/ssm-user/.bash_history"
 fi
 
 # Remove Bash History (General user)
