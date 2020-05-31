@@ -112,7 +112,7 @@ yum install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-system-tools 
 yum install -y python3 python3-pip python3-rpm-macros python3-setuptools python3-test python3-tools python3-wheel
 
 # Package Install Amazon Linux Specific Tools (from Amazon Official Repository)
-yum install -y ec2-hibinit-agent ec2-instance-connect hibagent
+yum install -y aws-cfn-bootstrap ec2-hibinit-agent ec2-instance-connect hibagent
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel-livepatch]
