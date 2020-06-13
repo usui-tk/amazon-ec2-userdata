@@ -156,7 +156,12 @@ rpm -qi epel-release
 
 # [Workaround] enable Base URL
 egrep '^\[|baseurl=|metalink=' /etc/yum.repos.d/epel*
-grep -l '#baseurl=' /etc/yum.repos.d/epel*.repo | xargs sed -i -e 's|#baseurl=|baseurl=|g'
+
+BaseUrlFlag=$(grep -l '#baseurl=' /etc/yum.repos.d/epel*.repo | wc -l)
+if [ $BaseUrlFlag -gt 0 ]; then
+	grep -l '#baseurl=' /etc/yum.repos.d/epel*.repo | xargs sed -i -e 's|#baseurl=|baseurl=|g'
+fi
+
 egrep '^\[|baseurl=|metalink=' /etc/yum.repos.d/epel*
 
 # [Workaround] disable MetaLink URL
