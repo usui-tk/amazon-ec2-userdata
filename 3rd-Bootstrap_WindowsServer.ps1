@@ -2577,9 +2577,9 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Initialize Parameter [# Depends on IrfanView version information]
     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview454_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL_INSTALLER_URL.LastIndexOf("/") + 1))
+    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview454_plugins_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_FILE.Substring($IRFANVIEW_PLUGIN_INSTALLER_FILE.LastIndexOf("/") + 1))
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Graphic Viewer (IrfanView)
     Write-Log "# Package Download Graphic Viewer (IrfanView)"
