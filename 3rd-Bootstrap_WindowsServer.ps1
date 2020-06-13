@@ -1984,8 +1984,8 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 7.0)"
 
 # Initialize Parameter [# Depends on PowerShell v7.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.0.0/PowerShell-7.0.0-win-x64.msi"
-Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value "PowerShell-7.0.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.0.2/PowerShell-7.0.2-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
@@ -2022,7 +2022,7 @@ Write-LogSeparator "Package Install System Utility (Windows Admin Center)"
 
 # Initialize Parameter
 Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdownload"
-Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter1910.msi"
+Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter.msi"
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
 # Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
@@ -2541,7 +2541,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on 7-Zip version information]
     Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z1900-x64.exe"
-    Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value "7z1900-x64.exe"
+    Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download File archiver (7-Zip)
     Write-Log "# Package Download File archiver (7-Zip)"
@@ -2577,9 +2577,9 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Initialize Parameter [# Depends on IrfanView version information]
     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview454_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value "iview454_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL_INSTALLER_URL.LastIndexOf("/") + 1))
     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview454_plugins_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value "iview454_plugins_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_FILE.Substring($IRFANVIEW_PLUGIN_INSTALLER_FILE.LastIndexOf("/") + 1))
 
     # Package Download Graphic Viewer (IrfanView)
     Write-Log "# Package Download Graphic Viewer (IrfanView)"
