@@ -186,21 +186,6 @@ function Get-AmazonMachineInformation {
         Write-Log "# [AWS - EC2] Hardware - System BIOS Revision : $SystemBiosVersion"
     }
 
-    # Get System BIOS Details Information
-    Set-Variable -Name BiosDetailsRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System\BIOS"
-
-    if (Test-Path $BiosDetailsRegistry) {
-        $BiosDetailsRegistryValue = Get-ItemProperty -Path $BiosDetailsRegistry -ErrorAction SilentlyContinue
-        $BiosSystemManufacturer = $BiosDetailsRegistryValue.SystemManufacturer
-        $BiosSystemProductName = $BiosDetailsRegistryValue.SystemProductName
-        $BiosSystemVersion = $BiosDetailsRegistryValue.SystemVersion
-
-        # Write the information to the Log Files
-        Write-Log "# [AWS - EC2] Hardware - System BIOS Manufacturer : $BiosSystemManufacturer"
-        Write-Log "# [AWS - EC2] Hardware - System BIOS ProductName : $BiosSystemProductName"
-        Write-Log "# [AWS - EC2] Hardware - System BIOS Version : $BiosSystemVersion"
-    }
-
     # Get System CPU Information
     Set-Variable -Name CpuRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System\CentralProcessor\0"
 
@@ -259,12 +244,12 @@ function Get-EbsVolumesMappingInformation {
 
         # InstanceId
         if ( [string]::IsNullOrEmpty($InstanceId) ) {
-            $InstanceId = (Invoke-WebRequest '169.254.169.254/latest/meta-data/instance-id').Content
+            $InstanceId = (Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/instance-id" -UseBasicParsing).Content
         }
 
         # AZ:Availability Zone
         if ( [string]::IsNullOrEmpty($AZ) ) {
-            $AZ = (Invoke-WebRequest '169.254.169.254/latest/meta-data/placement/availability-zone').Content
+            $AZ = (Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone" -UseBasicParsing).Content
         }
 
         # Region
@@ -277,9 +262,9 @@ function Get-EbsVolumesMappingInformation {
 
         # Get the block-device-mapping
         $VirtualDeviceMap = @{ }
-        ((Invoke-WebRequest '169.254.169.254/latest/meta-data/block-device-mapping').Content).Split("`n") | ForEach-Object {
+        ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping" -UseBasicParsing).Content).Split("`n") | ForEach-Object {
             $VirtualDevice = $_
-            $BlockDeviceName = ((Invoke-WebRequest ("169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice))).Content
+            $BlockDeviceName = (Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice") -UseBasicParsing).Content
             $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
             $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
         }
@@ -301,7 +286,7 @@ function Get-EbsVolumesMappingInformation {
             $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
         }
         elseif ($DiskDrive.PNPDeviceID -like "*PROD_AMAZON_EC2_NVME*") {
-            $BlockDeviceName = ((Invoke-WebRequest ("169.254.169.254/latest/meta-data/block-device-mapping/ephemeral" + $($DiskDrive.SCSIPort - 2)))).Content
+            $BlockDeviceName = ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/ephemeral" + $($DiskDrive.SCSIPort - 2)) -UseBasicParsing)).Content
             $BlockDevice = $null
             $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
         }
@@ -1694,7 +1679,7 @@ Get-Content -Path $SSMAgentLogFile
 
 # Display Windows Server OS Parameter [AWS Systems Manager agent Information]
 if ($RoleName) {
-    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -Verb runas -ArgumentList "get-instance-information" -RedirectStandardOutput "$LOGS_DIR\APPS_AWS_EC2-SSM-AgentStatus.log" -RedirectStandardError "$LOGS_DIR\APPS_EC2-SSM-AgentStatusError.log"
+    Start-Process -FilePath "C:\Program Files\Amazon\SSM\ssm-cli.exe" -Verb runas -ArgumentList "get-instance-information"
 }
 
 
@@ -2718,8 +2703,12 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on WinSCP version information]
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.17.6-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
+
     Write-Log "# Package Download System Utility (WinSCP)"
-    Get-WebContentToFile -Uri 'https://winscp.net/download/WinSCP-5.15.9-Setup.exe' -OutFile "$TOOL_DIR\WinSCP-5.15.9-Setup.exe"
+    Get-WebContentToFile -Uri "$WINSCP_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINSCP_INSTALLER_FILE"
 }
 
 # Package Download System Utility (Wireshark)
@@ -2735,8 +2724,12 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://td-agent-package-browser.herokuapp.com/3/windows
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+        # Initialize Parameter [# Depends on Fluentd version information]
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.7.1-0-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
+
         Write-Log "# Package Download System Utility (Fluentd)"
-        Get-WebContentToFile -Uri 'http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.7.1-0-x64.msi' -OutFile "$TOOL_DIR\td-agent-3.7.1-0-x64.msi"
+        Get-WebContentToFile -Uri "$FLUENTD_INSTALLER_URL" -OutFile "$TOOL_DIR\$FLUENTD_INSTALLER_FILE"
     }
 }
 
@@ -2744,38 +2737,52 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on Python 2.7 version information]
+    Set-Variable -Name PYTHON27_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi"
+    Set-Variable -Name PYTHON27_INSTALLER_FILE -Scope Script -Value ($PYTHON27_INSTALLER_URL.Substring($PYTHON27_INSTALLER_URL.LastIndexOf("/") + 1))
+
     Write-Log "# Package Download System Utility (Python 2.7)"
-    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/2.7.17/python-2.7.17.amd64.msi' -OutFile "$TOOL_DIR\python-2.7.17.amd64.msi"
+    Get-WebContentToFile -Uri "$PYTHON27_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON27_INSTALLER_FILE"
 }
 
 # Package Download System Utility (Python 3.8)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on Python 3.8 version information]
+    Set-Variable -Name PYTHON38_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.8.3/python-3.8.3-amd64.exe"
+    Set-Variable -Name PYTHON38_INSTALLER_FILE -Scope Script -Value ($PYTHON38_INSTALLER_URL.Substring($PYTHON38_INSTALLER_URL.LastIndexOf("/") + 1))
+
     Write-Log "# Package Download System Utility (Python 3.8)"
-    Get-WebContentToFile -Uri 'https://www.python.org/ftp/python/3.8.1/python-3.8.1-amd64.exe' -OutFile "$TOOL_DIR\python-3.8.1-amd64.exe"
+    Get-WebContentToFile -Uri "$PYTHON38_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON38_INSTALLER_FILE"
 }
 
 # Package Download System Utility (WinMerge)
 # https://winmerge.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on WinMerge version information]
+    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge/stable/2.16.6/WinMerge-2.16.6-Setup.exe"
+    Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
+
     Write-Log "# Package Download System Utility (WinMerge)"
-    Get-WebContentToFile -Uri 'https://jaist.dl.sourceforge.net/project/winmerge/stable/2.16.4/WinMerge-2.16.4-x64-Setup.exe' -OutFile "$TOOL_DIR\WinMerge-2.16.4-x64-Setup.exe"
+    Get-WebContentToFile -Uri "$WINMERGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_INSTALLER_FILE"
 }
 
 # Package Download System Utility (WinMerge - Japanese)
 # https://winmergejp.bitbucket.io/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (WinMerge - Japanese)"
-    Get-WebContentToFile -Uri 'https://jaist.dl.osdn.jp/winmerge-jp/72291/WinMerge-2.16.4-jp-13-x64-Setup.exe' -OutFile "$TOOL_DIR\WinMerge-2.16.4-jp-13-x64-Setup.exe"
-}
+    # Initialize Parameter [# Depends on WinMerge -Japanese version information]
+    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://osdn.net/dl/winmerge-jp/WinMerge-2.16.6-jp-6-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
+    Write-Log "# Package Download System Utility (WinMerge - Japanese)"
+    Get-WebContentToFile -Uri "$WINMERGE_JP_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_JP_INSTALLER_FILE"
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Collect Script/Config Files & Logging Data Files
-#-----------------------------------------------------------------------------------------------------------------------
-
+#----------------------------------------------------------------------------------------------------------------------
 # Log Separator
 Write-LogSeparator "Collect Script/Config Files & Logging Data Files"
 
