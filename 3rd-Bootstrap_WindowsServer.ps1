@@ -884,11 +884,12 @@ if ($RoleName) {
 # Get AMI Information from Systems Manager Parameter Store
 # - Get-SSMParametersByPath
 #   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-SSMParametersByPath.html
+#   https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/parameter-store-public-parameters.html
 #
-if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
-    Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
-}
+# if ($RoleName) {
+#     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
+#     Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
+# }
 
 # Get Windows Installation Media Information from Public Snapshot
 # - Get-EC2Snapshot
