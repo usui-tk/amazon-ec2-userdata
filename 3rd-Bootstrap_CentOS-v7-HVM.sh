@@ -647,7 +647,38 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
+# curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
+
+# [workaround - START]
+
+## add GPG key
+rpm --import https://packages.treasuredata.com/GPG-KEY-td-agent
+
+## add treasure data repository to yum
+cat > /etc/yum.repos.d/td.repo << __EOF__
+[treasuredata]
+name=TreasureData
+baseurl=http://packages.treasuredata.com/4/redhat/RELEASEVER/\$basearch
+gpgcheck=1
+gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+__EOF__
+
+## Updated release version information.
+RELEASEVER=$(/usr/bin/python -c 'import yum;yb=yum.YumBase();yb.doConfigSetup(init_plugins=False);print yb.conf.yumvar["releasever"]' | sed -e 's/[^0-9]//g')
+
+cat /etc/yum.repos.d/td.repo
+
+sed -i "s/RELEASEVER/$RELEASEVER/" /etc/yum.repos.d/td.repo
+
+cat /etc/yum.repos.d/td.repo
+
+## yum repository metadata Clean up
+yum clean all
+
+## Package Install fluentd
+yum install -y td-agent
+
+# [workaround - END]
 
 rpm -qi td-agent
 
