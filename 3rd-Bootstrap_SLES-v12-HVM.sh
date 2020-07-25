@@ -588,7 +588,7 @@ zypper --quiet --non-interactive locks
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip "/tmp/awscliv2.zip" -d /tmp/
+unzip -q "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
 /tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
