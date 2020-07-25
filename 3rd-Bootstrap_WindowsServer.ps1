@@ -2731,11 +2731,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (Fluentd)
 # https://www.fluentd.org/
-# https://td-agent-package-browser.herokuapp.com/3/windows
+# https://td-agent-package-browser.herokuapp.com/4/windows
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.8.0-0-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/4/windows/td-agent-4.0.0-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
