@@ -161,6 +161,11 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 fi
 
+# Prohibit installation/update of AWS-CLI v1 package from repository
+apt-mark showhold
+apt-mark hold awscli
+apt-mark showhold
+
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
 unzip "/tmp/awscliv2.zip" -d /tmp/
@@ -494,7 +499,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://toolbelt.treasuredata.com/sh/install-debian-buster-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-debian-buster-td-agent4.sh" | sh
 
 apt show td-agent
 
@@ -511,7 +516,7 @@ if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
 fi
 
 # Package bundled ruby gem package information
-/opt/td-agent/embedded/bin/fluent-gem list
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

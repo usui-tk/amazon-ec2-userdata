@@ -2735,7 +2735,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.7.1-0-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/3/windows/td-agent-3.8.0-0-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"

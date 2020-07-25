@@ -705,7 +705,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent3.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
 
 rpm -qi td-agent
 
@@ -722,7 +722,7 @@ if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
 fi
 
 # Package bundled ruby gem package information
-/opt/td-agent/embedded/bin/fluent-gem list
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Developer Package:Terraform]
