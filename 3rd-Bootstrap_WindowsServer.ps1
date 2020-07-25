@@ -2630,6 +2630,15 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
+# Package Download System Utility (EC2Launch v2)
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2-install.html
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    if ($WindowsOSVersion -match "^5.*|^6.*|^10.0") {
+        Write-Log "# Package Download System Utility (EC2Launch v2)"
+        Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazon-ec2launch-v2/windows/amd64/latest/AmazonEC2Launch.msi' -OutFile "$TOOL_DIR\AmazonEC2Launch.msi"
+    }
+}
+
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
