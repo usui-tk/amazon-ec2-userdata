@@ -116,13 +116,33 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP3 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
 		cat /etc/os-release
 		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
 			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
@@ -135,6 +155,10 @@ if [ -n "$VERSION_ID" ]; then
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
 			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
@@ -147,6 +171,10 @@ if [ -n "$VERSION_ID" ]; then
 		if [ $ZypperMigrationStatus -eq 0 ]; then
 			echo "Successful execution [Zypper Migration Command]"
 			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
 		else
 			echo "Failed to execute [Zypper Migration Command]"
 		fi
@@ -187,17 +215,18 @@ zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-is
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP3"
+		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools purge-kernels-service
+	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
-		zypper --quiet --non-interactive install jq
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools purge-kernels-service
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
-		zypper --quiet --non-interactive install jq
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA"
-		# zypper --quiet --non-interactive install pcp pcp-conf
+		zypper --quiet --non-interactive install pcp pcp-conf
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
 	fi
@@ -221,7 +250,26 @@ SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP3"
+
+		zypper --quiet --non-interactive install python3-susepubliccloudinfo
+
+		if [ $SapFlag -gt 0 ]; then
+			echo "SUSE Linux Enterprise Server for SAP Applications 15"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		else
+			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		fi
+
+	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
 
 		zypper --quiet --non-interactive install python3-susepubliccloudinfo
@@ -321,6 +369,103 @@ zypper --quiet refresh -fdb
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation (from SUSE Package Hub Repository)
+#   https://packagehub.suse.com/
+#   https://packagehub.suse.com/how-to-use/
+#-------------------------------------------------------------------------------
+
+# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP3"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP3
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+		# SUSEConnect -p PackageHub/15.3/x86_64
+		# sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		# SUSEConnect --status-text
+		# SUSEConnect --list-extensions
+
+		# zypper clean --all
+		# zypper --quiet refresh -fdb
+
+		# zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		# zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15.2" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP2"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP2
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.2/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15.1" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP1"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP1
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.1/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15" ]; then
+		echo "SUSE Linux Enterprise Server 15 GA"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	else
+		echo "SUSE Linux Enterprise Server 15 (Unknown)"
+	fi
+fi
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
 #   https://download.opensuse.org/repositories/utilities/SLE_15/
@@ -328,9 +473,11 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
+	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP3"
 
+	elif [ "${VERSION_ID}" = "15.2" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP2"
 
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
@@ -365,82 +512,6 @@ if [ -n "$VERSION_ID" ]; then
 
 		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 		zypper --quiet --non-interactive install atop
-
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-	fi
-fi
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation (from SUSE Package Hub Repository)
-#   https://packagehub.suse.com/
-#   https://packagehub.suse.com/how-to-use/
-#-------------------------------------------------------------------------------
-
-# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP2
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/15.2/x86_64"
-		# sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
-
-		# zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP1
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/15.1/x86_64"
-		# sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
-
-		# zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15" ]; then
-		echo "SUSE Linux Enterprise Server 15 GA"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/15/x86_64"
-		# sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
-
-		# zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
 
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
