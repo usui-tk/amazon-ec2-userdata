@@ -243,11 +243,11 @@ if [ $(command -v dpkg) ]; then
 			update-grub
 		fi
 
-		# apt repository metadata Clean up
-		apt clean -y -q
-
 		# Clean up package
 		apt autoremove -y -q
+
+		# apt repository metadata Clean up
+		apt clean -y -q
 
 		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using APT package manager) COMPLETE"
 
