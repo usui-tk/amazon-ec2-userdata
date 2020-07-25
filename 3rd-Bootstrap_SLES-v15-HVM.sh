@@ -217,18 +217,23 @@ zypper --quiet --non-interactive install openscap openscap-content openscap-util
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
-		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
-		# zypper --quiet --non-interactive install purge-kernels-service
+		zypper --quiet --non-interactive install jq purge-kernels-service
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
-		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
-		# zypper --quiet --non-interactive install purge-kernels-service
+		zypper --quiet --non-interactive install jq purge-kernels-service
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
-		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
+		zypper --quiet --non-interactive install jq
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
 	elif [ "${VERSION_ID}" = "15" ]; then
 		echo "SUSE Linux Enterprise Server 15 GA"
-		zypper --quiet --non-interactive install pcp pcp-conf
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf
 	else
 		echo "SUSE Linux Enterprise Server 15 (Unknown)"
 	fi
