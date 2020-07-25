@@ -217,10 +217,12 @@ zypper --quiet --non-interactive install openscap openscap-content openscap-util
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
-		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools purge-kernels-service
+		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
+		# zypper --quiet --non-interactive install purge-kernels-service
 	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
-		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools purge-kernels-service
+		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
+		# zypper --quiet --non-interactive install purge-kernels-service
 	elif [ "${VERSION_ID}" = "15.1" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP1"
 		zypper --quiet --non-interactive install jq pcp pcp-conf pcp-system-tools
