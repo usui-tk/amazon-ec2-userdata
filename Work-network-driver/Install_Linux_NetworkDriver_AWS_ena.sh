@@ -20,7 +20,7 @@
 #-------------------------------------------------------------------------------
 
 # Source code acquisition URL and definition of file name and version information
-SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.2.7.tar.gz"
+SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.2.11.tar.gz"
 SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
@@ -48,7 +48,14 @@ fi
 
 # Operating system support status of AWS Nitro Hypervisor (Before - Install ENA Kernel module)
 # https://github.com/awslabs/aws-support-tools/tree/master/EC2/NitroInstanceChecks
-curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh | bash
+
+TestScriptUrl="https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh"
+
+Result=`curl -LI ${TestScriptUrl} -w '%{http_code}\n' -s -o /dev/null`
+if [ "${Result}" = 200 ]; then
+	echo "Successful file existence check :" ${TestScriptUrl}
+	curl -fsSL ${TestScriptUrl} | bash
+fi
 
 # Package Install Kernel Module
 eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
@@ -108,7 +115,14 @@ modinfo ena
 
 # Operating system support status of AWS Nitro Hypervisor (After - Install ENA Kernel module)
 # https://github.com/awslabs/aws-support-tools/tree/master/EC2/C5M5InstanceChecks
-curl -fsSL https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh | bash
+
+# TestScriptUrl="https://raw.githubusercontent.com/awslabs/aws-support-tools/master/EC2/NitroInstanceChecks/nitro_check_script.sh"
+
+Result=`curl -LI ${TestScriptUrl} -w '%{http_code}\n' -s -o /dev/null`
+if [ "${Result}" = 200 ]; then
+	echo "Successful file existence check :" ${TestScriptUrl}
+	curl -fsSL ${TestScriptUrl} | bash
+fi
 
 #-------------------------------------------------------------------------------
 # Configure EC2 Instance Support for Amazon ENA Device
