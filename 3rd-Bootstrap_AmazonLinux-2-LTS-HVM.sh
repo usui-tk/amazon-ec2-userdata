@@ -189,8 +189,9 @@ yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colo
 #-------------------------------------------------------------------------------
 
 # Instance MetaData
-AZ=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-Region=$(echo $AZ | sed -e 's/.$//g')
+Az=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+AzId=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+Region=$(curl -s "http://169.254.169.254/latest/meta-data/placement/region")
 InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
 InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
 PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")

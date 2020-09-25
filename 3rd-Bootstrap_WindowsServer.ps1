@@ -345,8 +345,9 @@ function Get-Ec2InstanceMetadata {
     #--------------------------------------------------------------------------------------
 
     # Set AWS Instance Metadata
-    Set-Variable -Name AZ -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-    Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document").region
+    Set-Variable -Name Az -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+    Set-Variable -Name AzId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+    Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
     Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
     Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
     Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
@@ -368,7 +369,8 @@ function Get-Ec2InstanceMetadata {
 
     # Logging AWS Instance Metadata
     Write-Log "# [AWS - EC2] Region : $Region"
-    Write-Log "# [AWS - EC2] Availability Zone : $AZ"
+    Write-Log "# [AWS - EC2] Availability Zone : $Az"
+    Write-Log "# [AWS - EC2] Availability Zone ID: $AzId"
     Write-Log "# [AWS - EC2] Instance ID : $InstanceId"
     Write-Log "# [AWS - EC2] Instance Type : $InstanceType"
     Write-Log "# [AWS - EC2] VPC Private IP Address(IPv4) : $PrivateIp"
