@@ -129,7 +129,7 @@ Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value 
 Write-Message "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
 if (Test-Path $EC2Launchv2SysprepFile) {
-    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
+    Set-Variable -Name SysprepFile -Value $EC2Launchv2SysprepFile
     Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ if (Test-Path $EC2Launchv2SysprepFile) {
     }
 }
 elseif (Test-Path $EC2LaunchSysprepFile) {
-    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
+    Set-Variable -Name SysprepFile -Value $EC2LaunchSysprepFile
     Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------
@@ -163,7 +163,7 @@ elseif (Test-Path $EC2LaunchSysprepFile) {
 
 }
 elseif (Test-Path $EC2ConfigSysprepFile) {
-    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2ConfigSysprepFile
+    Set-Variable -Name SysprepFile -Value $EC2ConfigSysprepFile
     Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------

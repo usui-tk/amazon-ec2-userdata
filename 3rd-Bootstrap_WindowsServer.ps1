@@ -1482,15 +1482,15 @@ if ($WindowsOSLanguage -eq "ja-JP") {
     Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
     if (Test-Path $EC2Launchv2SysprepFile) {
-        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
+        Set-Variable -Name SysprepFile -Value $EC2Launchv2SysprepFile
         Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
     }
     elseif (Test-Path $EC2LaunchSysprepFile) {
-        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
+        Set-Variable -Name SysprepFile -Value $EC2LaunchSysprepFile
         Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
     }
     elseif (Test-Path $EC2ConfigSysprepFile) {
-        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2ConfigSysprepFile
+        Set-Variable -Name SysprepFile -Value $EC2ConfigSysprepFile
         Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
     }
     else {
