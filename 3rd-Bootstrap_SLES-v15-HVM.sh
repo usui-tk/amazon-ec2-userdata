@@ -816,6 +816,7 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
+# https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
 zypper --quiet --non-interactive --no-gpg-checks install "https://s3.amazonaws.com/amazoncloudwatch-agent/suse/amd64/latest/amazon-cloudwatch-agent.rpm"

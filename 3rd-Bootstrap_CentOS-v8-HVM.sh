@@ -574,9 +574,10 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
+# https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm"
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 rpm -qi amazon-cloudwatch-agent
 

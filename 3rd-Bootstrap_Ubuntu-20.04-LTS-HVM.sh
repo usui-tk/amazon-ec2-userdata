@@ -424,6 +424,7 @@ apt install -y -q libcurl4
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
+# https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
 dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
