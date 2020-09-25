@@ -126,11 +126,11 @@ Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C
 Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
 
-Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
+Write-Message "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
 if (Test-Path $EC2Launchv2SysprepFile) {
     Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
-    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
+    Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------
     # Execution of Sysprep processing (EC2Launch v2)
@@ -144,7 +144,7 @@ if (Test-Path $EC2Launchv2SysprepFile) {
 }
 elseif (Test-Path $EC2LaunchSysprepFile) {
     Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
-    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
+    Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------
     # Execution of Sysprep processing (EC2Launch)
@@ -164,7 +164,7 @@ elseif (Test-Path $EC2LaunchSysprepFile) {
 }
 elseif (Test-Path $EC2ConfigSysprepFile) {
     Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2ConfigSysprepFile
-    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
+    Write-Message ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
 
     #-------------------------------------------------------------------------------------
     # Execution of Sysprep processing (EC2Config) - #1
@@ -206,7 +206,7 @@ elseif (Test-Path $EC2ConfigSysprepFile) {
 
 }
 else {
-    Write-Log "# [Error] Not Found - Sysprep files"
+    Write-Message "# [Error] Not Found - Sysprep files"
     exit 1
 }
 

@@ -72,6 +72,9 @@ Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Progr
 # Set System & Application Config File (System Defined : Windows Server 2016, 2019)
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
+# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019)
+Set-Variable -Name EC2Launchv2File -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\config\agent-config.yml"
+
 # Set System & Application Log File (System Defined : All Windows Server)
 Set-Variable -Name SSMAgentLogFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 
@@ -323,6 +326,7 @@ function Get-Ec2ConfigVersion {
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
+    Set-Variable -Name EC2ConfigInformation -Scope Script -Value ($Null)
     Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ($Null)
 
     # Get EC2Config Version
@@ -444,6 +448,29 @@ function Get-Ec2LaunchVersion {
         }
     }
 } # end Get-Ec2LaunchVersion
+
+
+function Get-Ec2LaunchV2Version {
+    #--------------------------------------------------------------------------------------
+    #  Configuring a Windows Instance Using EC2Launch
+    #   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
+    #--------------------------------------------------------------------------------------
+
+    # Set Initialize Parameter
+    Set-Variable -Name Ec2LaunchV2Information -Scope Script -Value ($Null)
+    Set-Variable -Name Ec2LaunchV2Version -Scope Script -Value ($Null)
+
+    # Get EC2Launch Version
+    $Ec2LaunchV2Information = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "Amazon EC2Launch" })
+    if ($Ec2LaunchV2Information) {
+        $Ec2LaunchV2Version = $Ec2LaunchV2Information.Version
+    }
+
+    # Write the information to the Log Files
+    if ($Ec2LaunchV2Version) {
+        Write-Log "# [Windows] Amazon EC2 Windows Utility Information - Amazon EC2Launch v2 Version : $Ec2LaunchV2Version"
+    }
+} # end Get-Ec2LaunchV2Version
 
 
 function Get-Ec2SystemManagerAgentVersion {
@@ -807,14 +834,13 @@ else {
     Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection NG]"
 }
 
-# Test Connecting to the Internet (Google Public NTP : time.google.com)
-#  https://developers.google.com/time/guides
-$FlagInternetConnectionByFQDN = Test-Connection -ComputerName time.google.com -Count 1 -Quiet -ErrorAction SilentlyContinue
+# Test Connecting to the Internet (Google WebSite : www.google.com)
+$FlagInternetConnectionByFQDN = Test-Connection -ComputerName www.google.com -Count 1 -Quiet -ErrorAction SilentlyContinue
 if ($FlagInternetConnectionByFQDN -eq $TRUE) {
-    Write-Log "# [Network Connection] Google Public NTP : time.google.com - [Connection OK]"
+    Write-Log "# [Network Connection] Google WebSite : www.google.com - [Connection OK]"
 }
 else {
-    Write-Log "# [Network Connection] Google Public NTP : time.google.com - [Connection NG]"
+    Write-Log "# [Network Connection] Google WebSite : www.google.com - [Connection NG]"
 }
 
 # Test HTTPS Connecting to the Internet (AWS Check IP Address service : https://checkip.amazonaws.com/)
@@ -867,12 +893,20 @@ Get-PowerShellVerson
 # Logging Windows Server OS Parameter [Windows Driver Information]
 Get-WindowsDriverInformation
 
-# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information]
+# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Config or EC2Launch)]
 if ($WindowsOSVersion -match "^5.*|^6.*") {
     Get-Ec2ConfigVersion
 }
 elseif ($WindowsOSVersion -match "^10.*") {
     Get-Ec2LaunchVersion
+}
+else {
+    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+}
+
+# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Launch v2)]
+if ($WindowsOSVersion -match "^5.*|^6.*|^10.*") {
+    Get-Ec2LaunchV2Version
 }
 else {
     Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
@@ -1439,33 +1473,41 @@ Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting
 
 # Update Sysprep Answer File
 if ($WindowsOSLanguage -eq "ja-JP") {
-    # Update Sysprep Answer File
-    if ($WindowsOSVersion -match "^5.*|^6.*") {
-        # Sysprep Answer File
-        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-        if (Test-Path $SysprepFile) {
-            Get-Content -Path $SysprepFile
-            Update-SysprepAnswerFile $SysprepFile
-            Get-Content -Path $SysprepFile
-        }
-        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
 
-        }
-        elseif ($WindowsOSVersion -match "^10.*") {
-        # Sysprep Answer File
-        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-        if (Test-Path $SysprepFile) {
-            Get-Content -Path $SysprepFile
-            Update-SysprepAnswerFile $SysprepFile
-            Get-Content -Path $SysprepFile
-        }
-        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+    # Checking the existence of the sysprep file
+    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+    Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
+
+    Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
+
+    if (Test-Path $EC2Launchv2SysprepFile) {
+        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
+    }
+    elseif (Test-Path $EC2LaunchSysprepFile) {
+        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
+    }
+    elseif (Test-Path $EC2ConfigSysprepFile) {
+        Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2ConfigSysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
     }
     else {
-        Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
+        Write-Log "# [Warning] Not Found - Sysprep files"
     }
+
+    # Update Sysprep Answer File
+    if (Test-Path $SysprepFile) {
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
+        Get-Content -Path $SysprepFile
+
+        Update-SysprepAnswerFile $SysprepFile
+
+        Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
+        Get-Content -Path $SysprepFile
+    }
+
 }
 else {
     Write-Log ("# [Information] No Target [OS-Language - Japanese] - Windows Language Information : " + $WindowsOSLanguage)
@@ -2012,7 +2054,7 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 7.0)"
 
 # Initialize Parameter [# Depends on PowerShell v7.0 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.0.2/PowerShell-7.0.2-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.0.3/PowerShell-7.0.3-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
@@ -2550,7 +2592,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.microsoft.com/en-us/edge/business/download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
-    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/39efe221-38fc-47ea-bfde-17afb0710d4a/MicrosoftEdgeEnterpriseX64.msi"
+    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/cc746716-af14-48fa-a767-5a2e902b6340/MicrosoftEdgeEnterpriseX64.msi"
     Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value "MicrosoftEdgeEnterpriseX64.msi"
 
     # Package Download Modern Web Browser (Microsoft Edge 64bit Edition)
@@ -2655,29 +2697,33 @@ Write-LogSeparator "Custom Package Download (System Utility - AWS Tools)"
 
 # Package Download System Utility (EC2Config)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    if ($WindowsOSVersion -match "^5.*|^6.*") {
-        Write-Log "# Package Download System Utility (EC2Config)"
-        Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
-    }
-}
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     if ($WindowsOSVersion -match "^5.*|^6.*") {
+#         Write-Log "# Package Download System Utility (EC2Config)"
+#         Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/EC2Config/EC2Install.zip' -OutFile "$TOOL_DIR\EC2Install.zip"
+#     }
+# }
 
 # Package Download System Utility (EC2Launch)
 # http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    if ($WindowsOSVersion -match "^10.*") {
-        Write-Log "# Package Download System Utility (EC2Launch)"
-        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
-        Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
-    }
-}
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     if ($WindowsOSVersion -match "^10.*") {
+#         Write-Log "# Package Download System Utility (EC2Launch)"
+#         Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/EC2-Windows-Launch.zip' -OutFile "$TOOL_DIR\EC2-Windows-Launch.zip"
+#         Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/EC2Launch/latest/install.ps1' -OutFile "$TOOL_DIR\EC2-Windows-Launch-install.ps1"
+#     }
+# }
 
 # Package Download System Utility (EC2Launch v2)
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2-install.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^5.*|^6.*|^10.0") {
         Write-Log "# Package Download System Utility (EC2Launch v2)"
         Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazon-ec2launch-v2/windows/amd64/latest/AmazonEC2Launch.msi' -OutFile "$TOOL_DIR\AmazonEC2Launch.msi"
+
+        Write-Log "# Package Download System Utility (EC2Launch v2 - Migration Tool)"
+        Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazon-ec2launch-v2-utils/MigrationTool/windows/amd64/latest/EC2LaunchMigrationTool.zip' -OutFile "$TOOL_DIR\EC2LaunchMigrationTool.zip"
     }
 }
 
@@ -2777,7 +2823,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/4/windows/td-agent-4.0.0-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/4/windows/td-agent-4.0.1-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
@@ -2870,91 +2916,43 @@ Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 # Save Userdata Script, Bootstrap Script, Logging Data Files
 if ($WindowsOSVersion) {
-    if ($WindowsOSVersion -eq "6.1") {
-        # [Windows Server 2008 R2]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
 
-        # Save Script Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
-        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
-
-        # Save Configuration Files
-        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-
-        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
-
+    # Save UserData Script File (EC2config)
+    Set-Variable -Name Ec2ConfigUserdataScript -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1"
+    if (Test-Path $Ec2ConfigUserdataScript) {
+        Copy-Item -Path $Ec2ConfigUserdataScript -Destination $BASE_DIR
     }
-    elseif ($WindowsOSVersion -eq "6.2") {
-        # [Windows Server 2012]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
 
-        # Save Script Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
-        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+    # Save UserData Script File (EC2Launch)
+    Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
 
-        # Save Configuration Files
+    # Save Sysprep Configuration Files
+    if (Test-Path $SysprepFile) {
         Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-
-        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
-
     }
-    elseif ($WindowsOSVersion -eq "6.3") {
-        # [Windows Server 2012 R2]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
 
-        # Save Script Files
-        Copy-Item -Path "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1" -Destination $BASE_DIR
-        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
-
-        # Save Configuration Files
-        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-
+    # Save EC2-Bootstrap Application Configuration Files
+    if (Test-Path $EC2ConfigFile) {
         Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
-
     }
-    elseif ($WindowsOSVersion -eq "10.0") {
-        # [Windows Server 2016]
-        Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
 
-        # Save Script Files
-        Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
-
-        # Save Configuration Files
-        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-
+    if (Test-Path $EC2LaunchFile) {
         Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
         Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
         Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
-
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
-        Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-        # Save Logging Files
-        Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
-
     }
-    else {
-        # [No Target Server OS]
-        Write-Log ("# [Information] [Save Userdata Script, Bootstrap Script, Logging Data Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
+
+    if (Test-Path $EC2Launchv2File) {
+        Copy-Item -Path $EC2Launchv2File -Destination $BASE_DIR
     }
+
+    # Save CloudWatch Agent Configuration Files
+    Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+    Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+    # Save Logging Files
+    Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 }
 else {
     # [Undefined Server OS]
@@ -2996,3 +2994,9 @@ Rename-Computer $Hostname -Force
 
 # EC2 Instance Reboot
 Restart-Computer -Force
+
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# End of Script
+#-----------------------------------------------------------------------------------------------------------------------
