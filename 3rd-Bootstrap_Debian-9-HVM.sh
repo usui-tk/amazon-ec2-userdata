@@ -110,36 +110,82 @@ apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
 #-------------------------------------------------------------------------------
-# Set AWS Instance MetaData
+# Get AWS Instance MetaData Service (IMDS v1, v2)
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
+# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/instancedata-data-retrieval.html
 #-------------------------------------------------------------------------------
 
-# Instance MetaData
-Az=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-AzId=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
-Region=$(curl -s "http://169.254.169.254/latest/meta-data/placement/region")
-InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
-InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
-PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
-AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
+# Getting an Instance Metadata Service v2 (IMDS v2) token
+TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"`
 
-# IAM Role & STS Information
-if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
-	RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
-	RoleName=$(echo $RoleArn | cut -d '/' -f 2)
-fi
+if [ -n "$TOKEN" ]; then
+	#-----------------------------------------------------------------------
+	# Retrieving Metadata Using the Instance Metadata Service v2 (IMDS v2)
+	#-----------------------------------------------------------------------
 
-if [ -n "$RoleName" ]; then
-	StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+	# Instance MetaData
+	Az=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+	AzId=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+	Region=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/placement/region")
+	InstanceId=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/instance-id")
+	InstanceType=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/instance-type")
+	PrivateIp=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+	AmiId=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/ami-id")
+
+	# IAM Role & STS Information
 	if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
-		StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
-		StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
-		StsToken=$(echo $StsCredential | jq -r '.Token')
+		RoleArn=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+		RoleName=$(echo $RoleArn | cut -d '/' -f 2)
 	fi
-fi
 
-# AWS Account ID
-if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
-	AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+	if [ -n "$RoleName" ]; then
+		StsCredential=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+		if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
+			StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+			StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+			StsToken=$(echo $StsCredential | jq -r '.Token')
+		fi
+	fi
+
+	# AWS Account ID
+	if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
+		AwsAccountId=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+	fi
+
+else
+	#-----------------------------------------------------------------------
+	# Retrieving Metadata Using the Instance Metadata Service v1 (IMDS v1)
+	#-----------------------------------------------------------------------
+
+	# Instance MetaData
+	Az=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+	AzId=$(curl -s "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+	Region=$(curl -s "http://169.254.169.254/latest/meta-data/placement/region")
+	InstanceId=$(curl -s "http://169.254.169.254/latest/meta-data/instance-id")
+	InstanceType=$(curl -s "http://169.254.169.254/latest/meta-data/instance-type")
+	PrivateIp=$(curl -s "http://169.254.169.254/latest/meta-data/local-ipv4")
+	AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
+
+	# IAM Role & STS Information
+	if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
+		RoleArn=$(curl -s "http://169.254.169.254/latest/meta-data/iam/info" | jq -r '.InstanceProfileArn')
+		RoleName=$(echo $RoleArn | cut -d '/' -f 2)
+	fi
+
+	if [ -n "$RoleName" ]; then
+		StsCredential=$(curl -s "http://169.254.169.254/latest/meta-data/iam/security-credentials/$RoleName")
+		if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
+			StsAccessKeyId=$(echo $StsCredential | jq -r '.AccessKeyId')
+			StsSecretAccessKey=$(echo $StsCredential | jq -r '.SecretAccessKey')
+			StsToken=$(echo $StsCredential | jq -r '.Token')
+		fi
+	fi
+
+	# AWS Account ID
+	if [ $(compgen -ac | sort | uniq | grep -x jq) ]; then
+		AwsAccountId=$(curl -s "http://169.254.169.254/latest/dynamic/instance-identity/document" | jq -r '.accountId')
+	fi
+
 fi
 
 #-------------------------------------------------------------------------------
