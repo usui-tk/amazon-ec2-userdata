@@ -67,6 +67,15 @@ if (Test-Path -Path $Ec2LaunchLogFile) {
     Clear-Content -Path $Ec2LaunchLogFile -Force -ErrorAction SilentlyContinue
 }
 
+Set-Variable -Name Ec2LaunchV2LogFile -Value "C:\ProgramData\Amazon\EC2Launch\log\agent.log"
+if (Test-Path -Path $Ec2LaunchV2LogFile) {
+    Set-Variable -Name EC2LAUNCH_V2_LOG_DIR -Value "C:\ProgramData\Amazon\EC2Launch\log\*"
+
+    Write-Message ("# Delete directory [" + $EC2LAUNCH_V2_LOG_DIR + "]")
+    Remove-Item -Path $EC2LAUNCH_V2_LOG_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 5
+}
+
 Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
 if (Test-Path -Path $SSMAgentLogFile) {
     Write-Message ("# Clear file [" + $SSMAgentLogFile + "]")
@@ -112,51 +121,93 @@ Start-Sleep -Seconds 30
 
 Write-MessageSeparator "# Execution of Sysprep processing"
 
-# Execution of Sysprep processing (EC2Config) - #1
-Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
-if (Test-Path -Path $EC2SettingsFile) {
-    Write-Message ("# Settings EC2Config files [" + $EC2SettingsFile + "]")
+# Checking the existence of the sysprep file
+Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
 
-    $xml = [xml](get-content $EC2SettingsFile)
-    $xmlElement = $xml.get_DocumentElement()
-    $xmlElementToModify = $xmlElement.Plugins
+Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
-    foreach ($element in $xmlElementToModify.Plugin) {
-        if ($element.name -eq "Ec2SetPassword") {
-            $element.State = "Enabled"
-        }
-        elseif ($element.name -eq "Ec2DynamicBootVolumeSize") {
-            $element.State = "Enabled"
-        }
-        elseif ($element.name -eq "Ec2HandleUserData") {
-            $element.State = "Enabled"
-        }
+if (Test-Path $EC2Launchv2SysprepFile) {
+    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
+    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
+
+    #-------------------------------------------------------------------------------------
+    # Execution of Sysprep processing (EC2Launch v2)
+    #-------------------------------------------------------------------------------------
+    Set-Variable -Name EC2LaunchV2ExeFile -Value "C:\Program Files\Amazon\EC2Launch\EC2Launch.exe"
+    if (Test-Path -Path $EC2LaunchV2ExeFile) {
+        Write-Message ("# Execution for sysprep [" + $EC2LaunchV2ExeFile + "]")
+        Start-Process $EC2LaunchV2ExeFile -Verb runas -Wait -ArgumentList @("sysprep", "--clean", "--shutdown")
+        Start-Sleep -Seconds 5
     }
-    $xml.Save($EC2SettingsFile)
-
-    Start-Sleep -Seconds 5
 }
+elseif (Test-Path $EC2LaunchSysprepFile) {
+    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
+    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
 
-# Execution of Sysprep processing (EC2Config) - #2
-Set-Variable -Name EC2ConfigExeFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Ec2Config.exe"
-if (Test-Path -Path $EC2ConfigExeFile) {
-    Write-Message ("# Execution for sysprep [" + $EC2ConfigExeFile + "]")
+    #-------------------------------------------------------------------------------------
+    # Execution of Sysprep processing (EC2Launch)
+    #-------------------------------------------------------------------------------------
+    Set-Variable -Name EC2LaunchExeFile1 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeInstance.ps1"
+    Set-Variable -Name EC2LaunchExeFile2 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\SysprepInstance.ps1"
+    if (Test-Path -Path $EC2LaunchExeFile1) {
+        Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile1 + "]")
+        Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile1", "-Schedule")
+        Start-Sleep -Seconds 10
 
-    Start-Process $EC2ConfigExeFile -Verb runas -Wait -ArgumentList @("-sysprep")
-    Start-Sleep -Seconds 5
+        Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile2 + "]")
+        Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile2")
+        Start-Sleep -Seconds 10
+    }
+
 }
+elseif (Test-Path $EC2ConfigSysprepFile) {
+    Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2ConfigSysprepFile
+    Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
 
-# Execution of Sysprep processing (EC2Launch) - #1
-Set-Variable -Name EC2LaunchExeFile1 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeInstance.ps1"
-Set-Variable -Name EC2LaunchExeFile2 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\SysprepInstance.ps1"
-if (Test-Path -Path $EC2LaunchExeFile1) {
-    Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile1 + "]")
-    Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile1", "-Schedule")
-    Start-Sleep -Seconds 10
+    #-------------------------------------------------------------------------------------
+    # Execution of Sysprep processing (EC2Config) - #1
+    #-------------------------------------------------------------------------------------
+    Set-Variable -Name EC2SettingsFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+    if (Test-Path -Path $EC2SettingsFile) {
+        Write-Message ("# Settings EC2Config files [" + $EC2SettingsFile + "]")
 
-    Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile2 + "]")
-    Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile2")
-    Start-Sleep -Seconds 10
+        $xml = [xml](get-content $EC2SettingsFile)
+        $xmlElement = $xml.get_DocumentElement()
+        $xmlElementToModify = $xmlElement.Plugins
+
+        foreach ($element in $xmlElementToModify.Plugin) {
+            if ($element.name -eq "Ec2SetPassword") {
+                $element.State = "Enabled"
+            }
+            elseif ($element.name -eq "Ec2DynamicBootVolumeSize") {
+                $element.State = "Enabled"
+            }
+            elseif ($element.name -eq "Ec2HandleUserData") {
+                $element.State = "Enabled"
+            }
+        }
+        $xml.Save($EC2SettingsFile)
+
+        Start-Sleep -Seconds 5
+    }
+
+    #-------------------------------------------------------------------------------------
+    # Execution of Sysprep processing (EC2Config) - #2
+    #-------------------------------------------------------------------------------------
+    Set-Variable -Name EC2ConfigExeFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Ec2Config.exe"
+    if (Test-Path -Path $EC2ConfigExeFile) {
+        Write-Message ("# Execution for sysprep [" + $EC2ConfigExeFile + "]")
+
+        Start-Process $EC2ConfigExeFile -Verb runas -Wait -ArgumentList @("-sysprep")
+        Start-Sleep -Seconds 5
+    }
+
+}
+else {
+    Write-Log "# [Error] Not Found - Sysprep files"
+    exit 1
 }
 
 #-------------------------------------------------------------------------------
