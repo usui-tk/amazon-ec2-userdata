@@ -395,17 +395,17 @@ function Get-Ec2InstanceMetadata {
         Write-Log "# [AWS - EC2] Retrieving Metadata Using the Instance Metadata Service v2 (IMDS v2)"
 
         # AWS Instance Metadata
-        Set-Variable -Name Az -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-        Set-Variable -Name AzId -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
-        Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/region")
-        Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/instance-id")
-        Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/instance-type")
-        Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
-        Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/ami-id")
+        Set-Variable -Name Az -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+        Set-Variable -Name AzId -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+        Set-Variable -Name Region -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+        Set-Variable -Name InstanceId -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+        Set-Variable -Name InstanceType -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/instance-type")
+        Set-Variable -Name PrivateIp -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
+        Set-Variable -Name AmiId -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
         # IAM Role & STS Information
-        Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
-        Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
+        Set-Variable -Name RoleArn -Scope Script -Value ((Invoke-WebRequest -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
+        Set-Variable -Name RoleName -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
 
         if ($RoleName) {
             Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName) -UseBasicParsing) | ConvertFrom-Json)
@@ -415,7 +415,7 @@ function Get-Ec2InstanceMetadata {
         }
 
         # AWS Account ID
-        Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -UseBasicParsing) | ConvertFrom-Json).accountId
+        Set-Variable -Name AwsAccountId -Scope Script -Value ((Invoke-WebRequest -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -UseBasicParsing) | ConvertFrom-Json).accountId
     }
     else {
         #-----------------------------------------------------------------------
@@ -424,17 +424,17 @@ function Get-Ec2InstanceMetadata {
         Write-Log "# [AWS - EC2] Retrieving Metadata Using the Instance Metadata Service v1 (IMDS v1)"
 
         # AWS Instance Metadata
-        Set-Variable -Name Az -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-        Set-Variable -Name AzId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
-        Set-Variable -Name Region -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
-        Set-Variable -Name InstanceId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
-        Set-Variable -Name InstanceType -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
-        Set-Variable -Name PrivateIp -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
-        Set-Variable -Name AmiId -Option Constant -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
+        Set-Variable -Name Az -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+        Set-Variable -Name AzId -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone-id")
+        Set-Variable -Name Region -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+        Set-Variable -Name InstanceId -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+        Set-Variable -Name InstanceType -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-type")
+        Set-Variable -Name PrivateIp -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/local-ipv4")
+        Set-Variable -Name AmiId -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/ami-id")
 
         # IAM Role & STS Information
-        Set-Variable -Name RoleArn -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
-        Set-Variable -Name RoleName -Option Constant -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
+        Set-Variable -Name RoleArn -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/iam/info" -UseBasicParsing) | ConvertFrom-Json).InstanceProfileArn
+        Set-Variable -Name RoleName -Scope Script -Value ($RoleArn -split "/" | Select-Object -Index 1)
 
         if ($RoleName) {
             Set-Variable -Name StsCredential -Scope Script -Value ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/iam/security-credentials/" + $RoleName) -UseBasicParsing) | ConvertFrom-Json)
@@ -444,7 +444,7 @@ function Get-Ec2InstanceMetadata {
         }
 
         # AWS Account ID
-        Set-Variable -Name AwsAccountId -Option Constant -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -UseBasicParsing) | ConvertFrom-Json).accountId
+        Set-Variable -Name AwsAccountId -Scope Script -Value ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -UseBasicParsing) | ConvertFrom-Json).accountId
     }
 
     # Logging AWS Instance Metadata
