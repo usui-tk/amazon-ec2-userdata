@@ -247,17 +247,17 @@ function Get-EbsVolumesMappingInformation {
 
     # InstanceId
     if ( [string]::IsNullOrEmpty($InstanceId) ) {
-        $InstanceId = $(Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+        $InstanceId = $(Invoke-RestMethod -Uri 'http://169.254.169.254/latest/meta-data/instance-id')
     }
 
     # AZ:Availability Zone
     if ( [string]::IsNullOrEmpty($Az) ) {
-        $Az = $(Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+        $Az = $(Invoke-RestMethod -Uri 'http://169.254.169.254/latest/meta-data/placement/availability-zone')
     }
 
     # Region
     if ( [string]::IsNullOrEmpty($Region) ) {
-        $Region = $(Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+        $Region = $(Invoke-RestMethod -Uri 'http://169.254.169.254/latest/meta-data/placement/region')
     }
 
     # Setting AWS Tools for Windows PowerShell
@@ -270,7 +270,7 @@ function Get-EbsVolumesMappingInformation {
     $VirtualDeviceMap = @{}
     ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
         $VirtualDevice = $_
-        $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice")).Content
+        $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice)).Content
         $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
         $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
     }
@@ -383,7 +383,7 @@ function Get-Ec2InstanceMetadata {
     Set-Variable -Name AwsAccountId -Scope Script -Value ($Null)
 
     # Getting an Instance Metadata Service v2 (IMDS v2) token
-    $Token = $(Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri "http://169.254.169.254/latest/api/token")
+    $Token = $(Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri 'http://169.254.169.254/latest/api/token')
 
     if ($Token) {
         #-----------------------------------------------------------------------
