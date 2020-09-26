@@ -1782,6 +1782,7 @@ Get-Ec2SystemManagerAgentVersion
 
 # Forced cleanup of AWS Systems Manager agent's local data
 Stop-Service -Name "AmazonSSMAgent"
+Start-Sleep -Seconds 15
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
 
@@ -2109,10 +2110,10 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.0)"
 
     # Install AWSPowerShell.NetCore
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
 
 }
 
