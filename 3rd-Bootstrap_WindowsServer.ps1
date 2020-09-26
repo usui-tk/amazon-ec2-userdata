@@ -383,7 +383,7 @@ function Get-Ec2InstanceMetadata {
     Set-Variable -Name AwsAccountId -Scope Script -Value ($Null)
 
     # Getting an Instance Metadata Service v2 (IMDS v2) token
-    $Token = $(Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri 'http://169.254.169.254/latest/api/token')
+    $Token = $(Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT 'http://169.254.169.254/latest/api/token')
 
     if ($Token) {
         #-----------------------------------------------------------------------
