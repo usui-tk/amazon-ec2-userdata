@@ -236,6 +236,7 @@ function Get-EbsVolumesMappingInformation {
     # List the Windows disks
 
     # Set Initialize Parameter
+    Set-Variable -Name BlockDeviceName -Scope Script -Value ($Null)
     Set-Variable -Name BlockDeviceMapping -Scope Script -Value ($Null)
     Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
