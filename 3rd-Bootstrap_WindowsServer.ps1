@@ -368,6 +368,23 @@ function Get-Ec2InstanceMetadata {
     #   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/instancedata-data-retrieval.html
     #--------------------------------------------------------------------------------------
 
+    # Set Initialize Parameter
+    Set-Variable -Name Token -Scope Script -Value ($Null)
+    Set-Variable -Name Az -Scope Script -Value ($Null)
+    Set-Variable -Name AzId -Scope Script -Value ($Null)
+    Set-Variable -Name Region -Scope Script -Value ($Null)
+    Set-Variable -Name InstanceId -Scope Script -Value ($Null)
+    Set-Variable -Name InstanceType -Scope Script -Value ($Null)
+    Set-Variable -Name PrivateIp -Scope Script -Value ($Null)
+    Set-Variable -Name AmiId -Scope Script -Value ($Null)
+    Set-Variable -Name RoleArn -Scope Script -Value ($Null)
+    Set-Variable -Name RoleName -Scope Script -Value ($Null)
+    Set-Variable -Name StsCredential -Scope Script -Value ($Null)
+    Set-Variable -Name StsAccessKeyId -Scope Script -Value ($Null)
+    Set-Variable -Name StsSecretAccessKey -Scope Script -Value ($Null)
+    Set-Variable -Name StsToken -Scope Script -Value ($Null)
+    Set-Variable -Name AwsAccountId -Scope Script -Value ($Null)
+
     # Getting an Instance Metadata Service v2 (IMDS v2) token
     $Token = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri "http://169.254.169.254/latest/api/token"
 
@@ -956,11 +973,8 @@ Get-AWSPowerShellVersion
 Initialize-AWSDefaultConfiguration -Region $Region
 Set-DefaultAWSRegion -Region $Region
 
-# View Setting File [Initialize-AWSDefaults]
-Get-Content -Path "C:\Users\Administrator\AppData\Local\AWSToolkit\RegisteredAccounts.json"
-
 # Log Setting Information [Set-DefaultAWSRegion]
-Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
+# Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
 
 # Setting AWS Tools for Windows PowerShell (Additional)
 #  Clear-AWSHistory
@@ -1732,6 +1746,9 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 # Log Separator
 Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 
+# Set Initialize Parameter
+Set-Variable -Name AmazonSSMAgentUrl -Scope Script -Value ($Null)
+
 # Package Download System Utility (AWS Systems Manager agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
@@ -1770,7 +1787,10 @@ Get-Ec2SystemManagerAgentVersion
 Stop-Service -Name "AmazonSSMAgent"
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
-Clear-Content -Path $SSMAgentLogFile
+
+if (Test-Path $SSMAgentLogFile) {
+    Clear-Content -Path $SSMAgentLogFile
+}
 
 Start-Service -Name "AmazonSSMAgent"
 Start-Sleep -Seconds 15
@@ -2026,7 +2046,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
             [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\Program Files\Amazon\EC2ElasticGPUs\manager\", [EnvironmentVariableTarget]::Machine)
 
             # Service Automatic Startup Setting (Amazon EC2 Elastic GPU Manager)
-            Get-Service -Name EC2ElasticGPUs_Manager
+            Get-Service -Name "EC2ElasticGPUs_Manager"
 
             $EC2ElasticGPUs_ManagerStatus = (Get-WmiObject Win32_Service -Filter "Name='EC2ElasticGPUs_Manager'").StartMode
 
@@ -2891,6 +2911,21 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
+# Change the hostname to a host name using a private IP address
+#-----------------------------------------------------------------------------------------------------------------------
+# Log Separator
+Write-LogSeparator "Change the hostname to a host name using a private IP address"
+
+# Setting Hostname
+Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
+
+Write-Log ("# [Information] [HostName (Before) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name)
+Rename-Computer $Hostname -Force
+Start-Sleep -Seconds 10
+Write-Log ("# [Information] [HostName (After) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name)
+
+
+#-----------------------------------------------------------------------------------------------------------------------
 # Collect Script/Config Files & Logging Data Files
 #----------------------------------------------------------------------------------------------------------------------
 # Log Separator
@@ -2971,7 +3006,6 @@ else {
     Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Windows Server OS"
 }
 
-
 # Log Separator
 Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
 
@@ -2989,24 +3023,12 @@ Start-Sleep -Seconds 15
 Copy-Item -Path "$TEMP_DIR\userdata-transcript-*.log" -Destination $LOGS_DIR
 
 
-
-#-----------------------------------------------------------------------------------------------------------------------
-# Hostname rename
-#-----------------------------------------------------------------------------------------------------------------------
-
-# Setting Hostname
-Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
-Rename-Computer $Hostname -Force
-
-
-
 #-----------------------------------------------------------------------------------------------------------------------
 # Instance Reboot
 #-----------------------------------------------------------------------------------------------------------------------
 
 # EC2 Instance Reboot
 Restart-Computer -Force
-
 
 
 #-----------------------------------------------------------------------------------------------------------------------
