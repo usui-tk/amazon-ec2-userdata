@@ -135,7 +135,6 @@ function Convert-SCSITargetIdToDeviceName {
 
 
 function Set-TimeZoneCompatible {
-    [CmdletBinding(SupportsShouldProcess=$True)]
     param(
         [Parameter(ValueFromPipeline = $False, ValueFromPipelineByPropertyName = $True, Mandatory = $False)]
         [ValidateSet("Dateline Standard Time", "UTC-11", "Hawaiian Standard Time", "Alaskan Standard Time", "Pacific Standard Time (Mexico)", "Pacific Standard Time", "US Mountain Standard Time", "Mountain Standard Time (Mexico)", "Mountain Standard Time", "Central America Standard Time", "Central Standard Time", "Central Standard Time (Mexico)", "Canada Central Standard Time", "SA Pacific Standard Time", "Eastern Standard Time", "US Eastern Standard Time", "Venezuela Standard Time", "Paraguay Standard Time", "Atlantic Standard Time", "Central Brazilian Standard Time", "SA Western Standard Time", "Pacific SA Standard Time", "Newfoundland Standard Time", "E. South America Standard Time", "Argentina Standard Time", "SA Eastern Standard Time", "Greenland Standard Time", "Montevideo Standard Time", "Bahia Standard Time", "UTC-02", "Mid-Atlantic Standard Time", "Azores Standard Time", "Cape Verde Standard Time", "Morocco Standard Time", "UTC", "GMT Standard Time", "Greenwich Standard Time", "W. Europe Standard Time", "Central Europe Standard Time", "Romance Standard Time", "Central European Standard Time", "W. Central Africa Standard Time", "Namibia Standard Time", "Jordan Standard Time", "GTB&nbsp;Standard Time", "Middle East Standard Time", "Egypt Standard Time", "Syria Standard Time", "E. Europe Standard Time", "South Africa Standard Time", "FLE&nbsp;Standard Time", "Turkey Standard Time", "Israel Standard Time", "Arabic Standard Time", "Kaliningrad Standard Time", "Arab Standard Time", "E. Africa Standard Time", "Iran Standard Time", "Arabian Standard Time", "Azerbaijan Standard Time", "Russian Standard Time", "Mauritius Standard Time", "Georgian Standard Time", "Caucasus Standard Time", "Afghanistan Standard Time", "Pakistan Standard Time", "West Asia Standard Time", "India Standard Time", "Sri Lanka Standard Time", "Nepal Standard Time", "Central Asia Standard Time", "Bangladesh Standard Time", "Ekaterinburg Standard Time", "Myanmar Standard Time", "SE Asia Standard Time", "N. Central Asia Standard Time", "China Standard Time", "North Asia Standard Time", "Singapore Standard Time", "W. Australia Standard Time", "Taipei Standard Time", "Ulaanbaatar Standard Time", "North Asia East Standard Time", "Tokyo Standard Time", "Korea Standard Time", "Cen. Australia Standard Time", "AUS Central Standard Time", "E. Australia Standard Time", "AUS Eastern Standard Time", "West Pacific Standard Time", "Tasmania Standard Time", "Yakutsk&nbsp;Standard Time", "Central Pacific Standard Time", "Vladivostok Standard Time", "New Zealand Standard Time", "UTC+12", "Fiji Standard Time", "Magadan&nbsp;Standard Time", "Tonga Standard Time", "Samoa Standard Time")]
@@ -238,8 +237,8 @@ function Get-EbsVolumesMappingInformation {
 
     # Set Initialize Parameter
     Set-Variable -Name BlockDeviceMapping -Scope Script -Value ($Null)
-    Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
     Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
+    Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
 
     try {
@@ -247,27 +246,30 @@ function Get-EbsVolumesMappingInformation {
 
         # InstanceId
         if ( [string]::IsNullOrEmpty($InstanceId) ) {
-            $InstanceId = (Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/instance-id" -UseBasicParsing).Content
+            $InstanceId = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
         }
 
         # AZ:Availability Zone
-        if ( [string]::IsNullOrEmpty($AZ) ) {
-            $AZ = (Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone" -UseBasicParsing).Content
+        if ( [string]::IsNullOrEmpty($Az) ) {
+            $Az = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
         }
 
         # Region
         if ( [string]::IsNullOrEmpty($Region) ) {
-            $Region = $AZ.Substring(0, $AZ.Length - 1)
+            $Region = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
         }
+
+        # Setting AWS Tools for Windows PowerShell
+        Initialize-AWSDefaultConfiguration -Region $Region
 
         # Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
 
         # Get the block-device-mapping
         $VirtualDeviceMap = @{ }
-        ((Invoke-WebRequest -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping" -UseBasicParsing).Content).Split("`n") | ForEach-Object {
+        ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
             $VirtualDevice = $_
-            $BlockDeviceName = (Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice") -UseBasicParsing).Content
+            $BlockDeviceName = (Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice")).Content
             $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
             $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
         }
@@ -276,39 +278,56 @@ function Get-EbsVolumesMappingInformation {
         Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
     }
 
-    $EBSVolumeLists = Get-WmiObject -Class Win32_DiskDrive | ForEach-Object {
+    # Get EBS volumes and Ephemeral disks Information
+    $EBSVolumeLists = Get-disk | ForEach-Object {
+        $DriveLetter = $Null
+        $VolumeName = $Null
+
         $DiskDrive = $_
-        $Volumes = Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='$($DiskDrive.DeviceID)'} WHERE AssocClass=Win32_DiskDriveToDiskPartition" | ForEach-Object {
-            $DiskPartition = $_
-            Get-WmiObject -Query "ASSOCIATORS OF {Win32_DiskPartition.DeviceID='$($DiskPartition.DeviceID)'} WHERE AssocClass=Win32_LogicalDiskToPartition"
+        $Disk = $_.Number
+        $Partitions = $_.NumberOfPartitions
+        $EbsVolumeID = $_.SerialNumber -replace "_[^ ]*$" -replace "vol", "vol-"
+
+        Get-Partition -DiskId $_.Path | ForEach-Object {
+            if ($_.DriveLetter -ne "") {
+                $DriveLetter = $_.DriveLetter
+                $VolumeName = (Get-PSDrive | Where-Object {$_.Name -eq $DriveLetter}).Description
+            }
         }
 
-        if ($DiskDrive.PNPDeviceID -like "*PROD_PVDISK*") {
-            $BlockDeviceName = Convert-SCSITargetIdToDeviceName($DiskDrive.SCSITargetId)
-            $BlockDevice = $BlockDeviceMappings | Where-Object { $_.DeviceName -eq $BlockDeviceName }
-            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
+        if ($DiskDrive.path -like "*PROD_PVDISK*") {
+            $BlockDeviceName = Convert-SCSITargetIdToDeviceName((Get-WmiObject -Class Win32_Diskdrive | Where-Object {$_.DeviceID -eq ("\\.\PHYSICALDRIVE" + $DiskDrive.Number) }).SCSITargetId)
+            $BlockDeviceName = "/dev/" + $BlockDeviceName
+            $BlockDevice = $BlockDeviceMappings | Where-Object { $BlockDeviceName -like "*"+$_.DeviceName+"*" }
+            $EbsVolumeID = $BlockDevice.Ebs.VolumeId
+            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } else { $Null }
         }
-        elseif ($DiskDrive.PNPDeviceID -like "*PROD_AMAZON_EC2_NVME*") {
-            $BlockDeviceName = ((Invoke-WebRequest -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/ephemeral" + $($DiskDrive.SCSIPort - 2)) -UseBasicParsing)).Content
-            $BlockDevice = $null
-            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } Else { $null }
+        elseif ($DiskDrive.path -like "*PROD_AMAZON_EC2_NVME*") {
+            $BlockDeviceName = ((Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/ephemeral" + $(Get-WmiObject -Class Win32_Diskdrive | Where-Object {$_.DeviceID -eq ("\\.\PHYSICALDRIVE"+$DiskDrive.Number) }).SCSIPort - 2))).Content
+            $BlockDevice = $Null
+            $VirtualDevice = if ($VirtualDeviceMap.ContainsKey($BlockDeviceName)) { $VirtualDeviceMap[$BlockDeviceName] } else { $Null }
+        }
+        elseif ($DiskDrive.path -like "*PROD_AMAZON*") {
+            $BlockDevice = ""
+            $BlockDeviceName = ($BlockDeviceMappings | Where-Object {$_.ebs.VolumeId -eq $EbsVolumeID}).DeviceName
+            $VirtualDevice = $Null
         }
         else {
-            $BlockDeviceName = $null
-            $BlockDevice = $null
-            $VirtualDevice = $null
+            $BlockDeviceName = $Null
+            $BlockDevice = $Null
+            $VirtualDevice = $Null
         }
 
         New-Object PSObject -Property @{
-            Disk          = $DiskDrive.Index;
-            Partitions    = $DiskDrive.Partitions;
-            DriveLetter   = if ($Volumes -eq $null) { "N/A" } else { $Volumes.DeviceID };
-            EbsVolumeId   = if ($BlockDevice -eq $null) { "N/A" } else { $BlockDevice.Ebs.VolumeId };
-            Device        = if ($BlockDeviceName -eq $null) { "N/A" } else { $BlockDeviceName };
-            VirtualDevice = if ($VirtualDevice -eq $null) { "N/A" } else { $VirtualDevice };
-            VolumeName    = if ($Volumes -eq $null) { "N/A" } else { $Volumes.VolumeName };
-        }
-    } | Sort-Object Disk, Partitions | Select-Object Disk, Partitions, DriveLetter, EbsVolumeId, Device, VirtualDevice, VolumeName
+            Disk          = $Disk;
+            Partitions    = $Partitions;
+            DriveLetter   = if ($Null -eq $DriveLetter) { "N/A" } else { $DriveLetter };
+            EbsVolumeId   = if ($Null -eq $EbsVolumeID) { "N/A" } else { $EbsVolumeID };
+            Device        = if ($Null -eq $BlockDeviceName) { "N/A" } else { $BlockDeviceName };
+            VirtualDevice = if ($Null -eq $VirtualDevice) { "N/A" } else { $VirtualDevice };
+            VolumeName    = if ($Null -eq $VolumeName) { "N/A" } else { $VolumeName };
+          }
+    } | Sort-Object Disk, Partitions | Select-Object -Property Disk, Partitions, DriveLetter, EbsVolumeId, Device, VirtualDevice, VolumeName
 
     foreach ($EBSVolumeList in $EBSVolumeLists) {
         if ($EBSVolumeList) {
@@ -2250,22 +2269,15 @@ Write-Log "# [CUDA] Check Amazon EC2 G2 & G3 & P2 & P3 Instance Family"
 if ($InstanceType -match "^g2.*|^g3.*|^g4dn.*|^p2.*|^p3.*") {
     Write-Log "# Package Download NVIDIA CUDA Toolkit (for Amazon EC2 G2/G3/G4/P2/P3 Instance Family)"
     if ($WindowsOSVersion) {
-        if ($WindowsOSVersion -eq "6.3") {
-            # [Windows Server 2012 R2]
-            $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2012R2&target_type=exelocal'
-            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_windows.exe"
-            Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
-            Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2012R2.exe"
-        }
-        elseif ($WindowsOSVersion -eq "10.0") {
+        if ($WindowsOSVersion -eq "10.0") {
             # [Windows Server 2016]
-            $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
-            $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_win10.exe"
+            # $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2016&target_type=exelocal'
+            $CUDA_toolkit_url = "https://developer.download.nvidia.com/compute/cuda/11.1.0/local_installers/cuda_11.1.0_456.43_win10.exe"
             Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
             Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2016.exe"
             # [Windows Server 2019]
             # $CUDA_toolkit = Invoke-RestMethod -Uri 'https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64&target_version=Server2019&target_type=exelocal'
-            # $CUDA_toolkit_url = "https://developer.nvidia.com/compute/cuda/10.1/Prod/local_installers/cuda_10.1.168_425.25_win10.exe"
+            # $CUDA_toolkit_url = "https://developer.download.nvidia.com/compute/cuda/11.1.0/local_installers/cuda_11.1.0_456.43_win10.exe"
             # Write-Log ("# [Information] Package Download NVIDIA CUDA Toolkit URL : " + $CUDA_toolkit_url)
             # Get-WebContentToFile -Uri $CUDA_toolkit_url -OutFile "$TOOL_DIR\NVIDIA-CUDA-Toolkit_v10_for_WindowsServer2019.exe"
         }
