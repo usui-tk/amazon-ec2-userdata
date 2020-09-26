@@ -1787,7 +1787,7 @@ Start-Sleep -Seconds 15
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
 
 if (Test-Path $SSMAgentLogFile) {
-    Clear-Content -Path $SSMAgentLogFile
+    Clear-Content -Path $SSMAgentLogFile -Force -ErrorAction SilentlyContinue
 }
 
 Start-Service -Name "AmazonSSMAgent"
