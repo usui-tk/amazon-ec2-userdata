@@ -241,41 +241,37 @@ function Get-EbsVolumesMappingInformation {
     Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
 
-    try {
-        # Use the metadata service to discover which instance the script is running on
 
-        # InstanceId
-        if ( [string]::IsNullOrEmpty($InstanceId) ) {
-            $InstanceId = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
-        }
+    # Use the metadata service to discover which instance the script is running on
 
-        # AZ:Availability Zone
-        if ( [string]::IsNullOrEmpty($Az) ) {
-            $Az = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
-        }
-
-        # Region
-        if ( [string]::IsNullOrEmpty($Region) ) {
-            $Region = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
-        }
-
-        # Setting AWS Tools for Windows PowerShell
-        Initialize-AWSDefaultConfiguration -Region $Region
-
-        # Get the volumes attached to this instance
-        $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
-
-        # Get the block-device-mapping
-        $VirtualDeviceMap = @{ }
-        ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
-            $VirtualDevice = $_
-            $BlockDeviceName = (Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice")).Content
-            $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
-            $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
-        }
+    # InstanceId
+    if ( [string]::IsNullOrEmpty($InstanceId) ) {
+        $InstanceId = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
     }
-    catch {
-        Write-Log "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys."
+
+    # AZ:Availability Zone
+    if ( [string]::IsNullOrEmpty($Az) ) {
+        $Az = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/availability-zone")
+    }
+
+    # Region
+    if ( [string]::IsNullOrEmpty($Region) ) {
+        $Region = (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+    }
+
+    # Setting AWS Tools for Windows PowerShell
+    Initialize-AWSDefaultConfiguration -Region $Region
+
+    # Get the volumes attached to this instance
+    $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+
+    # Get the block-device-mapping
+    $VirtualDeviceMap = @{}
+    ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
+        $VirtualDevice = $_
+        $BlockDeviceName = (Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping" + "$VirtualDevice")).Content
+        $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
+        $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
     }
 
     # Get EBS volumes and Ephemeral disks Information
@@ -291,7 +287,7 @@ function Get-EbsVolumesMappingInformation {
         Get-Partition -DiskId $_.Path | ForEach-Object {
             if ($_.DriveLetter -ne "") {
                 $DriveLetter = $_.DriveLetter
-                $VolumeName = (Get-PSDrive | Where-Object {$_.Name -eq $DriveLetter}).Description
+                $VolumeName = if ($DriveLetter) { (Get-PSDrive -PSProvider FileSystem | Where-Object {$_.Name -eq $DriveLetter}).Root } else { $Null }
             }
         }
 
@@ -386,7 +382,7 @@ function Get-Ec2InstanceMetadata {
     Set-Variable -Name AwsAccountId -Scope Script -Value ($Null)
 
     # Getting an Instance Metadata Service v2 (IMDS v2) token
-    $Token = Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri "http://169.254.169.254/latest/api/token"
+    $Token = (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT –Uri "http://169.254.169.254/latest/api/token")
 
     if ($Token) {
         #-----------------------------------------------------------------------
@@ -2922,7 +2918,7 @@ Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Rep
 Write-Log ("# [Information] [HostName (Before) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name)
 Rename-Computer $Hostname -Force
 Start-Sleep -Seconds 10
-Write-Log ("# [Information] [HostName (After) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name)
+Write-Log ("# [Information] [HostName (After) : $Hostname")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
