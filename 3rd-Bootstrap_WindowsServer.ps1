@@ -773,22 +773,18 @@ function Update-SysprepAnswerFile($SysprepAnswerFile) {
 
 #Get OS Information & Language
 $Local:TimezoneLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
-$Local:TimezoneOSversion = (Get-CimInstance Win32_OperatingSystem | Select-Object Version).Version
 
 if ($TimezoneLanguage -eq "ja-JP") {
-    if ($TimezoneOSversion -match "^5.*|^6.*") {
-        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-        Set-TimeZoneCompatible "Tokyo Standard Time"
-        Start-Sleep -Seconds 5
-        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
-    }
-    elseif ($TimezoneOSversion -match "^10.*") {
+    if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Set-TimeZone" }) {
         Get-TimeZone
         Set-TimeZone -Id "Tokyo Standard Time"
         Start-Sleep -Seconds 5
         Get-TimeZone
     }
     else {
+        Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
+        Set-TimeZoneCompatible "Tokyo Standard Time"
+        Start-Sleep -Seconds 5
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
     }
 }
@@ -1749,9 +1745,13 @@ Set-Variable -Name AmazonSSMAgentUrl -Scope Script -Value ($Null)
 # Package Download System Utility (AWS Systems Manager agent)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
-# Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
-$AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
-Get-WebContentToFile -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+if ($Region) {
+    $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
+    Get-WebContentToFile -Uri $AmazonSSMAgentUrl -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+}
+else {
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
+}
 
 # Logging Windows Server OS Parameter [AWS Systems Manager agent Information]
 Get-Ec2SystemManagerAgentVersion
@@ -2110,11 +2110,16 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.0)"
 
     # Install AWSPowerShell.NetCore
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
-    Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Install-Module -Name AWSPowerShell.NetCore -AllowClobber -Force")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
 
+    # Install AWS.Tools.Common
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Install-Module -Name AWS.Tools.Common -AllowClobber -Force")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
+    # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-AWSPowerShellVersion")
 }
 
 
