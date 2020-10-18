@@ -1835,7 +1835,7 @@ else {
     Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
 }
 
-# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
+# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Amazon CloudWatch Agent Support Windows OS Version
@@ -1899,7 +1899,7 @@ Write-Log "# [AWS - EC2-AmazonInspectorAgent] AWS Region : $Region"
 # Check Region
 if ($Region -match "^us-east-1|^us-east-2|^us-west-1|^us-west-2|^ap-south-1|^ap-northeast-2|^ap-southeast-2|^ap-northeast-1|^eu-west-1|^eu-central-1") {
 
-    # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
+    # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019]
     if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
         # Amazon Inspector Agent Support Windows OS Version

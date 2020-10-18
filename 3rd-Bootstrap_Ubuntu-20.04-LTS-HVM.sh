@@ -437,36 +437,36 @@ snap services amazon-ssm-agent
 apt install -y -q libcurl4
 
 # Variable initialization
-# InspectorInstallStatus="0"
+InspectorInstallStatus="0"
 
 # Run Amazon Inspector Agent installer script
-# curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || InspectorInstallStatus=$?
+curl -fsSL "https://inspector-agent.amazonaws.com/linux/latest/install" | bash -ex || InspectorInstallStatus=$?
 
 # Check the exit code of the Amazon Inspector Agent installer script
-# if [ $InspectorInstallStatus -eq 0 ]; then
-# 	apt show awsagent
+if [ $InspectorInstallStatus -eq 0 ]; then
+	apt show awsagent
 
-# 	systemctl daemon-reload
+	systemctl daemon-reload
 
-# 	systemctl restart awsagent
+	systemctl restart awsagent
 
-# 	systemctl status -l awsagent
+	systemctl status -l awsagent
 
-# 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-# 	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
-# 		systemctl enable awsagent
-# 		systemctl is-enabled awsagent
-# 	fi
+	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
+		systemctl enable awsagent
+		systemctl is-enabled awsagent
+	fi
 
-# 	sleep 15
+	sleep 15
 
-# 	/opt/aws/awsagent/bin/awsagent status
-# else
-# 	echo "Failed to execute Amazon Inspector Agent installer script"
-# fi
+	/opt/aws/awsagent/bin/awsagent status
+else
+	echo "Failed to execute Amazon Inspector Agent installer script"
+fi
 
 # Cleanup
-# apt clean -y -q
+apt clean -y -q
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]

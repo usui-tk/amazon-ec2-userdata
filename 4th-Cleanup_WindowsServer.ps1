@@ -110,6 +110,7 @@ else {
 
 # Clear PowerShell history
 Get-History
+Start-Sleep -Seconds 5
 Clear-History -ErrorAction SilentlyContinue
 
 Write-MessageSeparator "Complete Script Execution Cleanup Script"
@@ -141,6 +142,10 @@ if (Test-Path $EC2Launchv2SysprepFile) {
         Start-Process $EC2LaunchV2ExeFile -Verb runas -Wait -ArgumentList @("sysprep", "--clean", "--shutdown")
         Start-Sleep -Seconds 5
     }
+    else {
+        Write-Message ("# [Error] Not Found - Execution file : " + $EC2LaunchV2ExeFile)
+        exit 1
+    }
 }
 elseif (Test-Path $EC2LaunchSysprepFile) {
     Set-Variable -Name SysprepFile -Value $EC2LaunchSysprepFile
@@ -151,16 +156,26 @@ elseif (Test-Path $EC2LaunchSysprepFile) {
     #-------------------------------------------------------------------------------------
     Set-Variable -Name EC2LaunchExeFile1 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\InitializeInstance.ps1"
     Set-Variable -Name EC2LaunchExeFile2 -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Scripts\SysprepInstance.ps1"
+
     if (Test-Path -Path $EC2LaunchExeFile1) {
         Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile1 + "]")
         Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile1", "-Schedule")
         Start-Sleep -Seconds 10
+    }
+    else {
+        Write-Message ("# [Error] Not Found - Execution file : " + $EC2LaunchExeFile1)
+        exit 1
+    }
 
+    if (Test-Path -Path $EC2LaunchExeFile2) {
         Write-Message ("# Execution for sysprep [" + $EC2LaunchExeFile2 + "]")
         Start-Process "powershell.exe" -Verb runas -Wait -ArgumentList @("-File $EC2LaunchExeFile2")
         Start-Sleep -Seconds 10
     }
-
+    else {
+        Write-Message ("# [Error] Not Found - Execution file : " + $EC2LaunchExeFile2)
+        exit 1
+    }
 }
 elseif (Test-Path $EC2ConfigSysprepFile) {
     Set-Variable -Name SysprepFile -Value $EC2ConfigSysprepFile
@@ -203,7 +218,10 @@ elseif (Test-Path $EC2ConfigSysprepFile) {
         Start-Process $EC2ConfigExeFile -Verb runas -Wait -ArgumentList @("-sysprep")
         Start-Sleep -Seconds 5
     }
-
+    else {
+        Write-Message ("# [Error] Not Found - Execution file : " + $EC2ConfigExeFile)
+        exit 1
+    }
 }
 else {
     Write-Message "# [Error] Not Found - Sysprep files"
