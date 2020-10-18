@@ -288,10 +288,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
+dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
 
 # Package Install CentOS System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y glances jnettop wdiff
+# dnf --enablerepo=epel-playground install -y jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
