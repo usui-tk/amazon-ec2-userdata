@@ -2076,7 +2076,7 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (PowerShell Core 7.0)
+# Custom Package Install (PowerShell Core 7.1)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 # https://github.com/PowerShell/PowerShell
 #
@@ -2087,27 +2087,27 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (PowerShell Core 7.0)"
+Write-LogSeparator "Package Install System Utility (PowerShell Core 7.1)"
 
-# Initialize Parameter [# Depends on PowerShell v7.0 version information]
+# Initialize Parameter [# Depends on PowerShell v7.1 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.0.3/PowerShell-7.0.3-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.1.0/PowerShell-7.1.0-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
-# Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
+# Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
-    # Package Download Commnand-Line Shell (PowerShell Core 7.0)
-    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 7.0)"
+    # Package Download Commnand-Line Shell (PowerShell Core 7.1)
+    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 7.1)"
     Get-WebContentToFile -Uri "$PWSH_INSTALLER_URL" -OutFile "$TOOL_DIR\$PWSH_INSTALLER_FILE"
 
-    # Package Install Commnand-Line Shell (PowerShell Core 7.0)
-    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 7.0)"
+    # Package Install Commnand-Line Shell (PowerShell Core 7.1)
+    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 7.1)"
     Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
     Start-Sleep -Seconds 10
 
-    # Package Configure Commnand-Line Shell (PowerShell Core 7.0)
-    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.0)"
+    # Package Configure Commnand-Line Shell (PowerShell Core 7.1)
+    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.1)"
 
     # Install AWSPowerShell.NetCore
     # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
@@ -2831,6 +2831,18 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (System Explorer)"
     Get-WebContentToFile -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
+}
+
+# Package Download System Utility (WinAuth)
+# https://winauth.github.io/winauth/index.html
+# https://winauth.github.io/winauth/download.html
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on WinAuth version information]
+    Set-Variable -Name WINAUTH_INSTALLER_URL -Scope Script -Value "https://github.com/winauth/winauth/releases/download/3.5.1/WinAuth-3.5.1.zip"
+    Set-Variable -Name WINAUTH_INSTALLER_FILE -Scope Script -Value ($WINAUTH_INSTALLER_URL.Substring($WINAUTH_INSTALLER_URL.LastIndexOf("/") + 1))
+
+    Write-Log "# Package Download System Utility (WinAuth)"
+    Get-WebContentToFile -Uri "$WINAUTH_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINAUTH_INSTALLER_FILE"
 }
 
 # Package Download System Utility (WinSCP)
