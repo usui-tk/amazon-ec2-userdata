@@ -259,7 +259,7 @@ activate-global-python-argcomplete
 # dnf install -y @python38
 # dnf module list | grep python3
 
-# Package Install Python 3.6 Runtime (from CentOS Community Repository)
+# Package Install Python 3.8 Runtime (from CentOS Community Repository)
 # dnf install -y python38 python38-devel python38-pip python38-rpm-macros python38-setuptools python38-test python38-wheel
 # dnf install -y python38-asn1crypto python38-pyyaml python38-six python38-urllib3
 
