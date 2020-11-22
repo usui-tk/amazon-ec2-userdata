@@ -174,28 +174,16 @@ AmiId=$(curl -s "http://169.254.169.254/latest/meta-data/ami-id")
 # https://docs.aws.amazon.com/cli/latest/userguide/install-bundle.html
 #-------------------------------------------------------------------------------
 
-# Package download AWS-CLI v1 Tools (from Bundle Installer)
-curl -sS "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "/tmp/awscli-bundle.zip"
-unzip "/tmp/awscli-bundle.zip" -d /tmp/
+# Package download AWS-CLI v2 Tools (from Bundle Installer)
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+unzip -q "/tmp/awscliv2.zip" -d /tmp/
 
-# [Workaround] Specify Python3 command
-if [ $(compgen -ac | sort | uniq | grep -x python3) ]; then
-	python3 --version
-
-	cat /tmp/awscli-bundle/install
-	sed -i 's|#!/usr/bin/env python|#!/usr/bin/env python3|g' /tmp/awscli-bundle/install
-	cat /tmp/awscli-bundle/install
-fi
-
-# Package Install AWS-CLI v1 Tools (from Bundle Installer)
-/tmp/awscli-bundle/install -i "/opt/aws/awscli" -b "/bin/aws"
+# Package Install AWS-CLI v2 Tools (from Bundle Installer)
+/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
 
 aws --version
 
 # Configuration AWS-CLI tools
-alternatives --install "/usr/bin/aws_completer" aws_completer "/opt/aws/awscli/bin/aws_completer" 1
-alternatives --display aws_completer
-
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
 # - /etc/bash_completion.d
@@ -216,6 +204,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Setting AWS-CLI S3 Configuration
 # https://docs.aws.amazon.com/cli/latest/topic/s3-config.html#cli-aws-help-s3-config
@@ -351,6 +342,9 @@ echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Create archive file of clone data
 # Create archive directory
 Arc="reposync_for_rhel-v6"
 mkdir -m 755 -p /tmp/$Arc
+
+# cd archive directory
+cd /tmp/$Arc
 
 # Create a copy of the file to be stored in the archive file
 echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Create a copy of the file to be stored in the archive file : START"
