@@ -241,7 +241,7 @@ echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Preparing the execution environme
 echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Sync YUM Repository Data from RHUI / EPEL : START"
 
 # Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
-repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Create working directory
 Dir="/var/www/html"
@@ -373,7 +373,7 @@ echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- [EXEC] Create archive file of clone data
 
 # Upload to S3 bucket
 
-# aws s3 cp --recursive --acl public-read pkg/ s3://rpm-repos/centos/7/x86_64/
+# aws s3 cp --recursive --acl public-read pkg/ s3://rpm-repos/rhel/6/
 # aws s3 sync ~/localrepo s3://yumrepobucket/remoterepo --delete
 
 # Make Public Access
