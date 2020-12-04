@@ -489,6 +489,40 @@ ansible --version
 ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Terraform]
+# https://www.terraform.io/docs/cli/install/yum.html
+#-------------------------------------------------------------------------------
+
+# Repository Configuration (HashiCorp Linux Repository)
+dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/fedora/hashicorp.repo"
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+# Cleanup repository information
+dnf clean all
+
+# HashiCorp Linux repository package [dnf command]
+dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+dnf --enablerepo=hashicorp -y install terraform
+
+rpm -qi terraform
+
+terraform version
+
+# Configure terraform software
+
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
+
+source /etc/profile.d/terraform.sh
+
+#-------------------------------------------------------------------------------
 # Custom Package Installation [Docker]
 #-------------------------------------------------------------------------------
 

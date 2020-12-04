@@ -101,7 +101,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion bcc binutils blktrace byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mcelog mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-completion bcc bcftools binutils blktrace byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mcelog mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -641,6 +641,39 @@ fi
 
 # Package bundled ruby gem package information
 /opt/td-agent/bin/fluent-gem list
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Terraform]
+# https://www.terraform.io/docs/cli/install/apt.html
+#-------------------------------------------------------------------------------
+
+# Import GPG Key File
+curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+
+# Add the HashiCorp Linux Repository
+apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+
+# apt repository metadata Clean up
+apt clean -y
+
+# Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+apt update -y -q && apt install -y -q terraform
+
+# Package Information
+apt show terraform
+
+terraform version
+
+# Configure terraform software
+
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
+
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

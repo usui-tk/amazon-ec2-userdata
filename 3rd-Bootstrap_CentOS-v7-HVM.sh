@@ -746,6 +746,40 @@ fi
 /opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
+# Custom Package Installation [Terraform]
+# https://www.terraform.io/docs/cli/install/yum.html
+#-------------------------------------------------------------------------------
+
+# Repository Configuration (HashiCorp Linux Repository)
+yum-config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+# Cleanup repository information
+yum clean all
+
+# HashiCorp Linux repository package [yum command]
+yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
+
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+yum --enablerepo=hashicorp install -y terraform
+
+rpm -qi terraform
+
+terraform version
+
+# Configure terraform software
+
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
+
+source /etc/profile.d/terraform.sh
+
+#-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 yum clean all
