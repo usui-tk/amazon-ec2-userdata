@@ -99,7 +99,7 @@ find /etc/yum.repos.d/
 
 yum search oracle-
 
-yum install -y oraclelinux-release-el7 oracle-epel-release-el7 oracle-olcne-release-el7 oracle-release-el7 oracle-softwarecollection-release-el7 oraclelinux-developer-release-el7
+yum install -y oraclelinux-release-el7 oracle-epel-release-el7 oracle-olcne-release-el7 oracle-softwarecollection-release-el7 oraclelinux-developer-release-el7
 yum clean all
 
 find /etc/yum.repos.d/
@@ -133,9 +133,11 @@ yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
 yum-config-manager --enable ol7_oracle_instantclient
-yum-config-manager --enable ol7_olcne11
+yum-config-manager --enable ol7_olcne12
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+yum-config-manager --disable ol7_olcne
+yum-config-manager --disable ol7_olcne11
 yum-config-manager --disable ol7_developer
 yum-config-manager --disable ol7_developer_EPEL
 yum-config-manager --disable ol7_developer_UEKR5
@@ -174,6 +176,9 @@ yum install -y redhat-lsb-core
 
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 # yum install -y ol-template-config ovm-template-config*
+
+# Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
+yum install -y olcne-selinux olcne-utils olcnectl yq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
@@ -253,7 +258,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
+yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
@@ -855,7 +860,7 @@ if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
     # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
+    # firewall-cmd --list-all
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]

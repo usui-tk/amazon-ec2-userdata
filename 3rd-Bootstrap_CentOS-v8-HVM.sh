@@ -288,7 +288,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
+dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
 
 # Package Install CentOS System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo=epel-playground install -y jnettop wdiff
@@ -773,7 +773,7 @@ if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
     # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
+    # firewall-cmd --list-all
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]

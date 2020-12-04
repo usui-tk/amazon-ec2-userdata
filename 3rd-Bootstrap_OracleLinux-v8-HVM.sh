@@ -103,7 +103,7 @@ find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
 dnf clean all
 
 find /etc/yum.repos.d/
@@ -129,6 +129,7 @@ dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_developer
+dnf config-manager --set-enabled ol8_olcne12
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_developer_EPEL
@@ -161,6 +162,12 @@ dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-s
 
 # Package Install Oracle Linux support tools (from Oracle Linux Repository)
 dnf install -y redhat-lsb-core
+
+# Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
+# dnf install -y ovm-template-config*
+
+# Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
+dnf install -y olcne-selinux olcne-utils olcnectl yq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
@@ -298,10 +305,41 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop byobu collectd collectd-utils colordiff fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
+dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo=epel-playground install -y jnettop wdiff
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Oracle Software Product]
+#-------------------------------------------------------------------------------
+
+# Package Install Oracle Database Utility (from Oracle Linux Repository)
+dnf install -y oracleasm-support ocfs2-tools
+
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
+dnf install -y oracle-database-preinstall-19c
+
+# Latest packages for Oracle Instant Client on Oracle Linux 8 (x86_64).
+#  https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html
+
+# Checking repository information
+dnf repolist all
+
+cat > /etc/yum.repos.d/oracle-instantclient-ol8.repo << __EOF__
+[ol8_instantclient]
+name=Oracle Linux \$releasever Oracle Instant Client Packages (\$basearch)
+baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
+
+# Checking repository information
+dnf repolist all
+
+# Package Install Oracle Instant Client (from Oracle Linux Repository)
+dnf install -y oracle-instantclient19.9-basic oracle-instantclient19.9-devel oracle-instantclient19.9-jdbc oracle-instantclient19.9-sqlplus oracle-instantclient19.9-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -783,7 +821,7 @@ if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
     # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
+    # firewall-cmd --list-all
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]

@@ -248,7 +248,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
+yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -818,7 +818,7 @@ if [ $(command -v firewall-cmd) ]; then
     # Network Information(Firewall Service) [systemctl status -l firewalld]
     systemctl status -l firewalld
     # Network Information(Firewall Service) [firewall-cmd --list-all]
-    firewall-cmd --list-all
+    # firewall-cmd --list-all
 fi
 
 # Linux Security Information(SELinux) [getenforce] [sestatus]

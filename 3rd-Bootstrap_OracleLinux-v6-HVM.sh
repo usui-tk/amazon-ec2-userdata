@@ -234,7 +234,7 @@ yum repolist all
 
 cat > /etc/yum.repos.d/oracle-instantclient-ol6.repo << __EOF__
 [ol6_instantclient]
-name=Oracle Linux $releasever Oracle Instant Client Packages ($basearch)
+name=Oracle Linux \$releasever Oracle Instant Client Packages (\$basearch)
 baseurl=https://yum.oracle.com/repo/OracleLinux/OL6/oracle/instantclient/\$basearch/
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
 gpgcheck=1
