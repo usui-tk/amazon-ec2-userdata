@@ -2849,7 +2849,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinSCP version information]
-    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.17.6-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.17.9-Setup.exe"
     Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinSCP)"
@@ -2902,16 +2902,16 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Get-WebContentToFile -Uri "$PYTHON38_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON38_INSTALLER_FILE"
 }
 
-# Package Download System Utility (WinMerge)
-# https://winmerge.org/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on WinMerge version information]
-    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://downloads.sourceforge.net/winmerge/WinMerge-2.16.8-x64-Setup.exe"
-    Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
+# # Package Download System Utility (WinMerge)
+# # https://winmerge.org/
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     # Initialize Parameter [# Depends on WinMerge version information]
+#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://downloads.sourceforge.net/winmerge/WinMerge-2.16.8-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (WinMerge)"
-    Get-WebContentToFile -Uri "$WINMERGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_INSTALLER_FILE"
-}
+#     Write-Log "# Package Download System Utility (WinMerge)"
+#     Get-WebContentToFile -Uri "$WINMERGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_INSTALLER_FILE"
+# }
 
 # Package Download System Utility (WinMerge - Japanese)
 # https://winmergejp.bitbucket.io/
@@ -2934,10 +2934,10 @@ Write-LogSeparator "Change the hostname to a host name using a private IP addres
 # Setting Hostname
 Set-Variable -Name Hostname -Option Constant -Scope Local -Value ($PrivateIp.Replace(".", "-"))
 
-Write-Log ("# [Information] [HostName (Before) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name)
+Write-Log ("# [Information] [HostName (Before) : " + (Get-CimInstance -Class Win32_ComputerSystem).Name + "]")
 Rename-Computer $Hostname -Force
 Start-Sleep -Seconds 10
-Write-Log ("# [Information] [HostName (After) : $Hostname")
+Write-Log ("# [Information] [HostName (After) : " + $Hostname + "]")
 
 
 #-----------------------------------------------------------------------------------------------------------------------
