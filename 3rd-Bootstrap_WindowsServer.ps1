@@ -2611,7 +2611,7 @@ Write-LogSeparator "Custom Package Installation (Application)"
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
     Set-Variable -Name CHROME_INSTALLER_URL -Scope Script -Value "https://dl.google.com/tag/s/dl/chrome/install/googlechromestandaloneenterprise64.msi"
-    Set-Variable -Name CHROME_INSTALLER_FILE -Scope Script -Value "GoogleChrome.msi"
+    Set-Variable -Name CHROME_INSTALLER_FILE -Scope Script -Value ($CHROME_INSTALLER_URL.Substring($CHROME_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Modern Web Browser (Google Chrome 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Google Chrome 64bit Edition)"
@@ -2627,8 +2627,8 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.microsoft.com/en-us/edge/business/download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
-    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://dl.delivery.mp.microsoft.com/filestreamingservice/files/cc746716-af14-48fa-a767-5a2e902b6340/MicrosoftEdgeEnterpriseX64.msi"
-    Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value "MicrosoftEdgeEnterpriseX64.msi"
+    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/819f400e-692f-401e-85d1-c738e7a4eefb/MicrosoftEdgeEnterpriseX64.msi"
+    Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value ($EDGE_INSTALLER_URL.Substring($EDGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Modern Web Browser (Microsoft Edge 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Microsoft Edge 64bit Edition)"
@@ -2681,9 +2681,9 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Initialize Parameter [# Depends on IrfanView version information]
-    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview454_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview456_x64_setup.exe"
     Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview454_plugins_x64_setup.exe"
+    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview456_plugins_x64_setup.exe"
     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Graphic Viewer (IrfanView)
@@ -2780,7 +2780,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
-    Get-WebContentToFile -Uri 'https://nosql-workbench-for-amazon-dynamodb.s3.amazonaws.com/NoSQL+Workbench+for+Amazon+DynamoDB-win-1.0.0.exe' -OutFile "$TOOL_DIR\NoSQL+Workbench+for+Amazon+DynamoDB-win-1.0.0.exe"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/nosql-workbench/NoSQL%20Workbench-win-2.1.0.exe' -OutFile "$TOOL_DIR\NoSQL_Workbench-win-2.1.0.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
@@ -2881,24 +2881,24 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # Package Download System Utility (Python 2.7)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on Python 2.7 version information]
-    Set-Variable -Name PYTHON27_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi"
-    Set-Variable -Name PYTHON27_INSTALLER_FILE -Scope Script -Value ($PYTHON27_INSTALLER_URL.Substring($PYTHON27_INSTALLER_URL.LastIndexOf("/") + 1))
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     # Initialize Parameter [# Depends on Python 2.7 version information]
+#     Set-Variable -Name PYTHON27_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi"
+#     Set-Variable -Name PYTHON27_INSTALLER_FILE -Scope Script -Value ($PYTHON27_INSTALLER_URL.Substring($PYTHON27_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (Python 2.7)"
-    Get-WebContentToFile -Uri "$PYTHON27_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON27_INSTALLER_FILE"
-}
+#     Write-Log "# Package Download System Utility (Python 2.7)"
+#     Get-WebContentToFile -Uri "$PYTHON27_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON27_INSTALLER_FILE"
+# }
 
-# Package Download System Utility (Python 3.8)
+# Package Download System Utility (Python 3.9)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on Python 3.8 version information]
-    Set-Variable -Name PYTHON38_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.8.3/python-3.8.3-amd64.exe"
+    # Initialize Parameter [# Depends on Python 3.9 version information]
+    Set-Variable -Name PYTHON38_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.9.0/python-3.9.0-amd64.exe"
     Set-Variable -Name PYTHON38_INSTALLER_FILE -Scope Script -Value ($PYTHON38_INSTALLER_URL.Substring($PYTHON38_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (Python 3.8)"
+    Write-Log "# Package Download System Utility (Python 3.9)"
     Get-WebContentToFile -Uri "$PYTHON38_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON38_INSTALLER_FILE"
 }
 
@@ -2906,7 +2906,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmerge.org/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinMerge version information]
-    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge/stable/2.16.6/WinMerge-2.16.6-Setup.exe"
+    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://downloads.sourceforge.net/winmerge/WinMerge-2.16.8-x64-Setup.exe"
     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinMerge)"
@@ -2917,7 +2917,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmergejp.bitbucket.io/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://osdn.net/dl/winmerge-jp/WinMerge-2.16.6-jp-6-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.osdn.jp/winmerge-jp/73987/WinMerge-2.16.8-jp-8-x64-Setup.exe"
     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
