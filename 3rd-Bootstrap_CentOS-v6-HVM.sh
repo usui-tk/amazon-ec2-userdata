@@ -46,6 +46,12 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #-------------------------------------------------------------------------------
 
+# [Workaround #1] Fix BaseURL
+find /etc/yum.repos.d -type f -print | xargs grep -ie 'mirrorlist.centos.org' -ie 'vault.centos.org'
+grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's/^mirrorlist=http:\/\/mirrorlist.centos.org/#mirrorlist=http:\/\/mirrorlist.centos.org/g'
+grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's/^#baseurl=http:\/\/mirror.centos.org/baseurl=http:\/\/vault.centos.org/g'
+find /etc/yum.repos.d -type f -print | xargs grep -ie 'mirrorlist.centos.org' -ie 'vault.centos.org'
+
 # Cleanup repository information
 yum clean all
 
@@ -99,6 +105,16 @@ yum install -y centos-release centos-release-scl
 yum clean all
 
 find /etc/yum.repos.d/
+
+# [Workaround #2] Fix BaseURL
+find /etc/yum.repos.d -type f -print | xargs grep -ie 'mirrorlist.centos.org' -ie 'vault.centos.org'
+grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|# baseurl=|#baseurl=|g'
+grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's/^mirrorlist=http:\/\/mirrorlist.centos.org/#mirrorlist=http:\/\/mirrorlist.centos.org/g'
+grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's/^#baseurl=http:\/\/mirror.centos.org/baseurl=http:\/\/vault.centos.org/g'
+find /etc/yum.repos.d -type f -print | xargs grep -ie 'mirrorlist.centos.org' -ie 'vault.centos.org'
+
+# Cleanup repository information
+yum clean all
 
 # Checking repository information
 yum repolist all
