@@ -37,11 +37,6 @@ echo $VpcNetwork
 #
 #-------------------------------------------------------------------------------
 
-# [Workaround] Setting System crypto policy (DEFAULT | FUTURE)
-update-crypto-policies --show
-# update-crypto-policies --set FUTURE
-# update-crypto-policies --is-applied
-
 # Cleanup repository information
 dnf clean all
 
@@ -121,6 +116,12 @@ if [ -n "$VERSION_ID" ]; then
 		echo "fedora ${VERSION_ID}"
 		dnf install -y arptables-compat
 	elif [ "${VERSION_ID}" = "30" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables
+	elif [ "${VERSION_ID}" = "29" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y arptables
+	elif [ "${VERSION_ID}" = "28" ]; then
 		echo "fedora ${VERSION_ID}"
 		dnf install -y arptables
 	else
@@ -520,6 +521,269 @@ fi
 __EOF__
 
 source /etc/profile.d/terraform.sh
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Docker]
+#-------------------------------------------------------------------------------
+
+# Package Install Docker Enviroment Tools (from Fedora Official Repository)
+if [ -n "$VERSION_ID" ]; then
+	if [ "${VERSION_ID}" = "31" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y moby-engine
+		rpm -qi moby-engine
+		systemctl daemon-reload
+		# systemctl restart docker
+		# systemctl status -l docker
+		# Configure Docker software (Start Daemon docker/moby-engine)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "30" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "29" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	elif [ "${VERSION_ID}" = "28" ]; then
+		echo "fedora ${VERSION_ID}"
+		dnf install -y docker
+		rpm -qi docker
+		systemctl daemon-reload
+		systemctl restart docker
+		systemctl status -l docker
+		# Configure Docker software (Start Daemon docker)
+		if [ $(systemctl is-enabled docker) = "disabled" ]; then
+			systemctl enable docker
+			systemctl is-enabled docker
+		fi
+		# Docker Deamon Information
+		docker version --format '{{json .}}' | jq .
+	else
+		echo "fedora ${VERSION_ID}"
+	fi
+fi
+
+# Docker Pull Image (from Docker Hub)
+if [ $(docker info > /dev/null 2>&1) ]; then
+	echo "# Docker daemon is running"
+	docker pull fedora:latest                        # Fedora
+	docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+else
+	echo "# Docker daemon is not running"
+fi
+
+# Docker Run (Amazon Linux 2 LTS)
+# docker run -it amazonlinux:latest bash
+# cat /etc/system-release
+# cat /etc/image-id
+# exit
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Node.js & Serverless Framework]
+#-------------------------------------------------------------------------------
+
+# Package Install Node.js NPM Enviroment Tools (from Fedora Official Repository)
+dnf install -y nodejs npm
+
+# Package Information
+rpm -qi nodejs
+rpm -qi npm
+
+node -v
+npm -v
+
+# Install Serverless Framework
+# https://serverless.com/
+# https://github.com/serverless/serverless
+# npm install -g serverless
+
+# sls -v
+
+# Install AWS Serverless Application Model (SAM) - SAM Local
+# https://docs.aws.amazon.com/lambda/latest/dg/sam-cli-requirements.html
+# npm install -g aws-sam-local
+
+# sam --version
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Go]
+#-------------------------------------------------------------------------------
+dnf install -y golang
+
+rpm -qi golang
+
+go version
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Environment
+#-------------------------------------------------------------------------------
+dnf group install -y "GNOME"
+
+echo "exec /usr/bin/gnome-session" >> ~/.xinitrc
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for XRDP Server
+#-------------------------------------------------------------------------------
+dnf install -y xrdp
+
+rpm -qi xrdp
+
+systemctl daemon-reload
+
+systemctl restart xrdp
+
+systemctl status -l xrdp
+
+# Configure XRDP Server software (Start Daemon xrdp)
+if [ $(systemctl is-enabled xrdp) = "disabled" ]; then
+	systemctl enable xrdp
+	systemctl is-enabled xrdp
+fi
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for VNC Server
+#
+#  - VNC Server User : fedora [cloud-init default user]
+#
+#-------------------------------------------------------------------------------
+dnf install -y tigervnc-server
+
+rpm -qi tigervnc-server
+
+systemctl daemon-reload
+
+# # Configure VNC Server for "fedora" user
+# cat > /home/fedora/vnc-setup.sh << __EOF__
+# #!/bin/bash
+
+# VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
+
+# vncpasswd << 'EOF';
+# \$VNC_PASSWORD
+# \$VNC_PASSWORD
+# n
+# EOF
+
+# echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
+# __EOF__
+
+# chmod 777 /home/fedora/vnc-setup.sh
+
+# su - "fedora" -c "/home/fedora/vnc-setup.sh"
+
+# # Pre-operation test of VNC server
+# su - "fedora" -c "vncserver :1 -geometry 1024x768 -depth 32"
+
+# sleep 15
+
+# su - "fedora" -c "vncserver -kill :1"
+
+# cat /home/fedora/.vnc/xstartup
+# cat /home/fedora/.vnc/config
+
+# # Systemd's VNC Server configuration
+# cp -pr /usr/lib/systemd/system/vncserver@.service /etc/systemd/system/vncserver@:1.service
+
+# cat /etc/systemd/system/vncserver@:1.service
+
+# sed -i 's@<USER>@fedora@g' /etc/systemd/system/vncserver@:1.service
+
+# cat /etc/systemd/system/vncserver@:1.service
+
+# systemctl daemon-reload
+
+# # Systemd's VNC Server startup
+# systemctl start vncserver@:1.service
+
+# systemctl status -l vncserver@:1.service
+
+# # Configure XRDP Server software (Start Daemon xrdp)
+# if [ $(systemctl is-enabled vncserver@:1.service) = "disabled" ]; then
+# 	systemctl enable vncserver@:1.service
+# 	systemctl is-enabled vncserver@:1.service
+# fi
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Google Chrome]
+#  - https://www.google.com/linuxrepositories/
+#-------------------------------------------------------------------------------
+
+cat > /etc/yum.repos.d/google-chrome.repo << __EOF__
+[google-chrome]
+name=google-chrome - \$basearch
+baseurl=https://dl.google.com/linux/chrome/rpm/stable/\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub
+__EOF__
+
+# Cleanup repository information
+dnf clean all
+dnf makecache
+
+# Install Google Chrome Stable version
+dnf install -y google-chrome-stable
+
+rpm -qi google-chrome-stable
+
+# Install Google Chrome Beta version
+# dnf install -y google-chrome-beta
+# rpm -qi google-chrome-beta
+
+# Install Google Chrome Unstable version
+# dnf install -y google-chrome-unstable
+# rpm -qi google-chrome-unstable
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for Desktop Application [Visual Studio Code]
+#-------------------------------------------------------------------------------
+
+rpm --import "https://packages.microsoft.com/keys/microsoft.asc"
+
+# Add the VS Code Repository
+cat > /etc/yum.repos.d/vscode.repo << __EOF__
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+__EOF__
+
+# Cleanup repository information
+dnf clean all
+dnf makecache
+
+# Install Visual Studio Code Stable version
+dnf install -y code
+
+rpm -qi code
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
