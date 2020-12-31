@@ -204,7 +204,8 @@ dnf list installed | grep kpatch
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS Web-Based support tools (from CentOS Community Repository)
-dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+## dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
