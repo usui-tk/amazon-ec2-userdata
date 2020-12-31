@@ -110,7 +110,7 @@ else {
 
 # Clear PowerShell history
 Get-History
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 Clear-History -ErrorAction SilentlyContinue
 
 Write-MessageSeparator "Complete Script Execution Cleanup Script"
