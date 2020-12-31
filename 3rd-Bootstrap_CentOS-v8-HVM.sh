@@ -36,7 +36,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - CentOS v8
+#  - CentOS Stream release 8
 #    https://docs.centos.org/en-US/docs/
 #    https://wiki.centos.org/Documentation
 #    https://wiki.centos.org/Cloud/AWS
@@ -45,6 +45,16 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #-------------------------------------------------------------------------------
+
+# Converting from CentOS Linux to CentOS Stream
+# https://www.centos.org/centos-stream/
+dnf install -y centos-release-stream
+
+dnf swap -y centos-{linux,stream}-repos
+
+dnf distro-sync -y
+
+cat /etc/centos-release
 
 # Cleanup repository information
 dnf clean all
@@ -87,12 +97,11 @@ systemctl list-unit-files --all --no-pager > /tmp/command-log_systemctl_list-uni
 # systemd service config
 systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemctl_list-service-config.txt
 
-
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-# Yum Repositories (CentOS v8)
-#  http://mirror.centos.org/centos-8/8/
+# Yum Repositories (CentOS Stream release 8)
+#  http://mirror.centos.org/centos/8-stream/
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information and Update dnf tools
@@ -108,8 +117,7 @@ find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y centos-release
-# dnf install -y centos-release-stream
+dnf install -y centos-release-stream
 dnf clean all
 
 find /etc/yum.repos.d/
@@ -121,27 +129,16 @@ dnf clean all
 dnf repolist all
 dnf module list
 
-# Checking repository information (repository configuration file)
-find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel, Media, RealTime")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" -ve "Media" -ve "RealTime"  | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
-# Enable repository in repository configuration file:[CentOS-Base.repo]
-dnf config-manager --set-enabled BaseOS
-
-# Enable repository in repository configuration file:[CentOS-AppStream.repo]
-dnf config-manager --set-enabled AppStream
-
-# Enable repository in repository configuration file:[CentOS-Extras.repo]
-dnf config-manager --set-enabled extras
-
-# Enable repository in repository configuration file:[CentOS-HA.repo]
-dnf config-manager --set-enabled HighAvailability
-
-# Enable repository in repository configuration file:[CentOS-PowerTools.repo]
-dnf config-manager --set-enabled PowerTools
-
-# Disable repository in repository configuration file:[CentOS-centosplus.repo]
-dnf config-manager --set-disabled centosplus
-egrep '^\[|enabled' /etc/yum.repos.d/CentOS-centosplus.repo
+# Enable Dnf/Yum Repository Data from CentOS Community Repository
+for repo in $repolist
+do
+	echo "[Target repository Name (Enable dnf/yum repository)] :" $repo
+	dnf config-manager --set-enabled ${repo}
+	sleep 3
+done
 
 # Checking repository information
 dnf repolist all
