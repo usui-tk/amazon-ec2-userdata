@@ -2627,8 +2627,8 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.microsoft.com/en-us/edge/business/download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter
-    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/819f400e-692f-401e-85d1-c738e7a4eefb/MicrosoftEdgeEnterpriseX64.msi"
-    Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value ($EDGE_INSTALLER_URL.Substring($EDGE_INSTALLER_URL.LastIndexOf("/") + 1))
+    Set-Variable -Name EDGE_INSTALLER_URL -Scope Script -Value "http://go.microsoft.com/fwlink/?LinkID=2093437"
+    Set-Variable -Name EDGE_INSTALLER_FILE -Scope Script -Value "MicrosoftEdgeEnterpriseX64.msi"
 
     # Package Download Modern Web Browser (Microsoft Edge 64bit Edition)
     Write-Log "# Package Download Modern Web Browser (Microsoft Edge 64bit Edition)"
