@@ -103,7 +103,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
-yum clean all
+yum --enablerepo="*" --verbose clean all
 yum install -y yum yum-utils
 yum update -y rh-amazon-rhui-client
 
@@ -125,7 +125,7 @@ done
 yum repolist all
 
 # Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
-yum clean all
+yum --enablerepo="*" --verbose clean all
 yum update -y rh-amazon-rhui-client
 
 # Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
@@ -227,7 +227,7 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 yum --enablerepo=epel-bootstrap -y install epel-release
 
@@ -242,7 +242,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt

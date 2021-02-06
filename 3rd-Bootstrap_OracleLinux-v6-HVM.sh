@@ -927,8 +927,12 @@ else
 		# Extending a Partition
 		parted -l
 		lsblk -al
-		LANG=C growpart --dry-run /dev/xvda 1
-		LANG=C growpart /dev/xvda 1
+
+		LANG=C growpart --dry-run /dev/xvda 1 || GrowPartStatus=$?
+		if [ "$GrowPartStatus" -eq 0 ]; then
+			LANG=C growpart /dev/xvda 1
+		fi
+
 		parted -l
 		lsblk -al
 
@@ -957,8 +961,12 @@ else
 		# Extending a Partition
 		parted -l
 		lsblk -al
-		LANG=C growpart --dry-run /dev/nvme0n1 1
-		LANG=C growpart /dev/nvme0n1 1
+
+		LANG=C growpart --dry-run /dev/nvme0n1 1 || GrowPartStatus=$?
+		if [ "$GrowPartStatus" -eq 0 ]; then
+			LANG=C growpart /dev/nvme0n1 1
+		fi
+
 		parted -l
 		lsblk -al
 

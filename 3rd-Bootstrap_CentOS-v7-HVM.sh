@@ -89,7 +89,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-plugin-fastestmirror yum-utils
@@ -103,7 +103,7 @@ find /etc/yum.repos.d/
 yum search centos-release
 
 yum install -y centos-release centos-release-scl
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -209,7 +209,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt

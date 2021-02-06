@@ -100,7 +100,7 @@ find /etc/yum.repos.d/
 yum search oracle-
 
 yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7  oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oraclelinux-developer-release-el7
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -114,7 +114,7 @@ find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
 grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Delete AMI Defalut YUM Repositories File
 find /etc/yum.repos.d/
@@ -122,7 +122,7 @@ rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
 find /etc/yum.repos.d/
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Checking repository information
 yum repolist all
@@ -239,7 +239,7 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 yum --enablerepo=epel-bootstrap -y install epel-release
 
@@ -254,7 +254,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
@@ -1110,8 +1110,12 @@ else
 		# Extending a Partition
 		parted -l
 		lsblk -al
-		LANG=C growpart --dry-run /dev/xvda 1
-		LANG=C growpart /dev/xvda 1
+
+		LANG=C growpart --dry-run /dev/xvda 1 || GrowPartStatus=$?
+		if [ "$GrowPartStatus" -eq 0 ]; then
+			LANG=C growpart /dev/xvda 1
+		fi
+
 		parted -l
 		lsblk -al
 
@@ -1140,8 +1144,12 @@ else
 		# Extending a Partition
 		parted -l
 		lsblk -al
-		LANG=C growpart --dry-run /dev/nvme0n1 1
-		LANG=C growpart /dev/nvme0n1 1
+
+		LANG=C growpart --dry-run /dev/nvme0n1 1 || GrowPartStatus=$?
+		if [ "$GrowPartStatus" -eq 0 ]; then
+			LANG=C growpart /dev/nvme0n1 1
+		fi
+
 		parted -l
 		lsblk -al
 
