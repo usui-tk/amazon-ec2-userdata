@@ -151,7 +151,7 @@ do
 done
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update
 yum update -y
@@ -249,6 +249,9 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
+
+# Package Install RHEL System Administration Tools (from EPEL-Testing Repository)
+# yum --enablerepo=epel-testing install -y tlog
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)

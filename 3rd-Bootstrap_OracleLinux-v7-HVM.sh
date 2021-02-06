@@ -99,13 +99,15 @@ find /etc/yum.repos.d/
 
 yum search oracle-
 
-yum install -y oraclelinux-release-el7 oracle-epel-release-el7 oracle-olcne-release-el7 oracle-softwarecollection-release-el7 oraclelinux-developer-release-el7
+yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7  oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oraclelinux-developer-release-el7
 yum clean all
 
 find /etc/yum.repos.d/
 
 # Update AMI Defalut YUM Repositories File
-/usr/bin/ol_yum_configure.sh
+if [ -f /usr/bin/ol_yum_configure.sh ]; then
+	/usr/bin/ol_yum_configure.sh
+fi
 
 # [Workaround] Fix BaseURL
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
@@ -127,15 +129,15 @@ yum repolist all
 
 # Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --enable ol7_latest
-yum-config-manager --enable ol7_UEKR5
 yum-config-manager --enable ol7_UEKR6
 yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
-yum-config-manager --enable ol7_oracle_instantclient
+yum-config-manager --enable ol7_oracle_instantclient21
 yum-config-manager --enable ol7_olcne12
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+yum-config-manager --disable ol7_UEKR5
 yum-config-manager --disable ol7_olcne
 yum-config-manager --disable ol7_olcne11
 yum-config-manager --disable ol7_developer
@@ -144,11 +146,11 @@ yum-config-manager --disable ol7_developer_UEKR5
 yum-config-manager --disable ol7_developer_UEKR6
 yum-config-manager --disable ol7_developer_olcne
 
+# yum repository metadata Clean up
+yum --enablerepo="*" --verbose clean all
+
 # Checking repository information
 yum repolist all
-
-# yum repository metadata Clean up
-yum clean all
 
 # Default Package Update
 yum update -y
@@ -257,8 +259,11 @@ yum clean all
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
-# Package Install RHEL System Administration Tools (from EPEL Repository)
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff zstd
+
+# Package Install Oracle Linux System Administration Tools (from EPEL-Testing Repository)
+# yum --enablerepo=epel-testing install -y tlog
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
@@ -274,11 +279,12 @@ yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
 # yum install -y oracle-database-preinstall-18c
 yum install -y oracle-database-preinstall-19c
 
-# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Repository)
-yum install -y oracle-em-agent-13cR2-preinstall
-
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
-yum install -y oracle-instantclient19.6-basic oracle-instantclient19.6-devel oracle-instantclient19.6-jdbc oracle-instantclient19.6-sqlplus oracle-instantclient19.6-tools
+# https://yum.oracle.com/oracle-instant-client.html
+yum install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+
+# Package Install Oracle Enterprise Manager Agent Pre-Installation Tools (from Oracle Linux Repository)
+# yum install -y oracle-em-agent-13cR2-preinstall
 
 # Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-ebs-server-R12-preinstall
