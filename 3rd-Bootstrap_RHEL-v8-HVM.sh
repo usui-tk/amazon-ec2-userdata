@@ -102,7 +102,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 dnf update -y rh-amazon-rhui-client
 dnf update -y dnf dnf-data
 
@@ -126,7 +126,7 @@ dnf repolist all
 dnf module list
 
 # Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 dnf update -y rh-amazon-rhui-client
 dnf update -y dnf dnf-data
 
@@ -154,7 +154,7 @@ do
 done
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Default Package Update
 dnf update -y
@@ -302,7 +302,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt

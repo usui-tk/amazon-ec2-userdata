@@ -103,8 +103,8 @@ find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
-dnf clean all
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
+dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -116,7 +116,7 @@ find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 dnf clean all
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Checking repository information
 dnf repolist all
@@ -128,19 +128,21 @@ dnf config-manager --set-enabled ol8_UEKR6
 dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
-dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_olcne12
+dnf config-manager --set-enabled ol8_oracle_instantclient21
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+dnf config-manager --set-disabled ol8_developer
 dnf config-manager --set-disabled ol8_developer_EPEL
 dnf config-manager --set-disabled ol8_developer_UEKR6
+dnf config-manager --set-disabled ol8_distro_builder
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
 
 # Checking repository information
 dnf repolist all
 dnf module list
-
-# Cleanup repository information
-dnf clean all
 
 # Default Package Update
 dnf update -y
@@ -298,7 +300,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
@@ -320,26 +322,9 @@ dnf install -y oracleasm-support ocfs2-tools
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-database-preinstall-19c
 
-# Latest packages for Oracle Instant Client on Oracle Linux 8 (x86_64).
-#  https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/x86_64/index.html
-
-# Checking repository information
-dnf repolist all
-
-cat > /etc/yum.repos.d/oracle-instantclient-ol8.repo << __EOF__
-[ol8_instantclient]
-name=Oracle Linux \$releasever Oracle Instant Client Packages (\$basearch)
-baseurl=https://yum.oracle.com/repo/OracleLinux/OL8/oracle/instantclient/\$basearch/
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-gpgcheck=1
-enabled=1
-__EOF__
-
-# Checking repository information
-dnf repolist all
-
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
-dnf install -y oracle-instantclient19.9-basic oracle-instantclient19.9-devel oracle-instantclient19.9-jdbc oracle-instantclient19.9-sqlplus oracle-instantclient19.9-tools
+# https://yum.oracle.com/oracle-instant-client.html
+dnf install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)

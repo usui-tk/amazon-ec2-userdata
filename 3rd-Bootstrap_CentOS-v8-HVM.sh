@@ -105,7 +105,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information and Update dnf tools
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 dnf update -y dnf dnf-data
 
 # Checking repository information
@@ -118,12 +118,12 @@ find /etc/yum.repos.d/
 dnf search release
 
 dnf install -y centos-release-stream
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Checking repository information
 dnf repolist all
@@ -148,7 +148,7 @@ dnf module list
 find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Default Package Update
 dnf update -y
@@ -281,7 +281,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
