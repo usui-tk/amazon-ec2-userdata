@@ -99,7 +99,9 @@ yum clean all
 find /etc/yum.repos.d/
 
 # Update AMI Defalut YUM Repositories File
-/usr/bin/ol_yum_configure.sh
+if [ -f /usr/bin/ol_yum_configure.sh ]; then
+	/usr/bin/ol_yum_configure.sh
+fi
 
 # Delete AMI Defalut YUM Repositories File
 find /etc/yum.repos.d/
