@@ -84,7 +84,7 @@ if [ $(command -v rpm) ]; then
 		fi
 
 		# Cleanup repository information
-		dnf clean all
+		dnf --enablerepo="*" --verbose clean all
 
 		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using DNF package manager) COMPLETE"
 
@@ -134,7 +134,7 @@ if [ $(command -v rpm) ]; then
 		fi
 
 		# Cleanup repository information
-		yum clean all
+		yum --enablerepo="*" --verbose clean all
 
 		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using YUM package manager) COMPLETE"
 
