@@ -57,7 +57,7 @@ dnf distro-sync -y
 cat /etc/centos-release
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
