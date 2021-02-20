@@ -816,22 +816,11 @@ fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
-# https://www.terraform.io/docs/cli/install/yum.html
+# http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
 #-------------------------------------------------------------------------------
 
-# Repository Configuration (HashiCorp Linux Repository)
-yum-config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
-
-cat /etc/yum.repos.d/hashicorp.repo
-
-# Cleanup repository information
-yum clean all
-
-# HashiCorp Linux repository package [yum command]
-yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
-
-# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-yum --enablerepo=hashicorp install -y terraform
+# Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
+yum --enablerepo=ol7_developer -y install terraform terraform-bundle terraform-provider-oci
 
 rpm -qi terraform
 
