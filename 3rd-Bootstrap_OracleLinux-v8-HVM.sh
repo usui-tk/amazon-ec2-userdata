@@ -108,12 +108,21 @@ dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
-# [Workaround] Fix BaseURL
+################################################################################
+# [Workaround] Updating the configuration of the Oracle Linux public repository
+################################################################################
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
-grep -l 'yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
+
+if [ $(grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
+	grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+fi
+
+if [ $(grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
+	grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
+fi
+
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-dnf clean all
+################################################################################
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
