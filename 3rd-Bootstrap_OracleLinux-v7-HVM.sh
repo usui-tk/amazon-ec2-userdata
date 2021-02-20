@@ -186,7 +186,8 @@ yum install -y pcp pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zero
 yum install -y redhat-lsb-core
 
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
-# yum install -y ol-template-config ovm-template-config*
+# yum install -y ol-template-config
+# yum install -y ovm-template-config*
 
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
 yum install -y olcne-selinux olcne-utils olcnectl yq
