@@ -41,6 +41,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://wiki.centos.org/Documentation
 #    https://wiki.centos.org/Cloud/AWS
 #
+#    https://www.centos.org/download/aws-images/
 #    https://aws.amazon.com/marketplace/pp/B00O7WM7QW
 #
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
