@@ -792,24 +792,54 @@ if [ $(systemctl is-enabled chronyd) = "disabled" ]; then
 	systemctl is-enabled chronyd
 fi
 
-systemctl restart chronyd
+# Contents of the configuration file
+ChronyConfigFile="/etc/chrony.conf"
+cat ${ChronyConfigFile}
 
-systemctl status -l chronyd
+# Configure NTP Client software (Enable log settings in Chrony configuration file)
+sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' ${ChronyConfigFile}
 
-# Configure NTP Client software (Configure chronyd)
-cat /etc/chrony.conf | grep -ie "169.254.169.123" -ie "pool" -ie "server"
+# Configure NTP Client software (Activate Amazon Time Sync Service settings in the Chrony configuration file)
+if [ $(cat ${ChronyConfigFile} | grep -ie "169.254.169.123" | wc -l) = "0" ]; then
+	echo "NTP server (169.254.169.123) for Amazon Time Sync Service is not configured in the configuration file."
 
-sed -i 's/#log measurements statistics tracking/log measurements statistics tracking/g' /etc/chrony.conf
+	# Configure the NTP server (169.254.169.123) for Amazon Time Sync Service in the configuration file.
+	if [ $(cat ${ChronyConfigFile} | grep -ie ".pool.ntp.org" | wc -l) = "0" ]; then
+		# Variables (for editing the Chrony configuration file)
+		VAR_CHRONY_NUM="1"
 
-# Configure NTP Client software (Time adjustment)
-systemctl restart chronyd
+		# Change settings (Chrony configuration file)
+		sed -i "${VAR_CHRONY_NUM}"'s/^/# Use the Amazon Time Sync Service.\nserver 169.254.169.123 prefer iburst minpoll 4 maxpoll 4\n\n/' ${ChronyConfigFile}
+	else
+		# Variables (for editing the Chrony configuration file)
+		VAR_CHRONY_STR=$(cat ${ChronyConfigFile} | grep -ie "pool" -ie "server" | tail -n 1)
+		VAR_CHRONY_NUM=$(grep -e "$VAR_CHRONY_STR" -n ${ChronyConfigFile} | sed -e 's/:.*//g')
 
-sleep 3
-chronyc tracking
-sleep 3
-chronyc sources -v
-sleep 3
-chronyc sourcestats -v
+		# Change settings (Chrony configuration file)
+		sed -i "${VAR_CHRONY_NUM}"'s/^/\n# Use the Amazon Time Sync Service.\nserver 169.254.169.123 prefer iburst minpoll 4 maxpoll 4\n\n/' ${ChronyConfigFile}
+	fi
+
+	# Contents of the configuration file
+	cat ${ChronyConfigFile}
+fi
+
+# Configure NTP Client software (Check the status of time synchronization by Chrony)
+if [ $(systemctl is-active chronyd) = "active" ]; then
+	systemctl daemon-reload
+	systemctl restart chronyd
+else
+	systemctl daemon-reload
+	systemctl start chronyd
+fi
+
+if [ $(command -v chronyc) ]; then
+	sleep 3
+	chronyc tracking
+	sleep 3
+	chronyc sources -v
+	sleep 3
+	chronyc sourcestats -v
+fi
 
 #-------------------------------------------------------------------------------
 # Configure Amazon Linux Kernel Autotuning (ec2sys-autotune)
