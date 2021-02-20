@@ -49,13 +49,19 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 # Converting from CentOS Linux to CentOS Stream
 # https://www.centos.org/centos-stream/
-dnf install -y centos-release-stream
+if [[ $(rpm -qa | grep centos-stream-release | wc -l) -gt 0 ]]; then
+	echo "The switch to CentOS Stream has already been completed."
+else
+	echo "Converting from CentOS Linux to CentOS Stream"
 
-dnf swap -y centos-{linux,stream}-repos
+	dnf install -y centos-release-stream
 
-dnf distro-sync -y
+	dnf swap -y centos-{linux,stream}-repos
 
-cat /etc/centos-release
+	dnf distro-sync -y
+
+	cat /etc/centos-release
+fi
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -865,7 +871,7 @@ if [ $(cat ${ChronyConfigFile} | grep -ie "169.254.169.123" | wc -l) = "0" ]; th
 	else
 		# Variables (for editing the Chrony configuration file)
 		VAR_CHRONY_STR=$(cat ${ChronyConfigFile} | grep -ie "pool" -ie "server" | tail -n 1)
-		VAR_CHRONY_NUM=$(grep -e "$VAR_CHRONY_STR" -n ${ChronyConfigFile} | sed -e 's/:.*//g')
+		VAR_CHRONY_NUM=`expr $(grep -e "$VAR_CHRONY_STR" -n ${ChronyConfigFile} | sed -e 's/:.*//g') + 1`
 
 		# Change settings (Chrony configuration file)
 		sed -i "${VAR_CHRONY_NUM}"'s/^/\n# Use the Amazon Time Sync Service.\nserver 169.254.169.123 prefer iburst minpoll 4 maxpoll 4\n\n/' ${ChronyConfigFile}
