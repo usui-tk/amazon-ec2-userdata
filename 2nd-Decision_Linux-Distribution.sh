@@ -13,6 +13,7 @@ ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-user
 ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
 ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
+ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
 ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
 ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
@@ -57,6 +58,10 @@ function get_os_info () {
          DIST_TYPE=$ID
          DIST=$NAME
          REV=$VERSION_ID
+      elif [ -f /etc/almalinux-release ]; then
+         DIST_TYPE='AlmaLinux'
+         DIST=`cat /etc/almalinux-release | sed s/\ release.*//`
+         REV=`cat /etc/almalinux-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/centos-release ]; then
          DIST_TYPE='CentOS'
          DIST=`cat /etc/centos-release | sed s/\ release.*//`
@@ -118,6 +123,13 @@ function get_bootstrap_script () {
          elif [ $(echo ${REV} | grep -e '6.') ]; then
             # Bootstrap Script for Red Hat Enterprise Linux v6.x
             BootstrapScript=${ScriptForRHELv6}
+         else
+            BootstrapScript=""
+         fi
+   elif [ "${DIST}" = "AlmaLinux" ] || [ "${DIST_TYPE}" = "almalinux" ]; then
+         if [ "${REV}" = "8" ]; then
+            # Bootstrap Script for AlmaLinux v8.x
+            BootstrapScript=${ScriptForAlmaLinuxv8}
          else
             BootstrapScript=""
          fi
@@ -234,8 +246,12 @@ echo "BootstrapScript URL is ${BootstrapScript}"
 if [ $(compgen -ac | sort | uniq | grep -x curl) ] || [ $(compgen -ac | sort | uniq | grep -x wget) ]; then
    echo "Preinstalled curl/wget command - Linux distribution: ${DIST} and distribution type: ${DIST_TYPE}"
 else
-   if [ $(command -v yum) ]; then
-      # Package Install curl/wget Tools (Amazon Linux, Red Hat Enterprise Linux, CentOS, Oracle Linux)
+   if [ $(command -v dnf) ]; then
+      # Package Install curl/wget Tools (Red Hat Enterprise Linux, AlmaLinux, CentOS, Oracle Linux)
+      dnf clean all
+      dnf install -y curl wget
+   elif [ $(command -v yum) ]; then
+      # Package Install curl/wget Tools (Amazon Linux, Red Hat Enterprise Linux, AlmaLinux, CentOS, Oracle Linux)
       yum clean all
       yum install -y curl wget
    elif [ $(command -v apt-get) ]; then
