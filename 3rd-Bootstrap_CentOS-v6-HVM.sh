@@ -102,7 +102,7 @@ find /etc/yum.repos.d/
 
 yum search centos-release
 yum install -y centos-release centos-release-scl
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -114,7 +114,7 @@ grep -l 'mirrorlist.centos.org' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's/^#
 find /etc/yum.repos.d -type f -print | xargs grep -ie 'mirrorlist.centos.org' -ie 'vault.centos.org'
 
 # Cleanup repository information
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Checking repository information
 yum repolist all
@@ -142,7 +142,7 @@ yum repolist all
 find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update
 yum update -y
@@ -182,6 +182,7 @@ alternatives --display pip3
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
+# https://archives.fedoraproject.org/pub/archive/epel/6/x86_64/
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -194,13 +195,14 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
 yum --enablerepo=epel install -y atop bash-completion byobu colordiff fio fping glances htop httping iftop inotify-tools iperf3 iptraf-ng ipv6calc jq moreutils ncdu netsniff-ng nload srm tcping wdiff zstd
+
 yum --enablerepo=epel install -y cloud-utils-growpart dracut-modules-growroot
 
 #-------------------------------------------------------------------------------

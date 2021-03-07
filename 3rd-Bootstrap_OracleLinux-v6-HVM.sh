@@ -80,7 +80,7 @@ chkconfig --list > /tmp/command-log_chkconfig_list.txt
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-utils
@@ -91,10 +91,10 @@ yum repolist all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-yum search oracle-
+yum search release
 
 yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 oracle-softwarecollection-release-el6
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -108,8 +108,24 @@ find /etc/yum.repos.d/
 rm -rf /etc/yum.repos.d/public-yum-ol6.repo*
 find /etc/yum.repos.d/
 
+################################################################################
+# [Workaround] Updating the configuration of the Oracle Linux public repository
+################################################################################
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+
+if [ $(grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
+	grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+fi
+
+if [ $(grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
+	grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
+fi
+
+find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
+################################################################################
+
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Checking repository information
 yum repolist all
@@ -128,7 +144,7 @@ yum-config-manager --disable ol6_UEK_latest
 yum repolist all
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update
 yum update -y
@@ -174,6 +190,7 @@ alternatives --display pip3
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
+# https://archives.fedoraproject.org/pub/archive/epel/6/x86_64/
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
@@ -188,7 +205,7 @@ enabled=0
 gpgcheck=0
 __EOF__
 
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 yum --enablerepo=epel-bootstrap -y install epel-release
 
@@ -203,7 +220,7 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
