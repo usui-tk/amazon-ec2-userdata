@@ -91,7 +91,7 @@ yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update
 yum update -y
