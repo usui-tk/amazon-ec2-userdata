@@ -58,18 +58,22 @@ function get_os_info () {
          DIST_TYPE=$ID
          DIST=$NAME
          REV=$VERSION_ID
+      elif [ -f /etc/rocky-release ]; then
+         DIST_TYPE='Rocky Linux'
+         DIST=`cat /etc/rocky-release | sed s/\ release.*//`
+         REV=`cat /etc/rocky-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/almalinux-release ]; then
          DIST_TYPE='AlmaLinux'
          DIST=`cat /etc/almalinux-release | sed s/\ release.*//`
          REV=`cat /etc/almalinux-release | sed s/.*release\ // | sed s/\ .*//`
-      elif [ -f /etc/centos-release ]; then
-         DIST_TYPE='CentOS'
-         DIST=`cat /etc/centos-release | sed s/\ release.*//`
-         REV=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/oracle-release ]; then
          DIST_TYPE='Oracle'
          DIST=`cat /etc/oracle-release | sed s/\ release.*//`
          REV=`cat /etc/oracle-release | sed s/.*release\ // | sed s/\ .*//`
+      elif [ -f /etc/centos-release ]; then
+         DIST_TYPE='CentOS'
+         DIST=`cat /etc/centos-release | sed s/\ release.*//`
+         REV=`cat /etc/centos-release | sed s/.*release\ // | sed s/\ .*//`
       elif [ -f /etc/fedora-release ]; then
          DIST_TYPE='Fedora'
          DIST=`cat /etc/fedora-release | sed s/\ release.*//`
