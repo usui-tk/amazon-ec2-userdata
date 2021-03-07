@@ -54,9 +54,13 @@ fi
 uname -a
 
 # Show Linux distribution release Information
-cat /etc/os-release
+if [ -f /etc/os-release ]; then
+	cat /etc/os-release
+fi
 
-cat /etc/system-release
+if [ -f /etc/system-release ]; then
+	cat /etc/system-release
+fi
 
 # Default installation package [rpm command]
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
@@ -93,14 +97,13 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 dnf clean all
 
 # Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
-dnf install -y bash dnf dnf-conf dnf-utils
-dnf install -y dnf-plugins-core dnf-plugin-system-upgrade
+dnf install -y bash dnf dnf-conf dnf-utils dnf-plugins-core dnf-plugin-system-upgrade
 
 # Checking repository information
 dnf repolist all
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Default Package Update
 dnf update -y
@@ -110,14 +113,19 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y abrt abrt-cli acpid atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crypto-policies curl dstat ebtables ethtool expect fio gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop iperf3 iptraf-ng jnettop jq kexec-tools libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils nftables nmap numactl nvme-cli nvmetcli parted patchutils patchutils pciutils pmempool psacct psmisc python3-dnf-plugin-versionlock python3-dnf-plugins-extras-common rsync smartmontools sos srm strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget xfsdump xfsprogs zip zsh
+dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop ipcalc iperf3 ipset iptraf-ng jnettop jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos srm strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
-dnf install -y iscsi-initiator-utils lsscsi sg3_utils
-dnf install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond
-dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
+dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
+# Package Install Fedora System Administration Tools [Version dependent] (from Fedora Official Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "31" ]; then
+	if [ "${VERSION_ID}" = "33" ]; then
+		echo "fedora ${VERSION_ID}"
+	elif [ "${VERSION_ID}" = "32" ]; then
+		echo "fedora ${VERSION_ID}"
+	elif [ "${VERSION_ID}" = "31" ]; then
 		echo "fedora ${VERSION_ID}"
 		dnf install -y arptables-compat
 	elif [ "${VERSION_ID}" = "30" ]; then
@@ -132,7 +140,7 @@ fi
 dnf install -y redhat-lsb-core
 
 # Package Install Python 3 Runtime (from Red Hat Official Repository)
-dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+dnf install -y python3 python3-pip  python3-utils python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 
 # Package Install Fedora Web-Based support tools (from Fedora Official Repository)
 # dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
@@ -654,7 +662,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from Fedora Official Repository)
-yum install -y tuned tuned-utils
+dnf install -y tuned tuned-utils
 
 rpm -qi tuned
 
@@ -682,7 +690,7 @@ tuned-adm active
 #-------------------------------------------------------------------------------
 
 # Configure ACPI daemon software (Install acpid Package)
-yum install -y acpid
+dnf install -y acpid
 
 rpm -qi acpid
 
