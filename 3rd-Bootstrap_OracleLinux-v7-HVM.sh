@@ -109,6 +109,11 @@ if [ -f /usr/bin/ol_yum_configure.sh ]; then
 	/usr/bin/ol_yum_configure.sh
 fi
 
+# Delete AMI Defalut YUM Repositories File
+find /etc/yum.repos.d/
+rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
+find /etc/yum.repos.d/
+
 ################################################################################
 # [Workaround] Updating the configuration of the Oracle Linux public repository
 ################################################################################
@@ -124,11 +129,6 @@ fi
 
 find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
 ################################################################################
-
-# Delete AMI Defalut YUM Repositories File
-find /etc/yum.repos.d/
-rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
-find /etc/yum.repos.d/
 
 # yum repository metadata Clean up
 yum --enablerepo="*" --verbose clean all
