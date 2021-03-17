@@ -578,7 +578,7 @@ if [ $(chkconfig --list | awk '{print $1}' | grep -x ntpd) ]; then
 	service ntpd stop
 fi
 
-yum erase -y ntp*
+yum remove -y ntp*
 
 # Replace NTP Client software (Install chrony Package)
 yum install -y chrony

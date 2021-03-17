@@ -83,7 +83,7 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-#  - RHEL v6 - Red Hat Yum Repository Default Status (Enable/Disable)
+#  - RHEL v6 (Non-ELS) - Red Hat Yum Repository Default Status (Enable/Disable)
 #
 #    [Default - Enable]
 #        rhui-REGION-rhel-server-releases
@@ -95,60 +95,172 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #        rhui-REGION-rhel-server-supplementary
 #        rhui-REGION-rhel-server-rhscl
 #-------------------------------------------------------------------------------
+#  - RHEL v6 (ELS) - Red Hat Yum Repository Default Status (Enable/Disable)
+#
+#    [Default - Enable]
+#        rhui-rhel-6-server-els-rhui-rpms
+#        rhui-client-config-server-6
+#    [Default - Disable]
+#-------------------------------------------------------------------------------
 
-# Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
-yum --enablerepo="*" --verbose clean all
-yum install -y yum yum-utils
-yum update -y rh-amazon-rhui-client
+# Check if this AMI is RHEL ELS compatible or not.
+# If the return value is not 0, it is assumed to be RHEL ELS compatible.
+ELS_FLAG=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | grep -ie "els" | wc -l)
 
-# Checking repository information
-yum repolist all
 
-# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
-repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
-# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
-for repo in $repolist
-do
-	echo "[Target repository Name (Enable yum repository)] :" $repo
-	yum-config-manager --enable ${repo}
-	sleep 3
-done
+# Configure NTP Client software (Activate Amazon Time Sync Service settings in the Chrony configuration file)
+if [ ${ELS_FLAG} -ne 0 ]; then
+	echo "Support for RHEL ELS (Extended Life Cycle Support)"
 
-# Checking repository information
-yum repolist all
+	################################################################################
+	# [Workaround] Workarounds for RHUI configuration in RHEL ELS
+	#  (Affected AMI information) RHEL-6.10ELS_HVM-20201107-x86_64-1-Hourly2-GP2
+	################################################################################
 
-# Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
-yum --enablerepo="*" --verbose clean all
-yum update -y rh-amazon-rhui-client
+	# RPM file for RHUI repository configuration for RHEL ELS (provided by AWS support team)
+	ELS_REPO_RPM="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Workaround/Package/rh-amazon-rhui-client-els-3.0.39-1.el6.noarch.rpm"
 
-# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
-repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+	# Remove RHUI configuration RPMs that do not support RHEL ELS
+	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client") ]; then
+		rpm -qi rh-amazon-rhui-client
 
-# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
-for repo in $repolist
-do
-	echo "[Target repository Name (Enable yum repository)] :" $repo
-	yum-config-manager --enable ${repo}
-	sleep 3
-done
+		yum remove -y rh-amazon-rhui-client
 
-# Checking repository information
-yum repolist all
+		yum --enablerepo="*" --verbose clean all
+	fi
 
-# RHEL/RHUI repository package [yum command]
-for repo in $repolist
-do
-	echo "[Target repository Name (Collect yum repository package list)] :" $repo
-	yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
-	sleep 3
-done
+	# Install RHUI configuration RPM for RHEL ELS support
+	yum localinstall --nogpgcheck -y ${ELS_REPO_RPM}
 
-# yum repository metadata Clean up
-yum --enablerepo="*" --verbose clean all
+	yum --enablerepo="*" --verbose clean all
 
-# Default Package Update
-yum update -y
+	yum repolist
+
+	# RHEL-ELS repository package [yum command]
+	yum list all > /tmp/command-log_yum_repository-ELS-package-list.txt
+
+	# RHEL-ELS repository package group [yum command]
+	yum grouplist -v > /tmp/command-log_yum_repository-ELS-package-group-list.txt
+
+	# RHEL-ELS repository list [yum command]
+	yum repolist all > /tmp/command-log_yum_repository-ELS-list.txt
+
+	################################################################################
+
+
+	# Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
+	yum --enablerepo="*" --verbose clean all
+	yum install -y yum yum-utils
+	yum reinstall -y rh-amazon-rhui-client-els
+
+	# Checking repository information
+	yum repolist all
+
+	# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+	repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+	# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Enable yum repository)] :" $repo
+		yum-config-manager --enable ${repo}
+		sleep 3
+	done
+
+	# Checking repository information
+	yum repolist all
+
+	# Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
+	yum --enablerepo="*" --verbose clean all
+	yum update -y rh-amazon-rhui-client-els
+
+	# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+	repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+	# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Enable yum repository)] :" $repo
+		yum-config-manager --enable ${repo}
+		sleep 3
+	done
+
+	# Checking repository information
+	yum repolist all
+
+	# RHEL/RHUI repository package [yum command]
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Collect yum repository package list)] :" $repo
+		yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-ELS-package-list_${repo}.txt
+		sleep 3
+	done
+
+	# yum repository metadata Clean up
+	yum --enablerepo="*" --verbose clean all
+
+	# Default Package Update
+	yum update -y
+
+else
+	echo "Not Support for RHEL ELS (Extended Life Cycle Support)"
+
+	# Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
+	yum --enablerepo="*" --verbose clean all
+	yum install -y yum yum-utils
+	yum update -y rh-amazon-rhui-client
+
+	# Checking repository information
+	yum repolist all
+
+	# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+	repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+	# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Enable yum repository)] :" $repo
+		yum-config-manager --enable ${repo}
+		sleep 3
+	done
+
+	# Checking repository information
+	yum repolist all
+
+	# Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
+	yum --enablerepo="*" --verbose clean all
+	yum update -y rh-amazon-rhui-client
+
+	# Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
+	repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+	# Enable Yum Repository Data from RHUI (Red Hat Update Infrastructure)
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Enable yum repository)] :" $repo
+		yum-config-manager --enable ${repo}
+		sleep 3
+	done
+
+	# Checking repository information
+	yum repolist all
+
+	# RHEL/RHUI repository package [yum command]
+	for repo in $repolist
+	do
+		echo "[Target repository Name (Collect yum repository package list)] :" $repo
+		yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+		sleep 3
+	done
+
+	# yum repository metadata Clean up
+	yum --enablerepo="*" --verbose clean all
+
+	# Default Package Update
+	yum update -y
+
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
@@ -691,7 +803,7 @@ if [ $(chkconfig --list | awk '{print $1}' | grep -x ntpd) ]; then
 	service ntpd stop
 fi
 
-yum erase -y ntp*
+yum remove -y ntp*
 
 # Replace NTP Client software (Install chrony Package)
 yum install -y chrony
