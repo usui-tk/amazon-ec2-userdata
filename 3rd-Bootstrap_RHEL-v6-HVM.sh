@@ -107,8 +107,6 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 # If the return value is not 0, it is assumed to be RHEL ELS compatible.
 ELS_FLAG=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | grep -ie "els" | wc -l)
 
-
-
 # Configure NTP Client software (Activate Amazon Time Sync Service settings in the Chrony configuration file)
 if [ ${ELS_FLAG} -ne 0 ]; then
 	echo "Support for RHEL ELS (Extended Life Cycle Support)"
