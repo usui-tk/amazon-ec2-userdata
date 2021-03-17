@@ -125,7 +125,7 @@ if [ ${ELS_FLAG} -ne 0 ]; then
 	ELS_REPO_RPM="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Workaround/Package/rh-amazon-rhui-client-els-3.0.39-1.el6.noarch.rpm"
 
 	# Remove RHUI configuration RPMs that do not support RHEL ELS
-	if [ $(yum list installed | grep -ie "rh-amazon-rhui-client" | grep -ve "rh-amazon-rhui-client-els") ]; then
+	if [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-els" | grep -ie "rh-amazon-rhui-client") ]; then
 		rpm -qi rh-amazon-rhui-client
 
 		yum remove -y rh-amazon-rhui-client
