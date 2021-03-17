@@ -101,6 +101,11 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #        rhui-rhel-6-server-els-rhui-rpms
 #        rhui-client-config-server-6
 #    [Default - Disable]
+#        rhui-REGION-rhel-server-rh-common
+#        rhui-REGION-rhel-server-extras
+#        rhui-REGION-rhel-server-releases-optional
+#        rhui-REGION-rhel-server-supplementary
+#        rhui-REGION-rhel-server-rhscl
 #-------------------------------------------------------------------------------
 
 # Check if this AMI is RHEL ELS compatible or not.
