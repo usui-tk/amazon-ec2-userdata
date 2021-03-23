@@ -19,7 +19,7 @@
 #-------------------------------------------------------------------------------
 
 # Source code acquisition URL and definition of file name and version information
-SourceUrl="https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.9.3/ixgbevf-4.9.3.tar.gz"
+SourceUrl="https://downloads.sourceforge.net/project/e1000/ixgbevf%20stable/4.11.1/ixgbevf-4.11.1.tar.gz"
 SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 

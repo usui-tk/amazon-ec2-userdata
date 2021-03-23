@@ -20,7 +20,7 @@
 #-------------------------------------------------------------------------------
 
 # Source code acquisition URL and definition of file name and version information
-SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.2.11.tar.gz"
+SourceUrl="https://github.com/amzn/amzn-drivers/archive/ena_linux_2.4.1.tar.gz"
 SourceFile=$(echo ${SourceUrl##*/})
 SourceVersion=$(echo $SourceFile | sed -nre 's/^[^0-9]*(([0-9]+\.)*[0-9]+).*/\1/p')
 
