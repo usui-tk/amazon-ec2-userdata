@@ -309,7 +309,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping zstd
+dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo=epel-playground install -y jnettop wdiff
