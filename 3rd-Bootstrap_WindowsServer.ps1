@@ -288,7 +288,7 @@ function Get-EbsVolumesMappingInformation {
         Get-Partition -DiskId $_.Path | ForEach-Object {
             if ($_.DriveLetter -ne "") {
                 $DriveLetter = $_.DriveLetter
-                $VolumeName = if ($DriveLetter) { (Get-PSDrive -PSProvider FileSystem | Where-Object {$_.Name -eq $DriveLetter}).Root } else { $Null }
+                $VolumeName = (Get-PSDrive | Where-Object {$_.Name -eq $DriveLetter}).Description
             }
         }
 
@@ -2091,7 +2091,7 @@ Write-LogSeparator "Package Install System Utility (PowerShell Core 7.1)"
 
 # Initialize Parameter [# Depends on PowerShell v7.1 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.1.0/PowerShell-7.1.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.1.3/PowerShell-7.1.3-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
@@ -2820,6 +2820,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 Write-LogSeparator "Custom Package Download (System Utility - 3rd Party)"
 
 # Package Download System Utility (Sysinternals Suite)
+# https://docs.microsoft.com/ja-jp/sysinternals/downloads/sysinternals-suite
 # https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Sysinternals Suite)"
@@ -2843,6 +2844,17 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
     Write-Log "# Package Download System Utility (WinAuth)"
     Get-WebContentToFile -Uri "$WINAUTH_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINAUTH_INSTALLER_FILE"
+}
+
+# Package Download System Utility (PuTTY)
+# https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on PuTTY version information]
+    Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi"
+    Set-Variable -Name PUTTY_INSTALLER_FILE -Scope Script -Value ($PUTTY_INSTALLER_URL.Substring($PUTTY_INSTALLER_URL.LastIndexOf("/") + 1))
+
+    Write-Log "# Package Download System Utility (PuTTY)"
+    Get-WebContentToFile -Uri "$PUTTY_INSTALLER_URL" -OutFile "$TOOL_DIR\$PUTTY_INSTALLER_FILE"
 }
 
 # Package Download System Utility (WinSCP)
