@@ -113,24 +113,23 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop ipcalc iperf3 ipset iptraf-ng jnettop jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos srm strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
+dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos srm strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
 dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
+# Package Install Fedora System Utility Tools (from Fedora Official Repository)
+dnf install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+
 # Package Install Fedora System Administration Tools [Version dependent] (from Fedora Official Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "33" ]; then
+	if [ "${VERSION_ID}" = "34" ]; then
+		echo "fedora ${VERSION_ID}"
+	elif [ "${VERSION_ID}" = "33" ]; then
 		echo "fedora ${VERSION_ID}"
 	elif [ "${VERSION_ID}" = "32" ]; then
 		echo "fedora ${VERSION_ID}"
-	elif [ "${VERSION_ID}" = "31" ]; then
-		echo "fedora ${VERSION_ID}"
-		dnf install -y arptables-compat
-	elif [ "${VERSION_ID}" = "30" ]; then
-		echo "fedora ${VERSION_ID}"
-		dnf install -y arptables
 	else
 		echo "fedora ${VERSION_ID}"
 	fi
@@ -146,7 +145,7 @@ dnf install -y python3 python3-pip  python3-utils python3-rpm-generators python3
 # dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
-dnf install -y rpmdevtools rpmconf
+dnf install -y rpmdevtools rpmconfdnf install -y rpmdevtools rpmconf
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -276,6 +275,9 @@ __EOF__
 
 # Setting AWS-CLI Logging
 aws configure set cli_history enabled
+
+# Setting AWS-CLI Pager settings
+aws configure set cli_pager ''
 
 # Getting AWS-CLI default Region & Output format
 aws configure list
