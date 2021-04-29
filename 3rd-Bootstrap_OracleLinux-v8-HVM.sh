@@ -101,7 +101,7 @@ dnf module list
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-dnf search release
+dnf list *release-el8
 
 dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
