@@ -91,20 +91,76 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-#  - RHEL v8 - Red Hat Dnf/Yum Repository Default Status (Enable/Disable)
+#  - RHEL v8
+#      (RHUI Client Package:rh-amazon-rhui-client)
 #
-#    [Default - Enable]
-#        rhel-8-baseos-rhui-rpms
-#        rhel-8-appstream-rhui-rpms
-#        rhui-client-config-server-8
-#    [Default - Disable]
-#        rhui-codeready-builder-for-rhel-8-rhui-rpms
+#      Red Hat Dnf/Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
+#          rhel-8-baseos-rhui-rpms
+#          rhel-8-appstream-rhui-rpms
+#          rhui-client-config-server-8
+#      [Default - Disable]
+#          rhui-codeready-builder-for-rhel-8-rhui-rpms
+#-------------------------------------------------------------------------------
+#  - RHEL v8 (HA:High Availability)
+#      (RHUI Client Package:rh-amazon-rhui-client-ha)
+#
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
+#          rhel-8-baseos-rhui-rpms
+#          rhel-8-appstream-rhui-rpms
+#          rhui-rhel-8-for-x86_64-highavailability-rhui-rpms
+#          rhui-client-config-server-8-ha
+#      [Default - Disable]
+#          rhel-8-supplementary-rhui-rpms
+#          rhui-codeready-builder-for-rhel-8-rhui-rpms
+#-------------------------------------------------------------------------------
+#  - RHEL v8 (HA:High Availability)
+#      (RHUI Client Package:rh-amazon-rhui-client-sap-bundle-e4s)
+#
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
+#          rhel-8-for-x86_64-baseos-e4s-rhui-rpms
+#          rhel-8-for-x86_64-appstream-e4s-rhui-rpms
+#          rhel-8-for-x86_64-highavailability-e4s-rhui-rpms
+#          rhel-8-for-x86_64-sap-netweaver-e4s-rhui-rpms
+#          rhel-8-for-x86_64-sap-solutions-e4s-rhui-rpms
+#          rhui-client-config-server-8-sap-bundle
+#      [Default - Disable]
+#          <NONE>
 #-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
 dnf --enablerepo="*" --verbose clean all
-dnf update -y rh-amazon-rhui-client
-dnf update -y dnf dnf-data
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	# RHUI configuration (RHEL-SAP Bundle repository)
+	echo "RHUI configuration (RHEL-SAP Bundle repository)"
+	rpm -qi rh-amazon-rhui-client-sap-bundle-e4s
+	dnf update -y rh-amazon-rhui-client-sap-bundle-e4s
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+	# RHUI configuration (RHEL-High Availability repository)
+	echo "RHUI configuration (RHEL-High Availability repository)"
+	rpm -qi rh-amazon-rhui-client-ha
+	dnf update -y rh-amazon-rhui-client-ha
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+	# RHUI configuration (RHEL-Standard repository)
+	echo "RHUI configuration (RHEL-Standard repository)"
+	rpm -qi rh-amazon-rhui-client
+	dnf update -y rh-amazon-rhui-client
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+else
+	# RHUI configuration (RHEL-Standard repository)
+	rpm -qi rh-amazon-rhui-client
+	dnf update -y rh-amazon-rhui-client
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+fi
 
 # Checking repository information
 dnf repolist all
@@ -127,8 +183,35 @@ dnf module list
 
 # Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
 dnf --enablerepo="*" --verbose clean all
-dnf update -y rh-amazon-rhui-client
-dnf update -y dnf dnf-data
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	# RHUI configuration (RHEL-SAP Bundle repository)
+	echo "RHUI configuration (RHEL-SAP Bundle repository)"
+	rpm -qi rh-amazon-rhui-client-sap-bundle-e4s
+	dnf update -y rh-amazon-rhui-client-sap-bundle-e4s
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+	# RHUI configuration (RHEL-High Availability repository)
+	echo "RHUI configuration (RHEL-High Availability repository)"
+	rpm -qi rh-amazon-rhui-client-ha
+	dnf update -y rh-amazon-rhui-client-ha
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+	# RHUI configuration (RHEL-Standard repository)
+	echo "RHUI configuration (RHEL-Standard repository)"
+	rpm -qi rh-amazon-rhui-client
+	dnf update -y rh-amazon-rhui-client
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+else
+	# RHUI configuration (RHEL-Standard repository)
+	rpm -qi rh-amazon-rhui-client
+	dnf update -y rh-amazon-rhui-client
+	dnf update -y dnf dnf-data
+	dnf --enablerepo="*" --verbose clean all
+fi
 
 # Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel")
 repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
@@ -450,10 +533,31 @@ fi
 
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
-	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
-	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)
+		echo "# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=RHEL-SAP-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL-HA)
+		echo "# Get Newest AMI Information from Public AMI (RHEL-HA)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL_HA-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle-e4s" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL)
+		echo "# Get Newest AMI Information from Public AMI (RHEL)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	else
+		# Get Newest AMI Information from Public AMI (RHEL)
+		echo "# Get Newest AMI Information from Public AMI (RHEL)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	fi
 fi
 
 # Get EC2 Instance Information
@@ -918,7 +1022,11 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from Red Hat Official Repository)
-dnf install -y tuned tuned-utils tuned-profiles-oracle tuned-profiles-mssql
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	dnf install -y tuned tuned-utils tuned-profiles-oracle tuned-profiles-mssql tuned-profiles-sap tuned-profiles-sap-hana
+else
+	dnf install -y tuned tuned-utils tuned-profiles-oracle tuned-profiles-mssql
+fi
 
 rpm -qi tuned
 
@@ -938,7 +1046,15 @@ fi
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	# tuned-adm profile sap-netweaver
+	# tuned-adm profile sap-hana
+	tuned-adm profile throughput-performance
+else
+	tuned-adm profile throughput-performance
+fi
+
 tuned-adm active
 
 #-------------------------------------------------------------------------------
