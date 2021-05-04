@@ -108,21 +108,14 @@ dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
-################################################################################
-# [Workaround] Updating the configuration of the Oracle Linux public repository
-################################################################################
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-
-if [ $(grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
-	grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+# Check the OCI variables to be used in YUM
+if [ -f /etc/yum/vars/ociregion ]; then
+	cat /etc/yum/vars/ociregion
 fi
 
-if [ $(grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
-	grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
+if [ -f /etc/yum/vars/ocidomain ]; then
+	cat /etc/yum/vars/ocidomain
 fi
-
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-################################################################################
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -137,12 +130,12 @@ dnf config-manager --set-enabled ol8_UEKR6
 dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
-dnf config-manager --set-enabled ol8_olcne12
 dnf config-manager --set-enabled ol8_oracle_instantclient21
+dnf config-manager --set-enabled ol8_developer
+dnf config-manager --set-enabled ol8_developer_EPEL
+dnf config-manager --set-enabled ol8_olcne12
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
-dnf config-manager --set-disabled ol8_developer
-dnf config-manager --set-disabled ol8_developer_EPEL
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_distro_builder
 
@@ -284,42 +277,18 @@ activate-global-python-argcomplete
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
 
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel-bootstrap]
-name=Extra Packages for Enterprise Linux \$releasever - \$basearch
-#baseurl=https://download.fedoraproject.org/pub/epel/\$releasever/Everything/\$basearch
-metalink=https://mirrors.fedoraproject.org/metalink?repo=epel-\$releasever&arch=\$basearch&infra=\$infra&content=\$contentdir
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
-
-dnf clean all
-
-dnf --enablerepo="epel-bootstrap" -y install epel-release
-
-# Delete dnf/yum temporary data
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-rm -rf /var/cache/dnf/epel-bootstrap*
-
-# Disable EPEL yum repository
-egrep '^\[|enabled' /etc/yum.repos.d/epel*
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
-egrep '^\[|enabled' /etc/yum.repos.d/epel*
-
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
-dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
-dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
+dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc ncdu nload screen srm tcping yamllint zstd
+# dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo="epel-playground" install -y jnettop wdiff
+# dnf --enablerepo="ol8_developer_EPEL" install -y jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
@@ -738,11 +707,8 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
-# dnf install -y ansible ansible-doc
-
-# Package Install Ansible (from EPEL Repository)
-dnf --enablerepo="epel" install -y ansible ansible-doc
+# Package Install Ansible (from Oracle Linux Repository)
+dnf --enablerepo="ol8_developer*" install -y ansible ansible-doc oci-ansible-collection
 
 ansible --version
 
