@@ -236,7 +236,7 @@ pip3 -V
 yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
-yum --disablerepo="*" --enablerepo="ol7_developer_EPEL" list available > /tmp/command-log_yum_repository-package-list_epel.txt
+yum --disablerepo="*" --enablerepo="ol7_developer_EPEL" list available > /tmp/command-log_yum_repository-package-list_ol7_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
@@ -729,7 +729,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
-yum --enablerepo="ol7_developer_EPEL" install -y ansible ansible-doc
+yum --enablerepo="ol7_developer*" install -y ansible ansible-doc oci-ansible-collection
 
 ansible --version
 
