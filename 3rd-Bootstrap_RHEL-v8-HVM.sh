@@ -39,6 +39,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #  - RHEL v8
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #    https://access.redhat.com/support/policy/updates/extras
+#    https://access.redhat.com/support/policy/updates/rhel8-app-streams-life-cycle
 #    https://access.redhat.com/articles/1150793
 #    https://access.redhat.com/solutions/3358
 #
@@ -373,8 +374,17 @@ __EOF__
 dnf clean all
 
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
-	# [Workaround] Install EPEL yum repository
+	################################################################################
+	# [Workaround] EPEL Repository Configuration for RHEL-SAP Bundle
+	################################################################################
+
+	# Install EPEL yum repository
 	dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+
+	# [Workaround] Fixed values for variables ($releasever)
+	if [ $(grep -l '$releasever' /etc/yum.repos.d/epel* | wc -l) != "0" ]; then
+		grep -l '$releasever' /etc/yum.repos.d/epel* | xargs sed -i -e 's|$releasever|8|g'
+	fi
 
 	# Delete dnf/yum temporary data
 	rm -f /etc/yum.repos.d/epel-bootstrap.repo
@@ -833,19 +843,53 @@ source /etc/profile.d/ec2rl.sh
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 # dnf install -y ansible ansible-doc rhel-system-roles
 
-# Package Install Ansible (from EPEL Repository)
-dnf --enablerepo=epel install -y ansible ansible-doc
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	# Package Install Ansible (from Red Hat Official Repository)
+	dnf install -y ansible
 
-ansible --version
+	rpm -qi ansible
 
-ansible localhost -m setup
+	ansible --version
+
+	ansible localhost -m setup
+else
+	# Package Install Ansible (from EPEL Repository)
+	dnf --enablerepo=epel install -y ansible ansible-doc
+
+	ansible --version
+
+	ansible localhost -m setup
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	################################################################################
+	# [Workaround] TreasureData Repository Configuration for RHEL-SAP Bundle
+	################################################################################
+
+	# add GPG key
+	rpm --import "https://packages.treasuredata.com/GPG-KEY-td-agent"
+
+	# add treasure data repository to yum
+	echo "[treasuredata]" > /etc/yum.repos.d/td.repo
+	echo "name=TreasureData" >> /etc/yum.repos.d/td.repo
+	echo "baseurl=http://packages.treasuredata.com/4/redhat/8/\$basearch" >> /etc/yum.repos.d/td.repo
+	echo "gpgcheck=1" >> /etc/yum.repos.d/td.repo
+	echo "gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent" >> /etc/yum.repos.d/td.repo
+
+	# Cleanup repository information
+	dnf --enablerepo="*" --verbose clean all
+
+	# Package Install fluentd (from fluentd Official Repository)
+	dnf --enablerepo=treasuredata install -y td-agent
+else
+	# Package Install fluentd (Setup with vendor installation scripts)
+	curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
+fi
 
 rpm -qi td-agent
 
@@ -872,10 +916,28 @@ fi
 # Repository Configuration (HashiCorp Linux Repository)
 dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
 
-cat /etc/yum.repos.d/hashicorp.repo
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	################################################################################
+	# [Workaround] HashiCorp Repository Configuration for RHEL-SAP Bundle
+	################################################################################
+
+	# Check the repository configuration file
+	cat /etc/yum.repos.d/hashicorp.repo
+
+	# [Workaround] Fixed values for variables ($releasever)
+	if [ $(grep -l '$releasever' /etc/yum.repos.d/hashicorp.repo | wc -l) != "0" ]; then
+		grep -l '$releasever' /etc/yum.repos.d/hashicorp.repo | xargs sed -i -e 's|$releasever|8|g'
+	fi
+
+	# Check the repository configuration file
+	cat /etc/yum.repos.d/hashicorp.repo
+else
+	# Check the repository configuration file
+	cat /etc/yum.repos.d/hashicorp.repo
+fi
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # HashiCorp Linux repository package [dnf command]
 dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
