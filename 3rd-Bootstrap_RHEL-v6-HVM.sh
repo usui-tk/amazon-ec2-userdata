@@ -241,7 +241,7 @@ alternatives --display pip3
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# yum localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+# yum localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm"
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 [epel-bootstrap]

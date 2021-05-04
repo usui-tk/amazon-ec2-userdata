@@ -358,7 +358,7 @@ activate-global-python-argcomplete
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+# dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 [epel-bootstrap]
@@ -372,11 +372,20 @@ __EOF__
 
 dnf clean all
 
-dnf --enablerepo=epel-bootstrap -y install epel-release
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	# [Workaround] Install EPEL yum repository
+	dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
 
-# Delete dnf/yum temporary data
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-rm -rf /var/cache/dnf/epel-bootstrap*
+	# Delete dnf/yum temporary data
+	rm -f /etc/yum.repos.d/epel-bootstrap.repo
+else
+	# Install EPEL yum repository
+	dnf --enablerepo=epel-bootstrap -y install epel-release
+
+	# Delete dnf/yum temporary data
+	rm -f /etc/yum.repos.d/epel-bootstrap.repo
+	rm -rf /var/cache/dnf/epel-bootstrap*
+fi
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*

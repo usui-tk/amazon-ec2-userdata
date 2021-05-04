@@ -282,7 +282,7 @@ activate-global-python-argcomplete
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-# dnf localinstall -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+# dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
 
 cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 [epel-bootstrap]
