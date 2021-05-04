@@ -83,24 +83,28 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-#  - RHEL v6 (Non-ELS) - Red Hat Yum Repository Default Status (Enable/Disable)
+#  - RHEL v6
+#      (RHUI Client Package:rh-amazon-rhui-client)
 #
-#    [Default - Enable]
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
 #        rhui-REGION-rhel-server-releases
 #        rhui-REGION-rhel-server-rh-common
 #        rhui-client-config-server-6
-#    [Default - Disable]
+#      [Default - Disable]
 #        rhui-REGION-rhel-server-extras
 #        rhui-REGION-rhel-server-releases-optional
 #        rhui-REGION-rhel-server-supplementary
 #        rhui-REGION-rhel-server-rhscl
 #-------------------------------------------------------------------------------
-#  - RHEL v6 (ELS) - Red Hat Yum Repository Default Status (Enable/Disable)
+#  - RHEL v6 (ELS:Extended Life-cycle Support)
+#      (RHUI Client Package:rh-amazon-rhui-client-els)
 #
-#    [Default - Enable]
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
 #        rhui-rhel-6-server-els-rhui-rpms
 #        rhui-client-config-server-6-els
-#    [Default - Disable]
+#      [Default - Disable]
 #        rhui-REGION-rhel-server-rh-common
 #        rhui-REGION-rhel-server-extras
 #        rhui-REGION-rhel-server-releases-optional
@@ -357,7 +361,7 @@ fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -q "/tmp/awscliv2.zip" -d /tmp/
+unzip -oq "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
 /tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
