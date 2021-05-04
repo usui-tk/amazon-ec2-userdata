@@ -1049,7 +1049,11 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Tuned (from Red Hat Official Repository)
-yum install -y tuned tuned-utils tuned-profiles-oracle
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle") ]; then
+	yum install -y tuned tuned-utils tuned-profiles-oracle tuned-profiles-sap tuned-profiles-sap-hana
+else
+	yum install -y tuned tuned-utils tuned-profiles-oracle
+fi
 
 rpm -qi tuned
 
@@ -1067,7 +1071,15 @@ fi
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle") ]; then
+	# tuned-adm profile sap-netweaver
+	# tuned-adm profile sap-hana
+	tuned-adm profile throughput-performance
+else
+	tuned-adm profile throughput-performance
+fi
+
 tuned-adm active
 
 #-------------------------------------------------------------------------------
