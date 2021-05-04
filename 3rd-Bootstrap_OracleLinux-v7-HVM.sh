@@ -99,7 +99,7 @@ find /etc/yum.repos.d/
 
 yum list *release-el7
 
-yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7  oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oraclelinux-developer-release-el7
+yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oraclelinux-developer-release-el7
 yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -107,28 +107,21 @@ find /etc/yum.repos.d/
 # Update AMI Defalut YUM Repositories File
 if [ -f /usr/bin/ol_yum_configure.sh ]; then
 	/usr/bin/ol_yum_configure.sh
+
+	# Delete AMI Defalut YUM Repositories File
+	find /etc/yum.repos.d/
+	rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
+	find /etc/yum.repos.d/
 fi
 
-# Delete AMI Defalut YUM Repositories File
-find /etc/yum.repos.d/
-rm -rf /etc/yum.repos.d/public-yum-ol7.repo*
-find /etc/yum.repos.d/
-
-################################################################################
-# [Workaround] Updating the configuration of the Oracle Linux public repository
-################################################################################
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-
-if [ $(grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
-	grep -l 'yum$ociregion.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|yum$ociregion.oracle.com|yum.oracle.com|g'
+# Check the OCI variables to be used in YUM
+if [ -f /etc/yum/vars/ociregion ]; then
+	cat /etc/yum/vars/ociregion
 fi
 
-if [ $(grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | wc -l) != "0" ]; then
-	grep -l 'http://yum.oracle.com' /etc/yum.repos.d/*.repo* | xargs sed -i -e 's|http://yum.oracle.com|https://yum.oracle.com|g'
+if [ -f /etc/yum/vars/ocidomain ]; then
+	cat /etc/yum/vars/ocidomain
 fi
-
-find /etc/yum.repos.d -type f -print | xargs grep '.oracle.com'
-################################################################################
 
 # yum repository metadata Clean up
 yum --enablerepo="*" --verbose clean all
@@ -143,14 +136,14 @@ yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
 yum-config-manager --enable ol7_oracle_instantclient21
+yum-config-manager --enable ol7_developer
+yum-config-manager --enable ol7_developer_EPEL
 yum-config-manager --enable ol7_olcne12
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_UEKR5
 yum-config-manager --disable ol7_olcne
 yum-config-manager --disable ol7_olcne11
-yum-config-manager --disable ol7_developer
-yum-config-manager --disable ol7_developer_EPEL
 yum-config-manager --disable ol7_developer_UEKR5
 yum-config-manager --disable ol7_developer_UEKR6
 yum-config-manager --disable ol7_developer_olcne
@@ -239,41 +232,17 @@ pip3 -V
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
 
-# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel-bootstrap]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
-failovermethod=priority
-enabled=0
-gpgcheck=0
-__EOF__
-
-yum --enablerepo="*" --verbose clean all
-
-yum --enablerepo=epel-bootstrap -y install epel-release
-
-# Delete yum temporary data
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
-
-# Disable EPEL yum repository
-egrep '^\[|enabled' /etc/yum.repos.d/epel*
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
-egrep '^\[|enabled' /etc/yum.repos.d/epel*
-
 # yum repository metadata Clean up
 yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
-yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
+yum --disablerepo="*" --enablerepo="ol7_developer_EPEL" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
+yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Testing Repository)
-# yum --enablerepo=epel-testing install -y tlog
+# yum --enablerepo="ol7_developer_EPEL"  install -y tlog
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
@@ -573,7 +542,7 @@ fi
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-hup.html
 # https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/solutions/HelperNonAmaznAmi/RHEL7_cfn-hup.template
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo="epel" localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
 # yum install -y python-setuptools
 
@@ -760,10 +729,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux EPEL Repository)
-# yum --enablerepo=ol7_developer_EPEL install -y ansible ansible-doc
-
-# Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+yum --enablerepo="ol7_developer_EPEL" install -y ansible ansible-doc
 
 ansible --version
 
@@ -830,7 +796,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-yum --enablerepo=ol7_developer -y install terraform terraform-bundle terraform-provider-oci
+yum --enablerepo="ol7_developer" -y install terraform terraform-bundle terraform-provider-oci
 
 rpm -qi terraform
 
@@ -846,15 +812,6 @@ fi
 __EOF__
 
 source /etc/profile.d/terraform.sh
-
-#-------------------------------------------------------------------------------
-# Custom Package Installation [Oracle Developer Package:Terraform]
-#-------------------------------------------------------------------------------
-
-# Package Install Oracle Linux System Administration Tools (from Oracle Linux Development Repository)
-# yum --enablerepo=ol7_developer install -y terraform
-
-# terraform --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
