@@ -946,11 +946,15 @@ tuned-adm active
 # Setting SELinux permissive mode
 getenforce
 sestatus
+
 cat /etc/selinux/config
 sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 cat /etc/selinux/config
-setenforce 0
-getenforce
+
+if [ $(getenforce) = "Enforcing" ]; then
+	setenforce 0
+	getenforce
+fi
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then

@@ -715,11 +715,15 @@ fi
 # Setting SELinux permissive mode
 getenforce
 sestatus
+
 cat /etc/selinux/config
 sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 cat /etc/selinux/config
-setenforce 0
-getenforce
+
+if [ $(getenforce) = "Enforcing" ]; then
+	setenforce 0
+	getenforce
+fi
 
 # Setting System crypto policy (Default -> FUTURE)
 update-crypto-policies --show

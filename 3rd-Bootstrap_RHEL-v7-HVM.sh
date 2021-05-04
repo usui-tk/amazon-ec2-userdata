@@ -472,10 +472,31 @@ fi
 
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
-	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-7.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
-	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)
+		echo "# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=RHEL-SAP-7.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL-HA)
+		echo "# Get Newest AMI Information from Public AMI (RHEL-HA)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL_HA-7.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+		# Get Newest AMI Information from Public AMI (RHEL)
+		echo "# Get Newest AMI Information from Public AMI (RHEL)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-7.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	else
+		# Get Newest AMI Information from Public AMI (RHEL)
+		echo "# Get Newest AMI Information from Public AMI (RHEL)"
+		NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-7.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
+		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	fi
 fi
 
 # Get EC2 Instance Information
@@ -1056,11 +1077,15 @@ tuned-adm active
 # Setting SELinux permissive mode
 getenforce
 sestatus
+
 cat /etc/selinux/config
 sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
 cat /etc/selinux/config
-setenforce 0
-getenforce
+
+if [ $(getenforce) = "Enforcing" ]; then
+	setenforce 0
+	getenforce
+fi
 
 # Setting SystemClock and Timezone
 if [ "${Timezone}" = "Asia/Tokyo" ]; then
