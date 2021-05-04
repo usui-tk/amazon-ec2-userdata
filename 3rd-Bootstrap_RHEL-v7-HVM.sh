@@ -88,24 +88,83 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-#  - RHEL v7 - Red Hat Yum Repository Default Status (Enable/Disable)
+#  - RHEL v7
+#      (RHUI Client Package:rh-amazon-rhui-client)
 #
-#    [Default - Enable]
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
 #        rhel-7-server-rhui-rpms
 #        rhel-7-server-rhui-rh-common-rpms
 #        rhui-client-config-server-7
-#    [Default - Disable]
+#      [Default - Disable]
 #        rhel-7-server-rhui-extras-rpms
 #        rhel-7-server-rhui-optional-rpms
 #        rhel-7-server-rhui-supplementary-rpms
 #        rhel-7-server-dotnet-rhui-rpms
 #        rhel-server-rhui-rhscl-7-rpms
 #-------------------------------------------------------------------------------
+#  - RHEL v7 (HA:High Availability)
+#      (RHUI Client Package:rh-amazon-rhui-client-ha)
+#
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
+#        rhel-7-server-rhui-rpms
+#        rhel-7-server-rhui-rh-common-rpms
+#        rhel-ha-for-rhel-7-server-rhui-rpms
+#        rhui-client-config-server-7-ha
+#      [Default - Disable]
+#        rhel-7-server-rhui-extras-rpms
+#        rhel-7-server-rhui-optional-rpms
+#        rhel-7-server-rhui-supplementary-rpms
+#        rhel-7-server-dotnet-rhui-rpms
+#        rhel-server-rhui-rhscl-7-rpms
+#-------------------------------------------------------------------------------
+#  - RHEL v7 (SAP Bundle)
+#      (RHUI Client Package:rh-amazon-rhui-client-sap-bundle)
+#
+#      Red Hat Yum Repository Default Status (Enable/Disable)
+#      [Default - Enable]
+#        rhel-7-server-rhui-rpms
+#        rhel-7-server-rhui-rh-common-rpms
+#        rhel-ha-for-rhel-7-server-rhui-rpms
+#        rhel-sap-for-rhel-7-server-rhui-rpms
+#        rhel-sap-hana-for-rhel-7-server-rhui-rpms
+#        rhui-client-config-server-7-sap-bundle
+#      [Default - Disable]
+#        rhel-7-server-rhui-extras-rpms
+#        rhel-7-server-rhui-optional-rpms
+#        rhel-7-server-rhui-supplementary-rpms
+#        rhel-server-rhui-rhscl-7-rpms
+#-------------------------------------------------------------------------------
 
 # Red Hat Update Infrastructure Client Package Update (Supports major version upgrade of RHUI)
 yum --enablerepo="*" --verbose clean all
 yum install -y yum yum-utils
-yum update -y rh-amazon-rhui-client
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle") ]; then
+	# RHUI configuration (RHEL-SAP Bundle repository)
+	echo "RHUI configuration (RHEL-SAP Bundle repository)"
+	rpm -qi rh-amazon-rhui-client-sap-bundle
+	yum update -y rh-amazon-rhui-client-sap-bundle
+	yum --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+	# RHUI configuration (RHEL-High Availability repository)
+	echo "RHUI configuration (RHEL-High Availability repository)"
+	rpm -qi rh-amazon-rhui-client-ha
+	yum update -y rh-amazon-rhui-client-ha
+	yum --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+	# RHUI configuration (RHEL-Standard repository)
+	echo "RHUI configuration (RHEL-Standard repository)"
+	rpm -qi rh-amazon-rhui-client
+	yum update -y rh-amazon-rhui-client
+	yum --enablerepo="*" --verbose clean all
+else
+	# RHUI configuration (RHEL-Standard repository)
+	rpm -qi rh-amazon-rhui-client
+	yum update -y rh-amazon-rhui-client
+	yum --enablerepo="*" --verbose clean all
+fi
 
 # Checking repository information
 yum repolist all
@@ -126,7 +185,31 @@ yum repolist all
 
 # Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
 yum --enablerepo="*" --verbose clean all
-yum update -y rh-amazon-rhui-client
+
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle") ]; then
+	# RHUI configuration (RHEL-SAP Bundle repository)
+	echo "RHUI configuration (RHEL-SAP Bundle repository)"
+	rpm -qi rh-amazon-rhui-client-sap-bundle
+	yum update -y rh-amazon-rhui-client-sap-bundle
+	yum --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+	# RHUI configuration (RHEL-High Availability repository)
+	echo "RHUI configuration (RHEL-High Availability repository)"
+	rpm -qi rh-amazon-rhui-client-ha
+	yum update -y rh-amazon-rhui-client-ha
+	yum --enablerepo="*" --verbose clean all
+elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+	# RHUI configuration (RHEL-Standard repository)
+	echo "RHUI configuration (RHEL-Standard repository)"
+	rpm -qi rh-amazon-rhui-client
+	yum update -y rh-amazon-rhui-client
+	yum --enablerepo="*" --verbose clean all
+else
+	# RHUI configuration (RHEL-Standard repository)
+	rpm -qi rh-amazon-rhui-client
+	yum update -y rh-amazon-rhui-client
+	yum --enablerepo="*" --verbose clean all
+fi
 
 # Get Yum Repository List (Exclude Yum repository related to "beta, debug, source, test, epel")
 repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Loaded plugins" -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
@@ -339,7 +422,7 @@ fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
 curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -q "/tmp/awscliv2.zip" -d /tmp/
+unzip -oq "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
 /tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
