@@ -395,7 +395,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	rm -f /etc/yum.repos.d/epel-bootstrap.repo
 else
 	# Install EPEL yum repository
-	dnf --enablerepo=epel-bootstrap -y install epel-release
+	dnf --enablerepo="epel-bootstrap" -y install epel-release
 
 	# Delete dnf/yum temporary data
 	rm -f /etc/yum.repos.d/epel-bootstrap.repo
@@ -418,14 +418,14 @@ dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-p
 # Package Install RHEL System Administration Tools (from EPEL Repository)
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	# Utilities to be installed from the EPEL repository (RHEL-SAP Bundle)
-	dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc ncdu nload screen srm tcping yamllint zstd
+	dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc ncdu nload screen srm tcping yamllint zstd
 else
 	# Utilities to be installed from the EPEL repository
-	dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+	dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 fi
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y jnettop wdiff
+# dnf --enablerepo="epel-playground" install -y jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -865,7 +865,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	ansible localhost -m setup
 else
 	# Package Install Ansible (from EPEL Repository)
-	dnf --enablerepo=epel install -y ansible ansible-doc
+	dnf --enablerepo="epel" install -y ansible ansible-doc
 
 	ansible --version
 
@@ -896,7 +896,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	dnf --enablerepo="*" --verbose clean all
 
 	# Package Install fluentd (from fluentd Official Repository)
-	dnf --enablerepo=treasuredata install -y td-agent
+	dnf --enablerepo="treasuredata" install -y td-agent
 else
 	# Package Install fluentd (Setup with vendor installation scripts)
 	curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
@@ -954,7 +954,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-dnf --enablerepo=hashicorp -y install terraform
+dnf --enablerepo="hashicorp" -y install terraform
 
 rpm -qi terraform
 

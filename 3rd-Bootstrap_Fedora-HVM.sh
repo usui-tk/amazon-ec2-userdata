@@ -514,7 +514,7 @@ dnf clean all
 dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-dnf --enablerepo=hashicorp -y install terraform
+dnf --enablerepo="hashicorp" -y install terraform
 
 rpm -qi terraform
 

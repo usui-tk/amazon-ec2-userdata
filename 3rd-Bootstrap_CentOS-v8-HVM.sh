@@ -295,10 +295,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
 # Package Install CentOS System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y jnettop wdiff
+# dnf --enablerepo="epel-playground" install -y jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -707,7 +707,7 @@ source /etc/profile.d/ec2rl.sh
 # dnf install -y ansible ansible-doc
 
 # Package Install Ansible (from EPEL Repository)
-dnf --enablerepo=epel install -y ansible ansible-doc
+dnf --enablerepo="epel" install -y ansible ansible-doc
 
 ansible --version
 
@@ -754,7 +754,7 @@ dnf clean all
 dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-dnf --enablerepo=hashicorp -y install terraform
+dnf --enablerepo="hashicorp" -y install terraform
 
 rpm -qi terraform
 

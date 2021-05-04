@@ -75,7 +75,7 @@ yum list all > /tmp/command-log_yum_repository-package-list.txt
 yum groups list -v > /tmp/command-log_yum_repository-package-group-list.txt
 
 # Special package information
-yum --enablerepo=amzn-preview list | grep amzn-preview
+yum --enablerepo="amzn-preview" list | grep amzn-preview
 
 # upstartd service config [chkconfig command]
 chkconfig --list > /tmp/command-log_chkconfig_list.txt
@@ -109,7 +109,7 @@ yum install -y iscsi-initiator-utils lsscsi
 yum install -y python36 python36-pip python36-setuptools python36-test python36-tools python36-virtualenv
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y bash-completion iperf3 zstd
+yum --enablerepo="epel" install -y bash-completion iperf3 zstd
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -514,7 +514,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+yum --enablerepo="epel" install -y ansible ansible-doc
 ansible --version
 ansible localhost -m setup
 

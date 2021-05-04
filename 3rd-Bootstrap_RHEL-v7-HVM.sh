@@ -312,7 +312,7 @@ __EOF__
 
 yum --enablerepo="*" --verbose clean all
 
-yum --enablerepo=epel-bootstrap -y install epel-release
+yum --enablerepo="epel-bootstrap" -y install epel-release
 
 # Delete yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
@@ -331,10 +331,10 @@ yum --enablerepo="*" --verbose clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
+yum --enablerepo="epel" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
 
 # Package Install RHEL System Administration Tools (from EPEL-Testing Repository)
-# yum --enablerepo=epel-testing install -y tlog
+# yum --enablerepo="epel-testing" install -y tlog
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -631,7 +631,7 @@ fi
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-hup.html
 # https://github.com/awslabs/aws-cloudformation-templates/blob/master/aws/solutions/HelperNonAmaznAmi/RHEL7_cfn-hup.template
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
+# yum --enablerepo="epel" localinstall -y https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm
 
 # yum install -y python-setuptools
 
@@ -821,7 +821,7 @@ source /etc/profile.d/ec2rl.sh
 # yum install -y ansible ansible-doc rhel-system-roles
 
 # Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+yum --enablerepo="epel" install -y ansible ansible-doc
 
 ansible --version
 
@@ -899,7 +899,7 @@ yum clean all
 yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-yum --enablerepo=hashicorp install -y terraform
+yum --enablerepo="hashicorp" install -y terraform
 
 rpm -qi terraform
 

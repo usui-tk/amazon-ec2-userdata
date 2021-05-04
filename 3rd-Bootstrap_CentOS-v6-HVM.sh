@@ -201,9 +201,9 @@ yum --enablerepo="*" --verbose clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo=epel install -y atop bash-completion byobu colordiff fio fping glances htop httping iftop inotify-tools iperf3 iptraf-ng ipv6calc jq moreutils ncdu netsniff-ng nload srm tcping wdiff zstd
+yum --enablerepo="epel" install -y atop bash-completion byobu colordiff fio fping glances htop httping iftop inotify-tools iperf3 iptraf-ng ipv6calc jq moreutils ncdu netsniff-ng nload srm tcping wdiff zstd
 
-yum --enablerepo=epel install -y cloud-utils-growpart dracut-modules-growroot
+yum --enablerepo="epel" install -y cloud-utils-growpart dracut-modules-growroot
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -477,9 +477,9 @@ fi
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/releasehistory-aws-cfn-bootstrap.html
 #-------------------------------------------------------------------------------
-# yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
+# yum --enablerepo="epel" localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
 
-# yum --enablerepo=epel install -y python-pip
+# yum --enablerepo="epel" install -y python-pip
 # # pip install --upgrade pip
 
 # pip install pystache
@@ -587,7 +587,7 @@ cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from EPEL Repository)
-yum --enablerepo=epel install -y ansible ansible-doc
+yum --enablerepo="epel" install -y ansible ansible-doc
 
 ansible --version
 

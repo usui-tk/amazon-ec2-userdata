@@ -296,7 +296,7 @@ __EOF__
 
 dnf clean all
 
-dnf --enablerepo=epel-bootstrap -y install epel-release
+dnf --enablerepo="epel-bootstrap" -y install epel-release
 
 # Delete dnf/yum temporary data
 rm -f /etc/yum.repos.d/epel-bootstrap.repo
@@ -316,10 +316,10 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo=epel install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
-# dnf --enablerepo=epel-playground install -y jnettop wdiff
+# dnf --enablerepo="epel-playground" install -y jnettop wdiff
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
@@ -742,7 +742,7 @@ source /etc/profile.d/ec2rl.sh
 # dnf install -y ansible ansible-doc
 
 # Package Install Ansible (from EPEL Repository)
-dnf --enablerepo=epel install -y ansible ansible-doc
+dnf --enablerepo="epel" install -y ansible ansible-doc
 
 ansible --version
 
@@ -778,7 +778,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-dnf --enablerepo=ol8_developer -y install terraform terraform-bundle terraform-provider-oci
+dnf --enablerepo="ol8_developer" -y install terraform terraform-bundle terraform-provider-oci
 
 rpm -qi terraform
 
