@@ -112,7 +112,6 @@ yum repolist all > /tmp/command-log_yum_repository-list.txt
 yum --enablerepo="*" --verbose clean all
 yum install -y yum yum-utils
 
-# RHUI configuration
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-els") ]; then
 	# RHUI configuration (RHEL-ELS repository)
 	echo "Support for RHEL ELS (Extended Life Cycle Support)"
@@ -126,7 +125,7 @@ elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-els" | grep -ie "rh-amazon-rh
 	yum update -y rh-amazon-rhui-client
 	yum --enablerepo="*" --verbose clean all
 else
-	# RHUI configuration
+	# RHUI configuration (RHEL-Standard repository)
 	rpm -qi rh-amazon-rhui-client
 	yum update -y rh-amazon-rhui-client
 	yum --enablerepo="*" --verbose clean all
@@ -151,9 +150,7 @@ yum repolist all
 
 # Red Hat Update Infrastructure Client Package Update (Supports minor version upgrade of RHUI)
 yum --enablerepo="*" --verbose clean all
-yum install -y yum yum-utils
 
-# RHUI configuration
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-els") ]; then
 	# RHUI configuration (RHEL-ELS repository)
 	echo "Support for RHEL ELS (Extended Life Cycle Support)"
@@ -167,7 +164,7 @@ elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-els" | grep -ie "rh-amazon-rh
 	yum update -y rh-amazon-rhui-client
 	yum --enablerepo="*" --verbose clean all
 else
-	# RHUI configuration
+	# RHUI configuration (RHEL-Standard repository)
 	rpm -qi rh-amazon-rhui-client
 	yum update -y rh-amazon-rhui-client
 	yum --enablerepo="*" --verbose clean all
