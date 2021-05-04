@@ -115,7 +115,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #          rhel-8-supplementary-rhui-rpms
 #          rhui-codeready-builder-for-rhel-8-rhui-rpms
 #-------------------------------------------------------------------------------
-#  - RHEL v8 (HA:High Availability)
+#  - RHEL v8 (SAP Bundle)
 #      (RHUI Client Package:rh-amazon-rhui-client-sap-bundle-e4s)
 #
 #      Red Hat Yum Repository Default Status (Enable/Disable)
