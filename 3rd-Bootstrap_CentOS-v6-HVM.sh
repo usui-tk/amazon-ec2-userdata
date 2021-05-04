@@ -479,31 +479,31 @@ fi
 #-------------------------------------------------------------------------------
 # yum --enablerepo=epel localinstall -y "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.amzn1.noarch.rpm"
 
-yum --enablerepo=epel install -y python-pip
-# pip install --upgrade pip
+# yum --enablerepo=epel install -y python-pip
+# # pip install --upgrade pip
 
-pip install pystache
-pip install argparse
-pip install python-daemon
-pip install requests
+# pip install pystache
+# pip install argparse
+# pip install python-daemon
+# pip install requests
 
-curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
-tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
+# curl -sS "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz" -o "/tmp/aws-cfn-bootstrap-latest.tar.gz"
+# tar -pxzf "/tmp/aws-cfn-bootstrap-latest.tar.gz" -C /tmp
 
-cd /tmp/aws-cfn-bootstrap-1.4/
-python setup.py build
-python setup.py install
+# cd /tmp/aws-cfn-bootstrap-1.4/
+# python setup.py build
+# python setup.py install
 
-chmod 775 /usr/init/redhat/cfn-hup
+# chmod 775 /usr/init/redhat/cfn-hup
 
-if [ -L /etc/init.d/cfn-hup ]; then
-	echo "Symbolic link exists"
-else
-	echo "No symbolic link exists"
-	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
-fi
+# if [ -L /etc/init.d/cfn-hup ]; then
+# 	echo "Symbolic link exists"
+# else
+# 	echo "No symbolic link exists"
+# 	ln -s /usr/init/redhat/cfn-hup /etc/init.d/cfn-hup
+# fi
 
-cd /tmp
+# cd /tmp
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
