@@ -257,6 +257,11 @@ dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-s
 # Package Install Red Hat Enterprise Linux support tools (from Red Hat Official Repository)
 dnf install -y redhat-lsb-core redhat-support-tool insights-client rhel-system-roles
 
+# Package Install RHEL-SAP System Administration Tools (from Red Hat Official Repository)
+if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+	dnf install -y sapconf
+fi
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
 # https://access.redhat.com/solutions/2206511
@@ -561,7 +566,7 @@ if [ -n "$RoleName" ]; then
 	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 		# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)
 		echo "# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)"
-		NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=RHEL-SAP-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+		NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=RHEL-8.?.0-SAP-HVM*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 		NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 	elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
@@ -851,7 +856,7 @@ source /etc/profile.d/ec2rl.sh
 
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	# Package Install Ansible (from Red Hat Official Repository)
-	dnf install -y ansible
+	dnf install -y ansible rhel-system-roles-sap
 
 	rpm -qi ansible
 
