@@ -499,6 +499,13 @@ if [ -n "$RoleName" ]; then
 	fi
 fi
 
+# Get the AMI information of the RHEL from Public AMI
+if [ -n "$RoleName" ]; then
+	# Get the AMI information of the RHEL from Public AMI (RHEL v7)
+	echo "# Get the AMI information of the RHEL from Public AMI (RHEL v7)"
+	aws ec2 describe-images --owners "309956199498" --query 'sort_by(Images, &CreationDate)[*].[CreationDate,Name,ImageId]' --filters "Name=name,Values=RHEL-7.*" --output table --region ${Region}
+fi
+
 # Get EC2 Instance Information
 if [ -n "$RoleName" ]; then
 	echo "# Get EC2 Instance Information"
