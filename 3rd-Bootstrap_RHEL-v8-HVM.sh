@@ -248,7 +248,7 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
-dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
+dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
@@ -269,7 +269,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Red Hat Enterprise Linux kernel live-patching tools (from Red Hat Official Repository)
-dnf install -y kpatch
+dnf install -y kpatch kpatch-dnf
 
 rpm -qi kpatch
 
@@ -343,21 +343,21 @@ python --version
 activate-global-python-argcomplete
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.8]
+# Custom Package Installation [Python 3.9]
 #-------------------------------------------------------------------------------
 
-# DNF-Module Enable Python 3.8 Runtime (from Red Hat Official Repository)
+# DNF-Module Enable Python 3.9 Runtime (from Red Hat Official Repository)
 # dnf module list | grep python3
-# dnf install -y @python38 @python38-devel
+# dnf install -y @python39
 # dnf module list | grep python3
 
-# Package Install Python 3.8 Runtime (from Red Hat Official Repository)
-# dnf install -y python38 python38-devel python38-pip python38-rpm-macros python38-setuptools python38-test python38-wheel
-# dnf install -y python38-asn1crypto python38-pyyaml python38-six python38-urllib3
+# Package Install Python 3.9 Runtime (from Red Hat Official Repository)
+# dnf install -y python39 python39-devel python39-pip python39-rpm-macros python39-setuptools python39-test python39-wheel
+# dnf install -y python39-pyyaml python39-six python39-urllib3
 
-# Version Information (Python 3.8)
-# python3.8 -V
-# pip3.8 -V
+# Version Information (Python 3.9)
+# python3.9 -V
+# pip3.9 -V
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL]
