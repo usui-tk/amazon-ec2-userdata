@@ -37,8 +37,8 @@ if [ $(uname -p) = "x86_64" ]; then
    ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
 elif [ $(uname -p) = "aarch64" ]; then
-
-   # [For x86_64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
+   exit 0
+   # [For aarch64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
    # ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
    # ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
    # ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
