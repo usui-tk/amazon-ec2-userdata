@@ -138,12 +138,13 @@ yum-config-manager --enable ol7_software_collections
 yum-config-manager --enable ol7_oracle_instantclient21
 yum-config-manager --enable ol7_developer
 yum-config-manager --enable ol7_developer_EPEL
-yum-config-manager --enable ol7_olcne12
+yum-config-manager --enable ol7_olcne13
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_UEKR5
 yum-config-manager --disable ol7_olcne
 yum-config-manager --disable ol7_olcne11
+yum-config-manager --disable ol7_olcne12
 yum-config-manager --disable ol7_developer_UEKR5
 yum-config-manager --disable ol7_developer_UEKR6
 yum-config-manager --disable ol7_developer_olcne
@@ -154,12 +155,29 @@ yum --enablerepo="*" --verbose clean all
 # Checking repository information
 yum repolist all
 
+# Get Yum Repository List (Exclude Yum repository related to "Base OS, Archive")
+repolist=$(yum repolist all | grep -ie "enabled" -ie "disabled" | grep -ve "Oracle Linux 7Server GA" -ve "7Server Update" -ve "_archive" -ve "ol7_security_validation" -ve "ol7_MODRHCK" -ve "UEKR3" -ve "UEKR4" -ve "UEKR5" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+# Oracle Linux YUM repository package [yum command]
+for repo in $repolist
+do
+	echo "[Target repository Name (Collect yum repository package list)] :" $repo
+	yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
+	sleep 3
+done
+
 # Default Package Update
 yum update -y
 
 # Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
 # https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
-yum install -y kernel-uek kernel-uek-devel
+
+if [ $(grubby --default-kernel | grep -ie "el7uek") ]; then
+	echo "Linux Kernel Package Name : kernel-uek"
+else
+	echo "Linux Kernel Package Name : kernel"
+	yum install -y kernel-uek kernel-uek-devel
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
@@ -719,7 +737,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
