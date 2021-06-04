@@ -133,9 +133,10 @@ dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_oracle_instantclient21
 dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
-dnf config-manager --set-enabled ol8_olcne12
+dnf config-manager --set-enabled ol8_olcne13
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+dnf config-manager --set-disabled ol8_olcne12
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_distro_builder
 
@@ -146,12 +147,29 @@ dnf --enablerepo="*" --verbose clean all
 dnf repolist all
 dnf module list
 
+# Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "BaseOS GA (x86_64), BaseOS (x86_64)")
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "BaseOS GA (x86_64)" -ve "BaseOS (x86_64)" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+
+# Oracle Linux YUM repository package [dnf command]
+for repo in $repolist
+do
+	echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
+	dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
+	sleep 3
+done
+
 # Default Package Update
 dnf update -y
 
 # Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
 # https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
-dnf install -y kernel-uek kernel-uek-devel
+
+if [ $(grubby --default-kernel | grep -ie "el8uek") ]; then
+	echo "Linux Kernel Package Name : kernel-uek"
+else
+	echo "Linux Kernel Package Name : kernel"
+	dnf install -y kernel-uek kernel-uek-devel
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
