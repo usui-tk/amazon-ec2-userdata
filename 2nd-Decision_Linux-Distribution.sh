@@ -36,10 +36,9 @@ if [ $(uname -p) = "x86_64" ]; then
    ScriptForOpenSUSE="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-HVM.sh"
    ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
-elif [ $(uname -p) = "aarch64" ]; then
-   echo "To Be Update for aarch64"
-   exit 0
-
+# elif [ $(uname -p) = "aarch64" ]; then
+#    echo "To Be Update for aarch64"
+#    exit 0
    # [For aarch64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
    # ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
    # ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
@@ -49,9 +48,9 @@ elif [ $(uname -p) = "aarch64" ]; then
    # ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
    # ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
 
-else
-   echo "None"
-   exit 0
+# else
+#    echo "None"
+#    exit 0
 
 fi
 
