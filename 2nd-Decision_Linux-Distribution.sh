@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 # Parameter Settings
 #-------------------------------------------------------------------------------
 
-if [ $(uname -p) = "x86_64" ]; then
+if [ $(uname -m) = "x86_64" ]; then
 
    # [For x86_64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
    ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
@@ -36,7 +36,7 @@ if [ $(uname -p) = "x86_64" ]; then
    ScriptForOpenSUSE="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-HVM.sh"
    ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
-# elif [ $(uname -p) = "aarch64" ]; then
+# elif [ $(uname -m) = "aarch64" ]; then
 #    echo "To Be Update for aarch64"
 #    exit 0
    # [For aarch64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
