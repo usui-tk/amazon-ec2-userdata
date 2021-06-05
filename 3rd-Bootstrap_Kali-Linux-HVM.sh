@@ -32,15 +32,17 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Kali-Linux-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-kalidata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Kali-Linux-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Kali Linux 2017.3
-#    https://www.kali.org/kali-linux-documentation/
-#    https://docs.kali.org/
+#  - Kali Linux
+#    https://www.kali.org/docs/
+#    https://www.kali.org/docs/cloud/aws/
+#    https://www.kali.org/docs/general-use/metapackages/
+#    https://www.kali.org/docs/troubleshooting/common-cloud-setup/
 #
-#    https://aws.amazon.com/marketplace/pp/B01M26MMTT
+#    https://aws.amazon.com/marketplace/pp/prodview-fznsw3f7mq7to
 #
 #-------------------------------------------------------------------------------
 
@@ -102,23 +104,82 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bcc binutils blktrace byobu chrony collectl colordiff crash cryptol curl debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc rsync screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
-apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfswatch
-apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
+apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
+apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+apt install -y -q open-iscsi open-isns-utils libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 apt install -y -q pcp pcp-conf pcp-manager
 
 # Package Install Python 3 Runtime (from Debian Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
+apt install -y -q python-is-python3
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Special package for Kali]
-#  https://tools.kali.org/kali-metapackages
-#  https://tools.kali.org/tools-listing
+# Custom Package Installation [Special package for Kali (Headless)]
+#  https://www.kali.org/docs/general-use/metapackages/
 #-------------------------------------------------------------------------------
 
-# Package Install Kali Linux Meta-Package
-apt install -y -q kali-linux-full kali-defaults kali-linux-gpu kali-linux-top10 kali-linux-web kali-linux-forensics kali-linux-pwtools
+# ------------------------------------------------------------------------------
+# Package Install Kali Linux Meta-Package (System)
+# ------------------------------------------------------------------------------
+#  - kali-linux-core: Base Kali Linux System – core items that are always included
+#  - kali-linux-headless: Default install that doesn’t require GUI
+#  - kali-linux-default: “Default” desktop (amd64/i386) images include these tools
+#  - kali-linux-light: Kali-Light images use this to be generated
+#  - kali-linux-arm: All tools suitable for ARM devices
+#  - kali-linux-nethunter: Tools used as part of Kali NetHunter
+# ------------------------------------------------------------------------------
+
+apt install -y -q kali-linux-core kali-linux-headless
+
+# ------------------------------------------------------------------------------
+# Package Install Kali Linux Meta-Package (Tools)
+# ------------------------------------------------------------------------------
+#  - kali-tools-gpu: Tools which benefit from having access to GPU hardware
+#  - kali-tools-hardware: Hardware hacking tools
+#  - kali-tools-crypto-stego: Tools based around Cryptography & Steganography
+#  - kali-tools-fuzzing: For fuzzing protocols
+#  - kali-tools-802-11: 802.11 (Commonly known as “Wi-Fi”)
+#  - kali-tools-bluetooth: For targeting Bluetooth devices
+#  - kali-tools-rfid: Radio-Frequency IDentification tools
+#  - kali-tools-sdr: Software-Defined Radio tools
+#  - kali-tools-voip: Voice over IP tools
+#  - kali-tools-windows-resources: Any resources which can be executed on a Windows hosts
+# ------------------------------------------------------------------------------
+
+apt install -y -q kali-tools-gpu kali-tools-crypto-stego kali-tools-fuzzing
+
+# ------------------------------------------------------------------------------
+# Package Install Kali Linux Meta-Package (Menu)
+# ------------------------------------------------------------------------------
+#  - kali-tools-information-gathering: Used for Open Source Intelligence (OSINT) & information gathering
+#  - kali-tools-vulnerability: Vulnerability assessments tools
+#  - kali-tools-web: Designed doing web applications attacks
+#  - kali-tools-database: Based around any database attacks
+#  - kali-tools-passwords: Helpful for password cracking attacks – Online & offline
+#  - kali-tools-wireless: All tools based around Wireless protocols – 802.11, Bluetooth, RFID & SDR
+#  - kali-tools-reverse-engineering: For reverse engineering binaries
+#  - kali-tools-exploitation: Commonly used for doing exploitation
+#  - kali-tools-social-engineering: Aimed for doing social engineering techniques
+#  - kali-tools-sniffing-spoofing: Any tools meant for sniffing & spoofing
+#  - kali-tools-post-exploitation: Techniques for post exploitation stage
+#  - kali-tools-forensics: Forensic tools – Live & Offline
+#  - kali-tools-reporting: Reporting tools
+# ------------------------------------------------------------------------------
+
+apt install -y -q kali-tools-information-gathering kali-tools-vulnerability kali-tools-web kali-tools-database kali-tools-passwords kali-tools-forensics
+
+# ------------------------------------------------------------------------------
+# Package Install Kali Linux Meta-Package (Others)
+# ------------------------------------------------------------------------------
+#  - kali-linux-large: Our previous default tools for amd64/i386 images
+#  - kali-linux-everything: Every metapackage and tool listed here
+#  - kali-tools-top10: The most commonly used tools
+#  - kali-desktop-live: Used during a live session when booted from the image
+# ------------------------------------------------------------------------------
+
+apt install -y -q kali-tools-top10
+
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -276,7 +337,7 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=Kali Linux*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=kali-linux-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 fi
@@ -499,7 +560,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
@@ -544,7 +605,7 @@ docker version --format '{{json .}}' | jq .
 
 # manage Docker as a non-root user
 cat /etc/group | grep docker
-usermod -aG docker ec2-user
+usermod -aG docker kali
 cat /etc/group | grep docker
 
 # Docker Pull Image (from Docker Hub)
@@ -567,12 +628,40 @@ fi
 # cat /etc/image-id
 # exit
 
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Special package for Kali (Desktop)]
+#  https://www.kali.org/docs/general-use/metapackages/
+#-------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# Package Install Kali Linux Meta-Package (Desktop environments/Window managers)
+# ------------------------------------------------------------------------------
+#  - kali-desktop-core: Any key tools required for a GUI image
+#  - kali-desktop-e17: Enlightenment (WM)
+#  - kali-desktop-gnome: GNOME (DE)
+#  - kali-desktop-i3: i3 (WM)
+#  - kali-desktop-kde: KDE (DE)
+#  - kali-desktop-lxde: LXDE (WM)
+#  - kali-desktop-mate: MATE (DE)
+#  - kali-desktop-xfce: Xfce (WM)
+# ------------------------------------------------------------------------------
+#  - kali-linux-default: “Default” desktop (amd64/i386) images include these tools
+#  - kali-tools-reporting: Reporting tools
+# ------------------------------------------------------------------------------
+
+apt install -y -q kali-linux-default kali-desktop-core kali-desktop-gnome kali-tools-reporting
+
+#-------------------------------------------------------------------------------
+# Enabling root for GNOME and KDE login
+#  https://www.kali.org/docs/general-use/enabling-root/
+#-------------------------------------------------------------------------------
+
+apt install -y -q kali-root-login
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Environment
 #-------------------------------------------------------------------------------
-
-# Package Install Kali Linux Desktop Environment [Desktop for Gnome 3]
-apt install -y -q kali-desktop-gnome
 
 # Package Install Kali Linux Desktop Environment for Japanese (from Kali Linux Official Repository)
 apt install -y -q task-japanese task-japanese-desktop locales-all fonts-ipafont ibus-mozc
@@ -598,16 +687,45 @@ fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for VNC Server
-#
-#  - VNC Server User : ec2-user [cloud-init default user]
-#
+#  - VNC Server User : root
 #-------------------------------------------------------------------------------
-apt install -y -q vnc4server tigervnc-common tigervnc-standalone-server tigervnc-xorg-extension
+apt install -y -q tigervnc-standalone-server tigervnc-xorg-extension
 
 systemctl daemon-reload
 
-# # Configure VNC Server for "ec2-user" user
-# cat > /home/ec2-user/vnc-setup.sh << __EOF__
+# mkdir -p ~/.vnc/
+
+# # Configure VNC Server for "root" user
+# # https://gitlab.com/kalilinux/nethunter/build-scripts/kali-nethunter-project/-/blob/master/nethunter-fs/profiles/xstartup
+
+# cat > ~/.vnc/xstartup << __EOF__
+# #!/bin/sh
+
+# #############################
+# ##          All            ##
+# unset SESSION_MANAGER
+# unset DBUS_SESSION_BUS_ADDRESS
+# export SHELL=/bin/bash
+
+# #############################
+# ##          Gnome          ##
+# [ -x /etc/vnc/xstartup ] && exec /etc/vnc/xstartup
+# [ -r $HOME/.Xresources ] && xrdb $HOME/.Xresources
+# vncconfig -iconic &
+# dbus-launch --exit-with-session gnome-session &
+
+# __EOF__
+
+# vncserver :1
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation for VNC Server
+#  - VNC Server User : kali [cloud-init default user]
+#-------------------------------------------------------------------------------
+
+# # Configure VNC Server for "kali" user
+# cat > /home/kali/vnc-setup.sh << __EOF__
 # #!/bin/bash
 
 # VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
@@ -621,20 +739,20 @@ systemctl daemon-reload
 # # echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 # __EOF__
 
-# chmod 777 /home/ec2-user/vnc-setup.sh
+# chmod 777 /home/kali/vnc-setup.sh
 
-# su - "ec2-user" -c "/home/ec2-user/vnc-setup.sh"
+# su - "kali" -c "/home/kali/vnc-setup.sh"
 
 
 # # Pre-operation test of VNC server
-# su - "ec2-user" -c "vncserver :1 -geometry 1024x768 -depth 32"
+# su - "kali" -c "vncserver :1 -geometry 1024x768 -depth 32"
 
 # sleep 10
 
-# su - "ec2-user" -c "vncserver -kill :1"
+# su - "kali" -c "vncserver -kill :1"
 
-# # cat /home/ec2-user/.vnc/xstartup
-# # cat /home/ec2-user/.vnc/config
+# # cat /home/kali/.vnc/xstartup
+# # cat /home/kali/.vnc/config
 
 # # Systemd's VNC Server configuration
 # cat > /etc/systemd/system/vncserver@:1.service << __EOF__
@@ -646,8 +764,8 @@ systemctl daemon-reload
 # Type=forking
 
 # ExecStartPre=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
-# ExecStart=/usr/sbin/runuser -l ec2-user -c "/usr/bin/vncserver %i"
-# PIDFile=/home/ec2-user/.vnc/%H%i.pid
+# ExecStart=/usr/sbin/runuser -l kali -c "/usr/bin/vncserver %i"
+# PIDFile=/home/kali/.vnc/%H%i.pid
 # ExecStop=/bin/sh -c '/usr/bin/vncserver -kill %i > /dev/null 2>&1 || :'
 
 # [Install]
@@ -658,6 +776,8 @@ systemctl daemon-reload
 # cat /etc/systemd/system/vncserver@:1.service
 
 # systemctl daemon-reload
+
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation for Desktop Application [Google Chrome]
