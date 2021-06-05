@@ -151,7 +151,7 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "AlmaLinux" ] || [ "${DIST_TYPE}" = "almalinux" ]; then
-         if [ "${REV}" = "8" ]; then
+         if [ $(echo ${REV} | grep -e '8.') ]; then
             # Bootstrap Script for AlmaLinux v8.x
             BootstrapScript=${ScriptForAlmaLinuxv8}
          else
