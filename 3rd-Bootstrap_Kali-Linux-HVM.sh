@@ -722,7 +722,6 @@ systemctl daemon-reload
 
 # vncserver :1
 
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation for VNC Server
 #  - VNC Server User : kali [cloud-init default user]
@@ -734,11 +733,14 @@ systemctl daemon-reload
 
 # VNC_PASSWORD=\$(cat /dev/urandom | base64 | fold -w 8 | head -n 1)
 
-# vncpasswd << 'EOF';
+# sleep 5
+
+# vncpasswd << '_EOF_';
 # \$VNC_PASSWORD
 # \$VNC_PASSWORD
 # n
-# EOF
+
+# _EOF_
 
 # # echo "# VNC Password is \$VNC_PASSWORD" > ~/.vnc/cloud-init_configure_passwd
 # __EOF__
@@ -780,6 +782,11 @@ systemctl daemon-reload
 # cat /etc/systemd/system/vncserver@:1.service
 
 # systemctl daemon-reload
+
+# systemctl restart vncserver@:1.service
+
+# systemctl status -l vncserver@:1.service
+
 
 
 
