@@ -87,6 +87,10 @@ VersionYear=$(echo $VERSION_ID | sed -e "s/\.[^.]*$//g")
 curl -sI "http://http.kali.org/README"
 # curl -s "http://http.kali.org/README.mirrorlist"
 
+# Hide login messages
+touch /root/.hushlogin
+touch /home/kali/.hushlogin
+
 # apt repository metadata Clean up
 apt clean -y -q
 
