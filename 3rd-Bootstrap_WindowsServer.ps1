@@ -2662,8 +2662,8 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://ja.osdn.net/projects/ttssh2/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on Tera Term version information]
-    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://ja.osdn.net/frs/redir.php?m=ymu&f=ttssh2%2F72009%2Fteraterm-4.105.exe"
-    Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value "teraterm-4.105.exe"
+    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://osdn.mirror.constant.com//ttssh2/74780/teraterm-4.106.exe"
+    Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Terminal emulator (Tera Term)
     Write-Log "# Package Download Terminal emulator (Tera Term)"
