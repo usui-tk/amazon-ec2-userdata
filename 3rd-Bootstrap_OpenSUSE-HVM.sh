@@ -45,13 +45,11 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://en.opensuse.org/YaST_Software_Management
 
 #    https://build.opensuse.org/project
-#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.0
-#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.1
-#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.2
+#    https://build.opensuse.org/project/show/Cloud:Images:Leap_15.3
 
 #
 #    https://aws.amazon.com/marketplace/seller-profile?id=730aa725-c0c9-4d1d-863f-8e7325fccad4
-#    https://aws.amazon.com/marketplace/pp/openSUSE-openSUSE-Leap/B01N4R3GJI
+#    https://aws.amazon.com/marketplace/pp/prodview-wn2xje27ui45o
 #
 #    https://github.com/SUSE-Enceladus
 #-------------------------------------------------------------------------------
@@ -109,68 +107,19 @@ zypper repos --uri
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply OpenSUSE Leap Linux Service Pack
-# (Service pack information as of 2019.11.1 : OpenSUSE Leap 15.1)
+# (Service pack information as of 2021.7.22 : OpenSUSE Leap 15.3)
 ServicePackStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
 		cat /etc/os-release
 
 		# OpenSUSE Leap Linux Software repository information
 		zypper repos --uri
 
-		# # Backup OpenSUSE Leap Linux Software repository configuration files
-		# cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
-
-		# # Change repository information (15.1 -> 15.1)
-		# sed -i 's/15.1/15.1/g' /etc/zypp/repos.d/*.repo
-
-		# # Renew repository information
-		# zypper --gpg-auto-import-keys --quiet refresh -fdb
-
-		# # Apply OpenSUSE Leap Linux Service Pack
-		# zypper --quiet --non-interactive dist-upgrade --auto-agree-with-licenses || ServicePackStatus=$?
-		# if [ $ServicePackStatus -eq 0 ]; then
-		# 	echo "Successful execution [Zypper dist-upgrade Command]"
-		# 	eval $(grep ^VERSION_ID= /etc/os-release)
-		# 	# Clean up
-		# 	rm -rf /etc/zypp/repos.d.Old
-		# else
-		# 	echo "Failed to execute [Zypper dist-upgrade Command]"
-		# fi
-		# cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
+	elif [ "${VERSION_ID}" = "15.2" ] || [ "${VERSION_ID}" = "15.1" ] || [ "${VERSION_ID}" = "15.0" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		cat /etc/os-release
-
-		# OpenSUSE Leap Linux Software repository information
-		zypper repos --uri
-
-		# # Backup OpenSUSE Leap Linux Software repository configuration files
-		# cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
-
-		# # Change repository information (15.1 -> 15.1)
-		# sed -i 's/15.1/15.1/g' /etc/zypp/repos.d/*.repo
-
-		# # Renew repository information
-		# zypper --gpg-auto-import-keys --quiet refresh -fdb
-
-		# # Apply OpenSUSE Leap Linux Service Pack
-		# zypper --quiet --non-interactive dist-upgrade --auto-agree-with-licenses || ServicePackStatus=$?
-		# if [ $ServicePackStatus -eq 0 ]; then
-		# 	echo "Successful execution [Zypper dist-upgrade Command]"
-		# 	eval $(grep ^VERSION_ID= /etc/os-release)
-		# 	# Clean up
-		# 	rm -rf /etc/zypp/repos.d.Old
-		# else
-		# 	echo "Failed to execute [Zypper dist-upgrade Command]"
-		# fi
-		# cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15.0" ]; then
-		echo "OpenSUSE Leap ${VERSION_ID} -> OpenSUSE Leap Lastest ServicePack"
 		cat /etc/os-release
 
 		# OpenSUSE Leap Linux Software repository information
@@ -179,8 +128,23 @@ if [ -n "$VERSION_ID" ]; then
 		# Backup OpenSUSE Leap Linux Software repository configuration files
 		cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
 
-		# Change repository information (15.0 -> 15.1)
-		sed -i 's/15.0/15.1/g' /etc/zypp/repos.d/*.repo
+		# Change OpenSUSE Leap Linux Software repository configuration files
+		if [ "${VERSION_ID}" = "15.3" ]; then
+			echo "OpenSUSE Leap ${VERSION_ID}"
+			cat /etc/os-release
+		elif [ "${VERSION_ID}" = "15.2" ]; then
+			# Change repository information (15.2 -> 15.3)
+			sed -i 's/15.2/15.3/g' /etc/zypp/repos.d/*.repo
+		elif [ "${VERSION_ID}" = "15.1" ]; then
+			# Change repository information (15.1 -> 15.3)
+			sed -i 's/15.1/15.3/g' /etc/zypp/repos.d/*.repo
+		elif [ "${VERSION_ID}" = "15.0" ]; then
+			# Change repository information (15.0 -> 15.3)
+			sed -i 's/15.0/15.3/g' /etc/zypp/repos.d/*.repo
+		else
+			echo "OpenSUSE Leap ${VERSION_ID}"
+			cat /etc/os-release
+		fi
 
 		# Renew repository information
 		zypper --gpg-auto-import-keys --quiet refresh -fdb
@@ -195,10 +159,13 @@ if [ -n "$VERSION_ID" ]; then
 		else
 			echo "Failed to execute [Zypper dist-upgrade Command]"
 		fi
+
+		echo "OpenSUSE Leap ${VERSION_ID}"
 		cat /etc/os-release
 
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
+		cat /etc/os-release
 	fi
 fi
 
@@ -221,22 +188,17 @@ zypper --quiet --non-interactive install --type pattern apparmor
 zypper --quiet --non-interactive install --type pattern enhanced_base
 
 # Package Install SLES System Administration Tools (from OpenSUSE Leap community Software repository - Select package)
-zypper --quiet --non-interactive install arptables atop bash-completion bash-loadables bcc-tools cloud-netconfig-ec2 collectl dstat ebtables git-core glib2-lang glibc-extra hdparm hostinfo iotop kexec-tools kmod-bash-completion lsb-release lzop man-pages-posix mtr net-snmp nmap nvme-cli psutils sdparm seccheck supportutils syslinux sysstat system-group-wheel system-user-bin system-user-daemon systemd-bash-completion systemd-bash-completion time traceroute traceroute tuned unrar unzip zypper-log
+zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables atop bash-completion bash-loadables bc bcc-tools bind-utils blktrace cloud-netconfig-ec2 collectl conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core glib2-lang glibc-extra gperftools hdparm hostinfo intltool iotop iotop jq kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages man-pages-posix mcelog mdadm mlocate mtr net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc psutils rsync sdparm seccheck smartmontools strace supportutils sysfsutils syslinux sysstat system-group-wheel system-user-bin system-user-daemon tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.2" ]; then
+	if [ "${VERSION_ID}" = "15.3" ]; then
 		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install jq
+		zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools pcp-zeroconf
 		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "OpenSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install jq
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
-	elif [ "${VERSION_ID}" = "15.0" ]; then
-		echo "OpenSUSE Leap ${VERSION_ID}"
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools
 	else
 		echo "OpenSUSE Leap ${VERSION_ID}"
 	fi
@@ -639,7 +601,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
@@ -649,12 +611,21 @@ source /etc/profile.d/ec2rl.sh
 # https://packagehub.suse.com/packages/ansible/
 #-------------------------------------------------------------------------------
 
-# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+# Package Install OpenSUSE Leap System Administration Tools (from OpenSUSE Leap community Software repository)
 zypper --quiet --non-interactive install ansible
 
 ansible --version
 
 ansible localhost -m setup
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Terraform]
+#-------------------------------------------------------------------------------
+
+# Package Install OpenSUSE Leap System Administration Tools (from OpenSUSE Leap community Software repository)
+zypper --quiet --non-interactive install terraform "terraform-provider-*"
+
+terraform --version
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
