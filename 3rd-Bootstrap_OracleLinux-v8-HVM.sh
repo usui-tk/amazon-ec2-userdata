@@ -44,7 +44,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -91,7 +91,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information and Update dnf tools
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 dnf update -y dnf dnf-data
 
 # Checking repository information
