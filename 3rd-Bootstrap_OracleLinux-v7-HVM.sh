@@ -40,6 +40,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.oracle.com/technetwork/server-storage/linux/documentation/index.html
 #    https://docs.oracle.com/en/operating-systems/oracle-linux/7/
 #    http://yum.oracle.com/oracle-linux-7.html
+#    https://github.com/oracle/oracle-linux
 #
 #-------------------------------------------------------------------------------
 
