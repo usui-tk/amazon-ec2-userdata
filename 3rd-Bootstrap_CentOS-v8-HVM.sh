@@ -298,6 +298,9 @@ dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-p
 dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc ncdu nload screen srm tcping yamllint zstd
 # dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
+# Package Install EC2 instance optimization tools (from EPEL Repository)
+dnf --enablerepo="epel" install -y ec2-hibinit-agent
+
 # Package Install CentOS System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo="epel-playground" install -y jnettop wdiff
 
