@@ -41,6 +41,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.debian.org/releases/
 #    https://www.debian.org/distrib/packages
 #
+#    https://packages.debian.org/ja/buster/
+#
 #    https://wiki.debian.org/FrontPage
 #    https://wiki.debian.org/Cloud/AmazonEC2Image
 #
