@@ -113,6 +113,9 @@ apt install -y -q pcp pcp-conf pcp-manager
 # Package Install Python 3 Runtime (from Debian Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
+# Package Install EC2 instance optimization tools (from Debian Official Repository)
+apt install -y -q python3 amazon-ec2-utils
+
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
