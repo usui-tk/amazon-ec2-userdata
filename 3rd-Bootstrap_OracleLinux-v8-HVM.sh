@@ -104,7 +104,7 @@ find /etc/yum.repos.d/
 
 dnf list *release-el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -131,13 +131,14 @@ dnf config-manager --set-enabled ol8_UEKR6
 dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
+dnf config-manager --set-enabled ol8_automation
 dnf config-manager --set-enabled ol8_oracle_instantclient21
 dnf config-manager --set-enabled ol8_developer
-dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_olcne13
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_olcne12
+dnf config-manager --set-disabled ol8_developer_EPEL
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_distro_builder
 
@@ -303,8 +304,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc ncdu nload screen srm tcping yamllint zstd
-# dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
@@ -320,11 +320,12 @@ dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
 dnf install -y oracleasm-support ocfs2-tools
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
-dnf install -y oracle-database-preinstall-19c
+# dnf install -y oracle-database-preinstall-19c
+dnf install -y oracle-database-preinstall-21c
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-dnf install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+dnf --disablerepo="*" --enablerepo="ol8_oracle_instantclient21" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -730,7 +731,8 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from Oracle Linux Repository)
-dnf --enablerepo="ol8_developer*" install -y ansible ansible-doc oci-ansible-collection
+dnf --disablerepo="*" --enablerepo="ol8_automation*, ol8_developer" install -y ansible oci-ansible-collection
+# dnf --enablerepo="ol8_developer*" install -y ansible ansible-doc oci-ansible-collection
 
 ansible --version
 
