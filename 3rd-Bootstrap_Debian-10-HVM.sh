@@ -36,7 +36,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Debian GNU/Linux 9 (Stretch)
+#  - Debian GNU/Linux 10 (Buster)
 #    https://www.debian.org/
 #    https://www.debian.org/releases/
 #    https://www.debian.org/distrib/packages
@@ -48,8 +48,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://cloud.debian.org/images/cloud/
 #    https://salsa.debian.org/cloud-team/debian-cloud-images
+#    https://image-finder.debian.net/
 #
-#    https://aws.amazon.com/marketplace/pp/
+#    https://aws.amazon.com/marketplace/pp/prodview-vh2uh3o4pdfow
 #
 #-------------------------------------------------------------------------------
 
