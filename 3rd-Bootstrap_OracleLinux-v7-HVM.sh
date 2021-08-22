@@ -258,7 +258,7 @@ yum --enablerepo="*" --verbose clean all
 yum --disablerepo="*" --enablerepo="ol7_developer_EPEL" list available > /tmp/command-log_yum_repository-package-list_ol7_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
+yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Testing Repository)
 # yum --enablerepo="ol7_developer_EPEL"  install -y tlog
@@ -275,7 +275,8 @@ yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
 # yum install -y oracle-rdbms-server-12cR1-preinstall
 # yum install -y oracle-database-server-12cR2-preinstall
 # yum install -y oracle-database-preinstall-18c
-yum install -y oracle-database-preinstall-19c
+# yum install -y oracle-database-preinstall-19c
+yum install -y oracle-database-preinstall-21c
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html

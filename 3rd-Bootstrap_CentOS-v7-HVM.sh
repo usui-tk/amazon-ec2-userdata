@@ -216,7 +216,7 @@ yum --enablerepo="*" --verbose clean all
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-yum --enablerepo="epel" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
+yum --enablerepo="epel" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
 
 # Package Install CentOS System Administration Tools (from EPEL-Testing Repository)
 # yum --enablerepo="epel-testing" install -y tlog
