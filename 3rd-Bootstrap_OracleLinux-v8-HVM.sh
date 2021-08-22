@@ -658,7 +658,7 @@ ssm-cli get-instance-information
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm"
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/oracle_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 rpm -qi amazon-cloudwatch-agent
 
