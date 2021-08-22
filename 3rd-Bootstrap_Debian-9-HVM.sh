@@ -48,6 +48,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://cloud.debian.org/images/cloud/
 #    https://salsa.debian.org/cloud-team/debian-cloud-images
+#    https://image-finder.debian.net/
 #
 #    https://aws.amazon.com/marketplace/pp/B073HW9SP3
 #
