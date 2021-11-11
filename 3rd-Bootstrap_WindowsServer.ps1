@@ -2076,38 +2076,42 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (PowerShell Core 7.1)
+# Custom Package Install (PowerShell Core 7.2)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 # https://github.com/PowerShell/PowerShell
 #
-# https://github.com/PowerShell/PowerShell/releases
+# [Stable Version]
+# https://aka.ms/powershell-release?tag=stable
+#
+# [LTS Version]
+# https://aka.ms/powershell-release?tag=lts
 #
 # https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-windows.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (PowerShell Core 7.1)"
+Write-LogSeparator "Package Install System Utility (PowerShell Core 7.2)"
 
-# Initialize Parameter [# Depends on PowerShell v7.1 version information]
+# Initialize Parameter [# Depends on PowerShell v7.2 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.1.3/PowerShell-7.1.3-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.2.0/PowerShell-7.2.0-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
-    # Package Download Commnand-Line Shell (PowerShell Core 7.1)
-    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 7.1)"
+    # Package Download Commnand-Line Shell (PowerShell Core 7.2)
+    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 7.2)"
     Get-WebContentToFile -Uri "$PWSH_INSTALLER_URL" -OutFile "$TOOL_DIR\$PWSH_INSTALLER_FILE"
 
-    # Package Install Commnand-Line Shell (PowerShell Core 7.1)
-    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 7.1)"
+    # Package Install Commnand-Line Shell (PowerShell Core 7.2)
+    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 7.2)"
     Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
     Start-Sleep -Seconds 10
 
-    # Package Configure Commnand-Line Shell (PowerShell Core 7.1)
-    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.1)"
+    # Package Configure Commnand-Line Shell (PowerShell Core 7.2)
+    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.2)"
 
     # Install AWSPowerShell.NetCore
     # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
@@ -2780,7 +2784,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/nosql-workbench/NoSQL%20Workbench-win-2.1.0.exe' -OutFile "$TOOL_DIR\NoSQL_Workbench-win-2.1.0.exe"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/nosql-workbench/NoSQL%20Workbench-win-3.2.0.exe' -OutFile "$TOOL_DIR\NoSQL_Workbench-win-3.2.0.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
@@ -2806,10 +2810,10 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (AWS ElasticWolf Client Console)
 # https://aws.amazon.com/jp/tools/aws-elasticwolf-client-console/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
-    Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\ElasticWolf-win-5.1.7.zip"
-}
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     Write-Log "# Package Download System Utility (AWS ElasticWolf Client Console)"
+#     Get-WebContentToFile -Uri 'https://s3-us-gov-west-1.amazonaws.com/elasticwolf/ElasticWolf-win-5.1.7.zip' -OutFile "$TOOL_DIR\ElasticWolf-win-5.1.7.zip"
+# }
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2882,7 +2886,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "http://packages.treasuredata.com.s3.amazonaws.com/4/windows/td-agent-4.0.1-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.2.0-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
@@ -2902,16 +2906,16 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     Get-WebContentToFile -Uri "$PYTHON27_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON27_INSTALLER_FILE"
 # }
 
-# Package Download System Utility (Python 3.9)
+# Package Download System Utility (Python 3.10)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on Python 3.9 version information]
-    Set-Variable -Name PYTHON38_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.9.0/python-3.9.0-amd64.exe"
-    Set-Variable -Name PYTHON38_INSTALLER_FILE -Scope Script -Value ($PYTHON38_INSTALLER_URL.Substring($PYTHON38_INSTALLER_URL.LastIndexOf("/") + 1))
+    # Initialize Parameter [# Depends on Python 3.10 version information]
+    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe"
+    Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (Python 3.9)"
-    Get-WebContentToFile -Uri "$PYTHON38_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON38_INSTALLER_FILE"
+    Write-Log "# Package Download System Utility (Python 3.10)"
+    Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
 }
 
 # # Package Download System Utility (WinMerge)
