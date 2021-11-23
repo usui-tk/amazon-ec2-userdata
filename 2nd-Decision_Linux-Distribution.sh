@@ -10,6 +10,7 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 if [ $(uname -m) = "x86_64" ]; then
 
    # [For x86_64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
+   ScriptForAmazonLinux2022="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2022-HVM.sh"
    ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
    ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-1-HVM.sh"
    ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
@@ -130,8 +131,11 @@ function get_os_info () {
 function get_bootstrap_script () {
    # Select a Bootstrap script
    if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST}" = "Amazon Linux" ] || [ "${DIST_TYPE}" = "amzn" ]; then
-         if [ "${REV}" = "2" ]; then
-            # Bootstrap Script for Amazon Linux 2.x [Caution - Workaround]
+         if [ "${REV}" = "2022" ]; then
+            # Bootstrap Script for Amazon Linux 2022
+            BootstrapScript=${ScriptForAmazonLinux2022}
+         elif [ "${REV}" = "2" ]; then
+            # Bootstrap Script for Amazon Linux 2.x
             BootstrapScript=${ScriptForAmazonLinux2}
          elif [ $(echo ${REV} | grep -e '201') ]; then
             # Bootstrap Script for Amazon Linux 1.x (2011.09 - 2017.09)
