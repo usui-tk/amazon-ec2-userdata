@@ -133,11 +133,6 @@ dnf install -y pcp pcp-export-pcp2json pcp-selinux pcp-system-tools pcp-zeroconf
 # Custom Package Installation [Python 3.9]
 #-------------------------------------------------------------------------------
 
-# DNF-Module Enable Python 3 Runtime (from Red Hat Official Repository)
-dnf module list | grep python3
-dnf install -y @python36
-dnf module list | grep python3
-
 # Package Install Python 3 Runtime (from Amazon Official Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-tools python3-virtualenv python3-wheel
 dnf install -y python3-dateutil python3-docutils python3-jmespath python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
