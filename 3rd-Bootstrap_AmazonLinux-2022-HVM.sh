@@ -116,16 +116,16 @@ dnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
+# Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
 dnf install -y arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crypto-policies curl dmidecode dstat ebtables ethtool expect gdisk git gnutls-utils intltool ipcalc iproute-tc ipset jq kernel-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mdadm nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time tree tzdata unzip usermode util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs  yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
 dnf install -y iscsi-initiator-utils
 
-# Package Install SELinux Tools (from Amazon Official Repository)
+# Package Install SELinux Tools (from Amazon Linux Official Repository)
 dnf install -y checkpolicy policycoreutils setools-console
 ## dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console setools-console-analyses setroubleshoot-server udica
 
-# Package Install Performance Co-Pilot (PCP) Tools (from Amazon Official Repository)
+# Package Install Performance Co-Pilot (PCP) Tools (from Amazon Linux Official Repository)
 dnf install -y pcp pcp-export-pcp2json pcp-selinux pcp-system-tools pcp-zeroconf
 ## dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
@@ -133,7 +133,7 @@ dnf install -y pcp pcp-export-pcp2json pcp-selinux pcp-system-tools pcp-zeroconf
 # Custom Package Installation [Python 3.9]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3 Runtime (from Amazon Official Repository)
+# Package Install Python 3 Runtime (from Amazon Linux Official Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-tools python3-virtualenv python3-wheel
 dnf install -y python3-dateutil python3-docutils python3-jmespath python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
 dnf install -y python3-argcomplete
@@ -231,17 +231,6 @@ else
 	fi
 
 fi
-
-
-
-
-
-
-
-
-
-
-
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
