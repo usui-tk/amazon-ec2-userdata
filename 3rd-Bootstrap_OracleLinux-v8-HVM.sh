@@ -104,7 +104,7 @@ find /etc/yum.repos.d/
 
 dnf list *release-el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -132,12 +132,15 @@ dnf config-manager --set-enabled ol8_appstream
 dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_automation
+dnf config-manager --set-enabled ol8_oracle_software
 dnf config-manager --set-enabled ol8_oracle_instantclient21
 dnf config-manager --set-enabled ol8_developer
-dnf config-manager --set-enabled ol8_olcne13
+dnf config-manager --set-enabled ol8_olcne14
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_olcne12
+dnf config-manager --set-disabled ol8_olcne13
+dnf config-manager --set-disabled ol8_kvm_appstream
 dnf config-manager --set-disabled ol8_developer_EPEL
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_distro_builder
@@ -319,9 +322,15 @@ dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
 # Package Install Oracle Database Utility (from Oracle Linux Repository)
 dnf install -y oracleasm-support ocfs2-tools
 
+# Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
+# yum install -y ords sqlcl
+
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-database-preinstall-19c
 dnf install -y oracle-database-preinstall-21c
+
+# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
+# dnf install -y oracle-ebs-server-R12-preinstall
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
