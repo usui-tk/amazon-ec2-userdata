@@ -87,7 +87,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update (Packages Related to yum)
 yum install -y yum yum-utils
@@ -100,7 +100,7 @@ find /etc/yum.repos.d/
 
 yum list *release-el7
 
-yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oraclelinux-developer-release-el7
+yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oracle-software-release-el7 oraclelinux-developer-release-el7
 yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -136,16 +136,18 @@ yum-config-manager --enable ol7_UEKR6
 yum-config-manager --enable ol7_optional_latest
 yum-config-manager --enable ol7_addons
 yum-config-manager --enable ol7_software_collections
+yum-config-manager --enable ol7_oracle_software
 yum-config-manager --enable ol7_oracle_instantclient21
 yum-config-manager --enable ol7_developer
 yum-config-manager --enable ol7_developer_EPEL
-yum-config-manager --enable ol7_olcne13
+yum-config-manager --enable ol7_olcne14
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_UEKR5
 yum-config-manager --disable ol7_olcne
 yum-config-manager --disable ol7_olcne11
 yum-config-manager --disable ol7_olcne12
+yum-config-manager --disable ol7_olcne13
 yum-config-manager --disable ol7_developer_UEKR5
 yum-config-manager --disable ol7_developer_UEKR6
 yum-config-manager --disable ol7_developer_olcne
@@ -269,6 +271,9 @@ yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcf
 
 # Package Install Oracle Database Utility (from Oracle Linux Repository)
 yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
+
+# Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
+# yum install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # yum install -y oracle-rdbms-server-11gR2-preinstall
