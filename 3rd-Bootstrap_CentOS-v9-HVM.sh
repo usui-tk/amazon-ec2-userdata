@@ -115,7 +115,7 @@ find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y centos-release-stream
+dnf install -y centos-stream-release
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
