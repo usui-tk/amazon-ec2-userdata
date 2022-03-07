@@ -307,7 +307,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping yamllint zstd
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
