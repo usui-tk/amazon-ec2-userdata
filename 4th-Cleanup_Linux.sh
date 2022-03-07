@@ -605,6 +605,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Remove Bash History
+export HISTSIZE=0
 unset HISTFILE
 
 # Remove Bash History (Root User) for All Linux Distribution
