@@ -892,7 +892,6 @@ fi
 # Configure Tuned software (select profile - throughput-performance)
 tuned-adm list
 
-tuned-adm active
 tuned-adm profile throughput-performance
 tuned-adm active
 
