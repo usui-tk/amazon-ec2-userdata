@@ -320,7 +320,9 @@ dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Database Utility (from Oracle Linux Repository)
+# dnf install -y kmod-redhat-oracleasm oracleasm-support ocfs2-tools
 dnf install -y oracleasm-support ocfs2-tools
+dnf install -y pcp-oracle-conf
 
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # yum install -y ords sqlcl

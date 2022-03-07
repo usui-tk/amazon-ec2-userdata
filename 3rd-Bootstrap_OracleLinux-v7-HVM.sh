@@ -271,6 +271,7 @@ yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcf
 
 # Package Install Oracle Database Utility (from Oracle Linux Repository)
 yum install -y kmod-oracleasm oracleasm-support ocfs2-tools
+yum install -y pcp-oracle-conf
 
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # yum install -y ords sqlcl
