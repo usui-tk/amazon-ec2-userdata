@@ -37,13 +37,8 @@ echo $VpcNetwork
 #
 #-------------------------------------------------------------------------------
 
-# [Workaround] Setting System crypto policy (DEFAULT | FUTURE)
-update-crypto-policies --show
-# update-crypto-policies --set FUTURE
-# update-crypto-policies --is-applied
-
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -55,11 +50,11 @@ uname -a
 
 # Show Linux distribution release Information
 if [ -f /etc/os-release ]; then
-	cat /etc/os-release
+	cat "/etc/os-release"
 fi
 
 if [ -f /etc/system-release ]; then
-	cat /etc/system-release
+	cat "/etc/system-release"
 fi
 
 # Default installation package [rpm command]
@@ -94,7 +89,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
 dnf install -y bash dnf dnf-conf dnf-utils dnf-plugins-core dnf-plugin-system-upgrade
@@ -112,40 +107,81 @@ dnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool collectl crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fzf gdisk git glances gnutls-utils hdparm htop iftop inotify-tools intltool iotop ipcalc iperf3 ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos srm strace stressapptest symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh
-dnf install -y cifs-utils nfs-utils nfs4-acl-tools
-dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
-dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
-dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+# Package Install CentOS Linux-Kernel Modules (from Fedora Official Repository)
+dnf install -y kernel-modules kernel-modules-extra kernel-tools
 
-# Package Install Fedora System Utility Tools (from Fedora Official Repository)
-dnf install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools ipv6calc moreutils moreutils-parallel ncdu nload screen srm tcping yamllint zstd
+# Package Install Fedora System Administration Tools (from Fedora Official Repository)
+dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bcftools bind-utils blktrace bpftool bpytop byobu collectd collectd-utils collectl colordiff crash-trace-command crypto-policies curl dateutils dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fping fzf gdisk git glances gnutls-utils hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 ipset iptraf-ng ipv6calc jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nload nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools sos srm strace stressapptest symlinks sysfsutils sysstat tcpdump tcping time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wget wireshark-cli xfsdump xfsprogs yamllint yum-utils zip zsh zstd
+
+dnf install -y cifs-utils nfs-utils nfs4-acl-tools
+
+dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
+
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
+
+dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
 # Package Install Fedora System Administration Tools [Version dependent] (from Fedora Official Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "34" ]; then
+	if [ "${VERSION_ID}" = "35" ]; then
 		echo "fedora ${VERSION_ID}"
-	elif [ "${VERSION_ID}" = "33" ]; then
-		echo "fedora ${VERSION_ID}"
-	elif [ "${VERSION_ID}" = "32" ]; then
+	elif [ "${VERSION_ID}" = "34" ]; then
 		echo "fedora ${VERSION_ID}"
 	else
 		echo "fedora ${VERSION_ID}"
 	fi
+else
+	if [ -f /etc/os-release ]; then
+		cat "/etc/os-release"
+	fi
 fi
 
 # Package Install Fedora support tools (from Fedora Official Repository)
-dnf install -y redhat-lsb-core
+dnf install -y redhat-lsb-core redhat-lsb-submod-security redhat-text-fonts
 
-# Package Install Python 3 Runtime (from Red Hat Official Repository)
-dnf install -y python3 python3-pip  python3-utils python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
-
-# Package Install Fedora Web-Based support tools (from Fedora Official Repository)
-# dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+# Package Install EC2 instance optimization tools (from Fedora Official Repository)
+dnf install -y ec2-hibinit-agent ec2-metadata
 
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
-dnf install -y rpmdevtools rpmconfdnf install -y rpmdevtools rpmconf
+dnf install -y rpmdevtools rpm-build rpmconf rpmconf-base redhat-rpm-config
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Cockpit]
+#-------------------------------------------------------------------------------
+
+# Package Install Fedora Web-Based support tools (from Fedora Official Repository)
+dnf install -y cockpit cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+
+rpm -qi cockpit
+
+systemctl daemon-reload
+
+systemctl restart cockpit
+
+systemctl status -l cockpit
+
+# Configure cockpit.socket
+if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
+	systemctl enable --now cockpit.socket
+	systemctl is-enabled cockpit.socket
+fi
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Python 3]
+#-------------------------------------------------------------------------------
+
+# Package Install Python 3 Runtime (from Fedora Official Repository)
+dnf install -y python3 python3-pip python3-utils python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
+dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 python3-pyasn1-modules python3-pyasn1-modules python3-pyyaml "python3-requests*" python3-six python3-urllib3
+dnf install -y python3-cloud-what python3-distro
+dnf install -y python3-argcomplete
+
+# Version Information (Python 3)
+python3 -V
+python3 -V
+
+# Python package setting (python3-argcomplete)
+activate-global-python-argcomplete
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -481,7 +517,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
@@ -491,7 +527,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y ansible ansible-doc
+dnf install -y ansible-core ansible-core-doc ansible-pcp
 
 ansible --version
 
@@ -508,13 +544,13 @@ dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/fedora/hashico
 cat /etc/yum.repos.d/hashicorp.repo
 
 # Cleanup repository information
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 # HashiCorp Linux repository package [dnf command]
 dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-dnf --enablerepo="hashicorp" -y install terraform
+dnf --enablerepo="hashicorp" -y install terraform terraform-ls
 
 rpm -qi terraform
 
@@ -534,7 +570,7 @@ source /etc/profile.d/terraform.sh
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-dnf clean all
+dnf --enablerepo="*" --verbose clean all
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -683,7 +719,6 @@ fi
 # Configure Tuned software (select profile - throughput-performance)
 tuned-adm list
 
-tuned-adm active
 tuned-adm profile throughput-performance
 tuned-adm active
 
@@ -725,6 +760,12 @@ if [ $(getenforce) = "Enforcing" ]; then
 	getenforce
 fi
 
+# Setting SELinux disabled mode
+#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+# grubby --info=ALL
+# grubby --update-kernel ALL --args selinux=0
+# grubby --info=ALL
+
 # Setting System crypto policy (Default -> FUTURE)
 update-crypto-policies --show
 # update-crypto-policies --set FUTURE
@@ -754,7 +795,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
-	dnf install -y langpacks-ja glibc-langpack-ja
+	dnf install -y langpacks-core-ja langpacks-core-font-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
 	dnf install -y ibus-kkc sazanami-gothic-fonts sazanami-mincho-fonts ipa-gothic-fonts ipa-mincho-fonts vlgothic-fonts vlgothic-p-fonts
 
 	echo "# Setting System Language -> $Language"
@@ -789,6 +830,12 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 
 	# Disable IPv6 Kernel Module
 	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+
+	# Disable IPv6 Kernel Module
+	grubby --info=ALL
+	grubby --update-kernel ALL --args ipv6.disable=1
+	grubby --info=ALL
+
 	# Disable IPv6 Kernel Parameter
 	sysctl -a
 
@@ -807,8 +854,6 @@ elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IP Protocol Stack -> $VpcNetwork"
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
-	echo "# Show IPv6 Kernel Module"
-	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
@@ -817,8 +862,6 @@ else
 	echo "# Default IP Protocol Stack"
 	echo "# Show IPv6 Network Interface Address"
 	ifconfig
-	echo "# Show IPv6 Kernel Module"
-	lsmod | awk '{print $1}' | grep ipv6
 	echo "# Show Network Listen Address and report"
 	netstat -an -A inet6
 	echo "# Show Network Routing Table"
