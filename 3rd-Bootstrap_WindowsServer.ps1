@@ -2649,7 +2649,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on 7-Zip version information]
-    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2106-x64.exe"
+    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2107-x64.exe"
     Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download File archiver (7-Zip)
