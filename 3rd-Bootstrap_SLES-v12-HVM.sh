@@ -874,6 +874,11 @@ systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
+# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
 # View Amazon CloudWatch Agent config files
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
