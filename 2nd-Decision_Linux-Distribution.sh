@@ -204,7 +204,7 @@ function get_bootstrap_script () {
    elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
          if [ $(echo ${REV} | grep -e '22.04') ]; then
             # Bootstrap Script for Ubuntu 22.04 LTS (⁠Jammy Jellyfish)
-            BootstrapScript=${ScriptForUbuntu2004}
+            BootstrapScript=${ScriptForUbuntu2204}
          elif [ $(echo ${REV} | grep -e '20.04') ]; then
             # Bootstrap Script for Ubuntu 20.04 LTS (Focal Fossa)
             BootstrapScript=${ScriptForUbuntu2004}
