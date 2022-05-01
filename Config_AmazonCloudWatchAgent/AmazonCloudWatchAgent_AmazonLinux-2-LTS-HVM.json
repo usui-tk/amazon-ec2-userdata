@@ -10,33 +10,43 @@
 					{
 						"file_path": "/var/log/messages",
 						"log_group_name": "/aws/ec2/amazonlinux2/var-log-message",
-						"log_stream_name": "{instance_id}"
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 7
 					},
 					{
 						"file_path": "/var/log/secure",
 						"log_group_name": "/aws/ec2/amazonlinux2/var-log-secure",
-						"log_stream_name": "{instance_id}"
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 7
 					},
 					{
 						"file_path": "/var/log/yum.log",
 						"log_group_name": "/aws/ec2/amazonlinux2/var-log-yum.log",
-						"log_stream_name": "{instance_id}"
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 7
 					},
 					{
 						"file_path": "/var/log/amazon/ssm/amazon-ssm-agent.log",
 						"log_group_name": "/aws/ec2/amazonlinux2/var-log-amazon-ssm-agent.log",
-						"log_stream_name": "{instance_id}"
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 7
 					},
 					{
 						"file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
 						"log_group_name": "/aws/ec2/amazonlinux2/opt/aws/amazon-cloudwatch-agent.log",
-						"log_stream_name": "{instance_id}"
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 7
 					}
 				]
 			}
 		}
 	},
 	"metrics": {
+		"aggregation_dimensions": [
+			[
+				"InstanceId"
+			]
+		],
 		"append_dimensions": {
 			"AutoScalingGroupName": "${aws:AutoScalingGroupName}",
 			"ImageId": "${aws:ImageId}",
@@ -44,6 +54,9 @@
 			"InstanceType": "${aws:InstanceType}"
 		},
 		"metrics_collected": {
+			"collectd": {
+				"metrics_aggregation_interval": 60
+			},
 			"cpu": {
 				"measurement": [
 					"cpu_usage_idle",
@@ -92,6 +105,11 @@
 					"tcp_time_wait"
 				],
 				"metrics_collection_interval": 10
+			},
+			"statsd": {
+				"metrics_aggregation_interval": 60,
+				"metrics_collection_interval": 10,
+				"service_address": ":8125"
 			},
 			"swap": {
 				"measurement": [
