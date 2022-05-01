@@ -505,7 +505,7 @@ ssm-cli get-instance-information
 #  aws ssm get-document --name "AmazonInspector-ManageAWSAgent" --document-version '$LATEST' --no-cli-pager --output json  | jq -r '.Content' | jq -r '.mainSteps[0].inputs.runCommand' | jq -r .[]
 ################################################################################
 
-cat > /tmp/AmazonInspector-ManageAWSAgent << __EOF__
+cat > /tmp/AmazonInspector-ManageAWSAgent << "__EOF__"
 #!/bin/bash
 # set -eux
 DOCUMENT_BUILD_VERSION="1.0.2"
