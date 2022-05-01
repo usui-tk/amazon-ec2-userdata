@@ -25,6 +25,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForOracleLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v8-HVM.sh"
    ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
    ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
+   ScriptForUbuntu2204="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-22.04-LTS-HVM.sh"
    ScriptForUbuntu2004="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-20.04-LTS-HVM.sh"
    ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
    ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
@@ -201,7 +202,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
-         if [ $(echo ${REV} | grep -e '20.04') ]; then
+         if [ $(echo ${REV} | grep -e '22.04') ]; then
+            # Bootstrap Script for Ubuntu 22.04 LTS (⁠Jammy Jellyfish)
+            BootstrapScript=${ScriptForUbuntu2004}
+         elif [ $(echo ${REV} | grep -e '20.04') ]; then
             # Bootstrap Script for Ubuntu 20.04 LTS (Focal Fossa)
             BootstrapScript=${ScriptForUbuntu2004}
          elif [ $(echo ${REV} | grep -e '18.04') ]; then
