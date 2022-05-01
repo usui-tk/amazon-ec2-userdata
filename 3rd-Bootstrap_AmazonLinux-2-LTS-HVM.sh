@@ -50,7 +50,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -93,7 +93,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # Default Package Update
 yum update -y
@@ -176,13 +176,13 @@ sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 
 # yum repository metadata Clean up
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # EPEL repository package [yum command]
 yum --disablerepo="*" --enablerepo="epel" list available > /tmp/command-log_yum_repository-package-list_epel.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-yum --enablerepo="epel" install -y atop bash-completion-extras bcftools byobu collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff
+yum --enablerepo="epel" install -y atop bash-completion-extras bcftools byobu collectd collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -833,7 +833,7 @@ yum-config-manager --add-repo "https://rpm.releases.hashicorp.com/AmazonLinux/ha
 cat /etc/yum.repos.d/hashicorp.repo
 
 # Cleanup repository information
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # HashiCorp Linux repository package [yum command]
 yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
@@ -859,7 +859,7 @@ source /etc/profile.d/terraform.sh
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 #-------------------------------------------------------------------------------
 # System information collection
