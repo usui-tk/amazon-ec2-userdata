@@ -438,7 +438,7 @@ fi
 # https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
 #-------------------------------------------------------------------------------
 
-# # Introduction of additional packages for ubuntu
+# Introduction of additional packages for ubuntu
 apt install -y -q libcurl4
 
 ################################################################################
