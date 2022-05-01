@@ -469,20 +469,21 @@ fi
 #-------------------------------------------------------------------------------
 
 snap list --all
-
 snap refresh
 
-snap list --all
-
-snap install amazon-ssm-agent --classic
-
-snap list amazon-ssm-agent
-
-snap restart amazon-ssm-agent
-
-snap services amazon-ssm-agent
-
-/snap/bin/amazon-ssm-agent.ssm-cli get-instance-information
+if [[ $(snap list --all | grep amazon-ssm-agent | wc -l) -gt 0 ]]; then
+	snap list --all
+	snap restart amazon-ssm-agent
+	snap list amazon-ssm-agent
+	snap services amazon-ssm-agent
+	/snap/bin/amazon-ssm-agent.ssm-cli get-instance-information
+else
+	snap list --all
+	snap install amazon-ssm-agent --classic
+	snap list amazon-ssm-agent
+	snap services amazon-ssm-agent
+	/snap/bin/amazon-ssm-agent.ssm-cli get-instance-information
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
