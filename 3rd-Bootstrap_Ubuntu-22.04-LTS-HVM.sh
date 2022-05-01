@@ -446,162 +446,161 @@ apt install -y -q libcurl4
 #  aws ssm get-document --name "AmazonInspector-ManageAWSAgent" --document-version '$LATEST' --no-cli-pager --output json  | jq -r '.Content' | jq -r '.mainSteps[0].inputs.runCommand' | jq -r .[]
 ################################################################################
 
-cat > /tmp/AmazonInspector-ManageAWSAgent << __EOF__
-#!/bin/bash
-# set -eux
-DOCUMENT_BUILD_VERSION="1.0.2"
-PUBKEY_FILE="inspector.gpg"
-INSTALLER_FILE="install"
-SIG_FILE="install.sig"
-function make_temp_dir() {
-	local stamp
-	stamp=$(date +%Y%m%d%H%M%S)
-	SECURE_TMP_DIR=${TMPDIR:-/tmp}/$stamp-$(awk 'BEGIN { srand (); print rand() }')-$$
-	mkdir -m 700 -- "$SECURE_TMP_DIR" 2>/dev/null
-	if [ $? -eq 0 ]; then
-		return 0
-	else
-		echo "Could not create temporary directory"
-		return 1
-	fi
-}
+# cat > /tmp/AmazonInspector-ManageAWSAgent << __EOF__
+# #!/bin/bash
+# # set -eux
+# DOCUMENT_BUILD_VERSION="1.0.2"
+# PUBKEY_FILE="inspector.gpg"
+# INSTALLER_FILE="install"
+# SIG_FILE="install.sig"
+# function make_temp_dir() {
+# 	local stamp
+# 	stamp=$(date +%Y%m%d%H%M%S)
+# 	SECURE_TMP_DIR=${TMPDIR:-/tmp}/$stamp-$(awk 'BEGIN { srand (); print rand() }')-$$
+# 	mkdir -m 700 -- "$SECURE_TMP_DIR" 2>/dev/null
+# 	if [ $? -eq 0 ]; then
+# 		return 0
+# 	else
+# 		echo "Could not create temporary directory"
+# 		return 1
+# 	fi
+# }
 
-declare SECURE_TMP_DIR
-if ! make_temp_dir; then
-	exit 1
-fi
+# declare SECURE_TMP_DIR
+# if ! make_temp_dir; then
+# 	exit 1
+# fi
 
-trap "rm -rf ${SECURE_TMP_DIR}" EXIT
-PUBKEY_PATH="${SECURE_TMP_DIR}/${PUBKEY_FILE}"
-INSTALLER_PATH="${SECURE_TMP_DIR}/${INSTALLER_FILE}"
-SIG_PATH="${SECURE_TMP_DIR}/${SIG_FILE}"
-if hash curl 2>/dev/null
-then
-	DOWNLOAD_CMD="curl -s --fail --retry 5 --max-time 30"
-	CONSOLE_ARG=""
-	TO_FILE_ARG=" -o "
-	PUT_METHOD_ARG=" -X PUT "
-	HEADER_ARG=" --head "
-else
-	DOWNLOAD_CMD="wget --quiet --tries=5 --timeout=30 "
-	CONSOLE_ARG=" -qO- "
-	TO_FILE_ARG=" -O "
-	PUT_METHOD_ARG=" --method=PUT "
-	HEADER_ARG=" -S --spider "
-fi
+# trap "rm -rf ${SECURE_TMP_DIR}" EXIT
+# PUBKEY_PATH="${SECURE_TMP_DIR}/${PUBKEY_FILE}"
+# INSTALLER_PATH="${SECURE_TMP_DIR}/${INSTALLER_FILE}"
+# SIG_PATH="${SECURE_TMP_DIR}/${SIG_FILE}"
+# if hash curl 2>/dev/null
+# then
+# 	DOWNLOAD_CMD="curl -s --fail --retry 5 --max-time 30"
+# 	CONSOLE_ARG=""
+# 	TO_FILE_ARG=" -o "
+# 	PUT_METHOD_ARG=" -X PUT "
+# 	HEADER_ARG=" --head "
+# else
+# 	DOWNLOAD_CMD="wget --quiet --tries=5 --timeout=30 "
+# 	CONSOLE_ARG=" -qO- "
+# 	TO_FILE_ARG=" -O "
+# 	PUT_METHOD_ARG=" --method=PUT "
+# 	HEADER_ARG=" -S --spider "
+# fi
 
-IMDSV2_TOKEN=$( ${DOWNLOAD_CMD} ${CONSOLE_ARG} ${PUT_METHOD_ARG} --header "X-aws-ec2-metadata-token-ttl-seconds: 21600" http://169.254.169.254/latest/api/token)
-IMDSV2_TOKEN_HEADER=""
-if [[ -n "${IMDSV2_TOKEN}" ]]; then
-	IMDSV2_TOKEN_HEADER=" --header X-aws-ec2-metadata-token:${IMDSV2_TOKEN} "
-fi
+# IMDSV2_TOKEN=$( ${DOWNLOAD_CMD} ${CONSOLE_ARG} ${PUT_METHOD_ARG} --header "X-aws-ec2-metadata-token-ttl-seconds: 21600" http://169.254.169.254/latest/api/token)
+# IMDSV2_TOKEN_HEADER=""
+# if [[ -n "${IMDSV2_TOKEN}" ]]; then
+# 	IMDSV2_TOKEN_HEADER=" --header X-aws-ec2-metadata-token:${IMDSV2_TOKEN} "
+# fi
 
-METADATA_AZ=$( ${DOWNLOAD_CMD} ${CONSOLE_ARG} ${IMDSV2_TOKEN_HEADER} http://169.254.169.254/latest/meta-data/placement/availability-zone)
-METADATA_REGION=$( echo $METADATA_AZ | sed -e "s/[a-z]*$//" )
-if [[ -n "${METADATA_REGION}" ]]; then
-	REGION=${METADATA_REGION}
-else
-	echo "No region information was obtained."
-	exit 2
-fi
+# METADATA_AZ=$( ${DOWNLOAD_CMD} ${CONSOLE_ARG} ${IMDSV2_TOKEN_HEADER} http://169.254.169.254/latest/meta-data/placement/availability-zone)
+# METADATA_REGION=$( echo $METADATA_AZ | sed -e "s/[a-z]*$//" )
+# if [[ -n "${METADATA_REGION}" ]]; then
+# 	REGION=${METADATA_REGION}
+# else
+# 	echo "No region information was obtained."
+# 	exit 2
+# fi
 
-AGENT_INVENTORY_FILE="AWS_AGENT_INVENTORY"
-BASE_URL="https://s3.dualstack.${REGION}.amazonaws.com/aws-agent.${REGION}/linux/latest"
-PUBKEY_FILE_URL="${BASE_URL}/${PUBKEY_FILE}"
-INSTALLER_FILE_URL="${BASE_URL}/${INSTALLER_FILE}"
-SIG_FILE_URL="${BASE_URL}/${SIG_FILE}"
-AGENT_METRICS_URL="${BASE_URL}/${AGENT_INVENTORY_FILE}?x-installer-version=${DOCUMENT_BUILD_VERSION}&x-installer-type=ssm-installer&x-op={{Operation}}"
-function handle_status() {
-	local result_param="nil"
-	local result="nil"
-	if [[ $# -eq 0 ]]; then
-		echo "Error while handling status function. At least one argument should be passed."
-		exit 129
-	else
-		if [[ $# > 1 ]]; then
-			result_param=$2
-		fi
-		result=$1
-	fi
+# AGENT_INVENTORY_FILE="AWS_AGENT_INVENTORY"
+# BASE_URL="https://s3.dualstack.${REGION}.amazonaws.com/aws-agent.${REGION}/linux/latest"
+# PUBKEY_FILE_URL="${BASE_URL}/${PUBKEY_FILE}"
+# INSTALLER_FILE_URL="${BASE_URL}/${INSTALLER_FILE}"
+# SIG_FILE_URL="${BASE_URL}/${SIG_FILE}"
+# AGENT_METRICS_URL="${BASE_URL}/${AGENT_INVENTORY_FILE}?x-installer-version=${DOCUMENT_BUILD_VERSION}&x-installer-type=ssm-installer&x-op={{Operation}}"
+# function handle_status() {
+# 	local result_param="nil"
+# 	local result="nil"
+# 	if [[ $# -eq 0 ]]; then
+# 		echo "Error while handling status function. At least one argument should be passed."
+# 		exit 129
+# 	else
+# 		if [[ $# > 1 ]]; then
+# 			result_param=$2
+# 		fi
+# 		result=$1
+# 	fi
 
-	#start publishing metrics
-	${DOWNLOAD_CMD} ${HEADER_ARG} "${AGENT_METRICS_URL}&x-result=${result}&x-result-param=${result_param}"
-	echo "Script exited with status code ${result} ${result_param}"
+# 	#start publishing metrics
+# 	${DOWNLOAD_CMD} ${HEADER_ARG} "${AGENT_METRICS_URL}&x-result=${result}&x-result-param=${result_param}"
+# 	echo "Script exited with status code ${result} ${result_param}"
 
-	if [[ "${result}" = "SUCCESS" ]]; then
-		exit 0
-	else
-		exit 1
-	fi
-}
+# 	if [[ "${result}" = "SUCCESS" ]]; then
+# 		exit 0
+# 	else
+# 		exit 1
+# 	fi
+# }
 
-#get the public key
-${DOWNLOAD_CMD} ${TO_FILE_ARG} "${PUBKEY_PATH}" ${PUBKEY_FILE_URL}
-if [[ $? != 0 ]]; then
-	echo "Failed to download public key from ${PUBKEY_FILE_URL}"
-	handle_status "FILE_DOWNLOAD_ERROR" "${PUBKEY_PATH}"
-fi
+# #get the public key
+# ${DOWNLOAD_CMD} ${TO_FILE_ARG} "${PUBKEY_PATH}" ${PUBKEY_FILE_URL}
+# if [[ $? != 0 ]]; then
+# 	echo "Failed to download public key from ${PUBKEY_FILE_URL}"
+# 	handle_status "FILE_DOWNLOAD_ERROR" "${PUBKEY_PATH}"
+# fi
 
-#get the installer
-${DOWNLOAD_CMD} ${TO_FILE_ARG} "${INSTALLER_PATH}" ${INSTALLER_FILE_URL}
-if [[ $? != 0 ]]; then
-	echo "Failed to download installer from ${INSTALLER_FILE_URL}"
-	handle_status "FILE_DOWNLOAD_ERROR" "${INSTALLER_PATH}"
-fi
+# #get the installer
+# ${DOWNLOAD_CMD} ${TO_FILE_ARG} "${INSTALLER_PATH}" ${INSTALLER_FILE_URL}
+# if [[ $? != 0 ]]; then
+# 	echo "Failed to download installer from ${INSTALLER_FILE_URL}"
+# 	handle_status "FILE_DOWNLOAD_ERROR" "${INSTALLER_PATH}"
+# fi
 
-#get the signature
-${DOWNLOAD_CMD} ${TO_FILE_ARG} "${SIG_PATH}" ${SIG_FILE_URL}
-if [[ $? != 0 ]]; then
-	echo "Failed to download installer signature from ${SIG_FILE_URL}"
-	handle_status "FILE_DOWNLOAD_ERROR" "${SIG_PATH}"
-fi
+# #get the signature
+# ${DOWNLOAD_CMD} ${TO_FILE_ARG} "${SIG_PATH}" ${SIG_FILE_URL}
+# if [[ $? != 0 ]]; then
+# 	echo "Failed to download installer signature from ${SIG_FILE_URL}"
+# 	handle_status "FILE_DOWNLOAD_ERROR" "${SIG_PATH}"
+# fi
 
-gpg_results=$( gpg -q --no-default-keyring --keyring "${PUBKEY_PATH}" --verify "${SIG_PATH}" "${INSTALLER_PATH}" 2>&1 )
+# gpg_results=$( gpg -q --no-default-keyring --keyring "${PUBKEY_PATH}" --verify "${SIG_PATH}" "${INSTALLER_PATH}" 2>&1 )
 
-if [[ $? -eq 0 ]]; then
-	echo "Validated " "${INSTALLER_PATH}" "signature with: $(echo "${gpg_results}" | grep -i fingerprint)"
-else
-	echo "Error validating signature of " "${INSTALLER_PATH}" ", terminating.  Please contact AWS Support."
-	echo ${gpg_results}
-	handle_status "SIGNATURE_MISMATCH" "${INSTALLER_PATH}"
-fi
-bash ${INSTALLER_PATH}
-__EOF__
+# if [[ $? -eq 0 ]]; then
+# 	echo "Validated " "${INSTALLER_PATH}" "signature with: $(echo "${gpg_results}" | grep -i fingerprint)"
+# else
+# 	echo "Error validating signature of " "${INSTALLER_PATH}" ", terminating.  Please contact AWS Support."
+# 	echo ${gpg_results}
+# 	handle_status "SIGNATURE_MISMATCH" "${INSTALLER_PATH}"
+# fi
+# bash ${INSTALLER_PATH}
+# __EOF__
 
-################################################################################
+# ################################################################################
 
+# # # Variable initialization
+# InspectorInstallStatus="0"
 
-# # Variable initialization
-InspectorInstallStatus="0"
+# # Execute the contents of the SSM document (Linux-Shellscript)
+# bash -ex /tmp/AmazonInspector-ManageAWSAgent || InspectorInstallStatus=$?
 
-# Execute the contents of the SSM document (Linux-Shellscript)
-bash -ex /tmp/AmazonInspector-ManageAWSAgent || InspectorInstallStatus=$?
+# # Check the exit code of the Amazon Inspector Agent installer script
+# if [ $InspectorInstallStatus -eq 0 ]; then
+# 	apt show awsagent
 
-# Check the exit code of the Amazon Inspector Agent installer script
-if [ $InspectorInstallStatus -eq 0 ]; then
-	apt show awsagent
+# 	systemctl daemon-reload
 
-	systemctl daemon-reload
+# 	systemctl restart awsagent
 
-	systemctl restart awsagent
+# 	systemctl status -l awsagent
 
-	systemctl status -l awsagent
+# 	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
+# 	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
+# 		systemctl enable awsagent
+# 		systemctl is-enabled awsagent
+# 	fi
 
-	# Configure Amazon Inspector Agent software (Start Daemon awsagent)
-	if [ $(systemctl is-enabled awsagent) = "disabled" ]; then
-		systemctl enable awsagent
-		systemctl is-enabled awsagent
-	fi
+# 	sleep 15
 
-	sleep 15
+# 	/opt/aws/awsagent/bin/awsagent status
+# else
+# 	echo "Failed to execute Amazon Inspector Agent installer script"
+# fi
 
-	/opt/aws/awsagent/bin/awsagent status
-else
-	echo "Failed to execute Amazon Inspector Agent installer script"
-fi
-
-# Cleanup
-apt clean -y -q
+# # Cleanup
+# apt clean -y -q
 
 
 #-------------------------------------------------------------------------------
@@ -609,45 +608,45 @@ apt clean -y -q
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
-curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
-dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
+# curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
+# dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
 
-apt show amazon-cloudwatch-agent
+# apt show amazon-cloudwatch-agent
 
-cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+# cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-systemctl daemon-reload
+# systemctl daemon-reload
 
-# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-	systemctl enable amazon-cloudwatch-agent
-	systemctl is-enabled amazon-cloudwatch-agent
-fi
+# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+# 	systemctl enable amazon-cloudwatch-agent
+# 	systemctl is-enabled amazon-cloudwatch-agent
+# fi
 
-# Configure Amazon CloudWatch Agent software (Monitor settings)
-curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-cat "/tmp/config.json"
+# # Configure Amazon CloudWatch Agent software (Monitor settings)
+# curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+# cat "/tmp/config.json"
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-systemctl status -l amazon-cloudwatch-agent
+# systemctl status -l amazon-cloudwatch-agent
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+# /usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# View Amazon CloudWatch Agent config files
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# # View Amazon CloudWatch Agent config files
+# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+# cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
