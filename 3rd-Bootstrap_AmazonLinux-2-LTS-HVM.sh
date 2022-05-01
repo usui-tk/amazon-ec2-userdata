@@ -994,24 +994,24 @@ if [ $(systemctl is-enabled autotune) = "disabled" ]; then
 	systemctl is-enabled autotune
 fi
 
-systemctl restart autotune
-
 systemctl status -l autotune
 
-autotune status
-autotune list
+if [ $(systemctl is-active autotune) = "active" ]; then
+	autotune status
+	autotune list
 
-# Configure ec2sys-autotune software (Check Current profile)
-autotune active
-autotune showconfig
+	# Configure ec2sys-autotune software (Check Current profile)
+	autotune active
+	autotune showconfig
 
-# Configure ec2sys-autotune software
-# autotune profile base
-# autotune profile placement-group
-# autotune profile udp-server
-# autotune apply
-# autotune active
-# autotune showconfig
+	# Configure ec2sys-autotune software
+	# autotune profile base
+	# autotune profile placement-group
+	# autotune profile udp-server
+	# autotune apply
+	# autotune active
+	# autotune showconfig
+fi
 
 #-------------------------------------------------------------------------------
 # System Setting
