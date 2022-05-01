@@ -32,7 +32,7 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Ubuntu-20.04-LTS-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Ubuntu-22.04-LTS-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
