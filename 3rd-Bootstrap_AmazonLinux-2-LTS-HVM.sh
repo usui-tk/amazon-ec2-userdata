@@ -994,8 +994,6 @@ if [ $(systemctl is-enabled autotune) = "disabled" ]; then
 	systemctl is-enabled autotune
 fi
 
-systemctl status -l autotune
-
 if [ $(systemctl is-active autotune) = "active" ]; then
 	autotune status
 	autotune list
