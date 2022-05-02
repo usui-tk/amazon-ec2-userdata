@@ -435,7 +435,7 @@ fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
-# https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
+# https://docs.aws.amazon.com/inspector/latest/user/supported.html
 #-------------------------------------------------------------------------------
 
 # Introduction of additional packages for ubuntu

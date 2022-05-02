@@ -497,7 +497,7 @@ ssm-cli get-instance-information
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon Inspector Agent]
-# https://docs.aws.amazon.com/inspector/latest/userguide/inspector_installing-uninstalling-agents.html
+# https://docs.aws.amazon.com/inspector/latest/user/supported.html
 #-------------------------------------------------------------------------------
 
 ################################################################################
