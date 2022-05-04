@@ -393,7 +393,7 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.4" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP4"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
