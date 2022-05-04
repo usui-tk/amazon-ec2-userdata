@@ -112,6 +112,13 @@ zypper repos
 #   https://www.suse.com/products/server/features/modules/
 SUSEConnect --list-extensions
 
+# Update core package
+zypper --quiet --non-interactive update systemd zypper
+
+systemctl daemon-reload
+
+systemctl daemon-reexec
+
 # Update default package
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
