@@ -216,7 +216,7 @@ zypper --quiet --non-interactive install --type pattern enhanced_base
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace cloud-netconfig-ec2 collectd conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core gperftools hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace clone-master-clean-up cloud-netconfig-ec2 collectd conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core gperftools hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
 
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 
@@ -394,25 +394,46 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
 	if [ "${VERSION_ID}" = "15.3" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP4"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.4/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP3
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect -p PackageHub/15.3/x86_64
-		# sleep 5
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.3/x86_64
+		sleep 5
 
 		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
+		zypper clean --all
+		zypper --quiet refresh -fdb
 
-		# zypper repos
+		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr
 
 	elif [ "${VERSION_ID}" = "15.2" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP2"
@@ -1108,7 +1129,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
@@ -1119,11 +1140,11 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-# zypper --quiet --non-interactive install ansible
+zypper --quiet --non-interactive install ansible
 
-# ansible --version
+ansible --version
 
-# ansible localhost -m setup
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
