@@ -247,7 +247,7 @@ zypper --quiet --non-interactive install --type pattern apparmor
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bind-utils blktrace cloud-netconfig-ec2 collectd curl dstat ebtables ethtool expect fio gdisk git-core hdparm hostinfo intltool iotop iotop kexec-tools libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nmap numactl nvme-cli nvmetcli nvml-tools parted patchutils psmisc rng-tools rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bind-utils blktrace clone-master-clean-up cloud-netconfig-ec2 curl dstat ebtables ethtool expect fio gdisk git-core hdparm hostinfo intltool iotop iotop kexec-tools libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nmap numactl nvme-cli nvmetcli nvml-tools parted patchutils psmisc rng-tools rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
 
 zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 
@@ -329,76 +329,23 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
 #   https://build.opensuse.org/
-#   https://download.opensuse.org/repositories/utilities/
 #   https://download.opensuse.org/repositories/network/
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.6" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP6"
-	elif [ "${VERSION_ID}" = "12.5" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP5"
-	elif [ "${VERSION_ID}" = "12.4" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP4"
 
-		# Add openSUSE Build Service Repository [utilities/SLE_12_SP4_Backports] : Version - SUSE Linux Enterprise 12 SP4
-		zypper repos
-		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP4" "https://download.opensuse.org/repositories/utilities/SLE_12_SP4_Backports/utilities.repo"
-		zypper --gpg-auto-import-keys refresh utilities
+	# Add openSUSE Build Service Repository [Networking services and related tools (SLE_12)]
+	zypper repos
+	zypper addrepo --check --refresh --name "Networking services and related tools (SLE_12)" "https://download.opensuse.org/repositories/network/SLE_12/network.repo"
+	zypper --gpg-auto-import-keys refresh network
 
-		# Repository Configure openSUSE Build Service Repository
-		zypper repos
-		zypper clean --all
-		zypper refresh -fdb
-		zypper repos
+	# Repository Configure openSUSE Build Service Repository
+	zypper repos
+	zypper clean --all
+	zypper refresh -fdb
+	zypper repos
 
-		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-		zypper --non-interactive install atop jq
-
-	elif [ "${VERSION_ID}" = "12.3" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP3"
-
-		# Add openSUSE Build Service Repository [utilities/SLE_12_SP3_Backports] : Version - SUSE Linux Enterprise 12 SP3
-		zypper repos
-		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP3" "https://download.opensuse.org/repositories/utilities/SLE_12_SP3_Backports/utilities.repo"
-		zypper --gpg-auto-import-keys refresh utilities
-
-		# Add openSUSE Build Service Repository [network/SLE_12_SP3] : Version - SUSE Linux Enterprise 12 SP3
-		zypper repos
-		zypper addrepo --check --refresh --name "openSUSE-NetworkUtilities-SLE-12-SP3" "https://download.opensuse.org/repositories/network/SLE_12_SP3/network.repo"
-		zypper --gpg-auto-import-keys refresh network
-
-		# Repository Configure openSUSE Build Service Repository
-		zypper repos
-		zypper clean --all
-		zypper refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-		zypper --non-interactive install atop jq
-
-	elif [ "${VERSION_ID}" = "12.2" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP2"
-
-		# Add openSUSE Build Service Repository [utilities/SLE_12_SP2_Backports] : Version - SUSE Linux Enterprise 12 SP2
-		zypper repos
-		zypper addrepo --check --refresh --name "openSUSE-Backports-SLE-12-SP2" "https://download.opensuse.org/repositories/utilities/SLE_12_SP2_Backports/utilities.repo"
-		zypper --gpg-auto-import-keys refresh utilities
-
-		# Repository Configure openSUSE Build Service Repository
-		zypper repos
-		zypper clean --all
-		zypper refresh -fdb
-		zypper repos
-
-	elif [ "${VERSION_ID}" = "12.1" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP1"
-	elif [ "${VERSION_ID}" = "12" ]; then
-		echo "SUSE Linux Enterprise Server 12 GA"
-	else
-		echo "SUSE Linux Enterprise Server 12 (Unknown)"
-	fi
 fi
 
 #-------------------------------------------------------------------------------
@@ -413,64 +360,64 @@ if [ -n "$VERSION_ID" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP6"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP6
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/12.6/x86_64"
-		# sleep 5
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.6/x86_64"
+		sleep 5
 
 		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
+		zypper clean --all
+		zypper --quiet refresh -fdb
 
-		# zypper repos
+		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12.5" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP5"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP5
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/12.5/x86_64"
-		# sleep 5
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.5/x86_64"
+		sleep 5
 
 		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
+		zypper clean --all
+		zypper --quiet refresh -fdb
 
-		# zypper repos
+		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12.4" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP4"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
-		# SUSEConnect --product "PackageHub/12.4/x86_64"
-		# sleep 5
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect --product "PackageHub/12.4/x86_64"
+		sleep 5
 
 		# Repository Configure SUSE Package Hub Repository
-		# SUSEConnect --status-text
-		# SUSEConnect --list-extensions
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
 
-		# zypper clean --all
-		# zypper --quiet refresh -fdb
+		zypper clean --all
+		zypper --quiet refresh -fdb
 
-		# zypper repos
+		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		# zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12.3" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP3"
@@ -490,7 +437,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12.2" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP2"
@@ -510,7 +457,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12.1" ]; then
 		echo "SUSE Linux Enterprise Server 12 SP1"
@@ -530,7 +477,7 @@ if [ -n "$VERSION_ID" ]; then
 		zypper repos
 
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
+		zypper --quiet --non-interactive install collectl mtr jq
 
 	elif [ "${VERSION_ID}" = "12" ]; then
 		echo "SUSE Linux Enterprise Server 12 GA"
@@ -1086,7 +1033,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
@@ -1097,11 +1044,11 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-# zypper --non-interactive install ansible
+zypper --non-interactive install ansible
 
-# ansible --version
+ansible --version
 
-# ansible localhost -m setup
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
