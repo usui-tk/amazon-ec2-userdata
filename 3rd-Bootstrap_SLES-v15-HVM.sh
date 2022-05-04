@@ -209,9 +209,12 @@ zypper --quiet --non-interactive install --type pattern enhanced_base
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace cloud-netconfig-ec2 conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core gperftools hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace cloud-netconfig-ec2 collectd conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core gperftools hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat systemd-bash-completion tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
+
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
+
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
