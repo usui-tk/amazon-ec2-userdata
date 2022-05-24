@@ -159,12 +159,12 @@ dnf update -y
 dnf install -y kernel-modules kernel-modules-extra
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
-dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
-dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
-## dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server strace udica
+dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
 # Package Install CentOS support tools (from CentOS Community Repository)
 # dnf install -y redhat-lsb-core
@@ -172,7 +172,6 @@ dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
 # https://access.redhat.com/solutions/2206511
-# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/managing_monitoring_and_updating_the_kernel/applying-patches-with-kernel-live-patching_managing-monitoring-and-updating-the-kernel
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS kernel live-patching tools (from CentOS Community Repository)
@@ -200,12 +199,11 @@ dnf list installed | grep kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
-# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9-beta/html-single/managing_systems_using_the_rhel_9_web_console/index
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/managing_systems_using_the_rhel_9_web_console/index
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS Web-Based support tools (from CentOS Community Repository)
-dnf install -y cockpit cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
-## dnf install -y cockpit cockpit-dashboard cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
@@ -226,8 +224,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Python 3.9 Runtime (from CentOS Community Repository)
-
-dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools
+dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
 dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 python3-pyasn1-modules python3-pyasn1-modules python3-pyyaml "python3-requests*" python3-six python3-urllib3
@@ -566,44 +563,47 @@ ssm-cli get-instance-information
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
+# [To Be Update]
+# The collectd package is not yet provided (we plan to introduce the package via EPEL)
 
-rpm -qi amazon-cloudwatch-agent
+# dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
 
-cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+# rpm -qi amazon-cloudwatch-agent
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-systemctl daemon-reload
+# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-	systemctl enable amazon-cloudwatch-agent
-	systemctl is-enabled amazon-cloudwatch-agent
-fi
+# systemctl daemon-reload
 
-# Configure Amazon CloudWatch Agent software (Monitor settings)
-curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-cat "/tmp/config.json"
+# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+# 	systemctl enable amazon-cloudwatch-agent
+# 	systemctl is-enabled amazon-cloudwatch-agent
+# fi
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+# # Configure Amazon CloudWatch Agent software (Monitor settings)
+# curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+# cat "/tmp/config.json"
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-systemctl status -l amazon-cloudwatch-agent
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# systemctl status -l amazon-cloudwatch-agent
 
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+# /usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-# View Amazon CloudWatch Agent config files
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+# # View Amazon CloudWatch Agent config files
+# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+
+# cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
