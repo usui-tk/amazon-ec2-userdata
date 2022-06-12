@@ -686,7 +686,7 @@ ssm-cli get-instance-information
 # [To Be Update]
 # The collectd package is not yet provided (we plan to introduce the package via EPEL)
 
-# dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
+# dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/redhat/amd64/latest/amazon-cloudwatch-agent.rpm"
 
 # rpm -qi amazon-cloudwatch-agent
 
