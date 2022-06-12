@@ -17,6 +17,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
    ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
    ScriptForRockyLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v8-HVM.sh"
+   ScriptForAlmaLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v9-HVM.sh"
    ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
    ScriptForCentOSv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v9-HVM.sh"
    ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
@@ -166,7 +167,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "AlmaLinux" ] || [ "${DIST_TYPE}" = "almalinux" ]; then
-         if [ $(echo ${REV} | grep -e '8.') ]; then
+         if [ $(echo ${REV} | grep -e '9.') ]; then
+            # Bootstrap Script for AlmaLinux v9.x
+            BootstrapScript=${ScriptForAlmaLinuxv9}
+         elif [ $(echo ${REV} | grep -e '8.') ]; then
             # Bootstrap Script for AlmaLinux v8.x
             BootstrapScript=${ScriptForAlmaLinuxv8}
          else
