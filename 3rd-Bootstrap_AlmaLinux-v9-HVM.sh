@@ -110,12 +110,12 @@ dnf update -y dnf dnf-data
 dnf repolist all
 dnf module list
 
-# Package Install CentOS yum repository Files (from AlmaLinux Community Repository)
+# Package Install AlmaLinux yum repository Files (from AlmaLinux Community Repository)
 find /etc/yum.repos.d/
 
 dnf search release
 
-dnf install -y centos-stream-release
+dnf install -y almalinux-release
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -155,10 +155,10 @@ dnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS Linux-Kernel Modules (from AlmaLinux Community Repository)
+# Package Install AlmaLinux Linux-Kernel Modules (from AlmaLinux Community Repository)
 dnf install -y kernel-modules kernel-modules-extra
 
-# Package Install CentOS System Administration Tools (from AlmaLinux Community Repository)
+# Package Install AlmaLinux System Administration Tools (from AlmaLinux Community Repository)
 dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
@@ -166,7 +166,7 @@ dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-pyt
 dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
-# Package Install CentOS support tools (from AlmaLinux Community Repository)
+# Package Install AlmaLinux support tools (from AlmaLinux Community Repository)
 # dnf install -y redhat-lsb-core
 
 #-------------------------------------------------------------------------------
@@ -174,7 +174,7 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # https://access.redhat.com/solutions/2206511
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS kernel live-patching tools (from AlmaLinux Community Repository)
+# Package Install AlmaLinux kernel live-patching tools (from AlmaLinux Community Repository)
 dnf install -y kpatch kpatch-dnf
 
 rpm -qi kpatch
@@ -202,7 +202,7 @@ dnf list installed | grep kpatch
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/managing_systems_using_the_rhel_9_web_console/index
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS Web-Based support tools (from AlmaLinux Community Repository)
+# Package Install AlmaLinux Web-Based support tools (from AlmaLinux Community Repository)
 dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
@@ -243,7 +243,7 @@ activate-global-python-argcomplete
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-dnf install -y epel-release epel-next-release
+dnf install -y epel-release
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
@@ -259,7 +259,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-next list > /tmp/command-log_dnf_repository-package-list_epel-next.txt
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
-# Package Install CentOS System Administration Tools (from EPEL Repository)
+# Package Install AlmaLinux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y atop colordiff dateutils fping htop iftop inotify-tools ipv6calc ncdu screen stressapptest
 # dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping wdiff yamllint
 
@@ -403,7 +403,7 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=CentOS Stream 9*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=AlmaLinux OS 9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 fi
@@ -643,10 +643,10 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS System Administration Tools (from AlmaLinux Community Repository)
+# Package Install AlmaLinux System Administration Tools (from AlmaLinux Community Repository)
 dnf install -y ansible-core ansible-collection-redhat-rhel_mgmt ansible-pcp ansible-test
 
-# Package Install CentOS System Administration Tools (from EPEL Repository)
+# Package Install AlmaLinux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y ansible-collection-community-general
 
 ansible --version
