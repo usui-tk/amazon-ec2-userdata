@@ -295,7 +295,9 @@ dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
-dnf repository-packages epel-playground list > /tmp/command-log_dnf_repository-package-list_epel-playground.txt
+dnf repository-packages epel-modular list > /tmp/command-log_dnf_repository-package-list_epel-modular.txt
+dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
+dnf repository-packages epel-testing-modular list > /tmp/command-log_dnf_repository-package-list_epel-testing-modular.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping wdiff yamllint
