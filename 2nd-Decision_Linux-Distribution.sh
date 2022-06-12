@@ -13,6 +13,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForAmazonLinux2022="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2022-HVM.sh"
    ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
    ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AmazonLinux-1-HVM.sh"
+   ScriptForRHELv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v9-HVM.sh"
    ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
    ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
    ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
@@ -147,7 +148,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "RHEL" ] || [ "${DIST}" = "Red Hat Enterprise Linux Server" ] || [ "${DIST_TYPE}" = "rhel" ]; then
-         if [ $(echo ${REV} | grep -e '8.') ]; then
+         if [ $(echo ${REV} | grep -e '9.') ]; then
+            # Bootstrap Script for Red Hat Enterprise Linux v9.x
+            BootstrapScript=${ScriptForRHELv9}
+         elif [ $(echo ${REV} | grep -e '8.') ]; then
             # Bootstrap Script for Red Hat Enterprise Linux v8.x
             BootstrapScript=${ScriptForRHELv8}
          elif [ $(echo ${REV} | grep -e '7.') ]; then
