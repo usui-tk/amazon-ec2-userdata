@@ -850,12 +850,21 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 
 	ansible localhost -m setup
 else
-	# Package Install Ansible (from EPEL Repository)
-	dnf --enablerepo="epel" install -y ansible ansible-doc
+	if [ $(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" | awk '{print $1}' | grep -ie  "ansible-2-for-rhel-8-rhui-rpms") ]; then
+		# Package Install Ansible (from Red Hat Official Repository)
+		dnf install -y ansible
 
-	ansible --version
+		ansible --version
 
-	ansible localhost -m setup
+		ansible localhost -m setup
+	else
+		# Package Install Ansible (from EPEL Repository)
+		dnf --enablerepo="epel" install -y ansible ansible-doc
+
+		ansible --version
+
+		ansible localhost -m setup
+	fi
 fi
 
 #-------------------------------------------------------------------------------
