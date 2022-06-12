@@ -837,6 +837,9 @@ source /etc/profile.d/ec2rl.sh
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
 # Package Install RHEL System Administration Tools (from Red Hat Official Repository)
 # dnf install -y ansible ansible-doc rhel-system-roles
 
