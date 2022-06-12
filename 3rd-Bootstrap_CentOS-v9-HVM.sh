@@ -260,7 +260,7 @@ dnf repository-packages epel-next list > /tmp/command-log_dnf_repository-package
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y atop colordiff dateutils fping htop iftop inotify-tools ipv6calc ncdu screen stressapptest
+dnf --enablerepo="epel" install -y atop colordiff dateutils fping htop iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu screen stressapptest wdiff
 # dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
