@@ -67,8 +67,8 @@ if [ -f /etc/redhat-release ]; then
 	cat "/etc/redhat-release"
 fi
 
-if [ -f /etc/centos-release ]; then
-	cat "/etc/centos-release"
+if [ -f /etc/almalinux-release ]; then
+	cat "/etc/almalinux-release"
 fi
 
 # Default installation package [rpm command]
@@ -256,7 +256,6 @@ dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
-dnf repository-packages epel-next list > /tmp/command-log_dnf_repository-package-list_epel-next.txt
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install AlmaLinux System Administration Tools (from EPEL Repository)
