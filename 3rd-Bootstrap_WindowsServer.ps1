@@ -2584,7 +2584,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on 7-Zip version information]
-    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2107-x64.exe"
+    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2200-x64.exe"
     Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download File archiver (7-Zip)
@@ -2800,7 +2800,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinSCP version information]
-    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.17.9-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.21-Setup.exe"
     Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinSCP)"
@@ -2821,7 +2821,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.2.0-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.3.1.1-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
