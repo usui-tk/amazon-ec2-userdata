@@ -100,7 +100,7 @@ find /etc/yum.repos.d/
 
 yum list *release-el7
 
-yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oracle-software-release-el7 oraclelinux-developer-release-el7
+yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-software-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oracle-software-release-el7 oraclelinux-developer-release-el7
 yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -140,7 +140,7 @@ yum-config-manager --enable ol7_oracle_software
 yum-config-manager --enable ol7_oracle_instantclient21
 yum-config-manager --enable ol7_developer
 yum-config-manager --enable ol7_developer_EPEL
-yum-config-manager --enable ol7_olcne14
+yum-config-manager --enable ol7_olcne15
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 yum-config-manager --disable ol7_UEKR5
@@ -148,6 +148,7 @@ yum-config-manager --disable ol7_olcne
 yum-config-manager --disable ol7_olcne11
 yum-config-manager --disable ol7_olcne12
 yum-config-manager --disable ol7_olcne13
+yum-config-manager --disable ol7_olcne14
 yum-config-manager --disable ol7_developer_UEKR5
 yum-config-manager --disable ol7_developer_UEKR6
 yum-config-manager --disable ol7_developer_olcne
