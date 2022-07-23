@@ -123,7 +123,17 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.5" ]; then
+		# Next version of service pack
+		echo "SUSE Linux Enterprise Server 15 SP5"
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.4" ]; then
+		# Current latest version of service pack (2022.6)
+		echo "SUSE Linux Enterprise Server 15 SP4"
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
 		cat /etc/os-release
 		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
@@ -225,7 +235,12 @@ zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-is
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.4" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP4"
+		zypper --quiet --non-interactive install jq purge-kernels-service
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+	elif [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
 		zypper --quiet --non-interactive install jq purge-kernels-service
 		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
@@ -267,7 +282,26 @@ SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.4" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP4"
+
+		zypper --quiet --non-interactive install python3-susepubliccloudinfo
+
+		if [ $SapFlag -gt 0 ]; then
+			echo "SUSE Linux Enterprise Server for SAP Applications 15"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		else
+			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		fi
+
+	elif [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
 
 		zypper --quiet --non-interactive install python3-susepubliccloudinfo
@@ -393,7 +427,28 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.4" ]; then
+	if [ "${VERSION_ID}" = "15.5" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP4"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.5/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15.4" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP4"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
@@ -511,7 +566,10 @@ fi
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.4" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP4"
+
+	elif [ "${VERSION_ID}" = "15.3" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP3"
 
 	elif [ "${VERSION_ID}" = "15.2" ]; then
