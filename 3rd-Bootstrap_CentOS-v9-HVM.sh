@@ -113,10 +113,10 @@ dnf module list
 # Package Install CentOS yum repository Files (from CentOS Community Repository)
 find /etc/yum.repos.d/
 
-dnf search release
+dnf list *release*
 
 dnf install -y centos-stream-release
-dnf --enablerepo="*" --verbose clean all
+# dnf install -y centos-stream-release centos-release-opstools
 
 find /etc/yum.repos.d/
 
@@ -251,7 +251,8 @@ activate-global-python-argcomplete
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-dnf install -y epel-release epel-next-release
+dnf install -y epel-release
+# dnf install -y epel-release epel-next-release
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
