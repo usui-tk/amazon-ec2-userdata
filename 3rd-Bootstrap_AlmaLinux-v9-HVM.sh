@@ -145,6 +145,14 @@ dnf module list
 # Checking repository information (repository configuration file)
 find /etc/yum.repos.d -type f -print | xargs egrep '^\[|enabled'
 
+# Checking repository information (repository package file)
+for repo in $repolist
+do
+	echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
+	dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
+	sleep 3
+done
+
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
 
