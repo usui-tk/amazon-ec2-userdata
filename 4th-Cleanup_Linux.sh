@@ -72,7 +72,11 @@ if [ $(command -v rpm) ]; then
 		fi
 
 		# Removing old kernel packages
-		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
+		# dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
+		# sleep 5
+
+		# Removing old kernel packages
+		dnf remove -y --oldinstallonly --setopt installonly_limit=2 ${DEFAULTKERNEL}
 		sleep 5
 
 		# Package Install Kernel Package
