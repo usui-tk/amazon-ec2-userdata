@@ -68,6 +68,10 @@ if [ -f /etc/system-release ]; then
 	cat /etc/system-release
 fi
 
+if [ -f /etc/image-id  ]; then
+	cat /etc/image-id
+fi
+
 # Default installation package [rpm command]
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
 
