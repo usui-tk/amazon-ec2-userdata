@@ -129,7 +129,7 @@ dnf repolist all
 dnf module list
 
 # Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, epel, Media, RealTime")
-repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" -ve "nfv" -ve "rt"  | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "epel" -ve "nfv" -ve "rt" -ve "cloud"  | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Enable Dnf/Yum Repository Data from Rocky Linux Repository
 for repo in $repolist
