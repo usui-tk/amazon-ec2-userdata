@@ -499,50 +499,50 @@ ssm-cli get-instance-information
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
 # dnf install -y amazon-cloudwatch-agent
 
-if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-	rpm -qi amazon-cloudwatch-agent
+# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+# 	rpm -qi amazon-cloudwatch-agent
 
-	systemctl daemon-reload
+# 	systemctl daemon-reload
 
-	cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+# 	cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
-fi
+# 	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# fi
 
-# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-	systemctl enable amazon-cloudwatch-agent
-	systemctl is-enabled amazon-cloudwatch-agent
-fi
+# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+# 	systemctl enable amazon-cloudwatch-agent
+# 	systemctl is-enabled amazon-cloudwatch-agent
+# fi
 
-# Configure Amazon CloudWatch Agent software (Monitor settings)
-if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-	curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-	cat "/tmp/config.json"
+# # Configure Amazon CloudWatch Agent software (Monitor settings)
+# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+# 	curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+# 	cat "/tmp/config.json"
 
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-	systemctl status -l amazon-cloudwatch-agent
+# 	systemctl status -l amazon-cloudwatch-agent
 
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-fi
+# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# fi
 
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+# 	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-fi
+# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# fi
 
-# View Amazon CloudWatch Agent config files
-if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# # View Amazon CloudWatch Agent config files
+# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+# 	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-	cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
-fi
+# 	cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
