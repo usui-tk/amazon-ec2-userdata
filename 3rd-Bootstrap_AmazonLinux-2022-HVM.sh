@@ -120,17 +120,40 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crypto-policies curl dmidecode dstat ebtables ethtool expect gdisk git gnutls-utils intltool ipcalc iproute-tc ipset jq kernel-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mdadm nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time tree tzdata unzip usermode util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs  yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bind-utils blktrace bpftool crypto-policies curl-minimal dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+
+## dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crypto-policies curl-minimal dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+
+# Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
-dnf install -y iscsi-initiator-utils
+
+# Package Install iSCSI Administration Tools (from Amazon Linux Official Repository)
+## dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 
 # Package Install SELinux Tools (from Amazon Linux Official Repository)
-dnf install -y checkpolicy policycoreutils setools-console
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console
 ## dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console setools-console-analyses setroubleshoot-server udica
 
 # Package Install Performance Co-Pilot (PCP) Tools (from Amazon Linux Official Repository)
-dnf install -y pcp pcp-export-pcp2json pcp-selinux pcp-system-tools pcp-zeroconf
-## dnf install -y pcp pcp-export-pcp2json pcp-manager "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+## dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+
+# Package Install rsyslog Tools (from Amazon Linux Official Repository)
+dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-related packages]
+#-------------------------------------------------------------------------------
+
+# Default installation information for AWS-related packages
+dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+
+# Repository information for AWS-related packages
+dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-instance-connect
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.9]
@@ -139,7 +162,7 @@ dnf install -y pcp pcp-export-pcp2json pcp-selinux pcp-system-tools pcp-zeroconf
 # Package Install Python 3 Runtime (from Amazon Linux Official Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-tools python3-virtualenv python3-wheel
 dnf install -y python3-dateutil python3-docutils python3-jmespath python3-pyasn1 python3-pyasn1-modules python3-pyyaml python3-six python3-urllib3
-dnf install -y python3-argcomplete
+dnf install -y python3-argcomplete python-unversioned-command
 
 # Version Information (Python 3)
 python3 -V
@@ -240,28 +263,20 @@ fi
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+# dnf install -y awscli-2
+
 # Package Uninstall AWS-CLI v1 Tools (from RPM Package)
 if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 	aws --version
 
 	which aws
 
-	if [ $(rpm -qa | grep awscli) ]; then
-		rpm -qi awscli
-
-		dnf remove -y awscli
+	if [ $(rpm -qa | grep awscli-2) ]; then
+		rpm -qi awscli-2
 	fi
 
 fi
-
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
-
-aws --version
 
 # Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
@@ -317,10 +332,10 @@ if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Systems Manager Parameter Store"
 
 	# al2022-ami-kernel-5.10-x86_64 for x86_64 architecture
-	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-kernel-5.10-x86_64" --output json --region ${Region}
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-kernel-default-x86_64" --output json --region ${Region}
 
 	# al2022-ami-minimal-kernel-5.10-x86_64 for x86_64 architecture (minimal AMI)
-	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-minimal-kernel-5.10-x86_64" --output json --region ${Region}
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-minimal-kernel-default-x86_64" --output json --region ${Region}
 fi
 
 # Get EC2 Instance Information
@@ -454,15 +469,18 @@ fi
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+# dnf install -y amazon-ssm-agent
 
-rpm -qi amazon-ssm-agent
+if [ $(rpm -qa | grep amazon-ssm-agent) ]; then
+	rpm -qi amazon-ssm-agent
 
-systemctl daemon-reload
+	systemctl daemon-reload
 
-systemctl restart amazon-ssm-agent
+	systemctl restart amazon-ssm-agent
 
-systemctl status -l amazon-ssm-agent
+	systemctl status -l amazon-ssm-agent
+fi
 
 # Configure AWS Systems Manager Agent software (Start Daemon awsagent)
 if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
@@ -478,15 +496,18 @@ ssm-cli get-instance-information
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+# dnf install -y amazon-cloudwatch-agent
 
-rpm -qi amazon-cloudwatch-agent
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	rpm -qi amazon-cloudwatch-agent
 
-cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+	systemctl daemon-reload
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+	cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-systemctl daemon-reload
+	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+fi
 
 # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
 if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
@@ -495,27 +516,33 @@ if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
 fi
 
 # Configure Amazon CloudWatch Agent software (Monitor settings)
-curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-cat "/tmp/config.json"
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+	cat "/tmp/config.json"
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-systemctl status -l amazon-cloudwatch-agent
+	systemctl status -l amazon-cloudwatch-agent
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+fi
 
 # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+fi
 
 # View Amazon CloudWatch Agent config files
-cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+	cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
