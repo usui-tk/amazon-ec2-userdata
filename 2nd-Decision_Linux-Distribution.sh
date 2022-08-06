@@ -17,6 +17,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
    ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
    ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
+   ScriptForRockyLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v9-HVM.sh"
    ScriptForRockyLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v8-HVM.sh"
    ScriptForAlmaLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v9-HVM.sh"
    ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
@@ -164,7 +165,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "Rocky Linux" ] || [ "${DIST_TYPE}" = "rocky" ]; then
-         if [ $(echo ${REV} | grep -e '8.') ]; then
+         if [ $(echo ${REV} | grep -e '9.') ]; then
+            # Bootstrap Script for Rocky Linux v9.x
+            BootstrapScript=${ScriptForRockyLinuxv9}
+         elif [ $(echo ${REV} | grep -e '8.') ]; then
             # Bootstrap Script for Rocky Linux v8.x
             BootstrapScript=${ScriptForRockyLinuxv8}
          else
