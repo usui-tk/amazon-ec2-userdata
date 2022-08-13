@@ -251,8 +251,7 @@ activate-global-python-argcomplete
 #-------------------------------------------------------------------------------
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-dnf install -y epel-release
-# dnf install -y epel-release epel-next-release
+dnf install -y epel-release epel-next-release
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
