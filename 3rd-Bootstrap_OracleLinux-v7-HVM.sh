@@ -261,7 +261,7 @@ yum --enablerepo="*" --verbose clean all
 yum --disablerepo="*" --enablerepo="ol7_developer_EPEL" list available > /tmp/command-log_yum_repository-package-list_ol7_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectd collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping wdiff yamllint zstd
+yum --enablerepo="ol7_developer_EPEL" install -y atop bash-completion-extras bcftools byobu collectd collectl colordiff fping glances htop httping iftop inotify-tools inxi ipv6calc jnettop jq moreutils moreutils-parallel ncdu nload srm tcping unicornscan wdiff yamllint zstd
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Testing Repository)
 # yum --enablerepo="ol7_developer_EPEL"  install -y collectd-utils tlog
