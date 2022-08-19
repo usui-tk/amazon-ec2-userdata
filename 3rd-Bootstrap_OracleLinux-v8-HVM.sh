@@ -183,6 +183,15 @@ fi
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
+# Package Install Oracle Linux Linux-Kernel Modules (from Oracle Linux Repository)
+if [ $(grubby --default-kernel | grep -ie "el8uek") ]; then
+	echo "Linux Kernel Package Name : kernel-uek"
+	dnf install -y kernel-uek-modules kernel-uek-modules-extra
+else
+	echo "Linux Kernel Package Name : kernel"
+	dnf install -y kernel-modules kernel-modules-extra
+fi
+
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
 dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
