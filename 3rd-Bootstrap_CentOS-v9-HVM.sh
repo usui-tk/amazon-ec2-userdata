@@ -174,9 +174,6 @@ dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-pyt
 dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
-# Package Install CentOS support tools (from CentOS Community Repository)
-# dnf install -y redhat-lsb-core
-
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
 # https://access.redhat.com/solutions/2206511
@@ -268,8 +265,8 @@ dnf repository-packages epel-next list > /tmp/command-log_dnf_repository-package
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y atop colordiff dateutils fping htop iftop inotify-tools inxi ipv6calc jc moreutils moreutils-parallel ncdu screen stressapptest wdiff
-# dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping wdiff yamllint
+dnf --enablerepo="epel" install -y atop collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc moreutils moreutils-parallel ncdu screen stressapptest unicornscan wdiff yamllint
+# dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 # dnf --enablerepo="epel" install -y ec2-hibinit-agent
@@ -571,47 +568,44 @@ ssm-cli get-instance-information
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
 
-# [To Be Update]
-# The collectd package is not yet provided (we plan to introduce the package via EPEL)
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
 
-# dnf install --nogpgcheck -y "https://s3.amazonaws.com/amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
+rpm -qi amazon-cloudwatch-agent
 
-# rpm -qi amazon-cloudwatch-agent
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-# cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+systemctl daemon-reload
 
-# systemctl daemon-reload
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
 
-# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-# 	systemctl enable amazon-cloudwatch-agent
-# 	systemctl is-enabled amazon-cloudwatch-agent
-# fi
+# Configure Amazon CloudWatch Agent software (Monitor settings)
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-# # Configure Amazon CloudWatch Agent software (Monitor settings)
-# curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-# cat "/tmp/config.json"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+systemctl status -l amazon-cloudwatch-agent
 
-# systemctl status -l amazon-cloudwatch-agent
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-# /usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# # View Amazon CloudWatch Agent config files
-# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
-
-# cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -666,24 +660,24 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-# curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
 
-# rpm -qi td-agent
+rpm -qi td-agent
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart td-agent
+systemctl restart td-agent
 
-# systemctl status -l td-agent
+systemctl status -l td-agent
 
-# # Configure fluentd software (Start Daemon td-agent)
-# if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-# 	systemctl enable td-agent
-# 	systemctl is-enabled td-agent
-# fi
+# Configure fluentd software (Start Daemon td-agent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# # Package bundled ruby gem package information
-# /opt/td-agent/bin/fluent-gem list
+# Package bundled ruby gem package information
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
