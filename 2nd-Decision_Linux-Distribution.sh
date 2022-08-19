@@ -25,6 +25,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
    ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
    ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
+   ScriptForOracleLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v9-HVM.sh"
    ScriptForOracleLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v8-HVM.sh"
    ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
    ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
@@ -201,7 +202,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "Oracle Linux Server" ] || [ "${DIST_TYPE}" = "ol" ]; then
-         if [ $(echo ${REV} | grep -e '8.') ]; then
+         if [ $(echo ${REV} | grep -e '9.') ]; then
+            # Bootstrap Script for Oracle Linux v9.x
+            BootstrapScript=${ScriptForOracleLinuxv9}
+         elif [ $(echo ${REV} | grep -e '8.') ]; then
             # Bootstrap Script for Oracle Linux v8.x
             BootstrapScript=${ScriptForOracleLinuxv8}
          elif [ $(echo ${REV} | grep -e '7.') ]; then
