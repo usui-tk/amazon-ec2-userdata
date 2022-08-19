@@ -5,6 +5,12 @@
 # Logger
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
+################################################################################
+#                                                                              #
+#  Script Evaluated Operating System Information - [Kali Linux 2022.3]         #
+#                                                                              #
+################################################################################
+
 #-------------------------------------------------------------------------------
 # Set UserData Parameter
 #-------------------------------------------------------------------------------
@@ -32,7 +38,7 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-kalidata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Kali-Linux-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_Kali-Linux-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
@@ -88,8 +94,13 @@ curl -sI "http://http.kali.org/README"
 # curl -s "http://http.kali.org/README.mirrorlist"
 
 # Hide login messages
-touch /root/.hushlogin
-touch /home/kali/.hushlogin
+if [ ! -f /root/.hushlogin ]; then
+	cat "/root/.hushlogin"
+fi
+
+if [ ! -f /home/kali/.hushlogin ]; then
+	cat "/home/kali/.hushlogin"
+fi
 
 # apt repository metadata Clean up
 apt clean -y -q
@@ -103,25 +114,31 @@ apt install -y -q apt-transport-https ca-certificates curl gnupg-agent software-
 # Default Package Update
 apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bc bcc bcftools binutils blktrace bpfcc-tools bpftool bpytop byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 ipset iptraf-ng ipv6calc ipv6toolkit jc jnettop jp jq kexec-tools linuxptp locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart net-tools netsniff-ng nftables nload nmap numactl numatop nvme-cli parted patchutils psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck smartmontools snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit tlog traceroute tree tzdata unicornscan unzip usermode util-linux wdiff wget xfsprogs yamllint zip zsh zstd
+
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
+
 apt install -y -q open-iscsi open-isns-utils libiscsi-bin lsscsi scsitools sdparm sg3-utils
+
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
+
 apt install -y -q pcp pcp-conf pcp-manager
 
 # Package Install Python 3 Runtime (from Debian Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 apt install -y -q python-is-python3
 
-#-------------------------------------------------------------------------------
+
+################################################################################
 # Custom Package Installation [Special package for Kali (Headless)]
 #  https://www.kali.org/docs/general-use/metapackages/
-#-------------------------------------------------------------------------------
+################################################################################
 
 # ------------------------------------------------------------------------------
 # Package Install Kali Linux Meta-Package (System)
@@ -129,7 +146,6 @@ apt install -y -q python-is-python3
 #  - kali-linux-core: Base Kali Linux System – core items that are always included
 #  - kali-linux-headless: Default install that doesn’t require GUI
 #  - kali-linux-default: “Default” desktop (amd64/i386) images include these tools
-#  - kali-linux-light: Kali-Light images use this to be generated
 #  - kali-linux-arm: All tools suitable for ARM devices
 #  - kali-linux-nethunter: Tools used as part of Kali NetHunter
 # ------------------------------------------------------------------------------
@@ -149,9 +165,10 @@ apt install -y -q kali-linux-core kali-linux-headless
 #  - kali-tools-sdr: Software-Defined Radio tools
 #  - kali-tools-voip: Voice over IP tools
 #  - kali-tools-windows-resources: Any resources which can be executed on a Windows hosts
+#  - kali-linux-labs: Environments for learning and practising on
 # ------------------------------------------------------------------------------
 
-apt install -y -q kali-tools-gpu kali-tools-crypto-stego kali-tools-fuzzing
+# apt install -y -q kali-tools-gpu kali-tools-crypto-stego kali-tools-fuzzing
 
 # ------------------------------------------------------------------------------
 # Package Install Kali Linux Meta-Package (Menu)
@@ -171,18 +188,17 @@ apt install -y -q kali-tools-gpu kali-tools-crypto-stego kali-tools-fuzzing
 #  - kali-tools-reporting: Reporting tools
 # ------------------------------------------------------------------------------
 
-apt install -y -q kali-tools-information-gathering kali-tools-vulnerability kali-tools-web kali-tools-database kali-tools-passwords kali-tools-forensics
+# apt install -y -q kali-tools-information-gathering kali-tools-vulnerability kali-tools-web kali-tools-database kali-tools-passwords kali-tools-forensics
 
 # ------------------------------------------------------------------------------
 # Package Install Kali Linux Meta-Package (Others)
 # ------------------------------------------------------------------------------
 #  - kali-linux-large: Our previous default tools for amd64/i386 images
 #  - kali-linux-everything: Every metapackage and tool listed here
-#  - kali-tools-top10: The most commonly used tools
 #  - kali-desktop-live: Used during a live session when booted from the image
 # ------------------------------------------------------------------------------
 
-apt install -y -q kali-tools-top10
+# apt install -y -q kali-linux-everything
 
 
 #-------------------------------------------------------------------------------
@@ -471,6 +487,7 @@ if [ -n "$RoleName" ]; then
 	fi
 fi
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
 # http://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/sysman-install-ssm-agent.html
@@ -494,6 +511,7 @@ if [ $(systemctl is-enabled amazon-ssm-agent) = "disabled" ]; then
 fi
 
 ssm-cli get-instance-information
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Install [Amazon CloudWatch Agent]
@@ -530,10 +548,16 @@ systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
+# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+
 # View Amazon CloudWatch Agent config files
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
 cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -569,6 +593,7 @@ source /etc/profile.d/ec2rl.sh
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
@@ -580,6 +605,7 @@ ansible --version
 
 ansible localhost -m setup
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Docker]
 #-------------------------------------------------------------------------------
@@ -588,9 +614,9 @@ ansible localhost -m setup
 apt install -y -q apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
 # install docker
-apt install -y -q docker-compose
+apt install -y -q docker.io
 
-apt show docker-compose
+apt show docker.io
 
 systemctl daemon-reload
 
@@ -615,28 +641,21 @@ cat /etc/group | grep docker
 # Docker Pull Image (from Docker Hub)
 if [ $(docker info > /dev/null 2>&1) ]; then
 	echo "# Docker daemon is running"
-	docker pull kalilinux/kali-linux-docker          # Kali Linux
-	docker pull amazonlinux:latest                   # Amazon Linux 2 LTS
+	docker pull kalilinux/kali-rolling
 else
 	echo "# Docker daemon is not running"
 fi
 
 # Docker Run (Kali Linux)
-# docker run -it kalilinux/kali-linux-docker /bin/bash
+# docker run -it kalilinux/kali-rolling /bin/bash
 # cat /etc/os-release
 # exit
 
-# Docker Run (Amazon Linux 2 LTS)
-# docker run -it amazonlinux:latest bash
-# cat /etc/system-release
-# cat /etc/image-id
-# exit
 
-
-#-------------------------------------------------------------------------------
+################################################################################
 # Custom Package Installation [Special package for Kali (Desktop)]
 #  https://www.kali.org/docs/general-use/metapackages/
-#-------------------------------------------------------------------------------
+################################################################################
 
 # ------------------------------------------------------------------------------
 # Package Install Kali Linux Meta-Package (Desktop environments/Window managers)
