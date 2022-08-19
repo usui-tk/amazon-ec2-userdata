@@ -265,7 +265,8 @@ dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros pyt
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
 dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 python3-pyasn1-modules python3-pyasn1-modules python3-pyyaml "python3-requests*" python3-six python3-urllib3
-dnf install -y python3-cloud-what python3-distro
+dnf install -y python3-distro
+# dnf install -y python3-cloud-what
 dnf install -y python3-argcomplete
 
 # Version Information (Python 3.9)
