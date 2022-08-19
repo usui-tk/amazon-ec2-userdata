@@ -170,7 +170,7 @@ done
 dnf update -y
 
 # Switching Linux-kernel packages (Switch from RHEL compatible kernel to Unbreakable Enterprise Kernel)
-# https://docs.oracle.com/en/operating-systems/uek/6/relnotes6.0/index.html
+# https://docs.oracle.com/en/operating-systems/uek/7/relnotes7.0/index.html
 
 if [ $(grubby --default-kernel | grep -ie "el8uek") ]; then
 	echo "Linux Kernel Package Name : kernel-uek"
