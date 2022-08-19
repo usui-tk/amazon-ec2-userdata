@@ -173,9 +173,6 @@ dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | 
 # Repository information for AWS-related packages
 dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
-# Package Install AWS-related packages (from Amazon Linux Official Repository)
-dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-instance-connect
-
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
