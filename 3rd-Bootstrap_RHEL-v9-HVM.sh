@@ -39,7 +39,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #  - RHEL v9
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #    https://access.redhat.com/support/policy/updates/extras
-#    https://access.redhat.com/support/policy/updates/rhel8-app-streams-life-cycle
+#    https://access.redhat.com/support/policy/updates/rhel-app-streams-life-cycle
 #    https://access.redhat.com/articles/1150793
 #    https://access.redhat.com/solutions/3358
 #
