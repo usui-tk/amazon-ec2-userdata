@@ -5,6 +5,12 @@ set -e -x
 # Logger
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
+################################################################################
+#                                                                              #
+#  Script Evaluated Operating System Information - [Fedora 36]                 #
+#                                                                              #
+################################################################################
+
 #-------------------------------------------------------------------------------
 # Set UserData Parameter
 #-------------------------------------------------------------------------------
@@ -84,6 +90,7 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 # Determine the OS release
 eval $(grep ^VERSION_ID= /etc/os-release)
 
+
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
@@ -103,11 +110,12 @@ dnf --enablerepo="*" --verbose clean all
 # Default Package Update
 dnf update -y
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install CentOS Linux-Kernel Modules (from Fedora Official Repository)
+# Package Install Fedora Linux-Kernel Modules (from Fedora Official Repository)
 dnf install -y kernel-modules kernel-modules-extra kernel-tools
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
@@ -117,13 +125,17 @@ dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 
-dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server udica
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server strace udica
 
-dnf install -y pcp pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+
+dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
 # Package Install Fedora System Administration Tools [Version dependent] (from Fedora Official Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "35" ]; then
+	if [ "${VERSION_ID}" = "36" ]; then
+		echo "fedora ${VERSION_ID}"
+	elif [ "${VERSION_ID}" = "35" ]; then
 		echo "fedora ${VERSION_ID}"
 	elif [ "${VERSION_ID}" = "34" ]; then
 		echo "fedora ${VERSION_ID}"
@@ -145,6 +157,21 @@ dnf install -y ec2-hibinit-agent ec2-metadata
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
 dnf install -y rpmdevtools rpm-build rpmconf rpmconf-base redhat-rpm-config
 
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AWS-related packages]
+#-------------------------------------------------------------------------------
+
+# Default installation information for AWS-related packages
+dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+
+# Repository information for AWS-related packages
+dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-instance-connect
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
 #-------------------------------------------------------------------------------
@@ -165,6 +192,7 @@ if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
 	systemctl enable --now cockpit.socket
 	systemctl is-enabled cockpit.socket
 fi
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3]
