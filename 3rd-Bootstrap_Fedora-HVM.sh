@@ -115,6 +115,11 @@ dnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
+# Package replacement CURL Tools [curl-minimal to curl-full]
+if [ $(rpm -qa | grep curl-minimal) ]; then
+	dnf install -y --allowerasing curl-full libcurl-full
+fi
+
 # Package Install Fedora Linux-Kernel Modules (from Fedora Official Repository)
 dnf install -y kernel-modules kernel-modules-extra kernel-tools
 
