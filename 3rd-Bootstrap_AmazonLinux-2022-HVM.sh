@@ -273,19 +273,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-# dnf install -y awscli-2
-
-# Package Uninstall AWS-CLI v1 Tools (from RPM Package)
-if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
-	aws --version
-
-	which aws
-
-	if [ $(rpm -qa | grep awscli-2) ]; then
-		rpm -qi awscli-2
-	fi
-
-fi
+dnf install -y awscli-2
 
 # Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
