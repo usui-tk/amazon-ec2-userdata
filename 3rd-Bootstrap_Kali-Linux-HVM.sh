@@ -95,11 +95,11 @@ curl -sI "http://http.kali.org/README"
 
 # Hide login messages
 if [ ! -f /root/.hushlogin ]; then
-	cat "/root/.hushlogin"
+	touch "/root/.hushlogin"
 fi
 
 if [ ! -f /home/kali/.hushlogin ]; then
-	cat "/home/kali/.hushlogin"
+	touch "/home/kali/.hushlogin"
 fi
 
 # apt repository metadata Clean up
