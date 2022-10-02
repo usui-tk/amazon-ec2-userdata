@@ -519,10 +519,16 @@ fi
 
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
-	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner "309956199498" --filter "Name=name,Values=RHEL-9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
-	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
+	echo "# Get Latest AMI Information from Public AMI"
+	LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+	aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region}
+fi
+
+# Get the AMI information of the RHEL from Public AMI
+if [ -n "$RoleName" ]; then
+	# Get the AMI information of the RHEL from Public AMI (RHEL v9)
+	echo "# Get the AMI information of the RHEL from Public AMI (RHEL v9)"
+	aws ec2 describe-images --owners "309956199498" --query 'sort_by(Images, &CreationDate)[*].[CreationDate,Name,ImageId]' --filters "Name=name,Values=RHEL-9.*" --output table --region ${Region}
 fi
 
 # Get EC2 Instance Information
