@@ -144,9 +144,7 @@ dnf config-manager --set-disabled ol8_olcne13
 dnf config-manager --set-disabled ol8_olcne14
 dnf config-manager --set-disabled ol8_kvm_appstream
 dnf config-manager --set-disabled ol8_developer_EPEL
-dnf config-manager --set-disabled ol8_developer_EPEL_modular
 dnf config-manager --set-disabled ol8_developer_UEKR6
-dnf config-manager --set-disabled ol8_distro_builder
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -317,13 +315,12 @@ dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
 dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
-dnf repository-packages "ol8_developer_EPEL_modular" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL_modular.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL","ol8_developer_EPEL_modular" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+dnf --enablerepo="ol8_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL","ol8_developer_EPEL_modular" install -y ec2-hibinit-agent
+dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo="ol8_developer_EPEL" install -y jnettop wdiff
