@@ -35,7 +35,7 @@ if [ -f /etc/sysconfig/kernel ]; then
 elif [ $(command -v grubby) ]; then
 	DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | cut -d '-' -f 1)
 else
-	DEFAULTKERNEL=$(rpm -qa | grep kernel-`uname -r` | cut -d '-' -f 1)
+	DEFAULTKERNEL=$(rpm -qa | grep -ie kernel-`uname -r` | cut -d '-' -f 1)
 fi
 
 # Show Machine Boot Program Information
@@ -52,14 +52,14 @@ fi
 #-------------------------------------------------------------------------------
 if [ $(command -v rpm) ]; then
 
-	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (RPM package ecosystem) START"
+	echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Cleanup process for old kernel Package (RPM package ecosystem) START"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Linux distributions using DNF package manager)
 	# --------------------------------------------------------------------------
 	if [ $(command -v dnf) ]; then
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using DNF package manager) START"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using DNF package manager) START"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -76,14 +76,8 @@ if [ $(command -v rpm) ]; then
 		fi
 
 		# Removing old kernel packages
-		# dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
-		# sleep 5
-
-		# Removing old kernel packages
-		if [ -n "$DEFAULTKERNEL" ]; then
-			dnf remove -y --oldinstallonly --setopt installonly_limit=2 ${DEFAULTKERNEL}
-			sleep 5
-		fi
+		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
+		sleep 5
 
 		# Package Install Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
@@ -106,14 +100,14 @@ if [ $(command -v rpm) ]; then
 		# Cleanup repository information
 		dnf --enablerepo="*" --verbose clean all
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using DNF package manager) COMPLETE"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using DNF package manager) COMPLETE"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Linux distributions using YUM package manager)
 	# --------------------------------------------------------------------------
 	elif [ $(command -v yum) ]; then
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using YUM package manager) START"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using YUM package manager) START"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -156,14 +150,14 @@ if [ $(command -v rpm) ]; then
 		# Cleanup repository information
 		yum --enablerepo="*" --verbose clean all
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using YUM package manager) COMPLETE"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using YUM package manager) COMPLETE"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Linux distributions using ZYPPER package manager)
 	# --------------------------------------------------------------------------
 	elif [ $(command -v zypper) ]; then
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using ZYPPER package manager) START"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using ZYPPER package manager) START"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -199,14 +193,14 @@ if [ $(command -v rpm) ]; then
 		# Cleanup repository information
 		zypper clean --all
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using ZYPPER package manager) COMPLETE"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using ZYPPER package manager) COMPLETE"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Unsupported Linux distributions)
 	# --------------------------------------------------------------------------
 	else
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Unsupported Linux distributions)"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Unsupported Linux distributions)"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -221,7 +215,7 @@ if [ $(command -v rpm) ]; then
 		fi
 	fi
 
-	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (RPM package ecosystem) COMPLETE"
+	echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Cleanup process for old kernel Package (RPM package ecosystem) COMPLETE"
 
 fi
 
@@ -230,14 +224,14 @@ fi
 #-------------------------------------------------------------------------------
 if [ $(command -v dpkg) ]; then
 
-	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (DEB package ecosystem) START"
+	echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Cleanup process for old kernel Package (DEB package ecosystem) START"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Linux distributions using APT package manager)
 	# --------------------------------------------------------------------------
 	if [ $(command -v apt) ]; then
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using APT package manager) START"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using APT package manager) START"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -269,14 +263,14 @@ if [ $(command -v dpkg) ]; then
 		# apt repository metadata Clean up
 		apt clean -y -q
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Linux distributions using APT package manager) COMPLETE"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Linux distributions using APT package manager) COMPLETE"
 
 	# --------------------------------------------------------------------------
 	# Removing old kernel packages (Unsupported Linux distributions)
 	# --------------------------------------------------------------------------
 	else
 
-		echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Removing old kernel packages (Unsupported Linux distributions)"
+		echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Removing old kernel packages (Unsupported Linux distributions)"
 
 		# Show Linux Distribution/Distro information
 		if [ $(command -v lsb_release) ]; then
@@ -291,7 +285,7 @@ if [ $(command -v dpkg) ]; then
 		fi
 	fi
 
-	echo $(date "+%Y-%m-%d %H:%M:%S.%N") "- Cleanup process for old kernel Package (DEB package ecosystem) COMPLETE"
+	echo "["$(date "+%Y-%m-%d %H:%M:%S.%N")"]" "- Cleanup process for old kernel Package (DEB package ecosystem) COMPLETE"
 
 fi
 
