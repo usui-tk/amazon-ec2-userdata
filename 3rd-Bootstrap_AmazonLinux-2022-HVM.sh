@@ -467,7 +467,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-# dnf install -y amazon-ssm-agent
+dnf install -y amazon-ssm-agent
 
 if [ $(rpm -qa | grep amazon-ssm-agent) ]; then
 	rpm -qi amazon-ssm-agent
@@ -494,7 +494,7 @@ ssm-cli get-instance-information
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-# dnf install -y amazon-cloudwatch-agent
+dnf install -y amazon-cloudwatch-agent
 
 if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
 	rpm -qi amazon-cloudwatch-agent
@@ -857,32 +857,10 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
 
 	# Disable IPv6 Kernel Module
-	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	grubby --info=ALL
+	grubby --update-kernel ALL --args ipv6.disable=1
+	grubby --info=ALL
 
-	# Disable IPv6 Kernel Parameter
-	sysctl -a
-
-	DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
-
-	cat /dev/null > $DisableIPv6Conf
-	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
-	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
-	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
-
-	sysctl --system
-	sysctl -p
-
-	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
-elif [ "${VpcNetwork}" = "IPv6" ]; then
-	echo "# Show IP Protocol Stack -> $VpcNetwork"
-	echo "# Show IPv6 Network Interface Address"
-	ifconfig
-	echo "# Show IPv6 Kernel Module"
-	lsmod | awk '{print $1}' | grep ipv6
-	echo "# Show Network Listen Address and report"
-	netstat -an -A inet6
-	echo "# Show Network Routing Table"
-	netstat -r -A inet6
 else
 	echo "# Default IP Protocol Stack"
 	echo "# Show IPv6 Network Interface Address"
