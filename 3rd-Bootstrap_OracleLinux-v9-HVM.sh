@@ -936,12 +936,15 @@ fi
 getenforce
 sestatus
 
-cat /etc/selinux/config
-sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
-cat /etc/selinux/config
-
 if [ $(getenforce) = "Enforcing" ]; then
+	# Setting SELinux disabled mode
+	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+	grubby --info=ALL
+	grubby --update-kernel ALL --args selinux=0
+	grubby --info=ALL
+
 	setenforce 0
+	sleep 5
 	getenforce
 fi
 
@@ -1007,22 +1010,10 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo "# Setting IP Protocol Stack -> $VpcNetwork"
 
 	# Disable IPv6 Kernel Module
-	echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
+	grubby --info=ALL
+	grubby --update-kernel ALL --args ipv6.disable=1
+	grubby --info=ALL
 
-	# Disable IPv6 Kernel Parameter
-	sysctl -a
-
-	DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
-
-	cat /dev/null > $DisableIPv6Conf
-	echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
-	echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
-	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
-
-	sysctl --system
-	sysctl -p
-
-	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 elif [ "${VpcNetwork}" = "IPv6" ]; then
 	echo "# Show IP Protocol Stack -> $VpcNetwork"
 	echo "# Show IPv6 Network Interface Address"
