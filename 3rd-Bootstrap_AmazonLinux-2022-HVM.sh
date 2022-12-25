@@ -128,10 +128,13 @@ if [ $(rpm -qa | grep curl-minimal) ]; then
 	dnf install -y --allowerasing curl-full libcurl-full
 fi
 
-# Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y acpid arptables bash-completion bc bind-utils blktrace bpftool crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+# Package replacement GPG Tools [gnupg2-minimal to gnupg2-full] (from Amazon Linux Official Repository)
+if [ $(rpm -qa | grep gnupg2-minimal) ]; then
+	dnf install -y --allowerasing gnupg2-full
+fi
 
-## dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool crypto-policies curl-minimal dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+# Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 # Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
@@ -140,7 +143,7 @@ dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
 ## dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 
 # Package Install SELinux Tools (from Amazon Linux Official Repository)
-dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console
+dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console udica
 ## dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console setools-console-analyses setroubleshoot-server udica
 
 # Package Install Performance Co-Pilot (PCP) Tools (from Amazon Linux Official Repository)
@@ -161,8 +164,8 @@ dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | 
 dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-instance-connect
-
+dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-hibinit-agent ec2-instance-connect
+## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.9]
@@ -496,50 +499,50 @@ ssm-cli get-instance-information
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
 # dnf install -y amazon-cloudwatch-agent
 
-# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-# 	rpm -qi amazon-cloudwatch-agent
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	rpm -qi amazon-cloudwatch-agent
 
-# 	systemctl daemon-reload
+	systemctl daemon-reload
 
-# 	cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+	cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-# 	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
-# fi
+	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+fi
 
-# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-# 	systemctl enable amazon-cloudwatch-agent
-# 	systemctl is-enabled amazon-cloudwatch-agent
-# fi
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
 
-# # Configure Amazon CloudWatch Agent software (Monitor settings)
-# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-# 	curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-# 	cat "/tmp/config.json"
+# Configure Amazon CloudWatch Agent software (Monitor settings)
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+	cat "/tmp/config.json"
 
-# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-# 	systemctl status -l amazon-cloudwatch-agent
+	systemctl status -l amazon-cloudwatch-agent
 
-# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-# fi
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+fi
 
-# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-# 	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-# 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-# fi
+	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+fi
 
-# # View Amazon CloudWatch Agent config files
-# if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-# 	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# View Amazon CloudWatch Agent config files
+if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
+	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# 	cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
-# fi
+	cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -619,33 +622,33 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # # Repository Configuration (HashiCorp Linux Repository)
-# dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo"
 
-# cat /etc/yum.repos.d/hashicorp.repo
+cat /etc/yum.repos.d/hashicorp.repo
 
-# # Cleanup repository information
-# dnf --enablerepo="*" --verbose clean all
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
 
-# # HashiCorp Linux repository package [dnf command]
-# dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+# HashiCorp Linux repository package [dnf command]
+dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
-# # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# dnf --enablerepo="hashicorp" -y install terraform
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+dnf --enablerepo="hashicorp" -y install terraform
 
-# rpm -qi terraform
+rpm -qi terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
@@ -783,12 +786,15 @@ fi
 getenforce
 sestatus
 
-cat /etc/selinux/config
-sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
-cat /etc/selinux/config
-
 if [ $(getenforce) = "Enforcing" ]; then
+	# Setting SELinux disabled mode
+	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+	grubby --info=ALL
+	grubby --update-kernel ALL --args selinux=0
+	grubby --info=ALL
+
 	setenforce 0
+	sleep 5
 	getenforce
 fi
 
