@@ -78,9 +78,6 @@ rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log
 # Default installation package [dnf command]
 dnf list installed > /tmp/command-log_dnf_installed-package.txt
 
-# Default installation package and Support Information [dnf command]
-dnf supportinfo --show installed > /tmp/command-log_dnf_installed-package_with_support-information.txt
-
 # Default repository package [dnf command]
 dnf list all > /tmp/command-log_dnf_repository-package-list.txt
 
