@@ -32,6 +32,10 @@ fi
 if [ -f /etc/sysconfig/kernel ]; then
 	eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
 	echo "Linux Kernel Package Name :" $DEFAULTKERNEL
+elif [ $(command -v grubby) ]; then
+	DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | cut -d '-' -f 1)
+else
+	DEFAULTKERNEL=$(rpm -qa | grep kernel-`uname -r` | cut -d '-' -f 1)
 fi
 
 # Show Machine Boot Program Information
@@ -76,8 +80,10 @@ if [ $(command -v rpm) ]; then
 		# sleep 5
 
 		# Removing old kernel packages
-		dnf remove -y --oldinstallonly --setopt installonly_limit=2 ${DEFAULTKERNEL}
-		sleep 5
+		if [ -n "$DEFAULTKERNEL" ]; then
+			dnf remove -y --oldinstallonly --setopt installonly_limit=2 ${DEFAULTKERNEL}
+			sleep 5
+		fi
 
 		# Package Install Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
