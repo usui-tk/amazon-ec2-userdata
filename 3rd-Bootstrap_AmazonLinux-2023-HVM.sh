@@ -161,8 +161,29 @@ dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | 
 dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent ec2-hibinit-agent ec2-instance-connect
-## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect
+dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux
+## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [kernel-livepatch]
+# https://docs.aws.amazon.com/linux/al2023/ug/live-patching.html
+#-------------------------------------------------------------------------------
+
+# Package Install Amazon Linux Kernel Live Patching dnf plugin)
+dnf list kernel
+
+dnf install -y kpatch-dnf
+
+dnf kernel-livepatch -y auto
+
+# Package Install Amazon Linux Kernel Live Patching (Dynamic kernel patching)
+dnf install -y kpatch-runtime
+
+# Configure Dynamic kernel patching software (Start Daemon kpatch)
+if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
+	systemctl enable kpatch
+	systemctl is-enabled kpatch
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.9]
