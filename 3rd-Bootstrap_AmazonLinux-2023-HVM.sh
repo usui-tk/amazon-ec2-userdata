@@ -36,15 +36,15 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - Amazon Linux 2022
-#    https://aws.amazon.com/jp/linux/amazon-linux-2022/
-#    https://aws.amazon.com/jp/linux/amazon-linux-2022/faqs/
+#  - Amazon Linux 2023
+#    https://aws.amazon.com/jp/linux/amazon-linux-2023/
+#    https://aws.amazon.com/jp/linux/amazon-linux-2023/faqs/
 #
 #    https://docs.aws.amazon.com/linux/index.html
-#    https://docs.aws.amazon.com/linux/al2022/release-notes/index.html
-#    https://docs.aws.amazon.com/linux/al2022/ug/index.html
+#    https://docs.aws.amazon.com/linux/al2023/release-notes/index.html
+#    https://docs.aws.amazon.com/linux/al2023/ug/index.html
 #
-#    https://github.com/amazonlinux/amazon-linux-2022
+#    https://github.com/amazonlinux/amazon-linux-2023
 #
 #-------------------------------------------------------------------------------
 
@@ -319,7 +319,7 @@ fi
 # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Public AMI"
-	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=al2022-ami-2022*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner amazon --filter "Name=name,Values=al2023-ami-2023*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region}
 fi
@@ -328,11 +328,11 @@ fi
 if [ -n "$RoleName" ]; then
 	echo "# Get Newest AMI Information from Systems Manager Parameter Store"
 
-	# al2022-ami-kernel-5.10-x86_64 for x86_64 architecture
-	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-kernel-default-x86_64" --output json --region ${Region}
+	# al2023-ami-kernel-default-x86_64 for x86_64 architecture
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64" --output json --region ${Region}
 
-	# al2022-ami-minimal-kernel-5.10-x86_64 for x86_64 architecture (minimal AMI)
-	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2022-ami-minimal-kernel-default-x86_64" --output json --region ${Region}
+	# al2023-ami-minimal-kernel-default-x86_64 for x86_64 architecture (minimal AMI)
+	aws ssm get-parameters --names "/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64" --output json --region ${Region}
 fi
 
 # Get EC2 Instance Information
