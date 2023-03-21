@@ -105,7 +105,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu chrony collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jc jnettop jp jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
+apt install -y -q acpid acpitool arptables atop bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu chrony collectd collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jc jnettop jp jq kexec-tools lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
@@ -438,45 +438,45 @@ fi
 # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/download-cloudwatch-agent-commandline.html
 # https://github.com/aws/amazon-cloudwatch-agent
 #-------------------------------------------------------------------------------
-# curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
-# dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
+curl -sS "https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb" -o "/tmp/amazon-cloudwatch-agent.deb"
+dpkg -i "/tmp/amazon-cloudwatch-agent.deb"
 
-# apt show amazon-cloudwatch-agent
+apt show amazon-cloudwatch-agent
 
-# cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
+cat /opt/aws/amazon-cloudwatch-agent/bin/CWAGENT_VERSION
 
-# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# # Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
-# if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
-# 	systemctl enable amazon-cloudwatch-agent
-# 	systemctl is-enabled amazon-cloudwatch-agent
-# fi
+# Configure Amazon CloudWatch Agent software (Start Daemon awsagent)
+if [ $(systemctl is-enabled amazon-cloudwatch-agent) = "disabled" ]; then
+	systemctl enable amazon-cloudwatch-agent
+	systemctl is-enabled amazon-cloudwatch-agent
+fi
 
-# # Configure Amazon CloudWatch Agent software (Monitor settings)
-# curl -sS ${CWAgentConfig} -o "/tmp/config.json"
-# cat "/tmp/config.json"
+# Configure Amazon CloudWatch Agent software (Monitor settings)
+curl -sS ${CWAgentConfig} -o "/tmp/config.json"
+cat "/tmp/config.json"
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/tmp/config.json -s
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
-# systemctl status -l amazon-cloudwatch-agent
+systemctl status -l amazon-cloudwatch-agent
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# # Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-# /usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
+# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
+/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
-# /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# # View Amazon CloudWatch Agent config files
-# cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
+# View Amazon CloudWatch Agent config files
+cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
-# cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
+cat /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.toml
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Amazon EC2 Rescue for Linux (ec2rl)]
@@ -532,57 +532,57 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-# curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-jammy-td-agent4.sh" | sh
 
-# apt show td-agent
+apt show td-agent
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart td-agent
+systemctl restart td-agent
 
-# systemctl status -l td-agent
+systemctl status -l td-agent
 
-# # Configure fluentd software (Start Daemon td-agent)
-# if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-# 	systemctl enable td-agent
-# 	systemctl is-enabled td-agent
-# fi
+# Configure fluentd software (Start Daemon td-agent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# # # Package bundled ruby gem package information
-# /opt/td-agent/bin/fluent-gem list
+# # Package bundled ruby gem package information
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
 # https://www.terraform.io/docs/cli/install/apt.html
 #-------------------------------------------------------------------------------
 
-# # Import GPG Key File
-# curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+# Import GPG Key File
+curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 
-# # Add the HashiCorp Linux Repository
-# apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+# Add the HashiCorp Linux Repository
+apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 
-# # apt repository metadata Clean up
-# apt clean -y
+# apt repository metadata Clean up
+apt clean -y
 
-# # Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# apt update -y -q && apt install -y -q terraform
+# Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+apt update -y -q && apt install -y -q terraform
 
-# # Package Information
-# apt show terraform
+# Package Information
+apt show terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
