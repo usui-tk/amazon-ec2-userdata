@@ -42,6 +42,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://docs.aws.amazon.com/linux/index.html
 #    https://docs.aws.amazon.com/linux/al2023/release-notes/index.html
+#    https://docs.aws.amazon.com/linux/al2023/release-notes/support-info-by-package.html
 #    https://docs.aws.amazon.com/linux/al2023/ug/index.html
 #
 #    https://github.com/amazonlinux/amazon-linux-2023
@@ -109,6 +110,14 @@ dnf update -y dnf dnf-data
 
 # Checking repository information
 dnf repolist all
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
+# Update to the latest version system-release
+#   https://docs.aws.amazon.com/linux/al2023/ug/deterministic-upgrades.html
+#   https://docs.aws.amazon.com/linux/al2023/ug/managing-repos-os-updates.html
+dnf upgrade -y --releasever=latest system-release
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
