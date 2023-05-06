@@ -1156,6 +1156,9 @@ if ($RoleName) {
 #
 if ($RoleName) {
 
+    # Initialize Parameter
+    Set-Variable -Name SSMAccessibleFlags -Scope Script -Value ($True)
+
     Try {
         Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (/aws/service/ami-windows-latest)"
         Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" -Region $Region | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-SSMParametersByPath_aws-service-ami-windows-latest.txt" -Append -Force
@@ -1166,7 +1169,7 @@ if ($RoleName) {
         Set-Variable -Name SSMAccessibleFlags -Scope Script -Value ($False)
     }
 
-    if ($SSMAccessibleFlags -ne $False) {
+    if ($SSMAccessibleFlags -eq $True) {
         Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (For AMI)"
 
         # Windows_Server-2012-R2_RTM-Japanese-64Bit-Base
