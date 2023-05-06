@@ -350,6 +350,16 @@ function Get-EbsVolumesMappingInformation {
     Set-Variable -Name VolumeName -Scope Script -Value ($Null)
     Set-Variable -Name DeviceName -Scope Script -Value ($Null)
 
+    # Test Cmdlet
+    if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Get-EC2InstanceMetadata" }) {
+        Try {
+            Get-EC2InstanceMetadata -ListCategory
+        }
+        Catch {
+            Write-Host "Could not access the instance Metadata using AWS Get-EC2Instance CMDLet. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
+        }
+    }
+
     # List the Windows disks
     [string[]]$array1 = @()
     [string[]]$array2 = @()
@@ -854,10 +864,51 @@ function Get-WindowsServerInformation {
 # Windows Bootstrap Individual requirement function
 #  [Dependent on function]
 #    - Write-Log
-#    - Get-Ec2InstanceMetadata
+#    - Get-CustomizeEc2InstanceMetadata
+#    - Get-Ec2LaunchV2Version
+#    - Get-Ec2LaunchVersion
+#    - Get-Ec2ConfigVersion
 #    - Get-WindowsServerInformation
 #
 ########################################################################################################################
+
+
+function Get-Ec2BootstrapProgram {
+
+    # Initialize Parameter
+    Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
+    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
+
+    # Checking the existence of the sysprep file
+    Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
+
+    if (Test-Path $EC2Launchv2SysprepFile) {
+        Set-Variable -Name SysprepFile -Value $EC2Launchv2SysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
+        if ($WindowsOSVersion -match "^6.*|^10.*") {
+            Get-Ec2LaunchV2Version
+        }
+    }
+    elseif (Test-Path $EC2LaunchSysprepFile) {
+        Set-Variable -Name SysprepFile -Value $EC2LaunchSysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
+        if ($WindowsOSVersion -match "^10.*") {
+            Get-Ec2LaunchVersion
+        }
+    }
+    elseif (Test-Path $EC2ConfigSysprepFile) {
+        Set-Variable -Name SysprepFile -Value $EC2ConfigSysprepFile
+        Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Config] : " + $SysprepFile)
+        if ($WindowsOSVersion -match "^5.*|^6.*") {
+            Get-Ec2ConfigVersion
+        }
+    }
+    else {
+        Write-Log "# [Warning] Not Found - Sysprep files"
+    }
+
+} # end function Update-SysprepAnswerFile
 
 
 function Update-SysprepAnswerFile($SysprepAnswerFile) {
@@ -878,7 +929,7 @@ function Update-SysprepAnswerFile($SysprepAnswerFile) {
 
     $SysprepXMLDocument.Save($SysprepAnswerFile)
 
-} # end function Update-SysprepAnswerFile
+} # end function Get-Ec2BootstrapProgram
 
 
 
@@ -1070,7 +1121,7 @@ else {
 # Log Separator
 Write-LogSeparator "Logging Amazon EC2 System & Windows Server OS Parameter"
 
-# Logging AWS Instance Metadata
+# Logging Amazon EC2 Instance Metadata
 Get-CustomizeEc2InstanceMetadata
 
 # Logging Amazon EC2 Hardware
@@ -1101,24 +1152,8 @@ Get-PowerShellVerson
 # Logging Windows Server OS Parameter [Windows Driver Information]
 Get-WindowsDriverInformation
 
-# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Config or EC2Launch)]
-if ($WindowsOSVersion -match "^5.*|^6.*") {
-    Get-Ec2ConfigVersion
-}
-elseif ($WindowsOSVersion -match "^10.*") {
-    Get-Ec2LaunchVersion
-}
-else {
-    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
-}
-
-# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Launch v2)]
-if ($WindowsOSVersion -match "^5.*|^6.*|^10.*") {
-    Get-Ec2LaunchV2Version
-}
-else {
-    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
-}
+# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Config / EC2Launch / EC2Launch V2)]
+Get-Ec2BootstrapProgram
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
 Get-Ec2SystemManagerAgentVersion
@@ -1669,9 +1704,9 @@ Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting
 if ($WindowsOSLanguage -eq "ja-JP") {
 
     # Checking the existence of the sysprep file
-    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
     Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
+    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 
     Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
