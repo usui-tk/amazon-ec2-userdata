@@ -5,11 +5,15 @@
 				"collect_list": [
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-agent.log",
-						"log_group_name": "/aws/ec2/windowsserver/2012/awslog-ssm-agent"
+						"log_group_name": "/aws/ec2/windows-server-2012/awslog-ssm-agent",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
-						"log_group_name": "/aws/ec2/windowsserver/2012/awslog-cloudwatch-agent"
+						"log_group_name": "/aws/ec2/windows-server-2012/awslog-cloudwatch-agent",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
 					}
 				]
 			},
@@ -25,8 +29,9 @@
 							"CRITICAL"
 						],
 						"event_name": "System",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-system",
-						"log_stream_name": "{instance_id}"
+						"log_group_name": "System",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
 					},
 					{
 						"event_format": "xml",
@@ -38,8 +43,9 @@
 							"CRITICAL"
 						],
 						"event_name": "Application",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-application",
-						"log_stream_name": "{instance_id}"
+						"log_group_name": "Application",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
 					},
 					{
 						"event_format": "xml",
@@ -51,14 +57,20 @@
 							"CRITICAL"
 						],
 						"event_name": "Security",
-						"log_group_name": "/aws/ec2/windowsserver/2012/eventlog-security",
-						"log_stream_name": "{instance_id}"
+						"log_group_name": "Security",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
 					}
 				]
 			}
 		}
 	},
 	"metrics": {
+		"aggregation_dimensions": [
+			[
+				"InstanceId"
+			]
+		],
 		"append_dimensions": {
 			"AutoScalingGroupName": "${aws:AutoScalingGroupName}",
 			"ImageId": "${aws:ImageId}",
@@ -92,11 +104,7 @@
 			},
 			"PhysicalDisk": {
 				"measurement": [
-					"% Disk Time",
-					"Disk Write Bytes/sec",
-					"Disk Read Bytes/sec",
-					"Disk Writes/sec",
-					"Disk Reads/sec"
+					"% Disk Time"
 				],
 				"metrics_collection_interval": 10,
 				"resources": [
@@ -113,18 +121,6 @@
 				"resources": [
 					"*"
 				]
-			},
-			"TCPv4": {
-				"measurement": [
-					"Connections Established"
-				],
-				"metrics_collection_interval": 10
-			},
-			"TCPv6": {
-				"measurement": [
-					"Connections Established"
-				],
-				"metrics_collection_interval": 10
 			}
 		}
 	}

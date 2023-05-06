@@ -5,13 +5,13 @@
 				"collect_list": [
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-agent.log",
-						"log_group_name": "/aws/ec2/windows-server-2016/awslog-ssm-agent",
+						"log_group_name": "/aws/ec2/windows-server-2022/awslog-ssm-agent",
 						"log_stream_name": "{instance_id}",
 						"retention_in_days": 14
 					},
 					{
 						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
-						"log_group_name": "/aws/ec2/windows-server-2016/awslog-cloudwatch-agent",
+						"log_group_name": "/aws/ec2/windows-server-2022/awslog-cloudwatch-agent",
 						"log_stream_name": "{instance_id}",
 						"retention_in_days": 14
 					}
