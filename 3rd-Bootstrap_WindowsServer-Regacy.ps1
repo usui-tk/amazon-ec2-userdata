@@ -309,8 +309,23 @@ function Get-EbsVolumesMappingInformation {
     }
 
     Try {
+        # Setting AWS Tools for Windows PowerShell
+        Initialize-AWSDefaultConfiguration -Region $Region
+
+        # Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+
+        # Get the block-device-mapping
         $VirtualDeviceMap = (Get-EC2InstanceMetadata -Category "BlockDeviceMapping").GetEnumerator() | Where-Object { $_.Key -ne "ami" }
+
+        # Get the block-device-mapping (Alternative Methods)
+        # $VirtualDeviceMap = @{}
+        # ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
+        #     $VirtualDevice = $_
+        #     $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice)).Content
+        #     $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
+        #     $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
+        # }
     }
     Catch {
         Write-Host "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
