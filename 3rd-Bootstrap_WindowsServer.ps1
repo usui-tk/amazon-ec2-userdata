@@ -2900,7 +2900,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinSCP version information]
-    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.21.8-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winscp/WinSCP/5.21.8/WinSCP-5.21.8-Setup.exe"
     Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinSCP)"
