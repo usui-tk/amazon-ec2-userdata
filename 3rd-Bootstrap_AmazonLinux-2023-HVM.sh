@@ -130,14 +130,14 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package replacement CURL Tools [curl-minimal to curl-full] (from Amazon Linux Official Repository)
-if [ $(rpm -qa | grep curl-minimal) ]; then
+if [ $(rpm -qa | grep -ve "libcurl-minimal" | grep -w curl-minimal) ]; then
 	dnf install -y --allowerasing curl-full libcurl-full
 fi
 
 # Package replacement GPG Tools [gnupg2-minimal to gnupg2-full] (from Amazon Linux Official Repository)
-if [ $(rpm -qa | grep gnupg2-minimal) ]; then
-	dnf install -y --allowerasing gnupg2-full
-fi
+# if [ $(rpm -qa | grep -w gnupg2-minimal) ]; then
+# 	dnf install -y --allowerasing gnupg2-full
+# fi
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
 dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
