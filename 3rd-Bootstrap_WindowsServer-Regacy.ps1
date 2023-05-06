@@ -319,23 +319,23 @@ function Get-EbsVolumesMappingInformation {
 
     Try {
         # Get the block-device-mapping
-        $VirtualDeviceMap = (Get-EC2InstanceMetadata -Category "BlockDeviceMapping").GetEnumerator() | Where-Object { $_.Key -ne "ami" }
+        # $VirtualDeviceMap = (Get-EC2InstanceMetadata -Category "BlockDeviceMapping").GetEnumerator() | Where-Object { $_.Key -ne "ami" }
 
         # Get the block-device-mapping (Alternative Methods)
-        # $VirtualDeviceMap = @{}
-        # ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
-        #     $VirtualDevice = $_
-        #     $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice)).Content
-        #     $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
-        #     $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
-        # }
+        $VirtualDeviceMap = @{}
+        ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
+            $VirtualDevice = $_
+            $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice)).Content
+            $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
+            $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
+        }
     }
     Catch {
         Write-Host "Could not access the AWS API using AWS Get-EC2InstanceMetadata CMDLet, therefore, VolumeId is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
     }
 
     # Get EBS volumes and Ephemeral disks Information
-    $EBSVolumeLists = Get-disk | ForEach-Object {
+    $EBSVolumeLists = Get-Disk | ForEach-Object {
         $DriveLetter = $null
         $VolumeName = $null
         $VirtualDevice = $null
