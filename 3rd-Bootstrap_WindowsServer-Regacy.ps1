@@ -1156,25 +1156,25 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 # Get AWS Region Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AWS Region Information"
-    Get-AWSRegion | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-AWSRegion.txt" -Append -Force
+    Get-AWSRegion | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-AWSRegion.txt" -Append -Force
 }
 
 # Get Amazon EC2 Instance Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
 }
 
 # Get Amazon EC2 Instance attached EBS Volume Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
+    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
 }
 
 # Get AMI information of this EC2 instance
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AMI information of this EC2 instance"
-    Get-EC2Image -ImageId $AmiId -Region $Region | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image.txt" -Append -Force
+    Get-EC2Image -ImageId $AmiId -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image.txt" -Append -Force
 }
 
 # Get AMI Information from Systems Manager Parameter Store
@@ -1189,7 +1189,7 @@ if ($RoleName) {
 
     Try {
         Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (/aws/service/ami-windows-latest)"
-        Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" -Region $Region | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-SSMParametersByPath_aws-service-ami-windows-latest.txt" -Append -Force
+        Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-SSMParametersByPath_aws-service-ami-windows-latest.txt" -Append -Force
     }
     Catch {
         Write-Host "Could not access the AWS API, therefore, SSM Parameter Store is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
@@ -1201,28 +1201,28 @@ if ($RoleName) {
         Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (For AMI)"
 
         # Windows_Server-2012-R2_RTM-Japanese-64Bit-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-Japanese-64Bit-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-Japanese-64Bit-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-Japanese-64Bit-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-Japanese-64Bit-Base.txt" -Append -Force
 
         # Windows_Server-2016-Japanese-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-Japanese-Full-Base").Parameters[0].Value ) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-Japanese-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-Japanese-Full-Base").Parameters[0].Value ) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-Japanese-Full-Base.txt" -Append -Force
 
         # Windows_Server-2019-Japanese-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-Japanese-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-Japanese-Full-Base.txt" -Append -Force
 
         # Windows_Server-2022-Japanese-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-Japanese-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-Japanese-Full-Base.txt" -Append -Force
 
         # Windows_Server-2012-R2_RTM-English-64Bit-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-English-64Bit-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-English-64Bit-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-English-64Bit-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-English-64Bit-Base.txt" -Append -Force
 
         # Windows_Server-2016-English-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-English-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-English-Full-Base.txt" -Append -Force
 
         # Windows_Server-2019-English-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-English-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-English-Full-Base.txt" -Append -Force
 
         # Windows_Server-2022-English-Full-Base
-        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-English-Full-Base.txt" -Append -Force
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-English-Full-Base.txt" -Append -Force
     }
 
 }
@@ -1234,7 +1234,7 @@ if ($RoleName) {
 #
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EBS snapshot information for AWS-provided installation media"
-    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Snapshot_WindowsInstallationMedia-List.txt" -Append -Force
+    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Snapshot_WindowsInstallationMedia-List.txt" -Append -Force
 }
 
 
@@ -1873,7 +1873,7 @@ Set-Variable -Name ServiceStatusForCloudFormation -Scope Script -Value ($Null)
 
 # Logging Install Windows Application List (Before Uninstall)
 Write-Log "# Get Install Windows Application List (Before Uninstall)"
-Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Uninstall AWS CloudFormation Helper Scripts
 Write-Log "# Uninstall AWS CloudFormation Helper Scripts"
@@ -1882,7 +1882,7 @@ Start-Sleep -Seconds 5
 
 # Logging Install Windows Application List (After Uninstall)
 Write-Log "# Get Install Windows Application List (After Uninstall)"
-Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Package Download System Utility (AWS CloudFormation Helper Scripts)
 # http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
@@ -1904,7 +1904,7 @@ Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName
 
 # Logging Install Windows Application List (After Install)
 Write-Log "# Get Install Windows Application List (After Install)"
-Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2143,11 +2143,11 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
         Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuType : $ElasticGpuType"
         Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniIpAddress : $ElasticGpuEniIpAddress"
 
-        $ElasticGpuInformation | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_EC2InstanceMetaData-Information.txt" -Append -Force
+        $ElasticGpuInformation | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_EC2InstanceMetaData-Information.txt" -Append -Force
 
         # Logging Amazon EC2 Elastic GPU Information from AWS Tools for Windows PowerShell
         if ($RoleName) {
-            Get-EC2ElasticGpu -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
+            Get-EC2ElasticGpu -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU-Information.txt" -Append -Force
         }
 
         # Logging Amazon EC2 Elastic GPU ENI Information from AWS Tools for Windows PowerShell
@@ -2157,7 +2157,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
 
             Write-Log "# [AWS - EC2-ElasticGPU] ElasticGpuEniId : $ElasticGpuEniId"
 
-            $ElasticGpuEniInsterface | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Information.txt" -Append -Force
+            $ElasticGpuEniInsterface | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-EC2_ElasticGPU_ENI-Information.txt" -Append -Force
         }
 
         # Check Windows OS Version[Windows Server 2012 R2, 2016]
@@ -3141,7 +3141,7 @@ Get-Variable | Export-Csv -Encoding default $BASE_DIR\Bootstrap-Variable.csv
 
 # Logging Install Windows Application List (Final Information)
 Write-Log "# Get Install Windows Application List (Final Information)"
-Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 
 # Package Download System Utility (EC2Rescue)
