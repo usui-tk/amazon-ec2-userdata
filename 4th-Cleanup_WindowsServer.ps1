@@ -55,10 +55,13 @@ else {
 }
 
 # Clear AWS Utility and Tool Log
-Set-Variable -Name Ec2ConfigLogFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt"
-if (Test-Path -Path $Ec2ConfigLogFile) {
-    Write-Message ("# Clear file [" + $Ec2ConfigLogFile + "]")
-    Clear-Content -Path $Ec2ConfigLogFile -Force -ErrorAction SilentlyContinue
+Set-Variable -Name Ec2LaunchV2LogFile -Value "C:\ProgramData\Amazon\EC2Launch\log\agent.log"
+if (Test-Path -Path $Ec2LaunchV2LogFile) {
+    Set-Variable -Name EC2LAUNCH_V2_LOG_DIR -Value "C:\ProgramData\Amazon\EC2Launch\log\*"
+
+    Write-Message ("# Delete directory [" + $EC2LAUNCH_V2_LOG_DIR + "]")
+    Remove-Item -Path $EC2LAUNCH_V2_LOG_DIR -Recurse -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 5
 }
 
 Set-Variable -Name Ec2LaunchLogFile -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Log\Ec2Launch.log"
@@ -67,13 +70,10 @@ if (Test-Path -Path $Ec2LaunchLogFile) {
     Clear-Content -Path $Ec2LaunchLogFile -Force -ErrorAction SilentlyContinue
 }
 
-Set-Variable -Name Ec2LaunchV2LogFile -Value "C:\ProgramData\Amazon\EC2Launch\log\agent.log"
-if (Test-Path -Path $Ec2LaunchV2LogFile) {
-    Set-Variable -Name EC2LAUNCH_V2_LOG_DIR -Value "C:\ProgramData\Amazon\EC2Launch\log\*"
-
-    Write-Message ("# Delete directory [" + $EC2LAUNCH_V2_LOG_DIR + "]")
-    Remove-Item -Path $EC2LAUNCH_V2_LOG_DIR -Recurse -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 5
+Set-Variable -Name Ec2ConfigLogFile -Value "C:\Program Files\Amazon\Ec2ConfigService\Logs\Ec2ConfigLog.txt"
+if (Test-Path -Path $Ec2ConfigLogFile) {
+    Write-Message ("# Clear file [" + $Ec2ConfigLogFile + "]")
+    Clear-Content -Path $Ec2ConfigLogFile -Force -ErrorAction SilentlyContinue
 }
 
 Set-Variable -Name SSMAgentLogFile -Value "C:\ProgramData\Amazon\SSM\Logs\amazon-ssm-agent.log"
@@ -123,9 +123,9 @@ Start-Sleep -Seconds 30
 Write-MessageSeparator "# Execution of Sysprep processing"
 
 # Checking the existence of the sysprep file
-Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
 Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
+Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 
 Write-Message "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
