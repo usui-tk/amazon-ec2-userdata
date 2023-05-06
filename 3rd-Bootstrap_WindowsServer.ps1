@@ -2125,7 +2125,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Package Install Commnand-Line Shell (PowerShell 7.3)
     Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.3)"
-    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_MicrosoftPowerShellSetup.log")
     Start-Sleep -Seconds 10
 
     # Package Configure Commnand-Line Shell (PowerShell 7.3)
@@ -2757,7 +2757,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-    Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_VSCodeSetup.log") | Out-Null
+    Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_MicrosoftVisualStudioCodeSetup.log") | Out-Null
 }
 
 
@@ -3015,9 +3015,8 @@ Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -Verb runa
 Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 
-# Save Userdata Script, Bootstrap Script, Logging Data Files
-
-Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows OS Version : " + $WindowsOSVersion)
+# Save Userdata Script, Bootstrap Script, Logging Data Files - Start
+Write-Log "# Save Userdata Script, Bootstrap Script, Logging Data Files) - Start"
 
 # Save UserData Script File (EC2config)
 Set-Variable -Name Ec2ConfigUserdataScript -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1"
@@ -3054,6 +3053,10 @@ Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destinatio
 
 # Save Logging Files
 Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
+
+# Save Userdata Script, Bootstrap Script, Logging Data Files - Complete
+Write-Log "# Save Userdata Script, Bootstrap Script, Logging Data Files) - Complete"
+
 
 # Log Separator
 Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
