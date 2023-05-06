@@ -2835,7 +2835,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
     # Package Install Text Editor (Visual Studio Code 64bit Edition)
     Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
-    Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, quicklaunchicon, addcontextmenufiles, addcontextmenufolders, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_MicrosoftVisualStudioCodeSetup.log") | Out-Null
+    Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/norestart", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, addcontextmenufiles, addcontextmenufolders, associatewithfiles, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_MicrosoftVisualStudioCodeSetup.log") | Out-Null
 }
 
 
