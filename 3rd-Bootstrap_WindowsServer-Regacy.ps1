@@ -937,10 +937,12 @@ Set-StrictMode -Version Latest
 Write-LogSeparator "Change PowerShell SecurityProtocol"
 
 # Initialize Parameter
+Set-Variable -Name PowerShellSystemSupportSecurityProtocol -Scope Script -Value ($Null)
 Set-Variable -Name PowerShellSecurityProtocol -Scope Script -Value ($Null)
 
 # Get System Support - PowerShell SecurityProtocol
-[enum]::GetNames([Net.SecurityProtocolType])
+$PowerShellSystemSupportSecurityProtocol = @([enum]::GetNames([Net.SecurityProtocolType]))
+Write-Log ("# [PowerShell SecurityProtocol] (Get System Support) : " + ($PowerShellSystemSupportSecurityProtocol -join ', '))
 
 # Get PowerShell SecurityProtocol
 $PowerShellSecurityProtocol = [Net.ServicePointManager]::SecurityProtocol
@@ -1382,69 +1384,69 @@ Set-Variable -Name HKCU_FolderOptionRegistry -Option Constant -Scope Local -Valu
 if (Test-Path -Path $HKLM_FolderOptionRegistry) {
     # [Check] Show hidden files, folders, or drives
     if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
-        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\Hidden")
     }
     else {
-        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\Hidden")
     }
 
     # [UnCheck] Hide extensions for known file types
     if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
-        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\HideFileExt")
     }
     else {
-        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\HideFileExt")
     }
 
     # [Check] Restore previous folders windows
     if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
-        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
+        Set-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_FolderOptionRegistry + "\PersistBrowsers")
     }
     else {
-        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_FolderOptionRegistry + "\PersistBrowsers")
     }
 }
 
 if ( -Not (Test-Path -Path $HKCU_FolderOptionRegistry ) ) {
     Write-Log ("# New-Item - " + $HKCU_FolderOptionRegistry)
-    New-Item -Path $HKCU_FolderOptionRegistry -Force
+    New-Item -Path $HKCU_FolderOptionRegistry -Force | Out-Null
     Start-Sleep -Seconds 5
 }
 
 if (Test-Path -Path $HKCU_FolderOptionRegistry) {
     # [Check] Show hidden files, folders, or drives
     if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
-        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\Hidden")
     }
     else {
-        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'Hidden' -Value '1' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\Hidden")
     }
 
     # [UnCheck] Hide extensions for known file types
     if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'HideFileExt') {
-        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\HideFileExt")
     }
     else {
-        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'HideFileExt' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\HideFileExt")
     }
 
     # [Check] Restore previous folders windows
     if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'PersistBrowsers') {
-        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force
+        Set-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_FolderOptionRegistry + "\PersistBrowsers")
     }
     else {
-        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_FolderOptionRegistry -Name 'PersistBrowsers' -Value '1' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_FolderOptionRegistry + "\PersistBrowsers")
     }
 }
@@ -1462,113 +1464,113 @@ Set-Variable -Name HKCU_DesktopIconRegistrySetting -Option Constant -Scope Local
 if (Test-Path -Path $HKLM_DesktopIconRegistrySetting) {
     #[CLSID] : My Computer
     if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
-        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
     }
     else {
-        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
     }
 
     #[CLSID] : Control Panel
     if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}') {
-        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
     }
     else {
-        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
     }
 
     #[CLSID] : User's Files
     if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{59031a47-3f72-44a7-89c5-5595fe6b30ee}') {
-        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
     }
     else {
-        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
     }
 
     #[CLSID] : Recycle Bin
     if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{645FF040-5081-101B-9F08-00AA002F954E}') {
-        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
     }
     else {
-        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
     }
 
     #[CLSID] : Network
     if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}') {
-        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force
+        Set-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
     }
     else {
-        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKLM_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKLM_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
     }
 }
 
 if ( -Not (Test-Path -Path $HKCU_DesktopIconRegistry ) ) {
     Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistry)
-    New-Item -Path $HKCU_DesktopIconRegistry -Force
+    New-Item -Path $HKCU_DesktopIconRegistry -Force | Out-Null
     Start-Sleep -Seconds 5
 
     Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistrySetting)
-    New-Item -Path $HKCU_DesktopIconRegistrySetting -Force
+    New-Item -Path $HKCU_DesktopIconRegistrySetting -Force | Out-Null
     Start-Sleep -Seconds 5
 }
 
 if (Test-Path -Path $HKCU_DesktopIconRegistrySetting) {
     #[CLSID] : My Computer
     if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
-        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
     }
     else {
-        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{20D04FE0-3AEA-1069-A2D8-08002B30309D}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{20D04FE0-3AEA-1069-A2D8-08002B30309D}")
     }
 
     #[CLSID] : Control Panel
     if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}') {
-        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
     }
     else {
-        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{5399E694-6CE5-4D6C-8FCE-1D8870FDCBA0}")
     }
 
     #[CLSID] : User's Files
     if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{59031a47-3f72-44a7-89c5-5595fe6b30ee}') {
-        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
     }
     else {
-        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{59031a47-3f72-44a7-89c5-5595fe6b30ee}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{59031a47-3f72-44a7-89c5-5595fe6b30ee}")
     }
 
     #[CLSID] : Recycle Bin
     if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{645FF040-5081-101B-9F08-00AA002F954E}') {
-        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
     }
     else {
-        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{645FF040-5081-101B-9F08-00AA002F954E}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{645FF040-5081-101B-9F08-00AA002F954E}")
     }
 
     #[CLSID] : Network
     if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}') {
-        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force
+        Set-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -Force | Out-Null
         Write-Log ("# Set-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
     }
     else {
-        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force
+        New-ItemProperty -Path $HKCU_DesktopIconRegistrySetting -Name '{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}' -Value '0' -PropertyType "DWord" -Force | Out-Null
         Write-Log ("# New-ItemProperty - " + $HKCU_DesktopIconRegistrySetting + "\{F02C1A0D-BE21-4350-88B0-7367FC96EF3C}")
     }
 }
@@ -1665,12 +1667,12 @@ if ($WindowsOSLanguage -eq "ja-JP") {
     # Update Sysprep Answer File
     if (Test-Path $SysprepFile) {
         Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (Before)"
-        Get-Content -Path $SysprepFile
+        Get-Content -Path $SysprepFile | ConvertTo-Xml | Out-File "$LOGS_DIR\WindowsConfigurationFiles_Sysprep(Before).xml" -Append -Force
 
         Update-SysprepAnswerFile $SysprepFile
 
         Write-Log "# [Windows - OS Settings] Update Sysprep Answer File (After)"
-        Get-Content -Path $SysprepFile
+        Get-Content -Path $SysprepFile | ConvertTo-Xml | Out-File "$LOGS_DIR\WindowsConfigurationFiles_Sysprep(After).xml" -Append -Force
     }
 
 }
@@ -1840,13 +1842,16 @@ else {
 # Log Separator
 Write-LogSeparator "Package ReInstall[Uninstall and Install] (AWS CloudFormation Helper Scripts)"
 
+# Set Initialize Parameter
+Set-Variable -Name ServiceStatusForCloudFormation -Scope Script -Value ($Null)
+
 # Logging Install Windows Application List (Before Uninstall)
 Write-Log "# Get Install Windows Application List (Before Uninstall)"
 Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Uninstall AWS CloudFormation Helper Scripts
 Write-Log "# Uninstall AWS CloudFormation Helper Scripts"
-(Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall()
+(Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall() | Out-Null
 Start-Sleep -Seconds 5
 
 # Logging Install Windows Application List (After Uninstall)
@@ -1867,7 +1872,9 @@ Start-Process -FilePath "$TOOL_DIR\$CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE" -Ve
 
 Start-Sleep -Seconds 10
 
-Get-Service -Name "cfn-hup"
+# Get Service Status
+$ServiceStatusForCloudFormation = (Get-Service -Name "cfn-hup" | Select-Object Displayname, Status, ServiceName)
+Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName - {1}] [Status - {2}]" -f $ServiceStatusForCloudFormation.Displayname, $ServiceStatusForCloudFormation.ServiceName, $ServiceStatusForCloudFormation.Status)
 
 # Logging Install Windows Application List (After Install)
 Write-Log "# Get Install Windows Application List (After Install)"
@@ -1882,6 +1889,7 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 Write-LogSeparator "Package Update System Utility (AWS Systems Manager agent)"
 
 # Set Initialize Parameter
+Set-Variable -Name ServiceStatusForAmazonSSMAgent -Scope Script -Value ($Null)
 Set-Variable -Name AmazonSSMAgentUrl -Scope Script -Value ($Null)
 
 # Package Download System Utility (AWS Systems Manager agent)
@@ -1904,7 +1912,9 @@ Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -Wait -A
 
 Start-Sleep -Seconds 5
 
-Get-Service -Name "AmazonSSMAgent"
+# Get Service Status
+$ServiceStatusForAmazonSSMAgent = (Get-Service -Name "AmazonSSMAgent" | Select-Object Displayname, Status, ServiceName)
+Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName - {1}] [Status - {2}]" -f $ServiceStatusForAmazonSSMAgent.Displayname, $ServiceStatusForAmazonSSMAgent.ServiceName, $ServiceStatusForAmazonSSMAgent.Status)
 
 # Service Automatic Startup Setting (AWS Systems Manager agent)
 $AmazonSSMAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonSSMAgent'").StartMode
@@ -1923,7 +1933,7 @@ if ($AmazonSSMAgentStatus -ne "Auto") {
 Get-Ec2SystemManagerAgentVersion
 
 # Forced cleanup of AWS Systems Manager agent's local data
-Stop-Service -Name "AmazonSSMAgent"
+Stop-Service -Name "AmazonSSMAgent" | Out-Null
 Start-Sleep -Seconds 15
 
 Remove-Item -Path "C:\ProgramData\Amazon\SSM\InstanceData" -Recurse -Force
@@ -1932,14 +1942,15 @@ if (Test-Path $SSMAgentLogFile) {
     Clear-Content -Path $SSMAgentLogFile -Force -ErrorAction SilentlyContinue
 }
 
-Start-Service -Name "AmazonSSMAgent"
+Start-Service -Name "AmazonSSMAgent" | Out-Null
 Start-Sleep -Seconds 15
 
 # Get Service Status
-Get-Service -Name "AmazonSSMAgent"
+$ServiceStatusForAmazonSSMAgent = (Get-Service -Name "AmazonSSMAgent" | Select-Object Displayname, Status, ServiceName)
+Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName - {1}] [Status - {2}]" -f $ServiceStatusForAmazonSSMAgent.Displayname, $ServiceStatusForAmazonSSMAgent.ServiceName, $ServiceStatusForAmazonSSMAgent.Status)
 
 # View Log File
-Get-Content -Path $SSMAgentLogFile
+Get-Content -Path $SSMAgentLogFile  | Out-File "$LOGS_DIR\AWS-Systems-Manager-agent.log" -Append -Force
 
 # Display Windows Server OS Parameter [AWS Systems Manager agent Information]
 if ($RoleName) {
@@ -1953,6 +1964,9 @@ if ($RoleName) {
 
 # Log Separator
 Write-LogSeparator "Package Install System Utility (Amazon CloudWatch Agent)"
+
+# Set Initialize Parameter
+Set-Variable -Name ServiceStatusForAmazonCloudWatchAgent -Scope Script -Value ($Null)
 
 # ConfigFile Download System Utility (Amazon CloudWatch Agent)
 Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
@@ -2011,7 +2025,9 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     Start-Sleep -Seconds 5
 
-    Get-Service -Name "AmazonCloudWatchAgent"
+    # Get Service Status
+    $ServiceStatusForAmazonCloudWatchAgent = (Get-Service -Name "AmazonCloudWatchAgent" | Select-Object Displayname, Status, ServiceName)
+    Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName - {1}] [Status - {2}]" -f $ServiceStatusForAmazonCloudWatchAgent.Displayname, $ServiceStatusForAmazonCloudWatchAgent.ServiceName, $ServiceStatusForAmazonCloudWatchAgent.Status)
 
     # Package Configuration System Utility (Amazon CloudWatch Agent)
     Write-Log "# Package Configuration System Utility (Amazon CloudWatch Agent)"
@@ -2022,7 +2038,9 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
     # Display Windows Server OS Parameter [Amazon CloudWatch Agent Information]
     powershell.exe -ExecutionPolicy Bypass -File "C:\Program Files\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1" -m ec2 -a status
 
-    Get-Service -Name "AmazonCloudWatchAgent"
+    # Get Service Status
+    $ServiceStatusForAmazonCloudWatchAgent = (Get-Service -Name "AmazonCloudWatchAgent" | Select-Object Displayname, Status, ServiceName)
+    Write-Log ("# [Windows - OS Settings] Service - [Displayname - {0}] [ServiceName - {1}] [Status - {2}]" -f $ServiceStatusForAmazonCloudWatchAgent.Displayname, $ServiceStatusForAmazonCloudWatchAgent.ServiceName, $ServiceStatusForAmazonCloudWatchAgent.Status)
 
     # Service Automatic Startup Setting (Amazon CloudWatch Agent)
     $AmazonCloudWatchAgentStatus = (Get-WmiObject Win32_Service -Filter "Name='AmazonCloudWatchAgent'").StartMode
@@ -2328,8 +2346,30 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=75
 #    -> [pfid] Tesla M60 : 783
 #
-#  [Amazon EC2 G4 Instance Family]
+#  [Amazon EC2 G4(G4dn) Instance Family]
 #  NVIDIA T4 Tensor Core GPU
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] T-Series : 110
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=110
+#    -> [pfid] Tesla T4 : 883
+#
+#  [Amazon EC2 G4(G4ad) Instance Family]
+#  AMD Radeon Pro V520 GPU
+#   https://www.amd.com/en/products/server-accelerators/amd-radeon-pro-v520
+#
+#  [Amazon EC2 G5 Instance Family]
+#  NVIDIA A10G Tensor Core GPU
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] A-Series : 118
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=118
+#    -> [pfid] NVIDIA A10 : 955
+#
+#  [Amazon EC2 G5(G5g) Instance Family]
+#  NVIDIA T4G Tensor Core GPU
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
 #    -> Tesla : 7
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
@@ -2354,6 +2394,15 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 #    -> [psid] V-Series : 105
 #   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=105
 #    -> [pfid] Tesla V100 : 857
+#
+#  [Amazon EC2 P4 Instance Family]
+#  NVIDIA A100 Tensor Core GPU
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=1
+#    -> Tesla : 7
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=2&ParentID=7
+#    -> [psid] A-Series : 118
+#   http://www.nvidia.com/Download/API/lookupValueSearch.aspx?TypeID=3&ParentID=118
+#    -> [pfid] NVIDIA A100 : 923
 #
 #=======================================================================================================================
 #
@@ -3064,6 +3113,10 @@ Write-LogSeparator "Collect Script/Config Files & Logging Data Files"
 Write-Log "# Get System & User Variables"
 Get-Variable | Export-Csv -Encoding default $BASE_DIR\Bootstrap-Variable.csv
 
+# Logging Install Windows Application List (Final Information)
+Write-Log "# Get Install Windows Application List (Final Information)"
+Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
+
 
 # Package Download System Utility (EC2Rescue)
 # http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
@@ -3114,8 +3167,7 @@ if (Test-Path $EC2ConfigFile) {
 
 if (Test-Path $EC2LaunchFile) {
     Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
-    Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
-    Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
+    Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" -Destination $BASE_DIR
 }
 
 if (Test-Path $EC2Launchv2File) {
