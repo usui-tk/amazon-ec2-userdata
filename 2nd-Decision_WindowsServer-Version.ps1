@@ -157,24 +157,24 @@ elseif ($OSversion -match "^10.0.*") {
         '17763' {
             # Log Separator
             Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2019"
-            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
-            Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL_MODERN))
+            Invoke-WebRequest -Uri $BOOTSTRAP_URL_MODERN -OutFile $BOOTSTRAP_SCRIPT
             Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
             powershell.exe -ExecutionPolicy Bypass "$TEMP_DIR\$BOOTSTRAP_SCRIPT" -SkipNetworkProfileCheck
         }
         '20348' {
             # Log Separator
             Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2022"
-            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
-            Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL_MODERN))
+            Invoke-WebRequest -Uri $BOOTSTRAP_URL_MODERN -OutFile $BOOTSTRAP_SCRIPT
             Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
             powershell.exe -ExecutionPolicy Bypass "$TEMP_DIR\$BOOTSTRAP_SCRIPT" -SkipNetworkProfileCheck
         }
         default {
             # Log Separator
             Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server (UnKnown Modern OS)"
-            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL))
-            Invoke-WebRequest -Uri $BOOTSTRAP_URL -OutFile $BOOTSTRAP_SCRIPT
+            Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL_MODERN))
+            Invoke-WebRequest -Uri $BOOTSTRAP_URL_MODERN -OutFile $BOOTSTRAP_SCRIPT
             Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
             powershell.exe -ExecutionPolicy Bypass "$TEMP_DIR\$BOOTSTRAP_SCRIPT" -SkipNetworkProfileCheck
         }
