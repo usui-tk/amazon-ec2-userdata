@@ -47,7 +47,6 @@ Set-Variable -Name TEMP_DIR -Scope Script "$Env:SystemRoot\Temp"
 
 # Set Script Parameter for Log File Name (User Defined)
 Set-Variable -Name USERDATA_LOG -Scope Script "$TEMP_DIR\userdata.log"
-Set-Variable -Name TRANSCRIPT_LOG -Scope Script "$TEMP_DIR\userdata-transcript-2nd.log"
 
 # Set Script Parameter for 3rd-Bootstrap Script (User Defined)
 Set-Variable -Name BOOTSTRAP_URL_MODERN -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_WindowsServer-Regacy.ps1"
@@ -95,15 +94,10 @@ function Write-LogSeparator {
 # Preparation for script execution
 #-----------------------------------------------------------------------------------------------------------------------
 
-Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
-
 Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
 Write-Log "# Script Execution 2nd-Decision Script [START] : $ScriptFullPath"
 
 Set-Location -Path $TEMP_DIR
-
-Get-ExecutionPolicy -List
-Set-StrictMode -Version Latest
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Windows Server OS Decision
