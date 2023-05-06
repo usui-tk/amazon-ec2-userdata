@@ -29,7 +29,7 @@
 							"CRITICAL"
 						],
 						"event_name": "System",
-						"log_group_name": "System",
+						"log_group_name": "/aws/ec2/windows-server-2012R2/WindowsEventLog-System",
 						"log_stream_name": "{instance_id}",
 						"retention_in_days": 14
 					},
@@ -43,7 +43,7 @@
 							"CRITICAL"
 						],
 						"event_name": "Application",
-						"log_group_name": "Application",
+						"log_group_name": "/aws/ec2/windows-server-2012R2/WindowsEventLog-Application",
 						"log_stream_name": "{instance_id}",
 						"retention_in_days": 14
 					},
@@ -57,7 +57,7 @@
 							"CRITICAL"
 						],
 						"event_name": "Security",
-						"log_group_name": "Security",
+						"log_group_name": "/aws/ec2/windows-server-2012R2/WindowsEventLog-Security",
 						"log_stream_name": "{instance_id}",
 						"retention_in_days": 14
 					}
