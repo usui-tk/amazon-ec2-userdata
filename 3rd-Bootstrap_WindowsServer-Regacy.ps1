@@ -68,7 +68,7 @@ Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp
 
 # Set Script Parameter for Log File Name (User Defined)
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
-Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript-3rd.log"
+Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript.log"
 
 # Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2)
 Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
@@ -120,6 +120,7 @@ function New-Directory {
     if (!(Test-Path -Path $dir)) {
         Write-Log "# Creating directory : $dir"
         New-Item -Path $dir -ItemType Directory -Force
+        Start-Sleep -Seconds 1
     }
 } # end function New-Directory
 
@@ -305,16 +306,18 @@ function Get-EbsVolumesMappingInformation {
         }
     }
     Catch {
-        Write-Host "Could not access the instance Metadata using AWS Get-EC2InstanceMetadata CMDLet. Verify you have AWSPowershell SDK version '3.1.73.0' or greater installed and Metadata is enabled for this instance." -ForegroundColor Yellow
+        Write-Host "Could not access the instance Metadata using Invoke-RestMethod CMDLet. Verify you have AWSPowershell SDK version '3.1.73.0' or greater installed and Metadata is enabled for this instance." -ForegroundColor Yellow
     }
 
     Try {
-        # Setting AWS Tools for Windows PowerShell
-        Initialize-AWSDefaultConfiguration -Region $Region
-
         # Get the volumes attached to this instance
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
+    }
+    Catch {
+        Write-Host "Could not access the instance Metadata using AWS Get-EC2Instance CMDLet. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
+    }
 
+    Try {
         # Get the block-device-mapping
         $VirtualDeviceMap = (Get-EC2InstanceMetadata -Category "BlockDeviceMapping").GetEnumerator() | Where-Object { $_.Key -ne "ami" }
 
@@ -328,7 +331,7 @@ function Get-EbsVolumesMappingInformation {
         # }
     }
     Catch {
-        Write-Host "Could not access the AWS API, therefore, VolumeId is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
+        Write-Host "Could not access the AWS API using AWS Get-EC2InstanceMetadata CMDLet, therefore, VolumeId is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
     }
 
     # Get EBS volumes and Ephemeral disks Information
@@ -893,10 +896,20 @@ $Local:TimezoneLanguage = ([CultureInfo]::CurrentCulture).IetfLanguageTag
 
 if ($TimezoneLanguage -eq "ja-JP") {
     if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Set-TimeZone" }) {
-        Get-TimeZone
-        Set-TimeZone -Id "Tokyo Standard Time"
+
+        # Set Initialize Parameter
+        Set-Variable -Name TimeZoneInformation -Scope Script -Value ($Null)
+
+        # Get TimeZone
+        $TimeZoneInformation = (Get-TimeZone | Select-Object Id, Displayname, StandardName, BaseUtcOffset)
+        Write-Log ("# [Windows - OS Settings] TimeZone - [Id - {0}] [Displayname - {1}] [StandardName - {2}] [BaseUtcOffset - {3}]" -f $TimeZoneInformation.Id, $TimeZoneInformation.Displayname, $TimeZoneInformation.StandardName, $TimeZoneInformation.BaseUtcOffset)
+
+        Set-TimeZone -Id "Tokyo Standard Time" | Out-Null
         Start-Sleep -Seconds 5
-        Get-TimeZone
+
+        # Get TimeZone
+        $TimeZoneInformation = (Get-TimeZone | Select-Object Id, Displayname, StandardName, BaseUtcOffset)
+        Write-Log ("# [Windows - OS Settings] TimeZone - [Id - {0}] [Displayname - {1}] [StandardName - {2}] [BaseUtcOffset - {3}]" -f $TimeZoneInformation.Id, $TimeZoneInformation.Displayname, $TimeZoneInformation.StandardName, $TimeZoneInformation.BaseUtcOffset)
     }
     else {
         Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation"
@@ -915,15 +928,28 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 
 Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
+
+# Log Separator
+Write-LogSeparator "# [Bootstrap Script] : Running UserData scripts retrieved from GitHub repositories"
 Write-Log "# Script Execution 3rd-Bootstrap Script [START] : $ScriptFullPath"
 
-New-Directory $BASE_DIR
-New-Directory $TOOL_DIR
-New-Directory $LOGS_DIR
+# Create Directory
+if ( -not (Test-Path $BASE_DIR)){
+    New-Directory $BASE_DIR | Out-Null
+}
+
+if ( -not (Test-Path $TOOL_DIR)){
+    New-Directory $TOOL_DIR | Out-Null
+}
+
+if ( -not (Test-Path $LOGS_DIR)){
+    New-Directory $LOGS_DIR | Out-Null
+}
+
 
 Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
-Set-Location -Path $BASE_DIR
+Set-Location -Path $BASE_DIR | Out-Null
 
 Get-ExecutionPolicy -List
 Set-StrictMode -Version Latest
