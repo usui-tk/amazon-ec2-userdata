@@ -31,6 +31,10 @@
 #               [Windows_Server-2019-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2019-English-Full-Base-YYYY.MM.DD]
 #
+#      - 10.0 : Windows Server 2022 (Microsoft Windows Server 2022 [Datacenter Edition])
+#               [Windows_Server-2022-Japanese-Full-Base-YYYY.MM.DD]
+#               [Windows_Server-2022-English-Full-Base-YYYY.MM.DD]
+#
 ########################################################################################################################
 
 #-------------------------------------------------------------------------------
@@ -2011,7 +2015,7 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (PowerShell Core 7.2)
+# Custom Package Install (PowerShell 7.3)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 # https://github.com/PowerShell/PowerShell
 #
@@ -2026,27 +2030,27 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (PowerShell Core 7.2)"
+Write-LogSeparator "Package Install System Utility (PowerShell 7.3)"
 
 # Initialize Parameter [# Depends on PowerShell v7.2 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.2.0/PowerShell-7.2.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.3.4/PowerShell-7.3.4-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
-    # Package Download Commnand-Line Shell (PowerShell Core 7.2)
-    Write-Log "# Package Download Commnand-Line Shell (PowerShell Core 7.2)"
+    # Package Download Commnand-Line Shell (PowerShell 7.3)
+    Write-Log "# Package Download Commnand-Line Shell (PowerShell 7.3)"
     Get-WebContentToFile -Uri "$PWSH_INSTALLER_URL" -OutFile "$TOOL_DIR\$PWSH_INSTALLER_FILE"
 
-    # Package Install Commnand-Line Shell (PowerShell Core 7.2)
-    Write-Log "# Package Install Commnand-Line Shell (PowerShell Core 7.2)"
+    # Package Install Commnand-Line Shell (PowerShell 7.3)
+    Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.3)"
     Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log")
     Start-Sleep -Seconds 10
 
-    # Package Configure Commnand-Line Shell (PowerShell Core 7.2)
-    Write-Log "# Package Configure Commnand-Line Shell (PowerShell Core 7.2)"
+    # Package Configure Commnand-Line Shell (PowerShell 7.3)
+    Write-Log "# Package Configure Commnand-Line Shell (PowerShell 7.3)"
 
     # Install AWSPowerShell.NetCore
     # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
@@ -2617,32 +2621,32 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # Custom Package Installation (IrfanView)
 # https://www.irfanview.net/
 # https://www.irfanview.com/faq.htm#PAGE12
-if ($FLAG_APP_INSTALL -eq $TRUE) {
+# if ($FLAG_APP_INSTALL -eq $TRUE) {
 
-    # Initialize Parameter [# Depends on IrfanView version information]
-    Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview456_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview456_plugins_x64_setup.exe"
-    Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
+#     # Initialize Parameter [# Depends on IrfanView version information]
+#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview456_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
+#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview456_plugins_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    # Package Download Graphic Viewer (IrfanView)
-    Write-Log "# Package Download Graphic Viewer (IrfanView)"
-    Get-WebContentToFile -Uri "$IRFANVIEW_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE"
+#     # Package Download Graphic Viewer (IrfanView)
+#     Write-Log "# Package Download Graphic Viewer (IrfanView)"
+#     Get-WebContentToFile -Uri "$IRFANVIEW_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE"
 
-    # Package Install Graphic Viewer (IrfanView)
-    Write-Log "# Package Install Graphic Viewer (IrfanView)"
-    Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent", "/desktop=1", "/thumbs=0", "/group=1", "/allusers=1", "/assoc=1", "/allusers=1", "/ini=%APPDATA%\IrfanView") | Out-Null
-    Start-Sleep -Seconds 5
+#     # Package Install Graphic Viewer (IrfanView)
+#     Write-Log "# Package Install Graphic Viewer (IrfanView)"
+#     Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent", "/desktop=1", "/thumbs=0", "/group=1", "/allusers=1", "/assoc=1", "/allusers=1", "/ini=%APPDATA%\IrfanView") | Out-Null
+#     Start-Sleep -Seconds 5
 
-    # Package Download Graphic Viewer (IrfanView All Plugins)
-    Write-Log "# Package Download Graphic Viewer (IrfanView All Plugins)"
-    Get-WebContentToFile -Uri "$IRFANVIEW_PLUGIN_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE"
+#     # Package Download Graphic Viewer (IrfanView All Plugins)
+#     Write-Log "# Package Download Graphic Viewer (IrfanView All Plugins)"
+#     Get-WebContentToFile -Uri "$IRFANVIEW_PLUGIN_INSTALLER_URL" -OutFile "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE"
 
-    # Package Install Graphic Viewer (IrfanView All Plugins)
-    Write-Log "# Package Install Graphic Viewer (IrfanView All Plugins)"
-    Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent") | Out-Null
-    Start-Sleep -Seconds 5
-}
+#     # Package Install Graphic Viewer (IrfanView All Plugins)
+#     Write-Log "# Package Install Graphic Viewer (IrfanView All Plugins)"
+#     Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent") | Out-Null
+#     Start-Sleep -Seconds 5
+# }
 
 # [Caution : Finally the installation process]
 # Custom Package Installation (Visual Studio Code 64bit Edition)
@@ -2719,7 +2723,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/workbench.settingup.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)"
-    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/nosql-workbench/NoSQL%20Workbench-win-3.2.0.exe' -OutFile "$TOOL_DIR\NoSQL_Workbench-win-3.2.0.exe"
+    Get-WebContentToFile -Uri 'https://s3.amazonaws.com/nosql-workbench/WorkbenchDDBLocal-win.exe' -OutFile "$TOOL_DIR\WorkbenchDDBLocal-win.exe"
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
@@ -2789,7 +2793,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on PuTTY version information]
-    Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.74-installer.msi"
+    Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.78-installer.msi"
     Set-Variable -Name PUTTY_INSTALLER_FILE -Scope Script -Value ($PUTTY_INSTALLER_URL.Substring($PUTTY_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (PuTTY)"
@@ -2800,7 +2804,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinSCP version information]
-    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.21-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://winscp.net/download/WinSCP-5.21.8-Setup.exe"
     Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinSCP)"
@@ -2821,7 +2825,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.3.1.1-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.4.2-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
@@ -2829,29 +2833,17 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
-# Package Download System Utility (Python 2.7)
-# https://www.python.org/
-# https://www.python.org/downloads/windows/
-# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-#     # Initialize Parameter [# Depends on Python 2.7 version information]
-#     Set-Variable -Name PYTHON27_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/2.7.18/python-2.7.18.amd64.msi"
-#     Set-Variable -Name PYTHON27_INSTALLER_FILE -Scope Script -Value ($PYTHON27_INSTALLER_URL.Substring($PYTHON27_INSTALLER_URL.LastIndexOf("/") + 1))
-
-#     Write-Log "# Package Download System Utility (Python 2.7)"
-#     Get-WebContentToFile -Uri "$PYTHON27_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON27_INSTALLER_FILE"
-# }
-
 # Package Download System Utility (Python 3.10)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on Python 3.10 version information]
-    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe"
-    Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     # Initialize Parameter [# Depends on Python 3.10 version information]
+#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe"
+#     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (Python 3.10)"
-    Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
-}
+#     Write-Log "# Package Download System Utility (Python 3.10)"
+#     Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
+# }
 
 # # Package Download System Utility (WinMerge)
 # # https://winmerge.org/
