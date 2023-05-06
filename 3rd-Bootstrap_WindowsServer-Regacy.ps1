@@ -70,11 +70,16 @@ Set-Variable -Name TEMP_DIR -Option Constant -Scope Script "$Env:SystemRoot\Temp
 Set-Variable -Name USERDATA_LOG -Option Constant -Scope Script "$TEMP_DIR\userdata.log"
 Set-Variable -Name TRANSCRIPT_LOG -Option Constant -Scope Script "$LOGS_DIR\userdata-transcript.log"
 
-# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2)
-Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
+# Set System Config File (sysprep)
+Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
+Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
+Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
 
 # Set System & Application Config File (System Defined : Windows Server 2016, 2019)
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
+
+# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2)
+Set-Variable -Name EC2ConfigFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Settings\Config.xml"
 
 # Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019)
 Set-Variable -Name EC2Launchv2File -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\config\agent-config.yml"
@@ -432,15 +437,6 @@ function Get-EbsVolumesMappingInformation {
     Try {
         # Get the block-device-mapping
         $VirtualDeviceMap = (Get-EC2InstanceMetadata -Category "BlockDeviceMapping").GetEnumerator() | Where-Object { $_.Key -ne "ami" }
-
-        # Get the block-device-mapping (Alternative Methods)
-        # $VirtualDeviceMap = @{}
-        # ((Invoke-WebRequest -UseBasicParsing -Uri "http://169.254.169.254/latest/meta-data/block-device-mapping").Content).Split("`n") | ForEach-Object {
-        #     $VirtualDevice = $_
-        #     $BlockDeviceName = $(Invoke-WebRequest -UseBasicParsing -Uri ("http://169.254.169.254/latest/meta-data/block-device-mapping/" + $VirtualDevice)).Content
-        #     $VirtualDeviceMap[$BlockDeviceName] = $VirtualDevice
-        #     $VirtualDeviceMap[$VirtualDevice] = $BlockDeviceName
-        # }
     }
     Catch {
         Write-Host "Could not access the AWS API using AWS Get-EC2InstanceMetadata CMDLet, therefore, VolumeId is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
@@ -874,12 +870,6 @@ function Get-WindowsServerInformation {
 
 
 function Get-Ec2BootstrapProgram {
-
-    # Initialize Parameter
-    Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
-    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-
     # Checking the existence of the sysprep file
     Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
@@ -1702,12 +1692,6 @@ Write-LogSeparator "Windows Server OS Configuration [Sysprep Answer File Setting
 
 # Update Sysprep Answer File
 if ($WindowsOSLanguage -eq "ja-JP") {
-
-    # Checking the existence of the sysprep file
-    Set-Variable -Name EC2Launchv2SysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\sysprep\unattend.xml"
-    Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Sysprep\Unattend.xml"
-    Set-Variable -Name EC2ConfigSysprepFile -Option Constant -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\sysprep2008.xml"
-
     Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
     if (Test-Path $EC2Launchv2SysprepFile) {
