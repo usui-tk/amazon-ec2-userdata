@@ -861,12 +861,45 @@ $PowerShellSecurityProtocol = [Net.ServicePointManager]::SecurityProtocol
 Write-Log ("# [PowerShell SecurityProtocol] (Before) : " + $PowerShellSecurityProtocol)
 
 # Set PowerShell SecurityProtocol
+# https://learn.microsoft.com/en-us/windows/win32/secauthn/protocols-in-tls-ssl--schannel-ssp-
 if ($PowerShellSecurityProtocol -match "^Ssl3|^Tls") {
-    # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
-    [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
-
-    # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
-    # [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+    if ($WindowsOSVersion -eq "6.1") {
+        # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
+        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
+    }
+    elseif ($WindowsOSVersion -eq "6.2") {
+        # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
+        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
+    }
+    elseif ($WindowsOSVersion -eq "6.3") {
+        # Set PowerShell SecurityProtocol [TLS v1.1, v1.2]
+        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;
+    }
+    elseif ($WindowsOSVersion -eq "10.0") {
+        switch ($WindowsOSName) {
+            'Windows Server 2016' {
+                # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+                [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+            }
+            'Windows Server 2019' {
+                # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+                [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+            }
+            'Windows Server 2022' {
+                # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+                [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+            }
+            default {
+                # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+                [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+            }
+        }
+    }
+    else {
+        # [No Target Server OS]
+        # Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+        [System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+    }
 }
 
 # Get PowerShell SecurityProtocol
@@ -961,7 +994,7 @@ elseif ($WindowsOSVersion -match "^10.*") {
     Get-Ec2LaunchVersion
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 # Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Launch v2)]
@@ -969,7 +1002,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*|^10.*") {
     Get-Ec2LaunchV2Version
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
@@ -1144,7 +1177,7 @@ if ($WindowsOSLanguage) {
             Write-Log "Windows Server OS Configuration [Windows OS Setting] : COMPLETE"
         }
         else {
-            Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows NT Version Information : " + $WindowsOSVersion)
+            Write-Log ("# [Warning] No Target [OS-Language - Japanese] - Windows Server OS Version Information : " + $WindowsOSVersion)
         }
     }
     else {
@@ -1198,7 +1231,7 @@ elseif ($WindowsOSVersion -match "^10.*") {
     Write-Log "# [Windows - OS Settings] Change Windows Update Policy (After)"
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 
@@ -1224,7 +1257,7 @@ elseif ($WindowsOSVersion -match "^10.*") {
     Write-Log "# [Windows - OS Settings] Change Microsoft Update Policy (After)"
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 
@@ -1513,11 +1546,11 @@ elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
         Write-Log "Windows Server OS Configuration [Network Connection Profile Setting] : COMPLETE"
     }
     else {
-        Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+        Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
     }
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 
@@ -1634,7 +1667,7 @@ elseif ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
     Write-Log "Windows Server OS Configuration [IPv6 Setting] : COMPLETE"
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 
@@ -1689,7 +1722,7 @@ elseif ($WindowsOSVersion -match "^10.0") {
     }
 }
 else {
-    Write-Log ("# [Warning] No Target - Windows NT Version Information : " + $WindowsOSVersion)
+    Write-Log ("# [Warning] No Target - Windows Server OS Version Information : " + $WindowsOSVersion)
 }
 
 # Logging Windows Server OS Parameter [System Power Plan Information]
@@ -1755,9 +1788,9 @@ Get-WebContentToFile -Uri "$CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL" -OutFile "$T
 
 # Package Install System Utility (AWS CloudFormation Helper Scripts)
 Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
-Start-Process -FilePath "$TOOL_DIR\$CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/install", "/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_AWS_AWSCloudFormationHelperScriptSetup.log") | Out-Null
+Start-Process -FilePath "$TOOL_DIR\$CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @('/install', '/quiet', '/log C:\EC2-Bootstrap\Logs\APPS_AWS_AWSCloudFormationHelperScriptSetup.log') | Out-Null
 
-Start-Sleep -Seconds 5
+Start-Sleep -Seconds 10
 
 Get-Service -Name "cfn-hup"
 
@@ -1792,7 +1825,7 @@ Get-Ec2SystemManagerAgentVersion
 
 # Package Update System Utility (AWS Systems Manager agent)
 Write-Log "# Package Update System Utility (AWS Systems Manager agent)"
-Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AWS_AmazonSSMAgentSetup.log', '/quiet') -Wait | Out-Null
+Start-Process -FilePath "$TOOL_DIR\AmazonSSMAgentSetup.exe" -Verb runas -Wait -ArgumentList @('ALLOWEC2INSTALL=YES', '/install', '/norstart', '/log C:\EC2-Bootstrap\Logs\APPS_AWS_AmazonSSMAgentSetup.log', '/quiet') | Out-Null
 
 Start-Sleep -Seconds 5
 
@@ -1849,24 +1882,40 @@ Write-LogSeparator "Package Install System Utility (Amazon CloudWatch Agent)"
 # ConfigFile Download System Utility (Amazon CloudWatch Agent)
 Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
 if ($WindowsOSVersion -eq "6.1") {
-    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows OS Version : " + $WindowsOSVersion)
     Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.2") {
-    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows OS Version : " + $WindowsOSVersion)
     Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.3") {
-    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows OS Version : " + $WindowsOSVersion)
     Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "10.0") {
-    Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016] : Windows NT OS Version : " + $WindowsOSVersion)
-    Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+    switch ($WindowsOSName) {
+        'Windows Server 2016' {
+            Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016] : Windows OS Version : " + $WindowsOSVersion)
+            Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+        }
+        'Windows Server 2019' {
+            Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2019] : Windows OS Version : " + $WindowsOSVersion)
+            Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2019.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+        }
+        'Windows Server 2022' {
+            Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
+            Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+        }
+        default {
+            Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
+            Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+        }
+    }
 }
 else {
     # [No Target Server OS]
-    Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows NT OS Version : " + $WindowsOSVersion)
+    Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows OS Version : " + $WindowsOSVersion)
 }
 
 # Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019]
@@ -2244,6 +2293,7 @@ if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 #    -> Windows Server 2012 R2 64 : 44
 #    -> Windows Server 2016       : 74
 #    -> Windows Server 2019       : 119
+#    -> Windows Server 2022       : 134
 #
 #=======================================================================================================================
 #
@@ -2539,31 +2589,47 @@ Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-download
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -eq "6.1") {
         # [Windows Server 2008 R2]
-        # https://downloadcenter.intel.com/ja/download/18725/
-        # Package Download Intel Network Driver (Windows Server 2008 R2)
+        # https://www.intel.com/content/www/us/en/download/15591/intel-network-adapter-driver-for-windows-server-2008-r2-final-release.html
         Write-Log "# Package Download Intel Network Driver (Windows Server 2008 R2)"
-        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/18725/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/18725/eng/prowinx64legacy.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2008R2.exe"
     }
     elseif ($WindowsOSVersion -eq "6.2") {
         # [Windows Server 2012]
-        # https://downloadcenter.intel.com/ja/download/21694/
-        # Package Download Intel Network Driver (Windows Server 2012)
+        # https://www.intel.com/content/www/us/en/download/16789/intel-network-adapter-driver-for-windows-server-2012.html
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012)"
-        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/21694/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772075/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2012.zip"
     }
     elseif ($WindowsOSVersion -eq "6.3") {
         # [Windows Server 2012 R2]
-        # https://downloadcenter.intel.com/ja/download/23073/
-        # Package Download Intel Network Driver (Windows Server 2012 R2)
+        # https://www.intel.com/content/www/us/en/download/17480/intel-network-adapter-driver-for-windows-server-2012-r2.html
         Write-Log "# Package Download Intel Network Driver (Windows Server 2012 R2)"
-        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/23073/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2012R2.exe"
+        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772074/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2012R2.zip"
     }
     elseif ($WindowsOSVersion -eq "10.0") {
-        # [Windows Server 2016]
-        # https://downloadcenter.intel.com/ja/download/26092/
-        # Package Download Intel Network Driver (Windows Server 2016)
-        Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-        Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/26092/eng/PROWinx64.exe' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROWinx64_For_WindowsServer2016.exe"
+        switch ($WindowsOSName) {
+            'Windows Server 2016' {
+                # [Windows Server 2016]
+                # https://www.intel.com/content/www/us/en/download/18737/intel-network-adapter-driver-for-windows-server-2016.html
+                Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
+                Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772073/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2016.zip"
+            }
+            'Windows Server 2019' {
+                # [Windows Server 2019]
+                # https://www.intel.com/content/www/us/en/download/19372/intel-network-adapter-driver-for-windows-server-2019.html
+                Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
+                Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772072/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2019.zip"
+            }
+            'Windows Server 2022' {
+                # [Windows Server 2022]
+                # https://www.intel.com/content/www/us/en/download/706171/intel-network-adapter-driver-for-windows-server-2022.html
+                Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
+                Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772066/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2022.zip"
+            }
+            default {
+                # [No Target Server OS]
+                Write-Log ("# [Information] [Intel Network Driver] No Target Server OS Version : " + $WindowsOSVersion)
+            }
+        }
     }
     else {
         # [No Target Server OS]
@@ -2863,15 +2929,15 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
-# Package Download System Utility (Python 3.10)
+# Package Download System Utility (Python 3.11)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on Python 3.10 version information]
-#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.10.0/python-3.10.0-amd64.exe"
+#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe"
 #     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
-#     Write-Log "# Package Download System Utility (Python 3.10)"
+#     Write-Log "# Package Download System Utility (Python 3.11)"
 #     Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
 # }
 
@@ -2879,7 +2945,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # # https://winmerge.org/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on WinMerge version information]
-#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://downloads.sourceforge.net/winmerge/WinMerge-2.16.8-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.30/WinMerge-2.16.30-x64-Setup.exe"
 #     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (WinMerge)"
@@ -2890,7 +2956,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmergejp.bitbucket.io/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.osdn.jp/winmerge-jp/73987/WinMerge-2.16.8-jp-8-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.osdn.jp/winmerge-jp/78711/WinMerge-2.16.30-jp-1-x64-Setup.exe"
     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
@@ -2950,49 +3016,44 @@ Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 
 
 # Save Userdata Script, Bootstrap Script, Logging Data Files
-if ($WindowsOSVersion) {
-    Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows NT OS Version : " + $WindowsOSVersion)
 
-    # Save UserData Script File (EC2config)
-    Set-Variable -Name Ec2ConfigUserdataScript -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1"
-    if (Test-Path $Ec2ConfigUserdataScript) {
-        Copy-Item -Path $Ec2ConfigUserdataScript -Destination $BASE_DIR
-    }
+Write-Log ("# Save Userdata Script, Bootstrap Script, Logging Data Files : Windows OS Version : " + $WindowsOSVersion)
 
-    # Save UserData Script File (EC2Launch)
-    Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
-
-    # Save Sysprep Configuration Files
-    if (Test-Path $SysprepFile) {
-        Copy-Item -Path $SysprepFile -Destination $BASE_DIR
-    }
-
-    # Save EC2-Bootstrap Application Configuration Files
-    if (Test-Path $EC2ConfigFile) {
-        Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-    }
-
-    if (Test-Path $EC2LaunchFile) {
-        Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
-        Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
-        Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
-    }
-
-    if (Test-Path $EC2Launchv2File) {
-        Copy-Item -Path $EC2Launchv2File -Destination $BASE_DIR
-    }
-
-    # Save CloudWatch Agent Configuration Files
-    Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
-    Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
-
-    # Save Logging Files
-    Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
+# Save UserData Script File (EC2config)
+Set-Variable -Name Ec2ConfigUserdataScript -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1"
+if (Test-Path $Ec2ConfigUserdataScript) {
+    Copy-Item -Path $Ec2ConfigUserdataScript -Destination $BASE_DIR
 }
-else {
-    # [Undefined Server OS]
-    Write-Log "# [Save Userdata Script, Bootstrap Script, Logging Data Files] Undefined Windows Server OS"
+
+# Save UserData Script File (EC2Launch)
+Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
+
+# Save Sysprep Configuration Files
+if (Test-Path $SysprepFile) {
+    Copy-Item -Path $SysprepFile -Destination $BASE_DIR
 }
+
+# Save EC2-Bootstrap Application Configuration Files
+if (Test-Path $EC2ConfigFile) {
+    Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
+}
+
+if (Test-Path $EC2LaunchFile) {
+    Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
+    Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json" $BASE_DIR
+    Copy-Item "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\EventLogConfig.json" $BASE_DIR
+}
+
+if (Test-Path $EC2Launchv2File) {
+    Copy-Item -Path $EC2Launchv2File -Destination $BASE_DIR
+}
+
+# Save CloudWatch Agent Configuration Files
+Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.json" -Destination $BASE_DIR
+Copy-Item -Path "C:\ProgramData\Amazon\AmazonCloudWatchAgent\*.tmol" -Destination $BASE_DIR
+
+# Save Logging Files
+Copy-Item -Path "$TEMP_DIR\*.tmp" -Destination $LOGS_DIR
 
 # Log Separator
 Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
