@@ -268,8 +268,41 @@ function Get-EbsVolumesMappingInformation {
     [array[]]$array = $array1, $array2, $array3, $array4
 
     Try {
-        $InstanceId = Get-EC2InstanceMetadata -Category "InstanceId"
-        $Region = Get-EC2InstanceMetadata -Category "Region" | Select-Object -ExpandProperty SystemName
+        # Getting an Instance Metadata Service v2 (IMDS v2) token
+        $Token = $(Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token-ttl-seconds" = "21600"} -Method PUT 'http://169.254.169.254/latest/api/token')
+
+        if ($Token) {
+            #-----------------------------------------------------------------------
+            # Retrieving Metadata Using the Instance Metadata Service v2 (IMDS v2)
+            #-----------------------------------------------------------------------
+            Write-Log "# [AWS - EC2] Retrieving Metadata Using the Instance Metadata Service v2 (IMDS v2)"
+
+            # InstanceId
+            if ( [string]::IsNullOrEmpty($InstanceId) ) {
+                Set-Variable -Name InstanceId -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+            }
+
+            # Region
+            if ( [string]::IsNullOrEmpty($Region) ) {
+                Set-Variable -Name Region -Scope Script -Value (Invoke-RestMethod -Headers @{"X-aws-ec2-metadata-token" = $token} -Method GET -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+            }
+        }
+        else {
+            #-----------------------------------------------------------------------
+            # Retrieving Metadata Using the Instance Metadata Service v1 (IMDS v1)
+            #-----------------------------------------------------------------------
+            Write-Log "# [AWS - EC2] Retrieving Metadata Using the Instance Metadata Service v1 (IMDS v1)"
+
+            # InstanceId
+            if ( [string]::IsNullOrEmpty($InstanceId) ) {
+                Set-Variable -Name InstanceId -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/instance-id")
+            }
+
+            # Region
+            if ( [string]::IsNullOrEmpty($Region) ) {
+                Set-Variable -Name Region -Scope Script -Value (Invoke-RestMethod -Uri "http://169.254.169.254/latest/meta-data/placement/region")
+            }
+        }
     }
     Catch {
         Write-Host "Could not access the instance Metadata using AWS Get-EC2InstanceMetadata CMDLet. Verify you have AWSPowershell SDK version '3.1.73.0' or greater installed and Metadata is enabled for this instance." -ForegroundColor Yellow
