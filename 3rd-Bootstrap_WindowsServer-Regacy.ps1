@@ -720,12 +720,20 @@ function Get-WebContentToFile {
         Write-Log ("# [NOTICE] Do not download files from : " + $Uri)
     }
     else {
+
         Write-Log ("# [Get-WebContentToFile] Download processing start    [" + $Uri + "] -> [" + $OutFile + "]" )
 
-        $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) }
-        Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
+        Try {
+            $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) }
+        }
+        Catch {
+            Write-Log ("# [Error] URL is not accessible (file does not exist) : " + $Uri)
+        }
 
-        Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] -> [" + $OutFile + "]" )
+        if ( Test-Path $OutFile ) {
+            Write-Log ("# [Get-WebContentToFile] Download processing time      ( " + $DownloadStatus.TotalSeconds + " seconds )" )
+            Write-Log ("# [Get-WebContentToFile] Download processing complete [" + $Uri + "] -> [" + $OutFile + "]" )
+        }
 
     }
 } # end Get-WebContentToFile
@@ -1109,109 +1117,95 @@ Initialize-AWSDefaultConfiguration -Region $Region
 Set-DefaultAWSRegion -Region $Region
 
 # Log Setting Information [Set-DefaultAWSRegion]
-# Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
+Start-Sleep -Seconds 5
+Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Windows Powershell : " + (Get-DefaultAWSRegion).Name + " - " + (Get-DefaultAWSRegion).Region)
 
 # Setting AWS Tools for Windows PowerShell (Additional)
 #  Clear-AWSHistory
 #  Set-AWSHistoryConfiguration -MaxCmdletHistory 512 -MaxServiceCallHistory 512 -RecordServiceRequests
 #  Set-AWSResponseLogging -Level Always
 
-# Get AMI Information from Public AMI
-# - Get-EC2Image
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Image.html
-#
+# Get AWS Region Information
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get Windows AMI Information from Public AMI"
-    Get-EC2Image -ImageId $AmiId | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-Information_from_PublicAMI.txt" -Append -Force
+    Write-Log "# [Amazon EC2 - Windows] Get AWS Region Information"
+    Get-AWSRegion | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-AWSRegion.txt" -Append -Force
+}
+
+# Get Amazon EC2 Instance Information
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
+}
+
+# Get Amazon EC2 Instance attached EBS Volume Information
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
+    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
+}
+
+# Get AMI information of this EC2 instance
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get AMI information of this EC2 instance"
+    Get-EC2Image -ImageId $AmiId -Region $Region | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image.txt" -Append -Force
 }
 
 # Get AMI Information from Systems Manager Parameter Store
-# - Get-SSMParametersByPath
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-SSMParametersByPath.html
-#   https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/parameter-store-public-parameters.html
 #
-# if ($RoleName) {
-#     Write-Log "# [Amazon EC2 - Windows] Get Windows AMI List Information from Systems Manager Parameter Store"
-#     Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsAMI-List-Information_from_SSM-ParameterStore.txt" -Append -Force
-# }
+# [Calling AMI public parameters]
+#   https://docs.aws.amazon.com/systems-manager/latest/userguide/parameter-store-public-parameters-ami.html
+#
+if ($RoleName) {
 
-# Get Windows Installation Media Information from Public Snapshot
-# - Get-EC2Snapshot
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Snapshot.html
+    Try {
+        Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (/aws/service/ami-windows-latest)"
+        Get-SSMParametersByPath -Path "/aws/service/ami-windows-latest" -Region $Region | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-SSMParametersByPath_aws-service-ami-windows-latest.txt" -Append -Force
+    }
+    Catch {
+        Write-Host "Could not access the AWS API, therefore, SSM Parameter Store is not available. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
+        # SSM Accessible Flags
+        Set-Variable -Name SSMAccessibleFlags -Scope Script -Value ($False)
+    }
+
+    if ($SSMAccessibleFlags -ne $False) {
+        Write-Log "# [Amazon EC2 - Windows] Get AMI Information from Systems Manager Parameter Store (For AMI)"
+
+        # Windows_Server-2012-R2_RTM-Japanese-64Bit-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-Japanese-64Bit-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-Japanese-64Bit-Base.txt" -Append -Force
+
+        # Windows_Server-2016-Japanese-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-Japanese-Full-Base").Parameters[0].Value ) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-Japanese-Full-Base.txt" -Append -Force
+
+        # Windows_Server-2019-Japanese-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-Japanese-Full-Base.txt" -Append -Force
+
+        # Windows_Server-2022-Japanese-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-Japanese-Full-Base.txt" -Append -Force
+
+        # Windows_Server-2012-R2_RTM-English-64Bit-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2012-R2_RTM-English-64Bit-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2012-R2_RTM-English-64Bit-Base.txt" -Append -Force
+
+        # Windows_Server-2016-English-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2016-English-Full-Base.txt" -Append -Force
+
+        # Windows_Server-2019-English-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2019-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2019-English-Full-Base.txt" -Append -Force
+
+        # Windows_Server-2022-English-Full-Base
+        Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base").Parameters[0].Value) | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image_Windows_Server-2022-English-Full-Base.txt" -Append -Force
+    }
+
+}
+
+# Get EBS snapshot information for AWS-provided installation media
 #
 # [Adding Windows Components Using Installation Media]
 #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/windows-optional-components.html
 #
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get Windows Installation Media Information from Public Snapshot"
-    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_WindowsInstallationMedia-List-Information_from_Public-Snapshot.txt" -Append -Force
+    Write-Log "# [Amazon EC2 - Windows] Get EBS snapshot information for AWS-provided installation media"
+    Get-EC2Snapshot -Owner amazon -Filter @{ Name = "description"; Values = "Windows*" } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Snapshot_WindowsInstallationMedia-List.txt" -Append -Force
 }
 
-# Get EC2 Instance Information
-# - Get-EC2Instance
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Instance.html
-#
-if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EC2-Instance-Information.txt" -Append -Force
-}
-
-# Get EC2 Instance attached EBS Volume Information
-# - Get-EC2Volume
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2Volume.html
-#
-if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json | Out-File "$LOGS_DIR\AWS-EC2_EBS-Volume-Information.txt" -Append -Force
-}
-
-# Get EC2 Instance Attribute[Network Interface Performance Attribute]
-# - Get-EC2InstanceAttribute
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2InstanceAttribute.html
-#
-# [Amazon EC2 Instance Network Adapter Type]
-# - ENA (Elastic Network Adapter)
-#   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
-# - SR-IOV
-#   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/sriov-networking.html
-# - Xen(PV)
-#   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
-#
-if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c5.*|^c5a.*|^c5ad.*|^c5adn.*|^c5an.*|^c5d.*|^c5n.*|^e3.*|^f1.*|^g3.*|^g3s.*|^g4dn.*|^h1.*|^i3.*|^i3en.*|^i3p.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^m5dn.*|^m5n.*|^p2.*|^p3.*|^p3dn.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^r5dn.*|^r5n.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^m4.16xlarge|^u-*tb1.metal") {
-        # Get EC2 Instance Attribute(Elastic Network Adapter Status)
-        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Elastic Network Adapter Status)"
-        Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | Select-Object -ExpandProperty "Instances" | Out-File "$LOGS_DIR\AWS-EC2_ENI-ENA-Information.txt" -Append -Force
-        # Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EnaSupport
-    }
-    elseif ($InstanceType -match "^c3.*|^c4.*|^d2.*|^i2.*|^r3.*|^m4.*") {
-        # Get EC2 Instance Attribute(Single Root I/O Virtualization Status)
-        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(Single Root I/O Virtualization Status)"
-        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute sriovNetSupport | Out-File "$LOGS_DIR\AWS-EC2_ENI-SRIOV-Information.txt" -Append -Force
-    }
-    else {
-        Write-Log "# [Amazon EC2 - Windows] Instance type of None [Network Interface Performance Attribute]"
-    }
-}
-
-# Get EC2 Instance Attribute[Storage Interface Performance Attribute]
-# - Get-EC2InstanceAttribute
-#   https://docs.aws.amazon.com/powershell/latest/reference/items/Get-EC2InstanceAttribute.html
-#
-# [Amazon EC2 Instance EBS Network Optimized]
-# - EBS Optimized Instance
-#   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/EBSOptimized.html
-#
-if ($RoleName) {
-    if ($InstanceType -match "^a1.*|^c1.*|^c3.*|^c4.*|^c5.*|^c5a.*|^c5ad.*|^c5adn.*|^c5an.*|^c5d.*|^c5n.*|^d2.*|^e3.*|^f1.*|^g2.*|^g3.*|^g3s.*|^g4dn.*|^h1.*|^i2.*|^i3.*|^i3en.*|^i3p.*|^m1.*|^m2.*|^m3.*|^m4.*|^m5.*|^m5a.*|^m5ad.*|^m5d.*|^m5dn.*|^m5n.*|^p2.*|^p3.*|^r3.*|^r4.*|^r5.*|^r5a.*|^r5ad.*|^r5d.*|^r5dn.*|^r5n.*|^t3.*|^t3a.*|^x1.*|^x1e.*|^z1d.*|^u-*tb1.metal") {
-        # Get EC2 Instance Attribute(EBS-optimized instance Status)
-        Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Attribute(EBS-optimized instance Status)"
-        Get-EC2InstanceAttribute -InstanceId $InstanceId -Attribute EbsOptimized | Out-File "$LOGS_DIR\AWS-EC2_EBS-Optimized-Instance-Information.txt" -Append -Force
-    }
-    else {
-        Write-Log "# [Amazon EC2 - Windows] Instance type of None [Storage Interface Performance Attribute]"
-    }
-}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
