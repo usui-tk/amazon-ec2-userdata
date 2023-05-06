@@ -239,11 +239,11 @@ function Get-EbsVolumesMappingInformation {
 
     # Set Initialize Parameter
     Set-Variable -Name BlockDeviceName -Scope Script -Value ($Null)
-    Set-Variable -Name BlockDeviceMapping -Scope Script -Value ($Null)
     Set-Variable -Name BlockDeviceMappings -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeList -Scope Script -Value ($Null)
     Set-Variable -Name EBSVolumeLists -Scope Script -Value ($Null)
     Set-Variable -Name VirtualDevice -Scope Script -Value ($Null)
+    Set-Variable -Name VirtualDeviceMap -Scope Script -Value ($Null)
     Set-Variable -Name VolumeName -Scope Script -Value ($Null)
     Set-Variable -Name DeviceName -Scope Script -Value ($Null)
 
@@ -273,6 +273,7 @@ function Get-EbsVolumesMappingInformation {
     }
     Catch {
         Write-Host "Could not access the instance Metadata using AWS Get-EC2InstanceMetadata CMDLet. Verify you have AWSPowershell SDK version '3.1.73.0' or greater installed and Metadata is enabled for this instance." -ForegroundColor Yellow
+    }
 
     Try {
         $BlockDeviceMappings = (Get-EC2Instance -Region $Region -Instance $InstanceId).Instances.BlockDeviceMappings
@@ -349,12 +350,12 @@ function Get-EbsVolumesMappingInformation {
         New-Object PSObject -Property @{
             Disk          = $Disk;
             Partitions    = $Partitions;
-            DriveLetter   = if ($DriveLetter -eq $null) { "N/A" } else { $DriveLetter };
-            EbsVolumeId   = if ($EbsVolumeID -eq $null) { "N/A" } else { $EbsVolumeID };
-            Device        = if ($BlockDeviceName -eq $null) { "N/A" } else { $BlockDeviceName };
-            VirtualDevice = if ($VirtualDevice -eq $null) { "N/A" } else { $VirtualDevice };
-            VolumeName    = if ($VolumeName -eq $null) { "N/A" } else { $VolumeName };
-            DeviceName    = if ($DeviceName -eq $null) { "N/A" } else { $DeviceName };
+            DriveLetter   = if ($null -eq $DriveLetter) { "N/A" } else { $DriveLetter };
+            EbsVolumeId   = if ($null -eq $EbsVolumeID) { "N/A" } else { $EbsVolumeID };
+            Device        = if ($null -eq $BlockDeviceName) { "N/A" } else { $BlockDeviceName };
+            VirtualDevice = if ($null -eq $VirtualDevice) { "N/A" } else { $VirtualDevice };
+            VolumeName    = if ($null -eq $VolumeName) { "N/A" } else { $VolumeName };
+            DeviceName    = if ($null -eq $DeviceName) { "N/A" } else { $DeviceName };
         }
     } | Sort-Object Disk | Select-Object -Property Disk, Partitions, DriveLetter, EbsVolumeId, Device, VirtualDevice, DeviceName, VolumeName
 
