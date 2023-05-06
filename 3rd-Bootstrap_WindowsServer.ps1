@@ -570,10 +570,10 @@ function Get-ScriptExecuteByAccount {
     if ($ScriptExecuteByAccountName) {
         Write-Log ("# [Windows] Powershell Script Execution Username : " + ($ScriptExecuteByAccountName))
         if ($CheckAdministrator -eq $true) {
-            Write-Log "# [Windows] [Information] Bootstrap scripts run with the privileges of the administrator"
+            Write-Log "# [Windows] Bootstrap scripts run with the privileges of the administrator"
         }
         else {
-            Write-Log "# [Windows] [Warning] Bootstrap scripts run with the privileges of the non-administrator"
+            Write-Log "# [Windows] Bootstrap scripts run with the privileges of the non-administrator"
         }
     }
 } # end Get-ScriptExecuteByAccount
@@ -656,7 +656,7 @@ function Get-WebContentToFile {
 function Get-WindowsServerInformation {
     #--------------------------------------------------------------------------------------
     #  Windows Server OS Version Tables (Windows NT Version Tables)
-    #   https://msdn.microsoft.com/ja-jp/library/windows/desktop/ms724832(v=vs.85).aspx
+    #   https://learn.microsoft.com/en-us/windows/win32/sysinfo/operating-system-version
     #--------------------------------------------------------------------------------------
     #   - Windows Server 2003    : 5.2
     #   - Windows Server 2003 R2 : 5.2
@@ -664,7 +664,9 @@ function Get-WindowsServerInformation {
     #   - Windows Server 2008 R2 : 6.1
     #   - Windows Server 2012    : 6.2
     #   - Windows Server 2012 R2 : 6.3
-    #   - Windows Server 2016    : 10.0
+    #   - Windows Server 2016    : 10.0 [Build No. 14393]
+    #   - Windows Server 2019    : 10.0 [Build No. 17763]
+    #   - Windows Server 2022    : 10.0 [Build No. 20348]
     #--------------------------------------------------------------------------------------
 
     # Initialize Parameter
@@ -672,6 +674,7 @@ function Get-WindowsServerInformation {
     Set-Variable -Name installOption -Scope Script -Value ($Null)
     Set-Variable -Name osVersion -Scope Script -Value ($Null)
     Set-Variable -Name osBuildLabEx -Scope Script -Value ($Null)
+    Set-Variable -Name osBuildNo -Scope Script -Value ($Null)
 
     Set-Variable -Name windowInfoKey -Option Constant -Scope Local -Value "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion"
     Set-Variable -Name fullServer -Option Constant -Scope Local -Value "Full"
@@ -695,8 +698,10 @@ function Get-WindowsServerInformation {
     }
 
     # Get Version and SKU from Win32_OperatingSystem
-    $osInfo = Get-CimInstance Win32_OperatingSystem | Select-Object Version, OperatingSystemSKU
+    $osInfo = Get-CimInstance Win32_OperatingSystem | Select-Object Version, BuildNumber, OperatingSystemSKU
+    $osBuildNumber = [int]$osInfo.BuildNumber
     $osSkuNumber = [int]$osInfo.OperatingSystemSKU
+
     if (-not $osVersion -and $osInfo.Version) {
         $osVersionSplit = $osInfo.Version.Split(".")
         if ($osVersionSplit.Count -gt 1) {
@@ -714,11 +719,33 @@ function Get-WindowsServerInformation {
         $installOption = $fullServer
     }
 
+    # Identify the version of Windows Server 2016, 2019, 2022
+    #---------------------------------------------------------------------------
+    #   - Windows Server 2016    : 10.0 [Build No. 14393]
+    #   - Windows Server 2019    : 10.0 [Build No. 17763]
+    #   - Windows Server 2022    : 10.0 [Build No. 20348]
+    #---------------------------------------------------------------------------
+
+    # Set Parameter
+    if ($osBuildNumber -eq "14393") {
+        Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value "Windows Server 2016"
+    }
+    elseif ($osBuildNumber -eq "17763") {
+        Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value "Windows Server 2019"
+    }
+    elseif ($osBuildNumber -eq "20348") {
+        Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value "Windows Server 2022"
+    }
+    else {
+        Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value ($productName)
+    }
+
     # Write the information to the Log Files
-    Write-Log ("# [Windows] Microsoft Windows NT version : {0}" -f $osVersion)
     Write-Log ("# [Windows] Windows Server OS Product Name : {0}" -f $productName)
-    Write-Log ("# [Windows] Windows Server OS Install Option : {0}" -f $installOption)
+    Write-Log ("# [Windows] Windows Server OS Name : {0}" -f $WindowsOSName)
     Write-Log ("# [Windows] Windows Server OS Version : {0}" -f $osVersion)
+    Write-Log ("# [Windows] Windows Server OS Install Option : {0}" -f $installOption)
+    Write-Log ("# [Windows] Windows Server Build Number : {0}" -f $osBuildNumber)
     Write-Log ("# [Windows] Windows Server Build Lab Ex : {0}" -f $osBuildLabEx)
 
     Write-Log ("# [Windows] Windows Server OS Language : {0}" -f ([CultureInfo]::CurrentCulture).IetfLanguageTag)
@@ -1720,12 +1747,15 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 
 # Package Download System Utility (AWS CloudFormation Helper Scripts)
 # http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+Set-Variable -Name CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-win64-latest.exe"
+Set-Variable -Name CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE -Scope Script -Value ($CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL.Substring($CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL.LastIndexOf("/") + 1))
+
 Write-Log "# Package Download System Utility (AWS CloudFormation Helper Scripts)"
-Get-WebContentToFile -Uri 'https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-win64-latest.msi' -OutFile "$TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi"
+Get-WebContentToFile -Uri "$CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL" -OutFile "$TOOL_DIR\$CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE"
 
 # Package Install System Utility (AWS CloudFormation Helper Scripts)
 Write-Log "# Package Install System Utility (AWS CloudFormation Helper Scripts)"
-Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-cfn-bootstrap-win64-latest.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWSCloudFormationHelperScriptSetup.log")
+Start-Process -FilePath "$TOOL_DIR\$CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/install", "/quiet", "/log C:\EC2-Bootstrap\Logs\APPS_AWS_AWSCloudFormationHelperScriptSetup.log") | Out-Null
 
 Start-Sleep -Seconds 5
 
