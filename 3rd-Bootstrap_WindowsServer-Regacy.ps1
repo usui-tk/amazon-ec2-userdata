@@ -48,7 +48,7 @@
 #
 #  - Windows Server AMI
 #    https://aws.amazon.com/jp/windows/resources/amis/
-#    https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/windows-ami-version-history.html
+#    https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/windows-ami-version-history.html
 #-------------------------------------------------------------------------------
 
 
@@ -247,8 +247,8 @@ function Get-AmazonMachineInformation {
 function Get-CustomizeEc2InstanceMetadata {
     #--------------------------------------------------------------------------------------
     #  Get AWS Instance MetaData Service (IMDS v1, v2)
-    #   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/configuring-instance-metadata-service.html
-    #   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/instancedata-data-retrieval.html
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/configuring-instance-metadata-service.html
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/instancedata-data-retrieval.html
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
@@ -572,7 +572,7 @@ function Get-Ec2ConfigVersion {
 function Get-Ec2LaunchVersion {
     #--------------------------------------------------------------------------------------
     #  Configuring a Windows Instance Using EC2Launch
-    #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch.html
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch.html
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
@@ -595,7 +595,7 @@ function Get-Ec2LaunchVersion {
 function Get-Ec2LaunchV2Version {
     #--------------------------------------------------------------------------------------
     #  Configuring a Windows Instance Using EC2Launch
-    #   https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
@@ -618,7 +618,7 @@ function Get-Ec2LaunchV2Version {
 function Get-Ec2SystemManagerAgentVersion {
     #--------------------------------------------------------------------------------------
     #  Amazon EC2 Systems Manager
-    #   http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager.html
+    #   https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/systems-manager.html
     #--------------------------------------------------------------------------------------
 
     # Set Initialize Parameter
@@ -946,9 +946,6 @@ function Update-SysprepAnswerFile($SysprepAnswerFile) {
 #
 ########################################################################################################################
 
-# Script execution start time
-$ScriptExecStartTime = Get-Date
-
 #-----------------------------------------------------------------------------------------------------------------------
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
@@ -988,6 +985,9 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 # Preparation for script execution
 #-----------------------------------------------------------------------------------------------------------------------
+
+# Script execution start time
+$ScriptExecStartTime = Get-Date
 
 Set-Variable -Name ScriptFullPath -Scope Script -Value ($MyInvocation.InvocationName)
 
@@ -1113,7 +1113,7 @@ else {
 }
 
 # Test HTTPS Connecting to the Internet (AWS Check IP Address service : https://checkip.amazonaws.com/)
-#  https://docs.aws.amazon.com/ja_jp/batch/latest/userguide/get-set-up-for-aws-batch.html#create-a-base-security-group
+#  https://docs.aws.amazon.com/batch/latest/userguide/get-set-up-for-aws-batch.html#create-a-base-security-group
 $FlagInternetConnectionByHTTPS = Invoke-WebRequest -Uri "https://checkip.amazonaws.com/" -UseBasicParsing
 if ($FlagInternetConnectionByHTTPS.StatusCode -eq 200) {
     Write-Log "# [Network Connection] AWS Check IP Address service : checkip.amazonaws.com - [Connection OK]"
@@ -1424,7 +1424,7 @@ else {
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Windows Server OS Configuration [Windows Time Service (w32tm) Setting]
-# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/windows-set-time.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/windows-set-time.html
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
@@ -1937,7 +1937,7 @@ Write-Log "# Get Install Windows Application List (After Uninstall)"
 Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Package Download System Utility (AWS CloudFormation Helper Scripts)
-# http://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-helper-scripts-reference.html
 Set-Variable -Name CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-win64-latest.exe"
 Set-Variable -Name CLOUDFORMATION_BOOTSTRAP_INSTALLER_FILE -Scope Script -Value ($CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL.Substring($CLOUDFORMATION_BOOTSTRAP_INSTALLER_URL.LastIndexOf("/") + 1))
 
@@ -1971,7 +1971,7 @@ Set-Variable -Name ServiceStatusForAmazonSSMAgent -Scope Script -Value ($Null)
 Set-Variable -Name AmazonSSMAgentUrl -Scope Script -Value ($Null)
 
 # Package Download System Utility (AWS Systems Manager agent)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/systems-manager-managedinstances.html#sysman-install-managed-win
 Write-Log "# Package Download System Utility (AWS Systems Manager agent)"
 if ($Region) {
     $AmazonSSMAgentUrl = "https://amazon-ssm-" + ${Region} + ".s3.amazonaws.com/latest/windows_amd64/AmazonSSMAgentSetup.exe"
@@ -2089,11 +2089,11 @@ else {
 if ($WindowsOSVersion -match "^6.1|^6.2|^6.3|^10.0") {
 
     # Amazon CloudWatch Agent Support Windows OS Version
-    # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+    # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
     Write-Log "# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : $WindowsOSVersion"
 
     # Package Download System Utility (Amazon CloudWatch Agent)
-    # http://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
+    # https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
     Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
     Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi' -OutFile "$TOOL_DIR\amazon-cloudwatch-agent.msi"
 
@@ -2275,7 +2275,7 @@ else {
 # [LTS Version]
 # https://aka.ms/powershell-release?tag=lts
 #
-# https://docs.aws.amazon.com/ja_jp/powershell/latest/userguide/pstools-getting-set-up-windows.html
+# https://docs.aws.amazon.com/powershell/latest/userguide/pstools-getting-set-up-windows.html
 # https://www.powershellgallery.com/packages/AWSPowerShell.NetCore/
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -2544,7 +2544,7 @@ if ($InstanceType -match "^g2.*|^g3.*|^g4dn.*|^p2.*|^p3.*") {
 Write-Log "# [GPU Driver:NVIDIA GRID K520] Check Amazon EC2 G2 Instance Family"
 
 # Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g2.*") {
     Write-Log "# Package Download NVIDIA GRID K520 GPU Driver (for Amazon EC2 G2 Instance Family)"
     if ($WindowsOSVersion) {
@@ -2595,7 +2595,7 @@ if ($InstanceType -match "^g2.*") {
 Write-Log "# [GPU Driver:NVIDIA GRID M60] Check Amazon EC2 G3 Instance Family"
 
 # Package Download NVIDIA Tesla M60 GPU Driver (for Amazon EC2 G3 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g3.*") {
     Write-Log "# Package Download NVIDIA GRID M60 GPU Driver (for Amazon EC2 G3 Instance Family)"
     if ($WindowsOSVersion) {
@@ -2638,7 +2638,7 @@ if ($InstanceType -match "^g3.*") {
 Write-Log "# [GPU Driver:NVIDIA T4 Tensor Core GPU] Check Amazon EC2 G4 Instance Family"
 
 # Package Download NVIDIA T4 Tensor Core GPU Driver (for Amazon EC2 G4 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^g4dn.*") {
     Write-Log "# Package Download NVIDIA T4 Tensor Core GPU Driver (for Amazon EC2 G4 Instance Family)"
     if ($WindowsOSVersion) {
@@ -2680,7 +2680,7 @@ if ($InstanceType -match "^g4dn.*") {
 Write-Log "# [GPU Driver:NVIDIA Tesla K80] Check Amazon EC2 P2 Instance Family"
 
 # Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^p2.*") {
     Write-Log "# Package Download NVIDIA Tesla K80 GPU Driver (for Amazon EC2 P2 Instance Family)"
     if ($WindowsOSVersion) {
@@ -2723,7 +2723,7 @@ if ($InstanceType -match "^p2.*") {
 Write-Log "# [GPU Driver:NVIDIA Tesla V100] Check Amazon EC2 P3 Instance Family"
 
 # Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/accelerated-computing-instances.html
 if ($InstanceType -match "^p3.*") {
     Write-Log "# Package Download NVIDIA Tesla V100 GPU Driver (for Amazon EC2 P3 Instance Family)"
     if ($WindowsOSVersion) {
@@ -2773,17 +2773,22 @@ if ($InstanceType -match "^g2.*|^g3.*|^g4dn.*|^p2.*|^p3.*") {
 Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 
 # Package Download Amazon Windows Paravirtual Drivers
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/AWSPV/Latest/AWSPVDriver.zip' -OutFile "$TOOL_DIR\AWSPVDriver.zip"
 
 # Package Download AWS NVMe Drivers
-# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/aws-nvme-drivers.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/aws-nvme-drivers.html
 Write-Log "# Package Download AWS NVMe Drivers"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip' -OutFile "$TOOL_DIR\AWSNVMe.zip"
 
+# Package Download AWS ebsnvme-id command
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/nvme-ebs-volumes.html
+Write-Log "# Package Download AWS ebsnvme-id command"
+Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/EBSNVMeID/Latest/ebsnvme-id.zip' -OutFile "$TOOL_DIR\ebsnvme-id.zip"
+
 # Package Download Amazon Elastic Network Adapter Driver
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/ENA/Latest/AwsEnaNetworkDriver.zip' -OutFile "$TOOL_DIR\AwsEnaNetworkDriver.zip"
 
@@ -2972,7 +2977,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 Write-LogSeparator "Custom Package Download (System Utility - AWS Tools)"
 
 # Package Download System Utility (EC2Config)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/UsingConfig_Install.html
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     if ($WindowsOSVersion -match "^5.*|^6.*") {
 #         Write-Log "# Package Download System Utility (EC2Config)"
@@ -2991,8 +2996,8 @@ Write-LogSeparator "Custom Package Download (System Utility - AWS Tools)"
 # }
 
 # Package Download System Utility (EC2Launch v2)
-# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
-# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2launch-v2-install.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch-v2.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2launch-v2-install.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^5.*|^6.*|^10.0") {
         Write-Log "# Package Download System Utility (EC2Launch v2)"
@@ -3011,14 +3016,14 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 # Package Download System Utility (Session Manager Plugin for the AWS CLI)
-# https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
+# https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Session Manager Plugin for the AWS CLI)"
     Get-WebContentToFile -Uri 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe' -OutFile "$TOOL_DIR\SessionManagerPluginSetup.exe"
 }
 
 # Package Download System Utility (AWS Task Orchestrator and Executor component manager)
-# https://docs.aws.amazon.com/ja_jp/imagebuilder/latest/userguide/toe-component-manager.html
+# https://docs.aws.amazon.com/imagebuilder/latest/userguide/toe-component-manager.html
 
 # Set Initialize Parameter
 Set-Variable -Name AmazonTOEtUrl -Scope Script -Value ($Null)
@@ -3042,7 +3047,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 # Package Download System Utility (AWS Directory Service PortTest Application)
-# http://docs.aws.amazon.com/ja_jp/workspaces/latest/adminguide/connect_verification.html
+# https://docs.aws.amazon.com/workspaces/latest/adminguide/connect_verification.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
     Get-WebContentToFile -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
@@ -3056,7 +3061,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 }
 
 # Package Download System Utility (AWS Diagnostics for Windows Server)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
     Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
@@ -3214,7 +3219,7 @@ Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | Conve
 
 
 # Package Download System Utility (EC2Rescue)
-# http://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/Windows-Server-EC2Rescue.html
 Write-Log "# Package Download System Utility (EC2Rescue)"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_latest.zip' -OutFile "$TOOL_DIR\EC2Rescue_latest.zip"
 
@@ -3232,7 +3237,7 @@ else {
 }
 
 # Log Collect (EC2Rescue)
-# https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
+# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/ec2rw-cli.html
 Write-Log "# Execution System Utility (EC2Rescue) - Start"
 Start-Process -FilePath "$TOOL_DIR\EC2Rescue_latest\EC2RescueCmd.exe" -Verb runas -PassThru -Wait -ArgumentList @("/accepteula", "/online", "/collect:all", "/output:$LOGS_DIR\EC2RescueCmd.zip") | Out-Null
 Write-Log "# Execution System Utility (EC2Rescue) - Complete"
