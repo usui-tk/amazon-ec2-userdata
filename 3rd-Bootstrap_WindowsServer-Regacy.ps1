@@ -1179,6 +1179,12 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 #  Set-AWSHistoryConfiguration -MaxCmdletHistory 512 -MaxServiceCallHistory 512 -RecordServiceRequests
 #  Set-AWSResponseLogging -Level Always
 
+# Get AWS Security Token Service (AWS STS) Information
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get AWS Security Token Service (AWS STS) Information"
+    Get-STSCallerIdentity -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-STSCallerIdentity.txt" -Append -Force
+}
+
 # Get AWS Region Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AWS Region Information"
@@ -1195,6 +1201,12 @@ if ($RoleName) {
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
     Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
+}
+
+# Get Amazon EC2 Instance attached VPC Security Group Information
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance attached VPC Security Group Information"
+    Get-EC2SecurityGroup -Region $Region -GroupIds ((Get-EC2InstanceAttribute -Region $Region -InstanceId $InstanceId -Attribute groupSet).Groups.GroupId) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2SecurityGroup.txt" -Append -Force
 }
 
 # Get AMI information of this EC2 instance
@@ -2983,6 +2995,23 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Session Manager Plugin for the AWS CLI)"
     Get-WebContentToFile -Uri 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/windows/SessionManagerPluginSetup.exe' -OutFile "$TOOL_DIR\SessionManagerPluginSetup.exe"
+}
+
+# Package Download System Utility (AWS Task Orchestrator and Executor component manager)
+# https://docs.aws.amazon.com/ja_jp/imagebuilder/latest/userguide/toe-component-manager.html
+
+# Set Initialize Parameter
+Set-Variable -Name AmazonTOEtUrl -Scope Script -Value ($Null)
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    Write-Log "# Package Download System Utility (AWS Task Orchestrator and Executor component manager)"
+
+    if ($Region) {
+        $AmazonTOEUrl = "https://awstoe-" + ${Region} + ".s3." + ${Region} + ".amazonaws.com/latest/windows/amd64/awstoe.exe"
+        Get-WebContentToFile -Uri $AmazonTOEUrl -OutFile "$TOOL_DIR\awstoe.exe"
+    }
+    else {
+        Get-WebContentToFile -Uri 'https://awstoe-us-east-1.s3.us-east-1.amazonaws.com/latest/linux/amd64/awstoe' -OutFile "$TOOL_DIR\awstoe.exe"
+    }
 }
 
 # Package Download System Utility (NoSQL Workbench for Amazon DynamoDB)
