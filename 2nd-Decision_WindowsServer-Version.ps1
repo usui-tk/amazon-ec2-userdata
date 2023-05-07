@@ -49,7 +49,7 @@ Set-Variable -Name TEMP_DIR -Scope Script "$Env:SystemRoot\Temp"
 Set-Variable -Name USERDATA_LOG -Scope Script "$TEMP_DIR\userdata.log"
 
 # Set Script Parameter for 3rd-Bootstrap Script (User Defined)
-Set-Variable -Name BOOTSTRAP_URL_MODERN -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_WindowsServer-Regacy.ps1"
+Set-Variable -Name BOOTSTRAP_URL_MODERN -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_WindowsServer-Modern.ps1"
 Set-Variable -Name BOOTSTRAP_URL_LEGACY -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_WindowsServer-Regacy.ps1"
 Set-Variable -Name BOOTSTRAP_SCRIPT -Scope Script -Value "3rd-Bootstrap_WindowsServer.ps1"
 
