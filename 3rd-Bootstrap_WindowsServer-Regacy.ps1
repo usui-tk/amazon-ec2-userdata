@@ -946,6 +946,9 @@ function Update-SysprepAnswerFile($SysprepAnswerFile) {
 #
 ########################################################################################################################
 
+# Script execution start time
+$ScriptExecStartTime = Get-Date
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Timezone Setting
 #-----------------------------------------------------------------------------------------------------------------------
@@ -3279,6 +3282,10 @@ Write-Log "# Save Userdata Script, Bootstrap Script, Logging Data Files) - Compl
 
 # Log Separator
 Write-LogSeparator "Complete Script Execution 3rd-Bootstrap Script"
+
+# Script execution complete time
+$ScriptExecCompleteTime = Get-Date
+Write-Log ("# Script Execution 3rd-Bootstrap Script [Execution Time] : " + ($ScriptExecCompleteTime - $ScriptExecStartTime).TotalSeconds + "seconds")
 
 # Complete Logging
 Write-Log "# Script Execution 3rd-Bootstrap Script [COMPLETE] : $ScriptFullPath"
