@@ -187,6 +187,23 @@ function Get-AmazonMachineImageInformation {
 
 
 function Get-AmazonMachineInformation {
+
+    # Get System BIOS Firmware Type
+    if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Get-ComputerInfo" }) {
+        $BiosFirmwareType = (Get-ComputerInfo).BiosFirmwareType
+
+        # Identify System BIOS Firmware Type
+        if ($BiosFirmwareType -eq "Uefi") {
+            Write-Log "# [AWS - EC2] Hardware - System BIOS Firmware Type : [UEFI] - $BiosFirmwareType"
+        }
+        elseif ($BiosFirmwareType -eq "Bios") {
+            Write-Log "# [AWS - EC2] Hardware - System BIOS Firmware Type : [BIOS] - $BiosFirmwareType"
+        }
+        else {
+            Write-Log "# [AWS - EC2] Hardware - System BIOS Firmware Type : [Unidentified] - $BiosFirmwareType"
+        }
+    }
+
     # Get System BIOS Information
     Set-Variable -Name BiosRegistry -Option Constant -Scope Local -Value "HKLM:\HARDWARE\DESCRIPTION\System"
 
@@ -1347,7 +1364,7 @@ if ($WindowsOSVersion -match "^5.*|^6.*") {
 
     # Change Windows Update Policy
     $AUSettings = (New-Object -ComObject "Microsoft.Update.AutoUpdate").Settings
-    $AUSettings.NotificationLevel = 3      # Automatic Updates prompts users to approve updates & before downloading or installing
+    $AUSettings.NotificationLevel = 3              # Automatic Updates prompts users to approve updates & before downloading or installing
     # $AUSettings.ScheduledInstallationDay  = 1    # Every Sunday
     # $AUSettings.ScheduledInstallationTime = 3    # AM 3:00
     $AUSettings.IncludeRecommendedUpdates = $True  # Enabled
