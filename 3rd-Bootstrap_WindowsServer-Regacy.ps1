@@ -1188,13 +1188,13 @@ if ($RoleName) {
 # Get Amazon EC2 Instance Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
-    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
+    Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
 }
 
 # Get Amazon EC2 Instance attached EBS Volume Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
-    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
+    Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Volume.txt" -Append -Force
 }
 
 # Get AMI information of this EC2 instance
