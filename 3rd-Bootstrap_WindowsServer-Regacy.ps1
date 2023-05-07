@@ -1235,30 +1235,30 @@ if ($RoleName) {
 
 # Get Amazon EC2 Instance Information
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance Information"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2Instance.txt" -Append -Force
 }
 
 # Get Amazon EC2 Instance Type Information
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Type Information"
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type Information"
     if (Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='nitro' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType }) {
-        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Nitro Hypervisor]" )
+        Write-Log ("# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type Information (Hypervisor) - [Nitro Hypervisor]" )
         Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='nitro' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2InstanceType.txt" -Append -Force
     }
     elseif (Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='xen' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType }) {
-        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Xen Hypervisor]" )
+        Write-Log ("# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type Information (Hypervisor) - [Xen Hypervisor]" )
         Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='xen' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2InstanceType.txt" -Append -Force
     }
     else {
-        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Unidentified]" )
+        Write-Log ("# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type Information (Hypervisor) - [Unidentified]" )
         Get-EC2InstanceType -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2InstanceType.txt" -Append -Force
     }
 }
 
 # Get Amazon EC2 Instance attached EBS Volume Information
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance attached EBS Volume Information"
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance attached EBS Volume Information"
     Get-EC2Volume -Filter @{Name = "attachment.instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2Volume.txt" -Append -Force
 }
 
@@ -1268,9 +1268,9 @@ if ($RoleName) {
     Get-EC2SecurityGroup -Region $Region -GroupIds ((Get-EC2InstanceAttribute -Region $Region -InstanceId $InstanceId -Attribute groupSet).Groups.GroupId) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2SecurityGroup.txt" -Append -Force
 }
 
-# Get AMI information of this EC2 instance
+# Get AMI information of this Amazon EC2 instance
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get AMI information of this EC2 instance"
+    Write-Log "# [Amazon EC2 - Windows] Get AMI information of this Amazon EC2 instance"
     Get-EC2Image -ImageId $AmiId -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AmazonEC2-Information_Get-EC2Image.txt" -Append -Force
 }
 
