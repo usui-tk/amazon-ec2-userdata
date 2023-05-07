@@ -1199,22 +1199,61 @@ Write-Log ("# [Amazon EC2 - Windows] Display Default Region at AWS Tools for Win
 #  Set-AWSHistoryConfiguration -MaxCmdletHistory 512 -MaxServiceCallHistory 512 -RecordServiceRequests
 #  Set-AWSResponseLogging -Level Always
 
+
+#------------------------------------------------------------------------------
+# Getting information about AWS services
+#------------------------------------------------------------------------------
+
 # Get AWS Security Token Service (AWS STS) Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AWS Security Token Service (AWS STS) Information"
     Get-STSCallerIdentity -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-STSCallerIdentity.txt" -Append -Force
 }
 
-# Get AWS Region Information
+# Get AWS Region List
 if ($RoleName) {
-    Write-Log "# [Amazon EC2 - Windows] Get AWS Region Information"
+    Write-Log "# [Amazon EC2 - Windows] Get AWS Region List"
     Get-AWSRegion | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-AWSRegion.txt" -Append -Force
 }
+
+# Get Amazon EC2 Instance Type List (Hypervisor - Nitro)
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type List (Hypervisor - Nitro)"
+    Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='nitro' } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2InstanceType_Nitro-Hypervisor.txt" -Append -Force
+}
+
+# Get Amazon EC2 Instance Type List (Hypervisor - Xen)
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get Amazon EC2 Instance Type List (Hypervisor - Xen)"
+    Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='xen' } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2InstanceType_Xen-Hypervisor.txt" -Append -Force
+}
+
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon EC2 Instance
+#------------------------------------------------------------------------------
 
 # Get Amazon EC2 Instance Information
 if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Information"
     Get-EC2Instance -Filter @{Name = "instance-id"; Values = $InstanceId } -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Instance.txt" -Append -Force
+}
+
+# Get Amazon EC2 Instance Type Information
+if ($RoleName) {
+    Write-Log "# [Amazon EC2 - Windows] Get EC2 Instance Type Information"
+    if (Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='nitro' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType }) {
+        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Nitro Hypervisor]" )
+        Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='nitro' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2InstanceType.txt" -Append -Force
+    }
+    elseif (Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='xen' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType }) {
+        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Xen Hypervisor]" )
+        Get-EC2InstanceType -Filter @{'name'='hypervisor';'values'='xen' } -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2InstanceType.txt" -Append -Force
+    }
+    else {
+        Write-Log ("# [Amazon EC2 - Windows] Get EC2 Instance Type Information (Hypervisor) - [Unidentified]" )
+        Get-EC2InstanceType -Region $Region | Where-Object { $_.InstanceType -eq $InstanceType } | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2InstanceType.txt" -Append -Force
+    }
 }
 
 # Get Amazon EC2 Instance attached EBS Volume Information
@@ -1234,6 +1273,11 @@ if ($RoleName) {
     Write-Log "# [Amazon EC2 - Windows] Get AMI information of this EC2 instance"
     Get-EC2Image -ImageId $AmiId -Region $Region | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AWS-Information_Get-EC2Image.txt" -Append -Force
 }
+
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon Machine Image (AMI)
+#------------------------------------------------------------------------------
 
 # Get AMI Information from Systems Manager Parameter Store
 #
@@ -1284,6 +1328,10 @@ if ($RoleName) {
     }
 
 }
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon EBS Snapshot
+#------------------------------------------------------------------------------
 
 # Get EBS snapshot information for AWS-provided installation media
 #
