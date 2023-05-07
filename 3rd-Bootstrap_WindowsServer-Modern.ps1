@@ -529,29 +529,6 @@ function Get-EbsVolumesMappingInformation {
 } # end Get-EbsVolumesMappingInformation
 
 
-function Get-Ec2ConfigVersion {
-    #--------------------------------------------------------------------------------------
-    #  Configuring a Windows Instance Using the EC2Config Service
-    #   http://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/UsingConfig_WinAMI.html
-    #--------------------------------------------------------------------------------------
-
-    # Set Initialize Parameter
-    Set-Variable -Name EC2ConfigInformation -Scope Script -Value ($Null)
-    Set-Variable -Name Ec2ConfigVersion -Scope Script -Value ($Null)
-
-    # Get EC2Config Version
-    $EC2ConfigInformation = $(Get-WmiObject -Class Win32_Product | Select-Object Name, Version | Where-Object { $_.Name -eq "EC2ConfigService" })
-    if ($EC2ConfigInformation) {
-        $Ec2ConfigVersion = $EC2ConfigInformation.Version
-    }
-
-    # Write the information to the Log Files
-    if ($Ec2ConfigVersion) {
-        Write-Log "# [Windows] Amazon EC2 Windows Utility Information - Amazon EC2Config Version : $Ec2ConfigVersion"
-    }
-} # end Get-Ec2ConfigVersion
-
-
 
 function Get-Ec2LaunchVersion {
     #--------------------------------------------------------------------------------------
@@ -858,7 +835,6 @@ function Get-WindowsServerInformation {
 #    - Get-CustomizeEc2InstanceMetadata
 #    - Get-Ec2LaunchV2Version
 #    - Get-Ec2LaunchVersion
-#    - Get-Ec2ConfigVersion
 #    - Get-WindowsServerInformation
 #
 ########################################################################################################################
@@ -871,7 +847,7 @@ function Get-Ec2BootstrapProgram {
     if (Test-Path $EC2Launchv2SysprepFile) {
         Set-Variable -Name SysprepFile -Value $EC2Launchv2SysprepFile
         Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
-        if ($WindowsOSVersion -match "^6.*|^10.*") {
+        if ($WindowsOSVersion -match "^10.*") {
             Get-Ec2LaunchV2Version
         }
     }
@@ -1121,7 +1097,7 @@ Get-PowerShellVerson
 # Logging Windows Server OS Parameter [Windows Driver Information]
 Get-WindowsDriverInformation
 
-# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Config / EC2Launch / EC2Launch V2)]
+# Logging Windows Server OS Parameter [EC2 Bootstrap Application Information (EC2Launch / EC2Launch V2)]
 Get-Ec2BootstrapProgram
 
 # Logging Windows Server OS Parameter [EC2 System Manager (SSM) Agent Information]
@@ -2098,7 +2074,7 @@ if ($Region -match "^ap-northeast-1|^ap-southeast-1|^ap-southeast-2|^eu-central-
         }
 
         # Check Windows OS Version[Windows Server 2012 R2, 2016]
-        if ($WindowsOSVersion -match "^6.3|^10.0") {
+        if ($WindowsOSVersion -match "^10.0") {
 
             # Amazon EC2 Elastic GPUs Support Windows OS Version
             # https://aws.amazon.com/jp/ec2/elastic-gpus/faqs/
@@ -2216,7 +2192,7 @@ Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter.m
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
 # Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
-if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+if ($WindowsOSVersion -match "^10.0") {
 
     # Package Download Web-based System Administrator Tool (Windows Admin Center)
     Write-Log "# Package Download Web-based System Administrator Tool (Windows Admin Center)"
@@ -2603,7 +2579,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.fluentd.org/
 # https://td-agent-package-browser.herokuapp.com/4/windows
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    if ($WindowsOSVersion -match "^6.2|^6.3|^10.0") {
+    if ($WindowsOSVersion -match "^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
         Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.4.2-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
@@ -2702,12 +2678,6 @@ Write-Log "# Execution System Utility (EC2Rescue) - Complete"
 # Save Userdata Script, Bootstrap Script, Logging Data Files - Start
 Write-Log "# Save Userdata Script, Bootstrap Script, Logging Data Files) - Start"
 
-# Save UserData Script File (EC2config)
-Set-Variable -Name Ec2ConfigUserdataScript -Scope Script -Value "C:\Program Files\Amazon\Ec2ConfigService\Scripts\UserScript.ps1"
-if (Test-Path $Ec2ConfigUserdataScript) {
-    Copy-Item -Path $Ec2ConfigUserdataScript -Destination $BASE_DIR
-}
-
 # Save UserData Script File (EC2Launch)
 Copy-Item -Path "$TEMP_DIR\*.ps1" -Destination $BASE_DIR
 
@@ -2717,10 +2687,6 @@ if (Test-Path $SysprepFile) {
 }
 
 # Save EC2-Bootstrap Application Configuration Files
-if (Test-Path $EC2ConfigFile) {
-    Copy-Item -Path $EC2ConfigFile -Destination $BASE_DIR
-}
-
 if (Test-Path $EC2LaunchFile) {
     Copy-Item -Path $EC2LaunchFile -Destination $BASE_DIR
     Copy-Item -Path "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\*.json" -Destination $BASE_DIR
