@@ -103,7 +103,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 
 # openSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
-zypper --quiet refresh -fdb
+# zypper --quiet refresh -fdb
 
 # openSUSE Leap Linux Software repository information
 zypper repos --uri
