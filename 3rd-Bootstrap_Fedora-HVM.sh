@@ -758,20 +758,20 @@ fi
 #-------------------------------------------------------------------------------
 
 # Setting SELinux permissive mode
-getenforce
-sestatus
+# getenforce
+# sestatus
 
-if [ $(getenforce) = "Enforcing" ]; then
-	# Setting SELinux disabled mode
-	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
-	grubby --info=ALL
-	grubby --update-kernel ALL --args selinux=0
-	grubby --info=ALL
+# if [ $(getenforce) = "Enforcing" ]; then
+# 	# Setting SELinux disabled mode
+# 	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+# 	grubby --info=ALL
+# 	grubby --update-kernel ALL --args selinux=0
+# 	grubby --info=ALL
 
-	setenforce 0
-	sleep 5
-	getenforce
-fi
+# 	setenforce 0
+# 	sleep 5
+# 	getenforce
+# fi
 
 # Setting SELinux disabled mode
 #  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
@@ -780,7 +780,7 @@ fi
 # grubby --info=ALL
 
 # Setting System crypto policy (Default -> FUTURE)
-update-crypto-policies --show
+# update-crypto-policies --show
 # update-crypto-policies --set FUTURE
 # update-crypto-policies --is-applied
 
