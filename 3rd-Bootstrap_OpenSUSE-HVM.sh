@@ -182,7 +182,7 @@ fi
 
 # openSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
-zypper --quiet refresh -fdb
+# zypper --quiet refresh -fdb
 
 # Install recommended packages
 # zypper --quiet --non-interactive install-new-recommends
@@ -209,7 +209,7 @@ zypper --quiet --non-interactive install pcp pcp-conf 'pcp-pmda-*' pcp-system-to
 
 # openSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
-zypper --quiet refresh -fdb
+# zypper --quiet refresh -fdb
 
 # Package Install Python 3 Runtime (from openSUSE Leap community Software repository)
 zypper --quiet --non-interactive install python3 python3-base python3-pip python3-setuptools python3-tools python3-virtualenv python3-wheel
@@ -217,7 +217,7 @@ zypper --quiet --non-interactive install python3-Babel python3-PyJWT python3-PyY
 
 # openSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
-zypper --quiet refresh -fdb
+# zypper --quiet refresh -fdb
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -634,7 +634,7 @@ terraform --version
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
 zypper clean --all
-zypper --quiet refresh -fdb
+# zypper --quiet refresh -fdb
 
 zypper --quiet --non-interactive update
 
