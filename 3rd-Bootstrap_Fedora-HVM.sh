@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Fedora 36]                 #
+#  Script Evaluated Operating System Information - [Fedora 38]                 #
 #                                                                              #
 ################################################################################
 
@@ -135,23 +135,6 @@ dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-pyt
 dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
-
-# Package Install Fedora System Administration Tools [Version dependent] (from Fedora Official Repository)
-if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "36" ]; then
-		echo "fedora ${VERSION_ID}"
-	elif [ "${VERSION_ID}" = "35" ]; then
-		echo "fedora ${VERSION_ID}"
-	elif [ "${VERSION_ID}" = "34" ]; then
-		echo "fedora ${VERSION_ID}"
-	else
-		echo "fedora ${VERSION_ID}"
-	fi
-else
-	if [ -f /etc/os-release ]; then
-		cat "/etc/os-release"
-	fi
-fi
 
 # Package Install Fedora support tools (from Fedora Official Repository)
 dnf install -y redhat-lsb-core redhat-lsb-submod-security redhat-text-fonts
@@ -295,6 +278,7 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+# https://packages.fedoraproject.org/pkgs/awscli2/awscli2/
 #-------------------------------------------------------------------------------
 
 # Package Uninstall AWS-CLI v1 Tools (from RPM Package)
@@ -311,14 +295,8 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 
 fi
 
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
-
-aws --version
+# Package Install AWS-CLI v2 packages (from Fedora Official Repository)
+dnf install -y awscli2
 
 # Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
