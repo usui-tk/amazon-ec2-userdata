@@ -106,7 +106,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 # [workaround] Package Install Debian System Administration Tools (from Debian Official Repository)
 update-ca-certificates
 sleep 5
-apt install -y -q openjdk-17-jre-headless
+apt clean -y -q
 apt install -y -q ca-certificates-java
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
