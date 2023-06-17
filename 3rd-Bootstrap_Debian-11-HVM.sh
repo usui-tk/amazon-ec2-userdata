@@ -520,57 +520,57 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-# curl -fsSL "https://toolbelt.treasuredata.com/sh/install-debian-bullseye-td-agent4.sh" | sh
+curl -fsSL "https://toolbelt.treasuredata.com/sh/install-debian-bullseye-td-agent4.sh" | sh
 
-# apt show td-agent
+apt show td-agent
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart td-agent
+systemctl restart td-agent
 
-# systemctl status -l td-agent
+systemctl status -l td-agent
 
-# # Configure fluentd software (Start Daemon td-agent)
-# if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-# 	systemctl enable td-agent
-# 	systemctl is-enabled td-agent
-# fi
+# Configure fluentd software (Start Daemon td-agent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# # Package bundled ruby gem package information
-# /opt/td-agent/bin/fluent-gem list
+# Package bundled ruby gem package information
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
 # https://www.terraform.io/docs/cli/install/apt.html
 #-------------------------------------------------------------------------------
 
-# # Import GPG Key File
-# curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
+# Import GPG Key File
+curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add -
 
-# # Add the HashiCorp Linux Repository
-# apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+# Add the HashiCorp Linux Repository
+apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 
-# # apt repository metadata Clean up
-# apt clean -y
+# apt repository metadata Clean up
+apt clean -y
 
-# # Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# apt update -y -q && apt install -y -q terraform
+# Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+apt update -y -q && apt install -y -q terraform
 
-# # Package Information
-# apt show terraform
+# Package Information
+apt show terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+	complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
