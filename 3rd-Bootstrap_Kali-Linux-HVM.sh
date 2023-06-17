@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Kali Linux 2022.3]         #
+#  Script Evaluated Operating System Information - [Kali Linux 2023.2]         #
 #                                                                              #
 ################################################################################
 
@@ -47,6 +47,9 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://www.kali.org/docs/cloud/aws/
 #    https://www.kali.org/docs/general-use/metapackages/
 #    https://www.kali.org/docs/troubleshooting/common-cloud-setup/
+#
+#    https://pkg.kali.org/
+#    https://www.kali.org/tools/
 #
 #    https://aws.amazon.com/marketplace/pp/prodview-fznsw3f7mq7to
 #
@@ -150,7 +153,7 @@ apt install -y -q python-is-python3
 #  - kali-linux-nethunter: Tools used as part of Kali NetHunter
 # ------------------------------------------------------------------------------
 
-apt install -y -q kali-linux-core kali-linux-headless
+apt install -y -q kali-linux-headless
 
 # ------------------------------------------------------------------------------
 # Package Install Kali Linux Meta-Package (Tools)
@@ -283,33 +286,11 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+# https://pkg.kali.org/pkg/awscli
 #-------------------------------------------------------------------------------
 
-# Package Uninstall AWS-CLI v1 Tools (from DEB Package)
-if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
-	aws --version
-
-	which aws
-
-	if [ $(dpkg -l awscli) ]; then
-		apt show awscli
-
-		apt remove -y -q awscli
-	fi
-
-fi
-
-# Prohibit installation/update of AWS-CLI v1 package from repository
-apt-mark showhold
-apt-mark hold awscli
-apt-mark showhold
-
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
+# Package Install AWS-CLI v2 Tools (from Kali Linux Official Repository)
+apt install -y -q awscli
 
 aws --version
 
@@ -548,11 +529,6 @@ systemctl status -l amazon-cloudwatch-agent
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-
 # View Amazon CloudWatch Agent config files
 cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml
 
@@ -604,6 +580,16 @@ apt show ansible
 ansible --version
 
 ansible localhost -m setup
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [Terraform]
+#-------------------------------------------------------------------------------
+# apt install -y -q terraform
+
+# apt show terraform
+
+# terraform --version
 
 
 #-------------------------------------------------------------------------------
