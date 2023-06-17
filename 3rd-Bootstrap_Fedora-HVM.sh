@@ -116,7 +116,9 @@ dnf update -y
 #-------------------------------------------------------------------------------
 
 # Package replacement CURL Tools [curl-minimal to curl-full]
-if [ $(rpm -qa | grep curl-minimal) ]; then
+if [ $(rpm -qa | grep -ve "libcurl-minimal" | grep -w curl-minimal) ]; then
+	dnf --enablerepo="*" --verbose clean all
+	sleep 5
 	dnf install -y --allowerasing curl-full libcurl-full
 fi
 
