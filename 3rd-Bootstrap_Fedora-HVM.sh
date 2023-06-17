@@ -300,6 +300,8 @@ fi
 # Package Install AWS-CLI v2 packages (from Fedora Official Repository)
 dnf install -y awscli2
 
+aws --version
+
 # Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
