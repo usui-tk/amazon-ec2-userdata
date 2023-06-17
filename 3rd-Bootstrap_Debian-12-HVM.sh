@@ -104,7 +104,8 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # [workaround] Package Install Debian System Administration Tools (from Debian Official Repository)
-apt install -y ca-certificates-java
+apt install -y -q openjdk-17-jre-headless
+apt install -y -q ca-certificates-java
 
 # Package Install Debian System Administration Tools (from Debian Official Repository)
 apt install -y -q acpid acpitool arptables atop bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu chrony collectd collectd-utils collectl colordiff crash curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jnettop jc jq kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart netcat-openbsd netsniff-ng nftables nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync screen secure-delete shellcheck snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget zip zstd
