@@ -35,6 +35,7 @@ if [ $(uname -m) = "x86_64" ]; then
    ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
    ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
    ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
+   ScriptForDebian12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-12-HVM.sh"
    ScriptForDebian11="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-11-HVM.sh"
    ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
    ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
@@ -122,12 +123,12 @@ function get_os_info () {
          DIST=""
          REV=""
       fi
-    fi
+   fi
 
-    if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
+   if [[ -z "${DIST}" || -z "${DIST_TYPE}" ]]; then
       echo "Unsupported distribution: ${DIST} and distribution type: ${DIST_TYPE}"
       exit 1
-    fi
+   fi
 
    LOWERCASE_DIST_TYPE=`lowercase $DIST_TYPE`
    UNIQ_OS_ID="${LOWERCASE_DIST_TYPE}-${KERNEL}-${MACH}"
@@ -144,23 +145,23 @@ function get_bootstrap_script () {
             # Bootstrap Script for Amazon Linux 2.x
             BootstrapScript=${ScriptForAmazonLinux2}
          elif [ $(echo ${REV} | grep -e '201') ]; then
-            # Bootstrap Script for Amazon Linux 1.x (2011.09 - 2017.09)
+            # Bootstrap Script for Amazon Linux 1.x
             BootstrapScript=${ScriptForAmazonLinux1}
          else
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "RHEL" ] || [ "${DIST}" = "Red Hat Enterprise Linux Server" ] || [ "${DIST_TYPE}" = "rhel" ]; then
          if [ $(echo ${REV} | grep -e '9.') ]; then
-            # Bootstrap Script for Red Hat Enterprise Linux v9.x
+            # Bootstrap Script for Red Hat Enterprise Linux v9.x (Plow)
             BootstrapScript=${ScriptForRHELv9}
          elif [ $(echo ${REV} | grep -e '8.') ]; then
-            # Bootstrap Script for Red Hat Enterprise Linux v8.x
+            # Bootstrap Script for Red Hat Enterprise Linux v8.x (Ootpa)
             BootstrapScript=${ScriptForRHELv8}
          elif [ $(echo ${REV} | grep -e '7.') ]; then
-            # Bootstrap Script for Red Hat Enterprise Linux v7.x
+            # Bootstrap Script for Red Hat Enterprise Linux v7.x (Maipo)
             BootstrapScript=${ScriptForRHELv7}
          elif [ $(echo ${REV} | grep -e '6.') ]; then
-            # Bootstrap Script for Red Hat Enterprise Linux v6.x
+            # Bootstrap Script for Red Hat Enterprise Linux v6.x (Santiago)
             BootstrapScript=${ScriptForRHELv6}
          else
             BootstrapScript=""
@@ -244,7 +245,10 @@ function get_bootstrap_script () {
             BootstrapScript=""
          fi
    elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
-         if [ $(echo ${REV} | grep -e '11') ]; then
+         if [ $(echo ${REV} | grep -e '12') ]; then
+            # Bootstrap Script for Debian GNU/Linux 12 (Bookworm)
+            BootstrapScript=${ScriptForDebian12}
+         elif [ $(echo ${REV} | grep -e '11') ]; then
             # Bootstrap Script for Debian GNU/Linux 11 (Bullseye)
             BootstrapScript=${ScriptForDebian11}
          elif [ $(echo ${REV} | grep -e '10') ]; then
@@ -267,10 +271,10 @@ function get_bootstrap_script () {
       # Bootstrap Script for Fedora
       BootstrapScript=${ScriptForFedora}
    elif [ "${DIST}" = "openSUSE Leap" ] || [ "${DIST_TYPE}" = "opensuse-leap" ]; then
-      # Bootstrap Script for openSUSE Leap 15
+      # Bootstrap Script for openSUSE Leap 15.x
       BootstrapScript=${ScriptForOpenSUSE}
    elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
-      # Bootstrap Script for Kali Linux 2020.x
+      # Bootstrap Script for Kali Linux
       BootstrapScript=${ScriptForKaliLinux}
    else
       BootstrapScript=""
