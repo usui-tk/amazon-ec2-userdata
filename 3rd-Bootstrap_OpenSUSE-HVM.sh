@@ -5,6 +5,12 @@ set -e -x
 # Logger
 exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /dev/console) 2>&1
 
+################################################################################
+#                                                                              #
+#  Script Evaluated Operating System Information - [Open SUSE 15.5]            #
+#                                                                              #
+################################################################################
+
 #-------------------------------------------------------------------------------
 # Set UserData Parameter
 #-------------------------------------------------------------------------------
@@ -106,18 +112,18 @@ zypper repos --uri
 zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Apply openSUSE Leap Linux Service Pack
-# (Service pack information as of 2021.7.22 : openSUSE Leap 15.3)
+# (Service pack information as of 2023.6.17 : openSUSE Leap 15.5)
 ServicePackStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
+	if [ "${VERSION_ID}" = "15.5" ]; then
 		echo "openSUSE Leap ${VERSION_ID}"
 		cat /etc/os-release
 
 		# openSUSE Leap Linux Software repository information
 		zypper repos --uri
 
-	elif [ "${VERSION_ID}" = "15.2" ] || [ "${VERSION_ID}" = "15.1" ] || [ "${VERSION_ID}" = "15.0" ]; then
+	elif [ "${VERSION_ID}" = "15.4" ] || [ "${VERSION_ID}" = "15.3" ] || [ "${VERSION_ID}" = "15.2" ] || [ "${VERSION_ID}" = "15.1" ] || [ "${VERSION_ID}" = "15.0" ]; then
 		echo "openSUSE Leap ${VERSION_ID}"
 		cat /etc/os-release
 
@@ -128,18 +134,24 @@ if [ -n "$VERSION_ID" ]; then
 		cp -Rv /etc/zypp/repos.d /etc/zypp/repos.d.Old
 
 		# Change openSUSE Leap Linux Software repository configuration files
-		if [ "${VERSION_ID}" = "15.3" ]; then
+		if [ "${VERSION_ID}" = "15.5" ]; then
 			echo "openSUSE Leap ${VERSION_ID}"
 			cat /etc/os-release
+		elif [ "${VERSION_ID}" = "15.4" ]; then
+			# Change repository information (15.4 -> 15.5)
+			sed -i 's/15.4/15.5/g' /etc/zypp/repos.d/*.repo
+		elif [ "${VERSION_ID}" = "15.3" ]; then
+			# Change repository information (15.3 -> 15.5)
+			sed -i 's/15.3/15.5/g' /etc/zypp/repos.d/*.repo
 		elif [ "${VERSION_ID}" = "15.2" ]; then
-			# Change repository information (15.2 -> 15.3)
-			sed -i 's/15.2/15.3/g' /etc/zypp/repos.d/*.repo
+			# Change repository information (15.2 -> 15.5)
+			sed -i 's/15.2/15.5/g' /etc/zypp/repos.d/*.repo
 		elif [ "${VERSION_ID}" = "15.1" ]; then
-			# Change repository information (15.1 -> 15.3)
-			sed -i 's/15.1/15.3/g' /etc/zypp/repos.d/*.repo
+			# Change repository information (15.1 -> 15.5)
+			sed -i 's/15.1/15.5/g' /etc/zypp/repos.d/*.repo
 		elif [ "${VERSION_ID}" = "15.0" ]; then
-			# Change repository information (15.0 -> 15.3)
-			sed -i 's/15.0/15.3/g' /etc/zypp/repos.d/*.repo
+			# Change repository information (15.0 -> 15.5)
+			sed -i 's/15.0/15.5/g' /etc/zypp/repos.d/*.repo
 		else
 			echo "openSUSE Leap ${VERSION_ID}"
 			cat /etc/os-release
@@ -193,15 +205,7 @@ zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs
 
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
-if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.3" ]; then
-		echo "openSUSE Leap ${VERSION_ID}"
-		zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools pcp-zeroconf
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-manager 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
-	else
-		echo "openSUSE Leap ${VERSION_ID}"
-	fi
-fi
+zypper --quiet --non-interactive install pcp pcp-conf 'pcp-pmda-*' pcp-system-tools pcp-zeroconf
 
 # openSUSE Leap Linux Software repository metadata Clean up
 zypper clean --all
@@ -563,11 +567,6 @@ cat "/tmp/config.json"
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
 systemctl status -l amazon-cloudwatch-agent
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
