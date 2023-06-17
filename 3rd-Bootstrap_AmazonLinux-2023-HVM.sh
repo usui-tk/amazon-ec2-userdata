@@ -563,13 +563,6 @@ if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
 	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 fi
 
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
-	/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
-
-	/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-fi
-
 # View Amazon CloudWatch Agent config files
 if [ $(rpm -qa | grep amazon-cloudwatch-agent) ]; then
 	cat /opt/aws/amazon-cloudwatch-agent/etc/common-config.toml

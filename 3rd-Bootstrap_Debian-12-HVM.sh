@@ -114,6 +114,9 @@ apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 apt install -y -q pcp pcp-conf pcp-manager
 
+# Package Install rsyslog Tools (from Debian Official Repository)
+apt install -y -q rsyslog
+
 # Package Install Python 3 Runtime (from Debian Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-toolz python3-wheel
 
@@ -202,33 +205,11 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+# https://salsa.debian.org/cloud-team/awscli
 #-------------------------------------------------------------------------------
 
-# Package Uninstall AWS-CLI v1 Tools (from DEB Package)
-if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
-	aws --version
-
-	which aws
-
-	if [ $(dpkg -l awscli) ]; then
-		apt show awscli
-
-		apt remove -y -q awscli
-	fi
-
-fi
-
-# Prohibit installation/update of AWS-CLI v1 package from repository
-apt-mark showhold
-apt-mark hold awscli
-apt-mark showhold
-
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
+# Package Install AWS-CLI v2 Tools (from Debian Official Repository)
+apt install -y -q awscli
 
 aws --version
 
@@ -462,11 +443,6 @@ cat "/tmp/config.json"
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
 
 systemctl status -l amazon-cloudwatch-agent
-
-/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
-
-# Configure Amazon CloudWatch Agent software (OpenTelemetry Collector settings)
-/usr/bin/amazon-cloudwatch-agent-ctl -a fetch-config -o default -s
 
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
 
