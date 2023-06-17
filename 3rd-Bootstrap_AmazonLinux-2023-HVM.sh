@@ -309,6 +309,8 @@ fi
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
 dnf install -y awscli-2
 
+aws --version
+
 # Configuration AWS-CLI tools
 cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
 # Typically that would be added under one of the following paths:
