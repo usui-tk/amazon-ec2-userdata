@@ -123,7 +123,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Kali Linux System Administration Tools (from Kali Linux Official Repository)
-apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bc bcc bcftools binutils blktrace bpfcc-tools bpftool bpytop byobu chrony collectd collectd-utils collectl colordiff crash cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 ipset iptraf-ng ipv6calc ipv6toolkit jc jnettop jp jq kexec-tools linuxptp locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart net-tools netsniff-ng nftables nload nmap numactl numatop nvme-cli parted patchutils psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck smartmontools snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit tlog traceroute tree tzdata unicornscan unzip usermode util-linux wdiff wget xfsprogs yamllint zip zsh zstd
+apt install -y -q acpid acpitool arptables atop bash-builtins bash-completion bc bcc bcftools binutils blktrace bpfcc-tools bpftool bpytop byobu chrony collectd collectd-utils collectl colordiff crash curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 ipset iptraf-ng ipv6calc ipv6toolkit jc jnettop jp jq kexec-tools linuxptp locales-all lsb-release lsof lvm2 lzop manpages mc mdadm mlocate moreutils mtr ncdu ncompress needrestart net-tools netsniff-ng nftables nload nmap numactl numatop nvme-cli parted patchutils psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck smartmontools snmp sosreport strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit tlog traceroute tree tzdata unicornscan unzip usermode util-linux wdiff wget xfsprogs yamllint zip zsh zstd
 
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 
@@ -585,11 +585,11 @@ ansible localhost -m setup
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
 #-------------------------------------------------------------------------------
-# apt install -y -q terraform
+apt install -y -q terraform
 
-# apt show terraform
+apt show terraform
 
-# terraform --version
+terraform --version
 
 
 #-------------------------------------------------------------------------------
