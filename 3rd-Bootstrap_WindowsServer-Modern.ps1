@@ -1946,7 +1946,7 @@ else {
     Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows OS Version : " + $WindowsOSVersion)
 }
 
-# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019]
+# Check Windows OS Version[Windows Server 2016, 2019, 2022]
 if ($WindowsOSVersion -match "^10.0") {
 
     # Amazon CloudWatch Agent Support Windows OS Version
@@ -1997,6 +1997,30 @@ if ($WindowsOSVersion -match "^10.0") {
 else {
     # Amazon CloudWatch Agent Support Windows OS Version (None)
     Write-Log ("# [AWS - EC2-AmazonCloudWatchAgent] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
+}
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Custom Package Install (AWS Distro for OpenTelemetry Collector (ADOT Collector))
+# https://aws-otel.github.io/docs/setup/build-collector-on-windows
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Package Install System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))"
+
+# Check Windows OS Version[Windows Server 2016, 2019, 2022]
+if ($WindowsOSVersion -match "^10.0") {
+
+    # Package Download System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))
+    # https://github.com/aws-observability/aws-otel-collector/blob/main/README.md
+    Write-Log "# Package Download System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))"
+    Get-WebContentToFile -Uri 'https://aws-otel-collector.s3.amazonaws.com/windows/amd64/latest/aws-otel-collector.msi' -OutFile "$TOOL_DIR\aws-otel-collector.msi"
+
+    # Package Install System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))
+    Write-Log "# Package Install System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))"
+    Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\aws-otel-collector.msi", "/qn", "/L*v $LOGS_DIR\APPS_AWS_AWS-Distro-for-OpenTelemetry-Collector_Setup.log")
+
+    Start-Sleep -Seconds 5
 }
 
 
