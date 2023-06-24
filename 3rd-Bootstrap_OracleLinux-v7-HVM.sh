@@ -167,7 +167,7 @@ for repo in $repolist
 do
 	echo "[Target repository Name (Collect yum repository package list)] :" $repo
 	yum --disablerepo="*" --enablerepo=${repo} list available > /tmp/command-log_yum_repository-package-list_${repo}.txt
-	sleep 3
+	sleep 1
 done
 
 # Default Package Update

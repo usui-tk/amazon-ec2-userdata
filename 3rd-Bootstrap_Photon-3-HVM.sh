@@ -227,10 +227,186 @@ aws configure set cli_pager ''
 aws configure list
 cat ~/.aws/config
 
-# Get AWS Region Information
+
+#------------------------------------------------------------------------------
+# Getting information about AWS services
+#------------------------------------------------------------------------------
+
+# Get AWS Security Token Service (AWS STS) Information
 if [ -n "$RoleName" ]; then
-	echo "# Get AWS Region Infomation"
-	aws ec2 describe-regions --region ${Region}
+	echo "# Get AWS Security Token Service (AWS STS) Information"
+	aws sts get-caller-identity --output json
+fi
+
+# Get AWS Region List
+if [ -n "$RoleName" ]; then
+	echo "# Get AWS Region List"
+	aws ec2 describe-regions --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-regions.txt"
+fi
+
+# Get Amazon EC2 Instance Type List
+if [ -n "$RoleName" ]; then
+	echo "# Get Amazon EC2 Instance Type List"
+    aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`nitro`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_nitro-hypervisor.txt"
+    aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`xen`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_xen-hypervisor.txt"
+fi
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon EC2 Instance
+#------------------------------------------------------------------------------
+
+# Get Amazon EC2 Instance Information
+if [ -n "$RoleName" ]; then
+	echo "# Get Amazon EC2 Instance Information"
+    aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instances.txt"
+fi
+
+# Get Amazon EC2 Instance Type Information
+if [ -n "$RoleName" ]; then
+	echo "# Get Amazon EC2 Instance Type Information"
+    aws ec2 describe-instance-types --query "InstanceTypes[?InstanceType==\`${InstanceType}\`]" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types.txt"
+fi
+
+# Get Amazon EC2 Instance attached EBS Volume Information
+if [ -n "$RoleName" ]; then
+	echo "# Get Amazon EC2 Instance attached EBS Volume Information"
+    aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-volumes.txt"
+fi
+
+# Get Amazon EC2 Instance attached VPC Security Group Information
+if [ -n "$RoleName" ]; then
+	echo "# Get Amazon EC2 Instance attached VPC Security Group Information"
+    aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-security-groups.txt"
+fi
+
+# Get AMI information of this Amazon EC2 instance
+if [ -n "$RoleName" ]; then
+	echo "# Get AMI information of this Amazon EC2 instance"
+    aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-images.txt"
+fi
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon EC2 Instance Attribute
+# [Network Interface Performance Attribute]
+#------------------------------------------------------------------------------
+# - Summary of Networking and Storage Features
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
+# - ENA (Elastic Network Adapter)
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
+# - Elastic Fabric Adapter (EFA)
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html
+# - Single-root I/O virtualization (SR-IOV)
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html
+#------------------------------------------------------------------------------
+
+# Get EC2 Instance Attribute [Network Interface Performance Attribute]
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute]"
+
+    # Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]
+    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSupport" --output text --region ${Region}) == "required" ]]; then
+        echo "EnaSupport is available for $InstanceType"
+
+        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]"
+        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA.txt"
+
+		# Get Linux Kernel Module(modinfo ena)
+		echo "# Get Linux Kernel Module(modinfo ena)"
+		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
+			modinfo ena
+		fi
+    fi
+
+    # Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]
+    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EfaSupported" --output text --region ${Region}) == "true" ]]; then
+        echo "EfaSupported is available for $InstanceType"
+
+        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]"
+        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_EFA.txt"
+    fi
+
+    # Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]
+    if [[ $(aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --query 'SriovNetSupport.Value' --output text --region ${Region}) == "simple" ]]; then
+        echo "SriovNetSupport is available for $InstanceType"
+
+        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]"
+        aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_SR-IOV.txt"
+
+		# Get Linux Kernel Module(modinfo ixgbevf)
+		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
+		if [ $(lsmod | awk '{print $1}' | grep -x ixgbevf) ]; then
+			modinfo ixgbevf
+		fi
+    fi
+fi
+
+#------------------------------------------------------------------------------
+# Getting information about Amazon EC2 Instance Attribute
+# [Storage Interface Performance Attribute]
+#------------------------------------------------------------------------------
+# - Summary of Networking and Storage Features
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
+# - EBS Optimized Instance
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSPerformance.html
+# - Nitro-based Instances
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#ec2-nitro-instances
+# - Amazon EBS and NVMe Volumes
+#   http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
+# - SSD Instance Store Volumes
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ssd-instance-store.html
+#------------------------------------------------------------------------------
+
+# Get EC2 Instance Attribute [Storage Interface Performance Attribute]
+if [ -n "$RoleName" ]; then
+	echo "# Get EC2 Instance Attribute [Storage Interface Performance Attribute]"
+
+    # Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]
+    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.EbsOptimizedSupport" --output text --region ${Region}) == "default" ]]; then
+        echo "EbsOptimizedSupport is available for $InstanceType"
+
+        echo "# Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]"
+        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_EbsInfo.txt"
+    fi
+
+    # Get EC2 Instance Attribute [Storage Interface Performance Attribute - Amazon EBS and NVMe Volumes]
+    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.NvmeSupport" --output text --region ${Region}) == "required" ]]; then
+        echo "NvmeSupport is available for $InstanceType"
+
+		# Get Linux Kernel Module(modinfo nvme)
+		echo "# Get Linux Kernel Module(modinfo nvme)"
+		if [ $(lsmod | awk '{print $1}' | grep -x nvme) ]; then
+			modinfo nvme
+		fi
+
+		# Get NVMe Device(nvme list)
+		# http://www.spdk.io/doc/nvme-cli.html
+		# https://github.com/linux-nvme/nvme-cli
+		if [ $(command -v nvme) ]; then
+			echo "# Get NVMe Device(nvme list)"
+			nvme list
+		fi
+    fi
+
+fi
+
+# Get PCI-Express Device(lspci -v)
+if [ $(command -v lspci) ]; then
+	echo "# Get PCI-Express Device(lspci -v)"
+	lspci -v
+fi
+
+# Get Disk[MountPoint] Information (lsblk -a)
+if [ $(command -v lsblk) ]; then
+	echo "# Get Disk[MountPoint] Information (lsblk -a)"
+	lsblk -a
+fi
+
+
+# Get Linux Block Device Read-Ahead Value(blockdev --report)
+if [ $(command -v blockdev) ]; then
+    echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+    blockdev --report
 fi
 
 #-------------------------------------------------------------------------------

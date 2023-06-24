@@ -163,7 +163,7 @@ for repo in $repolist
 do
 	echo "[Target repository Name (Collect dnf/yum repository package list)] :" $repo
 	dnf repository-packages ${repo} list > /tmp/command-log_dnf_repository-package-list_${repo}.txt
-	sleep 3
+	sleep 1
 done
 
 # Default Package Update
