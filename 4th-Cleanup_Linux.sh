@@ -34,7 +34,7 @@ if [ $(command -v rpm) ]; then
 		DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | sed 's/\(.*\)-[0-9].*-.*/\1/')
 		echo "Linux kernel package name :" $DEFAULTKERNEL
 	else
-		DEFAULTKERNEL=$(rpm -qa | grep -ie `uname -r` | grep -ie "kernel" | awk '{print length, $0}' | sort -n | head -n 1 | awk '{print $2}')
+		DEFAULTKERNEL=$(rpm -qa | grep -ie `uname -r` | grep -ie "kernel-" | awk '{print length, $0}' | sort -n | head -n 1 | awk '{print $2}')
 		echo "Linux kernel package name :" $DEFAULTKERNEL
 	fi
 fi
