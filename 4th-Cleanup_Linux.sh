@@ -33,6 +33,7 @@ if [ $(command -v rpm) ]; then
 	if [ $(command -v grubby) ]; then
 		DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | sed 's/\(.*\)-[0-9].*-.*/\1/')
 		echo "Linux kernel package name :" $DEFAULTKERNEL
+		grubby --info=ALL
 	else
 		DEFAULTKERNEL=$(rpm -qa | grep -ie `uname -r` | grep -ie "kernel-" | awk '{print length, $0}' | sort -n | head -n 1 | awk '{print $2}')
 		echo "Linux kernel package name :" $DEFAULTKERNEL
@@ -76,6 +77,11 @@ if [ $(command -v rpm) ]; then
 			rpm -qa | grep -ie "kernel" | sort
 		fi
 
+		# Show Linux Boot Program information
+		if [ $(command -v grubby) ]; then
+			grubby --info=ALL
+		fi
+
 		# Removing old kernel packages
 		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
 		sleep 5
@@ -85,6 +91,11 @@ if [ $(command -v rpm) ]; then
 			dnf --showduplicate list ${DEFAULTKERNEL}
 		else
 			rpm -qa | grep -ie "kernel" | sort
+		fi
+
+		# Show Linux Boot Program information
+		if [ $(command -v grubby) ]; then
+			grubby --info=ALL
 		fi
 
 		# Reconfigure GRUB 2 config file
