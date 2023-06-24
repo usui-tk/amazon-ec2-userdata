@@ -86,16 +86,16 @@ if [ $(command -v rpm) ]; then
 		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
 		sleep 5
 
+		# Show Linux Boot Program information
+		if [ $(command -v grubby) ]; then
+			grubby --info=ALL
+		fi
+
 		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
 			dnf --showduplicate list ${DEFAULTKERNEL}
 		else
 			rpm -qa | grep -ie "kernel" | sort
-		fi
-
-		# Show Linux Boot Program information
-		if [ $(command -v grubby) ]; then
-			grubby --info=ALL
 		fi
 
 		# Reconfigure GRUB 2 config file
@@ -107,6 +107,11 @@ if [ $(command -v rpm) ]; then
 			else
 				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
 			fi
+		fi
+
+		# Show Linux Boot Program information
+		if [ $(command -v grubby) ]; then
+			grubby --info=ALL
 		fi
 
 		# Cleanup repository information
