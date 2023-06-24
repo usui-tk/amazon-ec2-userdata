@@ -924,6 +924,40 @@ if [ $(systemctl is-enabled acpid) = "disabled" ]; then
 fi
 
 #-------------------------------------------------------------------------------
+# Configure Kernel package optimization (Remove RHEL-compatible kernel packages)
+#-------------------------------------------------------------------------------
+
+# Show Linux kernel package name Information
+if [ $(command -v grubby) ]; then
+	DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | sed 's/\(.*\)-[0-9].*-.*/\1/')
+	echo "Linux kernel package name :" $DEFAULTKERNEL
+	grubby --info=ALL
+else
+	DEFAULTKERNEL=$(rpm -qa | grep -ie `uname -r` | grep -ie "kernel-" | awk '{print length, $0}' | sort -n | head -n 1 | awk '{print $2}')
+	echo "Linux kernel package name :" $DEFAULTKERNEL
+fi
+
+# Remove RHEL-compatible kernel packages
+if [ $(rpm -qa | grep -ie "kernel-core") ]; then
+	echo "Remove RHEL-compatible kernel packages"
+
+	# Information on installed kernel packages
+	rpm -qa | grep -ie "kernel-" | sort
+
+	# Removing old kernel packages
+	dnf remove -y kernel-core
+	sleep 5
+
+	# Information on installed kernel packages
+	rpm -qa | grep -ie "kernel-" | sort
+
+	# Show Linux Boot Program information
+	if [ $(command -v grubby) ]; then
+		grubby --info=ALL
+	fi
+fi
+
+#-------------------------------------------------------------------------------
 # System Setting
 #-------------------------------------------------------------------------------
 
