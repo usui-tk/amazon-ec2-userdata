@@ -29,13 +29,14 @@ if [ -f /etc/os-release ]; then
 fi
 
 # Show Linux kernel package name Information
-if [ -f /etc/sysconfig/kernel ]; then
-	eval $(grep ^DEFAULTKERNEL= /etc/sysconfig/kernel)
-	echo "Linux Kernel Package Name :" $DEFAULTKERNEL
-elif [ $(command -v grubby) ]; then
-	DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | cut -d '-' -f 1)
-else
-	DEFAULTKERNEL=$(rpm -qa | grep -ie kernel-`uname -r` | cut -d '-' -f 1)
+if [ $(command -v rpm) ]; then
+	if [ $(command -v grubby) ]; then
+		DEFAULTKERNEL=$(rpm -qf `grubby --default-kernel` | sed 's/\(.*\)-[0-9].*-.*/\1/')
+		echo "Linux kernel package name :" $DEFAULTKERNEL
+	else
+		DEFAULTKERNEL=$(rpm -qa | grep -ie `uname -r` | grep -ie "kernel" | awk '{print length, $0}' | sort -n | head -n 1 | awk '{print $2}')
+		echo "Linux kernel package name :" $DEFAULTKERNEL
+	fi
 fi
 
 # Show Machine Boot Program Information
@@ -68,7 +69,7 @@ if [ $(command -v rpm) ]; then
 			uname -a
 		fi
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
 			dnf --showduplicate list ${DEFAULTKERNEL}
 		else
@@ -79,7 +80,7 @@ if [ $(command -v rpm) ]; then
 		dnf remove -y $(dnf repoquery --installonly --latest-limit=-1 -q)
 		sleep 5
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
 			dnf --showduplicate list ${DEFAULTKERNEL}
 		else
@@ -116,7 +117,7 @@ if [ $(command -v rpm) ]; then
 			uname -a
 		fi
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
 			yum --showduplicate list ${DEFAULTKERNEL}
 		else
@@ -129,7 +130,7 @@ if [ $(command -v rpm) ]; then
 			sleep 5
 		fi
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
 			yum --showduplicate list ${DEFAULTKERNEL}
 		else
@@ -240,7 +241,7 @@ if [ $(command -v dpkg) ]; then
 			uname -a
 		fi
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		dpkg --get-selections | grep -ie "linux-image" | sort
 
 		# Removing old kernel packages
@@ -249,7 +250,7 @@ if [ $(command -v dpkg) ]; then
 			sleep 5
 		fi
 
-		# Package Install Kernel Package
+		# Package Installed Kernel Package
 		dpkg --get-selections | grep -ie "linux-image" | sort
 
 		# Reconfigure GRUB 2 config file
