@@ -522,8 +522,9 @@ rm -rf /var/tmp/*
 # Remove /var/log files
 find /var/log/ -type f -name \* -exec cp -f /dev/null {} \;
 
-# Remove /var/log/user-data_*.log files
+# Remove /var/log/user-data_*.log and txt files
 rm -rf /var/log/user-data_*.log
+rm -rf /var/log/user-data_*.txt
 
 #-------------------------------------------------------------------------------
 # Cleanup process for Machine ID
