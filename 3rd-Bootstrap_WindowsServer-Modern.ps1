@@ -2476,10 +2476,10 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (AWS Tools for Windows PowerShell)
 # https://aws.amazon.com/jp/powershell/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
-    Get-WebContentToFile -Uri 'https://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
-}
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     Write-Log "# Package Download System Utility (AWS Tools for Windows PowerShell)"
+#     Get-WebContentToFile -Uri 'https://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi' -OutFile "$TOOL_DIR\AWSToolsAndSDKForNet.msi"
+# }
 
 # Package Download System Utility (Session Manager Plugin for the AWS CLI)
 # https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html
