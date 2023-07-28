@@ -346,10 +346,8 @@ dnf install -y pcp-oracle-conf
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-database-preinstall-19c
-dnf install -y oracle-database-preinstall-21c
-
-# Package Install Oracle E-Business Suite Pre-Installation Tools (from Oracle Linux Repository)
-# dnf install -y oracle-ebs-server-R12-preinstall
+# dnf install -y oracle-database-preinstall-21c
+dnf install -y oracle-database-preinstall-23c
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
