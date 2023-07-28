@@ -112,7 +112,7 @@ find /etc/yum.repos.d/
 
 dnf list *release-el9
 
-dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -140,6 +140,7 @@ dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
 dnf config-manager --set-enabled ol9_developer
+dnf config-manager --set-enabled ol9_olcne17
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol9_kvm_utils
@@ -204,7 +205,7 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # dnf install -y ovm-template-config*
 
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
-# dnf install -y olcne-selinux olcne-utils olcnectl yq
+dnf install -y olcne-selinux olcne-utils olcnectl yq
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
