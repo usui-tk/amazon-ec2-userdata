@@ -175,6 +175,7 @@ dnf update -y
 
 if [ $(grubby --default-kernel | grep -ie "el9uek") ]; then
 	echo "Linux Kernel Package Name : kernel-uek"
+	# dnf remove -y kernel kernel-core
 else
 	echo "Linux Kernel Package Name : kernel"
 	dnf install -y kernel-uek kernel-uek-devel
