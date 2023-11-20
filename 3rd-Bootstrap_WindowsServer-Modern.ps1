@@ -2150,7 +2150,7 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (PowerShell 7.3)
+# Custom Package Install (PowerShell 7.4)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 # https://github.com/PowerShell/PowerShell
 #
@@ -2165,27 +2165,27 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (PowerShell 7.3)"
+Write-LogSeparator "Package Install System Utility (PowerShell 7.4)"
 
-# Initialize Parameter [# Depends on PowerShell v7.2 version information]
+# Initialize Parameter [# Depends on PowerShell v7.4 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.3.4/PowerShell-7.3.4-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.4.0/PowerShell-7.4.0-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
 if ($WindowsOSVersion -match "^10.0") {
 
-    # Package Download Commnand-Line Shell (PowerShell 7.3)
-    Write-Log "# Package Download Commnand-Line Shell (PowerShell 7.3)"
+    # Package Download Commnand-Line Shell (PowerShell 7.4)
+    Write-Log "# Package Download Commnand-Line Shell (PowerShell 7.4)"
     Get-WebContentToFile -Uri "$PWSH_INSTALLER_URL" -OutFile "$TOOL_DIR\$PWSH_INSTALLER_FILE"
 
-    # Package Install Commnand-Line Shell (PowerShell 7.3)
-    Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.3)"
+    # Package Install Commnand-Line Shell (PowerShell 7.4)
+    Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.4)"
     Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_MicrosoftPowerShellSetup.log")
     Start-Sleep -Seconds 10
 
-    # Package Configure Commnand-Line Shell (PowerShell 7.3)
-    Write-Log "# Package Configure Commnand-Line Shell (PowerShell 7.3)"
+    # Package Configure Commnand-Line Shell (PowerShell 7.4)
+    Write-Log "# Package Configure Commnand-Line Shell (PowerShell 7.4)"
 
     # Install AWSPowerShell.NetCore
     # Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
