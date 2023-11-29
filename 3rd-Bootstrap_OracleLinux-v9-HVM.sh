@@ -205,6 +205,10 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 # dnf install -y ovm-template-config*
 
+# Package Install Oracle Linux Troubleshooting support tools (from Oracle Linux Repository)
+# https://github.com/oracle/oled-tools
+dnf install -y oled-tools
+
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
 dnf install -y olcne-selinux olcne-utils olcnectl yq
 
@@ -213,7 +217,7 @@ dnf install -y olcne-selinux olcne-utils olcnectl yq
 # https://access.redhat.com/solutions/2206511
 #-------------------------------------------------------------------------------
 
-# # Package Install Rocky Linux kernel live-patching tools (from Rocky Linux Repository)
+# # Package Install Oracle Linux kernel live-patching tools (from Oracle Linux Repository)
 # dnf install -y kpatch kpatch-dnf
 
 # rpm -qi kpatch
@@ -241,7 +245,7 @@ dnf install -y olcne-selinux olcne-utils olcnectl yq
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/managing_systems_using_the_rhel_9_web_console/index
 #-------------------------------------------------------------------------------
 
-# Package Install Rocky Linux Web-Based support tools (from Rocky Linux Repository)
+# Package Install Oracle Linux Web-Based support tools (from Oracle Linux Repository)
 dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
@@ -262,7 +266,7 @@ fi
 # Custom Package Installation [Python 3.9]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3.9 Runtime (from Rocky Linux Repository)
+# Package Install Python 3.9 Runtime (from Oracle Linux Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
@@ -291,7 +295,7 @@ dnf --enablerepo="*" --verbose clean all
 # EPEL repository package [dnf command]
 dnf repository-packages "ol9_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
-# Package Install Rocky Linux System Administration Tools (from EPEL Repository)
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="ol9_developer_EPEL" install -y atop collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc moreutils moreutils-parallel ncdu screen stressapptest unicornscan wdiff yamllint
 
 # dnf --enablerepo="ol9_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
@@ -305,13 +309,14 @@ dnf --enablerepo="ol9_developer_EPEL" install -y ec2-hibinit-agent
 
 # # Package Install Oracle Database Utility (from Oracle Linux Repository)
 # # dnf install -y kmod-redhat-oracleasm oracleasm-support ocfs2-tools
-# dnf install -y oracleasm-support ocfs2-tools
-# dnf install -y pcp-oracle-conf
+dnf install -y ocfs2-tools
+dnf install -y pcp-oracle-conf
 
 # # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # # yum install -y ords sqlcl
 
 # # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
+dnf install -y oracle-database-preinstall-19c
 # dnf install -y oracle-database-preinstall-23c
 
 # # Package Install Oracle Instant Client (from Oracle Linux Repository)
@@ -690,7 +695,7 @@ source /etc/profile.d/ec2rl.sh
 # Package Install Ansible (from Oracle Linux Repository)
 dnf install -y ansible-core ansible-pcp ansible-test
 
-# Package Install Rocky Linux System Administration Tools (from EPEL Repository)
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="ol9_developer_EPEL" install -y ansible-collection-community-general
 
 ansible --version
