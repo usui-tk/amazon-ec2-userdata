@@ -211,6 +211,10 @@ dnf install -y redhat-lsb-core
 # Package Install Oracle Linux Cleanup tools (from Oracle Linux Repository)
 # dnf install -y ovm-template-config*
 
+# Package Install Oracle Linux Troubleshooting support tools (from Oracle Linux Repository)
+# https://github.com/oracle/oled-tools
+dnf install -y oled-tools
+
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
 dnf install -y olcne-selinux olcne-utils olcnectl yq
 
