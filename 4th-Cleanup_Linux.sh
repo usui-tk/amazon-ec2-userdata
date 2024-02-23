@@ -312,6 +312,9 @@ fi
 # https://docs.aws.amazon.com/imagebuilder/latest/userguide/security-best-practices.html
 #-------------------------------------------------------------------------------
 
+# [Creation of execution flags]
+touch /perform_cleanup
+
 if [[ ! -f {{workingDirectory}}/perform_cleanup ]]; then
     echo "Skipping cleanup"
     exit 0
