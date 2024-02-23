@@ -112,7 +112,7 @@ find /etc/yum.repos.d/
 
 dnf list *release-el9
 
-dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-instantclient-release-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -139,15 +139,17 @@ dnf config-manager --set-enabled ol9_UEKR7
 dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
+dnf config-manager --set-enabled ol9_oracle_instantclient
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
-dnf config-manager --set-enabled ol9_olcne17
+dnf config-manager --set-enabled ol9_olcne18
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol9_kvm_utils
 dnf config-manager --set-disabled ol9_developer_UEKR7
 dnf config-manager --set-disabled ol9_developer_kvm_utils
 dnf config-manager --set-disabled ol9_distro_builder
+dnf config-manager --set-disabled ol9_olcne17
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -296,9 +298,9 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol9_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol9_developer_EPEL" install -y atop collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc moreutils moreutils-parallel ncdu screen stressapptest unicornscan wdiff yamllint
+dnf --enablerepo="ol9_developer_EPEL" install -y atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
 
-# dnf --enablerepo="ol9_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+# dnf --enablerepo="ol9_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol9_developer_EPEL" install -y ec2-hibinit-agent
@@ -321,7 +323,7 @@ dnf install -y oracle-database-preinstall-19c
 
 # # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # # https://yum.oracle.com/oracle-instant-client.html
-# dnf --disablerepo="*" --enablerepo="ol9_oracle_instantclient21" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+dnf --enablerepo="ol9_oracle_instantclient" install -y oracle-instantclient19.19-basic oracle-instantclient19.19-devel oracle-instantclient19.19-jdbc oracle-instantclient19.19-sqlplus oracle-instantclient19.19-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
