@@ -312,213 +312,247 @@ fi
 # https://docs.aws.amazon.com/imagebuilder/latest/userguide/security-best-practices.html
 #-------------------------------------------------------------------------------
 
-FILES=(
-		# Secure removal of list of users
-		"/etc/sudoers.d/90-cloud-init-users"
+if [[ ! -f {{workingDirectory}}/perform_cleanup ]]; then
+    echo "Skipping cleanup"
+    exit 0
+else
+    sudo rm -f {{workingDirectory}}/perform_cleanup
+fi
 
-		# Secure removal of RSA encrypted SSH host keys.
-		"/etc/ssh/ssh_host_rsa_key"
-		"/etc/ssh/ssh_host_rsa_key.pub"
+function cleanup() {
+    FILES=("$@")
+    for FILE in "${FILES[@]}"; do
+        if [[ -f "$FILE" ]]; then
+            echo "Deleting $FILE";
+            sudo shred -zuf $FILE;
+        fi;
+        if [[ -f $FILE ]]; then
+            echo "Failed to delete '$FILE'. Failing."
+            exit 1
+        fi;
+    done
+};
 
-		# Secure removal of ECDSA encrypted SSH host keys.
-		"/etc/ssh/ssh_host_ecdsa_key"
-		"/etc/ssh/ssh_host_ecdsa_key.pub"
 
-		# Secure removal of ED25519 encrypted SSH host keys.
-		"/etc/ssh/ssh_host_ed25519_key"
-		"/etc/ssh/ssh_host_ed25519_key.pub"
-
-		# Secure removal of "root" user approved SSH keys list.
-		"/root/.ssh/authorized_keys"
-
-		# Secure removal of "ec2-user" user approved SSH keys list.
-		"/home/ec2-user/.ssh/authorized_keys"
-
-		# Secure removal of file which tracks system updates
-		"/etc/.updated"
-		"/var/.updated"
-
-		# Secure removal of file with aliases for mailing lists
-		"/etc/aliases.db"
-
-		# Secure removal of file which contains the hostname of the system
-		"/etc/hostname"
-
-		# Secure removal of files with system-wide locale settings
-		"/etc/locale.conf"
-
-		# Secure removal of cached GPG signatures of yum repositories
-		"/var/cache/yum/x86_64/2/.gpgkeyschecked.yum"
-
-		# Secure removal of audit framework logs
-		"/var/log/audit/audit.log"
-
-		# Secure removal of boot logs
-		"/var/log/boot.log"
-
-		# Secure removal of kernel message logs
-		"/var/log/dmesg"
-
-		# Secure removal of cloud-init logs
-		"/var/log/cloud-init.log"
-
-		# Secure removal of cloud-init's output logs
-		"/var/log/cloud-init-output.log"
-
-		# Secure removal of cron logs
-		"/var/log/cron"
-
-		# Secure removal of aliases file for the Postfix mail transfer agent
-		"/var/lib/misc/postfix.aliasesdb-stamp"
-
-		# Secure removal of master lock for the Postfix mail transfer agent
-		"/var/lib/postfix/master.lock"
-
-		# Secure removal of spool data for the Postfix mail transfer agent
-		"/var/spool/postfix/pid/master.pid"
-
-		# Secure removal of history of Bash commands
-		"/home/ec2-user/.bash_history"
-
+# Clean up for cloud-init files
+CLOUD_INIT_FILES=(
+    "/etc/sudoers.d/90-cloud-init-users"
+    "/etc/locale.conf"
+    "/var/log/cloud-init.log"
+    "/var/log/cloud-init-output.log"
 )
+if [[ -f {{workingDirectory}}/skip_cleanup_cloudinit_files ]]; then
+    echo "Skipping cleanup of cloud init files"
+else
+    echo "Cleaning up cloud init files"
+    cleanup "${CLOUD_INIT_FILES[@]}"
+    if [[ $( sudo find /var/lib/cloud -type f | sudo wc -l ) -gt 0 ]]; then
+        echo "Deleting files within /var/lib/cloud/*"
+        sudo find /var/lib/cloud -type f -exec shred -zuf {} \;
+    fi;
+
+    if [[ $( sudo ls /var/lib/cloud | sudo wc -l ) -gt 0 ]]; then
+        echo "Deleting /var/lib/cloud/*"
+        sudo rm -rf /var/lib/cloud/* || true
+    fi;
+fi;
 
 
-for FILE in "${FILES[@]}"; do
-	if [[ -f $FILE ]]; then
-		echo "Deleting $FILE"
-		shred -zuf $FILE
-	fi
+# Clean up for temporary instance files
+INSTANCE_FILES=(
+    "/etc/.updated"
+    "/etc/aliases.db"
+    "/etc/hostname"
+    "/var/lib/misc/postfix.aliasesdb-stamp"
+    "/var/lib/postfix/master.lock"
+    "/var/spool/postfix/pid/master.pid"
+    "/var/.updated"
+    "/var/cache/yum/x86_64/2/.gpgkeyschecked.yum"
+)
+if [[ -f {{workingDirectory}}/skip_cleanup_instance_files ]]; then
+    echo "Skipping cleanup of instance files"
+else
+    echo "Cleaning up instance files"
+    cleanup "${INSTANCE_FILES[@]}"
+fi;
 
-	if [[ -f $FILE ]]; then
-		echo "Failed to delete '$FILE'. Failing."
-	fi
-done
 
-#-------------------------------------------------------------------------------
+# Clean up for ssh files
+SSH_FILES=(
+    "/etc/ssh/ssh_host_rsa_key"
+    "/etc/ssh/ssh_host_rsa_key.pub"
+    "/etc/ssh/ssh_host_ecdsa_key"
+    "/etc/ssh/ssh_host_ecdsa_key.pub"
+    "/etc/ssh/ssh_host_ed25519_key"
+    "/etc/ssh/ssh_host_ed25519_key.pub"
+    "/root/.ssh/authorized_keys"
+)
+if [[ -f {{workingDirectory}}/skip_cleanup_ssh_files ]]; then
+    echo "Skipping cleanup of ssh files"
+else
+    echo "Cleaning up ssh files"
+    cleanup "${SSH_FILES[@]}"
+    USERS=$(ls /home/)
+    for user in $USERS; do
+        echo Deleting /home/"$user"/.ssh/authorized_keys;
+        sudo find /home/"$user"/.ssh/authorized_keys -type f -exec shred -zuf {} \;
+    done
+    for user in $USERS; do
+        if [[ -f /home/"$user"/.ssh/authorized_keys ]]; then
+            echo Failed to delete /home/"$user"/.ssh/authorized_keys;
+            exit 1
+        fi;
+    done;
+fi;
 
-# Secure removal of system activity reports/logs
-if [[ $(find /var/log/sa/sa* -type f | wc -l) -gt 0 ]]; then
-	echo "Deleting /var/log/sa/sa*"
-	shred -zuf /var/log/sa/sa*
+
+# Clean up for instance log files
+INSTANCE_LOG_FILES=(
+    "/var/log/audit/audit.log"
+    "/var/log/boot.log"
+    "/var/log/dmesg"
+    "/var/log/cron"
+)
+if [[ -f {{workingDirectory}}/skip_cleanup_instance_log_files ]]; then
+    echo "Skipping cleanup of instance log files"
+else
+    echo "Cleaning up instance log files"
+    cleanup "${INSTANCE_LOG_FILES[@]}"
+fi;
+
+# Clean up for TOE files
+if [[ -f {{workingDirectory}}/skip_cleanup_toe_files ]]; then
+    echo "Skipping cleanup of TOE files"
+else
+    echo "Cleaning TOE files"
+    if [[ $( sudo find {{workingDirectory}}/TOE_* -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Deleting files within {{workingDirectory}}/TOE_*"
+        sudo find {{workingDirectory}}/TOE_* -type f -exec shred -zuf {} \;
+    fi
+    if [[ $( sudo find {{workingDirectory}}/TOE_* -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Failed to delete {{workingDirectory}}/TOE_*"
+        exit 1
+    fi
+    if [[ $( sudo find {{workingDirectory}}/TOE_* -type d | sudo wc -l) -gt 0 ]]; then
+        echo "Deleting {{workingDirectory}}/TOE_*"
+        sudo rm -rf {{workingDirectory}}/TOE_*
+    fi
+    if [[ $( sudo find {{workingDirectory}}/TOE_* -type d | sudo wc -l) -gt 0 ]]; then
+        echo "Failed to delete {{workingDirectory}}/TOE_*"
+        exit 1
+    fi
 fi
 
-if [[ $(find /var/log/sa/sa* -type f | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/log/sa/sa*"
-fi
-
-#-------------------------------------------------------------------------------
-
-# Secure removal of SSM logs
-if [[ $(find /var/log/amazon/ssm -type f | wc -l) -gt 0 ]]; then
-	echo "Deleting files within /var/log/amazon/ssm/*"
-	find /var/log/amazon/ssm -type f -exec shred -zuf {} \;
-fi
-
-if [[ $(find /var/log/amazon/ssm -type f | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/log/amazon/ssm"
-fi
-
-
-if [[ -d "/var/log/amazon/ssm" ]]; then
-	echo "Deleting /var/log/amazon/ssm/*"
-	rm -rf /var/log/amazon/ssm
-fi
-
-if [[ -d "/var/log/amazon/ssm" ]]; then
-	echo "Failed to delete /var/log/amazon/ssm"
-fi
-
-#-------------------------------------------------------------------------------
-
-# Secure removal of DHCP client leases that have been acquired
-if [[ $(find /var/lib/dhclient/dhclient*.lease -type f | wc -l) -gt 0 ]]; then
-	echo "Deleting /var/lib/dhclient/dhclient*.lease"
-	shred -zuf /var/lib/dhclient/dhclient*.lease
-fi
-
-if [[ $(find /var/lib/dhclient/dhclient*.lease -type f | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/lib/dhclient/dhclient*.lease"
-fi
-
-#-------------------------------------------------------------------------------
-
-# Secure removal of cloud-init files
-if [[ $(find /var/lib/cloud -type f | wc -l) -gt 0 ]]; then
-	echo "Deleting files within /var/lib/cloud/*"
-	find /var/lib/cloud -type f -exec shred -zuf {} \;
-fi
-
-if [[ $(find /var/lib/cloud -type f | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/lib/cloud"
+# Clean up for ssm log files
+if [[ -f {{workingDirectory}}/skip_cleanup_ssm_log_files ]]; then
+    echo "Skipping cleanup of ssm log files"
+else
+    echo "Cleaning up ssm log files"
+    if [[ $( sudo find /var/log/amazon/ssm -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Deleting files within /var/log/amazon/ssm/*"
+        sudo find /var/log/amazon/ssm -type f -exec shred -zuf {} \;
+    fi
+    if [[ $( sudo find /var/log/amazon/ssm -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Failed to delete /var/log/amazon/ssm"
+        exit 1
+    fi
+    if [[ -d "/var/log/amazon/ssm" ]]; then
+        echo "Deleting /var/log/amazon/ssm/*"
+        sudo rm -rf /var/log/amazon/ssm
+    fi
+    if [[ -d "/var/log/amazon/ssm" ]]; then
+        echo "Failed to delete /var/log/amazon/ssm"
+        exit 1
+    fi
 fi
 
 
-if [[ $(ls /var/lib/cloud | wc -l) -gt 0 ]]; then
-	echo "Deleting /var/lib/cloud/*"
-	rm -rf /var/lib/cloud/*
+if [[ $( sudo find /var/log/sa/sa* -type f | sudo wc -l ) -gt 0 ]]; then
+    echo "Deleting /var/log/sa/sa*"
+    sudo shred -zuf /var/log/sa/sa*
 fi
-if [[ $(ls /var/lib/cloud | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/lib/cloud/*"
-fi
-
-#-------------------------------------------------------------------------------
-
-# Secure removal of temporary files
-if [[ $(find /var/tmp -type f | wc -l) -gt 0 ]]; then
-	echo "Deleting files within /var/tmp/*"
-	find /var/tmp -type f -exec shred -zuf {} \;
+if [[ $( sudo find /var/log/sa/sa* -type f | sudo wc -l ) -gt 0 ]]; then
+    echo "Failed to delete /var/log/sa/sa*"
+    exit 1
 fi
 
-if [[ $(find /var/tmp -type f | wc -l) -gt 0 ]]; then
-	echo "Failed to delete /var/tmp"
+if [[ $( sudo find /var/lib/dhclient/dhclient*.lease -type f | sudo wc -l ) -gt 0 ]]; then
+        echo "Deleting /var/lib/dhclient/dhclient*.lease"
+        sudo shred -zuf /var/lib/dhclient/dhclient*.lease
+fi
+if [[ $( sudo find /var/lib/dhclient/dhclient*.lease -type f | sudo wc -l ) -gt 0 ]]; then
+        echo "Failed to delete /var/lib/dhclient/dhclient*.lease"
+        exit 1
 fi
 
-if [[ $( ls /var/tmp | wc -l ) -gt 0 ]]; then
-	echo "Deleting /var/tmp/*"
-	rm -rf /var/tmp/*
+if [[ $( sudo find /var/tmp -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Deleting files within /var/tmp/*"
+        sudo find /var/tmp -type f -exec shred -zuf {} \;
+fi
+if [[ $( sudo find /var/tmp -type f | sudo wc -l) -gt 0 ]]; then
+        echo "Failed to delete /var/tmp"
+        exit 1
+fi
+if [[ $( sudo ls /var/tmp | sudo wc -l ) -gt 0 ]]; then
+        echo "Deleting /var/tmp/*"
+        sudo rm -rf /var/tmp/*
 fi
 
-#-------------------------------------------------------------------------------
-
-
-
-#-------------------------------------------------------------------------------
 # Shredding is not guaranteed to work well on rolling logs
-# [Security best practices for EC2 Image Builder]
-# https://docs.aws.amazon.com/imagebuilder/latest/userguide/security-best-practices.html
-#-------------------------------------------------------------------------------
-
-# Removal of system logs
-if [[ -f "/var/lib/rsyslog/imjournal.state" ]]; then
-	echo "Deleting /var/lib/rsyslog/imjournal.state"
-	shred -zuf /var/lib/rsyslog/imjournal.state
-	rm -f /var/lib/rsyslog/imjournal.state
-fi
 
 if [[ -f "/var/lib/rsyslog/imjournal.state" ]]; then
-	echo "Failed to delete /var/lib/rsyslog/imjournal.state"
+        echo "Deleting /var/lib/rsyslog/imjournal.state"
+        sudo shred -zuf /var/lib/rsyslog/imjournal.state
+        sudo rm -f /var/lib/rsyslog/imjournal.state
 fi
 
-# Removal of journal logs
-if [[ $(ls /var/log/journal/ | wc -l) -gt 0 ]]; then
-	echo "Deleting /var/log/journal/*"
-	find /var/log/journal/ -type f -exec shred -zuf {} \;
-	rm -rf /var/log/journal/*
+if [[ $( sudo ls /var/log/journal/ | sudo wc -l ) -gt 0 ]]; then
+        echo "Deleting /var/log/journal/*"
+        sudo find /var/log/journal/ -type f -exec shred -zuf {} \;
+        sudo rm -rf /var/log/journal/*
 fi
+
 
 #-------------------------------------------------------------------------------
+# Cleanup process for Bash History
+#-------------------------------------------------------------------------------
 
+# Remove Bash History
+export HISTSIZE=0
+unset HISTFILE
+
+# Remove Bash History (Root User) for All Linux Distribution
+if [ -f /root/.bash_history ]; then
+	echo "[Remove Bash History] : rm -fv /root/.bash_history"
+	shred -zuf "/root/.bash_history"
+fi
+
+# Remove Bash History (for AWS Systems Manager/OS Local User)
+if [ -f /home/ssm-user/.bash_history ]; then
+	echo "[Remove Bash History] : /home/ssm-user/.bash_history"
+	shred -zuf "/home/ssm-user/.bash_history"
+fi
+
+# Remove Bash History (General user)
+if [[ $(find /home -name ".bash_history" | wc -l) -gt 0 ]]; then
+
+	# Bash History File List
+	BashHistoryList=$(find /home -name ".bash_history")
+
+	# Remove Bash History (General user)
+	for BashHistory in $BashHistoryList
+	do
+		echo "[Remove Bash History] :" $BashHistory
+		shred -zuf $BashHistory
+		sleep 1
+	done
+
+fi
 
 
 #-------------------------------------------------------------------------------
 # Cleanup process for Configuration Files, and Log Files
 #-------------------------------------------------------------------------------
-
-# Remove the udev persistent rules file
-rm -rf /etc/udev/rules.d/70-persistent-*
-
-# Remove cloud-init status
-rm -rf /var/lib/cloud/*
 
 # Remove temporary files
 rm -rf /tmp/*
@@ -577,96 +611,6 @@ if [ -f /var/lib/zypp/AnonymousUniqueId ]; then
 	cat /dev/null > "/var/lib/zypp/AnonymousUniqueId"
 
 	cat "/var/lib/zypp/AnonymousUniqueId"
-fi
-
-#-------------------------------------------------------------------------------
-# Cleanup process for SSH Host Key, SSH Public Key, SSH Authorized Keys
-#-------------------------------------------------------------------------------
-
-# Remove SSH Host Key
-if [[ $(find /etc/ssh/ -name "*_key" | wc -l) -gt 0 ]]; then
-
-	# SSH Host Key File List
-	HostKeyList=$(find /etc/ssh/ -name "*_key")
-
-	# Remove SSH Host Key
-	for HostKey in $HostKeyList
-	do
-		echo "[Remove SSH Host Key] :" $HostKey
-		shred -zuf $HostKey
-		sleep 1
-	done
-
-fi
-
-
-# Remove SSH Public Key
-if [[ $(find /etc/ssh/ -name "*_key.pub" | wc -l) -gt 0 ]]; then
-
-	# SSH Public Key File List
-	PublicKeyList=$(find /etc/ssh/ -name "*_key.pub")
-
-	# Remove SSH Public Key
-	for PublicKey in $PublicKeyList
-	do
-		echo "[Remove SSH Public Key] :" $PublicKey
-		shred -zuf $PublicKey
-		sleep 1
-	done
-
-fi
-
-# Remove SSH Authorized Keys (General user)
-if [[ $(find /home -name "authorized_keys" | wc -l) -gt 0 ]]; then
-
-	# SSH Authorized Keys File List
-	SshKeyList=$(find /home -name "authorized_keys")
-
-	# Remove SSH Authorized Keys (General user)
-	for SshKey in $SshKeyList
-	do
-		echo "[Remove SSH Authorized Key] :" $SshKey
-		shred -zuf $SshKey
-		sleep 1
-	done
-
-fi
-
-
-#-------------------------------------------------------------------------------
-# Cleanup process for Bash History
-#-------------------------------------------------------------------------------
-
-# Remove Bash History
-export HISTSIZE=0
-unset HISTFILE
-
-# Remove Bash History (Root User) for All Linux Distribution
-if [ -f /root/.bash_history ]; then
-	echo "[Remove Bash History] : rm -fv /root/.bash_history"
-	shred -zuf "/root/.bash_history"
-fi
-
-# Remove Bash History (for AWS Systems Manager/OS Local User)
-if [ -f /home/ssm-user/.bash_history ]; then
-	echo "[Remove Bash History] : /home/ssm-user/.bash_history"
-	shred -zuf "/home/ssm-user/.bash_history"
-fi
-
-# Remove Bash History (General user)
-if [[ $(find /home -name ".bash_history" | wc -l) -gt 0 ]]; then
-
-	# Bash History File List
-	BashHistoryList=$(find /home -name ".bash_history")
-
-	# Remove Bash History (General user)
-	for BashHistory in $BashHistoryList
-	do
-		echo "[Remove Bash History] :" $BashHistory
-		shred -zuf $BashHistory
-		sleep 1
-	done
-
 fi
 
 
