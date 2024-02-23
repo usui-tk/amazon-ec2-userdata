@@ -319,6 +319,8 @@ fi
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html#instance-type-summary-table
 # - ENA (Elastic Network Adapter)
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
+# - ENA Express (Elastic Network Adapter Express)
+#   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ena-express.html
 # - Elastic Fabric Adapter (EFA)
 #   https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html
 # - Single-root I/O virtualization (SR-IOV)
@@ -340,6 +342,32 @@ if [ -n "$RoleName" ]; then
 		echo "# Get Linux Kernel Module(modinfo ena)"
 		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
 			modinfo ena
+
+			if [ $(command -v nmcli) ]; then
+				# Get Network Interface Information
+				ethtool -S $(nmcli -t -f DEVICE device | grep -v lo)
+				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
+			fi
+		fi
+    fi
+
+    # Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]
+    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSrdSupported" --output text --region ${Region}) == "true" ]]; then
+        echo "EnaSrdSupported is available for $InstanceType"
+
+        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]"
+        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA_Express.txt"
+
+		# Get Linux Kernel Module(modinfo ena)
+		echo "# Get Linux Kernel Module(modinfo ena)"
+		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
+			modinfo ena
+
+			if [ $(command -v nmcli) ]; then
+				# Get Network Interface Information
+				ethtool -S $(nmcli -t -f DEVICE device | grep -v lo)
+				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
+			fi
 		fi
     fi
 
@@ -362,6 +390,12 @@ if [ -n "$RoleName" ]; then
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
 		if [ $(lsmod | awk '{print $1}' | grep -x ixgbevf) ]; then
 			modinfo ixgbevf
+
+			if [ $(command -v nmcli) ]; then
+				# Get Network Interface Information
+				ethtool -S $(nmcli -t -f DEVICE device | grep -v lo)
+				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
+			fi
 		fi
     fi
 fi
