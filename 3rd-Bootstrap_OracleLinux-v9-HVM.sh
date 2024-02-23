@@ -197,7 +197,7 @@ else
 fi
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool policycoreutils psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server strace udica
@@ -209,7 +209,9 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 
 # Package Install Oracle Linux Troubleshooting support tools (from Oracle Linux Repository)
 # https://github.com/oracle/oled-tools
+# https://github.com/oracle/bpftune
 dnf install -y oled-tools
+dnf install -y bpftune
 
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
 dnf install -y olcne-selinux olcne-utils olcnectl yq
@@ -298,12 +300,32 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol9_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol9_developer_EPEL" install -y atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
+dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
 
-# dnf --enablerepo="ol9_developer_EPEL" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+# dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol9_developer_EPEL" install -y ec2-hibinit-agent
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [EPEL - OpenSCAP]
+#-------------------------------------------------------------------------------
+
+# Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
+# dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
+dnf --enablerepo="ol9_developer_EPEL" install -y openscap openscap-engine-sce openscap-python3 openscap-report openscap-scanner openscap-utils scap-security-guide
+
+# Open SCAP report generation
+
+# OpenSCAP_Config="/usr/share/xml/scap/ssg/content/ssg-ol9-ds.xml"
+# ll /usr/share/xml/scap/ssg/content/
+# oscap info ${OpenSCAP_Config}
+# oscap xccdf eval --profile xccdf_org.ssgproject.content_profile_ospp --results ssg-ds.xml --report ssg-ds.html ${OpenSCAP_Config}
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
