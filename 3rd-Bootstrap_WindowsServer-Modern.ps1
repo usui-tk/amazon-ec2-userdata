@@ -2354,7 +2354,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
             'Windows Server 2022' {
                 # [Windows Server 2022]
                 # https://www.intel.com/content/www/us/en/download/706171/intel-network-adapter-driver-for-windows-server-2022.html
-                Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
+                Write-Log "# Package Download Intel Network Driver (Windows Server 2022)"
                 Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772066/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2022.zip"
             }
             default {
