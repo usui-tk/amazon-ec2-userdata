@@ -23,6 +23,8 @@
 #               [Windows_Server-2022-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2022-English-Full-Base-YYYY.MM.DD]
 #
+#      - 10.0 : Windows Server 2025 (TBU)
+#
 ########################################################################################################################
 
 #-------------------------------------------------------------------------------
@@ -86,6 +88,15 @@ function Format-Message {
     $timestamp = Get-Date -Format "yyyy/MM/dd HH:mm:ss.fffffff zzz"
     "$timestamp - $message"
 } # end function Format-Message
+
+
+
+function Extract-Numbers {
+    param([string]$string)
+
+    $cleanString = $string -replace "[^0-9]"
+	return [long]$cleanString
+} # end function Extract-Numbers
 
 
 function Write-Log {
@@ -960,16 +971,32 @@ Start-Transcript -Path "$TRANSCRIPT_LOG" -Append -Force
 
 Set-Location -Path $BASE_DIR | Out-Null
 
-Get-ExecutionPolicy -List
-Set-StrictMode -Version Latest
-
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Change PowerShell SecurityProtocol
+# PowerShell Configuration and Settings Checking
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Change PowerShell SecurityProtocol"
+Write-LogSeparator "PowerShell Configuration and Settings Checking"
+
+# PowerShell Configuration / ExecutionPolicy)
+Get-ExecutionPolicy -List
+
+# PowerShell Configuration / StrictMode)
+Set-StrictMode -Version Latest
+
+# PowerShell Configuration / HistoryCount)
+Get-Variable -Name MaximumHistoryCount
+Set-Variable -Name MaximumHistoryCount -Value 32767
+Get-Variable -Name MaximumHistoryCount
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Change PowerShell security protocols (TLS)
+#-----------------------------------------------------------------------------------------------------------------------
+
+# Log Separator
+Write-LogSeparator "Change PowerShell security protocols (TLS)"
 
 # Initialize Parameter
 Set-Variable -Name PowerShellSystemSupportSecurityProtocol -Scope Script -Value ($Null)
@@ -1028,7 +1055,7 @@ Write-LogSeparator "Test Network Connection"
 # Initialize Parameter
 Set-Variable -Name FlagInternetConnection -Scope Script -Value ($Null)
 
-# Test Connecting to the Internet (Google Public DNS : 8.8.8.8)
+# Connection test to the Internet [IP address] (Google Public DNS : 8.8.8.8)
 #  https://developers.google.com/speed/public-dns/
 $FlagInternetConnectionByIPAddress = Test-Connection -ComputerName 8.8.8.8 -Count 1 -Quiet -ErrorAction SilentlyContinue
 if ($FlagInternetConnectionByIPAddress -eq $TRUE) {
@@ -1038,8 +1065,8 @@ else {
     Write-Log "# [Network Connection] Google Public DNS : 8.8.8.8 - [Connection NG]"
 }
 
-# Test Connecting to the Internet (Google WebSite : www.google.com)
-$FlagInternetConnectionByFQDN = Test-Connection -ComputerName www.google.com -Count 1 -Quiet -ErrorAction SilentlyContinue
+# Connection test to the Internet [DNS record name resolution] (Google WebSite : www.google.com)
+$FlagInternetConnectionByFQDN = Test-Connection -ComputerName "www.google.com" -Count 1 -Quiet -ErrorAction SilentlyContinue
 if ($FlagInternetConnectionByFQDN -eq $TRUE) {
     Write-Log "# [Network Connection] Google WebSite : www.google.com - [Connection OK]"
 }
@@ -2169,7 +2196,7 @@ Write-LogSeparator "Package Install System Utility (PowerShell 7.4)"
 
 # Initialize Parameter [# Depends on PowerShell v7.4 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.4.0/PowerShell-7.4.0-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/PowerShell-7.4.1-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
@@ -2327,6 +2354,43 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # Log Separator
 Write-LogSeparator "Custom Package Installation (Application)"
 
+
+# Custom Package Installation (Microsoft Sysinternals Suite)
+# https://docs.microsoft.com/ja-jp/sysinternals/downloads/sysinternals-suite
+# https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
+if ($FLAG_APP_INSTALL -eq $TRUE) {
+    # Initialize Parameter
+    Set-Variable -Name SYSINTERNALS_SUITE_INSTALLER_URL -Scope Script -Value "https://download.sysinternals.com/files/SysinternalsSuite.zip"
+    Set-Variable -Name SYSINTERNALS_SUITE_INSTALLER_FILE -Scope Script -Value ($SYSINTERNALS_SUITE_INSTALLER_URL.Substring($SYSINTERNALS_SUITE_INSTALLER_URL.LastIndexOf("/") + 1))
+    Set-Variable -Name SYSINTERNALS_SUITE_DIR -Scope Script -Value ($Env:ProgramFiles + "\Sysinternals Suite")
+
+    # Package Download System Administration Utility (Microsoft Sysinternals Suite)
+    Write-Log "# Package Download System Administration Utility (Microsoft Sysinternals Suite)"
+    Get-WebContentToFile -Uri "$SYSINTERNALS_SUITE_INSTALLER_URL" -OutFile "$TOOL_DIR\$SYSINTERNALS_SUITE_INSTALLER_FILE"
+
+    # Create Directory
+    if ( -not (Test-Path $SYSINTERNALS_SUITE_DIR)){
+        New-Directory $SYSINTERNALS_SUITE_DIR | Out-Null
+    }
+
+    # Package Uncompress System Administration Utility (Microsoft Sysinternals Suite)
+    if ($WindowsOSVersion -match "^10.0") {
+        Expand-Archive -Path "$TOOL_DIR\$SYSINTERNALS_SUITE_INSTALLER_FILE" -DestinationPath "$SYSINTERNALS_SUITE_DIR" -Force | Out-Null
+        Start-Sleep -Seconds 5
+    }
+
+    # Add installation folder to Path for easy access if not already present
+    if ((Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path -split ';' -notcontains $SYSINTERNALS_SUITE_DIR) {
+        Write-Host ("Adding {0} with the SysInternalsSuite to the System Path" -f $SYSINTERNALS_SUITE_DIR) -ForegroundColor Green
+        $OldPath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).Path
+        $NewPath = $OldPath + ";$($SYSINTERNALS_SUITE_DIR)"
+        Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $NewPath
+    }
+    else {
+        Write-Host ("The installation folder {0} is already present in the System Path, skipping adding it..." -f $SYSINTERNALS_SUITE_DIR) -ForegroundColor Green
+    }
+}
+
 # Custom Package Installation (Google Chrome 64bit Edition)
 # https://cloud.google.com/chrome-enterprise/browser/download/#chrome-browser-download
 if ($FLAG_APP_INSTALL -eq $TRUE) {
@@ -2366,7 +2430,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on 7-Zip version information]
-    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2201-x64.exe"
+    Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2301-x64.exe"
     Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download File archiver (7-Zip)
@@ -2380,10 +2444,10 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 }
 
 # Custom Package Installation (Tera Term)
-# https://ja.osdn.net/projects/ttssh2/
+# https://teratermproject.github.io/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
     # Initialize Parameter [# Depends on Tera Term version information]
-    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://osdn.mirror.constant.com//ttssh2/74780/teraterm-4.106.exe"
+    Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.1/teraterm-5.1.exe"
     Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
     # Package Download Terminal emulator (Tera Term)
@@ -2402,9 +2466,9 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # if ($FLAG_APP_INSTALL -eq $TRUE) {
 
 #     # Initialize Parameter [# Depends on IrfanView version information]
-#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview456_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview466_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
-#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview456_plugins_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview466_plugins_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     # Package Download Graphic Viewer (IrfanView)
@@ -2425,6 +2489,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 #     Start-Process -FilePath "$TOOL_DIR\$IRFANVIEW_PLUGIN_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/silent") | Out-Null
 #     Start-Sleep -Seconds 5
 # }
+
 
 # [Caution : Finally the installation process]
 # Custom Package Installation (Visual Studio Code 64bit Edition)
@@ -2539,41 +2604,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # Custom Package Download (System Utility - 3rd Party)
 #-----------------------------------------------------------------------------------------------------------------------
 
-# Log Separator
-Write-LogSeparator "Custom Package Download (System Utility - 3rd Party)"
-
-# Package Download System Utility (Sysinternals Suite)
-# https://docs.microsoft.com/ja-jp/sysinternals/downloads/sysinternals-suite
-# https://technet.microsoft.com/ja-jp/sysinternals/bb842062.aspx
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (Sysinternals Suite)"
-    Get-WebContentToFile -Uri 'https://download.sysinternals.com/files/SysinternalsSuite.zip' -OutFile "$TOOL_DIR\SysinternalsSuite.zip"
-}
-
-# Package Download System Utility (System Explorer)
-# http://systemexplorer.net/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    Write-Log "# Package Download System Utility (System Explorer)"
-    Get-WebContentToFile -Uri 'http://systemexplorer.net/download/SystemExplorerSetup.exe' -OutFile "$TOOL_DIR\SystemExplorerSetup.exe"
-}
-
-# Package Download System Utility (WinAuth)
-# https://winauth.github.io/winauth/index.html
-# https://winauth.github.io/winauth/download.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on WinAuth version information]
-    Set-Variable -Name WINAUTH_INSTALLER_URL -Scope Script -Value "https://github.com/winauth/winauth/releases/download/3.5.1/WinAuth-3.5.1.zip"
-    Set-Variable -Name WINAUTH_INSTALLER_FILE -Scope Script -Value ($WINAUTH_INSTALLER_URL.Substring($WINAUTH_INSTALLER_URL.LastIndexOf("/") + 1))
-
-    Write-Log "# Package Download System Utility (WinAuth)"
-    Get-WebContentToFile -Uri "$WINAUTH_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINAUTH_INSTALLER_FILE"
-}
-
 # Package Download System Utility (PuTTY)
 # https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on PuTTY version information]
-    Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.78-installer.msi"
+    Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.80-installer.msi"
     Set-Variable -Name PUTTY_INSTALLER_FILE -Scope Script -Value ($PUTTY_INSTALLER_URL.Substring($PUTTY_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (PuTTY)"
@@ -2584,7 +2619,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinSCP version information]
-    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winscp/WinSCP/5.21.8/WinSCP-5.21.8-Setup.exe"
+    Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.1-Setup.exe"
     Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinSCP)"
@@ -2596,7 +2631,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.wireshark.org/download.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     Write-Log "# Package Download System Utility (Wireshark)"
-    Get-WebContentToFile -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-win64-latest.exe' -OutFile "$TOOL_DIR\Wireshark-win64-latest.exe"
+    Get-WebContentToFile -Uri 'https://1.as.dl.wireshark.org/win64/Wireshark-latest-x64.msi' -OutFile "$TOOL_DIR\Wireshark-latest-x64.msi"
 }
 
 # Package Download System Utility (Fluentd)
@@ -2605,7 +2640,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     if ($WindowsOSVersion -match "^10.0") {
         # Initialize Parameter [# Depends on Fluentd version information]
-        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.4.2-x64.msi"
+        Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.5.2-x64.msi"
         Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
         Write-Log "# Package Download System Utility (Fluentd)"
@@ -2613,12 +2648,12 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     }
 }
 
-# Package Download System Utility (Python 3.11)
+# Package Download System Utility (Python 3.12)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on Python 3.10 version information]
-#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.11.3/python-3.11.3-amd64.exe"
+#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
 #     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (Python 3.11)"
@@ -2629,7 +2664,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # # https://winmerge.org/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on WinMerge version information]
-#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.30/WinMerge-2.16.30-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.38/WinMerge-2.16.38-x64-Setup.exe"
 #     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (WinMerge)"
@@ -2638,14 +2673,14 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (WinMerge - Japanese)
 # https://winmergejp.bitbucket.io/
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-    # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-    Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.osdn.jp/winmerge-jp/78711/WinMerge-2.16.30-jp-1-x64-Setup.exe"
-    Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
+# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+#     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
+#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge-v2-jp/2.16.38%2B-jp-1/WinMerge-2.16.38-jp-1-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
-    Write-Log "# Package Download System Utility (WinMerge - Japanese)"
-    Get-WebContentToFile -Uri "$WINMERGE_JP_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_JP_INSTALLER_FILE"
-}
+#     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
+#     Get-WebContentToFile -Uri "$WINMERGE_JP_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_JP_INSTALLER_FILE"
+# }
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -2686,10 +2721,6 @@ Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2rescue/windows/EC2Rescue_
 # Package Uncompress System Utility (EC2Rescue)
 if ($WindowsOSVersion -match "^10.0") {
     Expand-Archive -Path "$TOOL_DIR\EC2Rescue_latest.zip" -DestinationPath "$TOOL_DIR\EC2Rescue_latest" -Force | Out-Null
-}
-else {
-    # EC2Rescue Support Windows OS Version (None)
-    Write-Log ("# [AWS - EC2Rescue] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
 }
 
 # Log Collect (EC2Rescue)
