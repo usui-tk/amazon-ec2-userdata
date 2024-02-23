@@ -13,6 +13,7 @@
 #  https://github.com/amzn/amzn-drivers
 #  https://github.com/amzn/amzn-drivers/releases
 #  https://github.com/amzn/amzn-drivers/blob/master/kernel/linux/rpm/README-rpm.txt
+#  https://github.com/amzn/amzn-drivers/blob/master/kernel/linux/ena/ENA_Linux_Best_Practices.rst
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
