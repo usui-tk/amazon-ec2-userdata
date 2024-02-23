@@ -313,6 +313,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # [Define working directory]
+cd /tmp
 workingDirectory="/tmp"
 
 # # [Cleaning Execution Process]
