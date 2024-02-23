@@ -156,6 +156,9 @@ dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console udica
 ## dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console setools-console-analyses setroubleshoot-server udica
 
+# Package Install Federal Information Processing Standards (FIPS) Tools (from Amazon Linux Official Repository)
+dnf -y install crypto-policies crypto-policies-scripts
+
 # Package Install Performance Co-Pilot (PCP) Tools (from Amazon Linux Official Repository)
 ## dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
 
