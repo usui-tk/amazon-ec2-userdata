@@ -106,7 +106,7 @@ function Write-Log {
     Format-Message $message | Out-File $log -Append -Force
 
     # Messages to the console host (Uses for Script Testing)
-    Write-Host $message -ForegroundColor Green -ErrorAction SilentlyContinue
+    Format-Message $message | Write-Host -ForegroundColor Green -ErrorAction SilentlyContinue
 
 } # end function Write-Log
 
@@ -1849,9 +1849,11 @@ Write-Log "# Get Install Windows Application List (Before Uninstall)"
 Get-WmiObject -Class Win32_Product | Select-Object Name, Version, Vendor | ConvertTo-Json -Depth 100 | Out-File (Join-Path $LOGS_DIR ("AWS-EC2_WindowsInstallApplicationList_" + $(Get-Date).ToString("yyyyMMdd_hhmmss") + ".txt")) -Append -Force
 
 # Uninstall AWS CloudFormation Helper Scripts
-Write-Log "# Uninstall AWS CloudFormation Helper Scripts"
-(Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall() | Out-Null
-Start-Sleep -Seconds 5
+if (Get-WmiObject -Class Win32_Product  | Where-Object { $_.Name -eq "aws-cfn-bootstrap" }) {
+    Write-Log "# Uninstall AWS CloudFormation Helper Scripts"
+    (Get-WmiObject -Class Win32_Product -Filter "Name='aws-cfn-bootstrap'" -ComputerName . ).Uninstall() | Out-Null
+    Start-Sleep -Seconds 5
+}
 
 # Logging Install Windows Application List (After Uninstall)
 Write-Log "# Get Install Windows Application List (After Uninstall)"
