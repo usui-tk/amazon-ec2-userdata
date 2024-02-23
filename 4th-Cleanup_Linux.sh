@@ -541,7 +541,18 @@ if [ -f /etc/machine-id ]; then
 
 	cat "/etc/machine-id"
 
-	cat /dev/null > "/etc/machine-id"
+	if [ $(command -v systemd-machine-id-setup) ]; then
+
+		# [Reference]
+		# https://access.redhat.com/solutions/3600401
+		systemd-machine-id-setup --print
+		systemd-machine-id-setup
+
+		# [Workaround]
+		cat /dev/null > "/etc/machine-id"
+	else
+		cat /dev/null > "/etc/machine-id"
+	fi
 
 	cat "/etc/machine-id"
 fi
