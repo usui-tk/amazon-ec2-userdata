@@ -724,10 +724,10 @@ function Get-WebContentToFile {
     Try {
         $FileAccessCheckStatus = Invoke-WebRequest -Uri $Uri -UseBasicParsing
         if ($FileAccessCheckStatus.StatusCode -eq 200) {
-            Write-Log "# [Get-WebContentToFile] URL is accessible : " + $Uri
+            Write-Log ("# [Get-WebContentToFile] URL is accessible : " + $Uri)
         }
         else {
-            Write-Log "# [Get-WebContentToFile] (Error) URL is not accessible (file does not exist) : " + $Uri
+            Write-Log ("# [Get-WebContentToFile] (Error) URL is not accessible (file does not exist) : " + $Uri)
         }
     }
     Catch {
