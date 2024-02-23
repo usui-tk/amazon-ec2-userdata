@@ -314,7 +314,6 @@ fi
 
 # [Creation of Execution flags]
 workingDirectory="/tmp"
-touch ${workingDirectory}/perform_cleanup
 
 
 # [Cleaning Execution Process]
