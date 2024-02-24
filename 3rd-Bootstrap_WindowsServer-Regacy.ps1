@@ -107,7 +107,12 @@ function Format-Message {
 function Write-Log {
     param([string]$message, $log = $USERDATA_LOG)
 
+    # Messages to log files
     Format-Message $message | Out-File $log -Append -Force
+
+    # Messages to the console host (Uses for Script Testing)
+    Format-Message $message | Write-Host -ForegroundColor Green -ErrorAction SilentlyContinue
+
 } # end function Write-Log
 
 
@@ -737,14 +742,30 @@ function Get-WebContentToFile {
     Param([String]$Uri, [String]$OutFile)
 
     # Initialize Parameter
+    Set-Variable -Name FileAccessCheckStatus -Scope Script -Value ($Null)
     Set-Variable -Name DownloadStatus -Scope Script -Value ($Null)
 
     # Workaround -> https://github.com/PowerShell/PowerShell/issues/2138
     Set-Variable -Name ProgressPreference -Scope Script -Value "SilentlyContinue"
 
+    #  Test access to Internet resources
+    Try {
+        $FileAccessCheckStatus = Invoke-WebRequest -Uri $Uri -UseBasicParsing
+        if ($FileAccessCheckStatus.StatusCode -eq 200) {
+            Write-Log ("# [Get-WebContentToFile] URL is accessible : " + $Uri)
+        }
+        else {
+            Write-Log ("# [Get-WebContentToFile] (Error) URL is not accessible (file does not exist) : " + $Uri)
+        }
+    }
+    Catch {
+        Write-Log ("# [Get-WebContentToFile] (Error) Request response status is not normally terminated (status code is not 200) : " + $Uri)
+    }
+
+    # Download Internet Resources
     if ( Test-Path $OutFile ) {
-        Write-Log ("# [NOTICE] File already exists : " + $OutFile)
-        Write-Log ("# [NOTICE] Do not download files from : " + $Uri)
+        Write-Log ("# [Get-WebContentToFile] (Notice) File already exists : " + $OutFile)
+        Write-Log ("# [Get-WebContentToFile] (Notice) Do not download files from : " + $Uri)
     }
     else {
 
@@ -754,7 +775,7 @@ function Get-WebContentToFile {
             $DownloadStatus = Measure-Command { (Invoke-WebRequest -Uri $Uri -UseBasicParsing -OutFile $OutFile) }
         }
         Catch {
-            Write-Log ("# [Error] URL is not accessible (file does not exist) : " + $Uri)
+            Write-Log ("# [Get-WebContentToFile] (Error) URL is not accessible (file does not exist) : " + $Uri)
         }
 
         if ( Test-Path $OutFile ) {
