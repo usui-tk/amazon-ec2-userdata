@@ -10,13 +10,13 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 #-------------------------------------------------------------------------------
 
 if [ -f /tmp/userdata-parameter ]; then
-    source /tmp/userdata-parameter
+	source /tmp/userdata-parameter
 fi
 
 if [[ -z "${Language}" || -z "${Timezone}" || -z "${VpcNetwork}" ]]; then
-    # Default Language
+	# Default Language
 	Language="en_US.UTF-8"
-    # Default Timezone
+	# Default Timezone
 	Timezone="Asia/Tokyo"
 	# Default VPC Network
 	VpcNetwork="IPv4"
@@ -61,7 +61,7 @@ apt clean -y -q
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
-    lsb_release -a
+	lsb_release -a
 fi
 
 # Show Linux System Information
@@ -285,8 +285,8 @@ fi
 # Get Amazon EC2 Instance Type List
 if [ -n "$RoleName" ]; then
 	echo "# Get Amazon EC2 Instance Type List"
-    aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`nitro`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_nitro-hypervisor.txt"
-    aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`xen`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_xen-hypervisor.txt"
+	aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`nitro`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_nitro-hypervisor.txt"
+	aws ec2 describe-instance-types --query 'InstanceTypes[?Hypervisor==`xen`]' --output json --region ${Region} > "/var/log/user-data_aws-cli_aws-services_describe-instance-types_xen-hypervisor.txt"
 fi
 
 #------------------------------------------------------------------------------
@@ -296,31 +296,31 @@ fi
 # Get Amazon EC2 Instance Information
 if [ -n "$RoleName" ]; then
 	echo "# Get Amazon EC2 Instance Information"
-    aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instances.txt"
+	aws ec2 describe-instances --instance-ids ${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instances.txt"
 fi
 
 # Get Amazon EC2 Instance Type Information
 if [ -n "$RoleName" ]; then
 	echo "# Get Amazon EC2 Instance Type Information"
-    aws ec2 describe-instance-types --query "InstanceTypes[?InstanceType==\`${InstanceType}\`]" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types.txt"
+	aws ec2 describe-instance-types --query "InstanceTypes[?InstanceType==\`${InstanceType}\`]" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types.txt"
 fi
 
 # Get Amazon EC2 Instance attached EBS Volume Information
 if [ -n "$RoleName" ]; then
 	echo "# Get Amazon EC2 Instance attached EBS Volume Information"
-    aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-volumes.txt"
+	aws ec2 describe-volumes --filters Name=attachment.instance-id,Values=${InstanceId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-volumes.txt"
 fi
 
 # Get Amazon EC2 Instance attached VPC Security Group Information
 if [ -n "$RoleName" ]; then
 	echo "# Get Amazon EC2 Instance attached VPC Security Group Information"
-    aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-security-groups.txt"
+	aws ec2 describe-security-groups --group-ids $(aws ec2 describe-instances --instance-id ${InstanceId} --query "Reservations[].Instances[].SecurityGroups[].GroupId[]" --output text --region ${Region}) --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-security-groups.txt"
 fi
 
 # Get AMI information of this Amazon EC2 instance
 if [ -n "$RoleName" ]; then
 	echo "# Get AMI information of this Amazon EC2 instance"
-    aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-images.txt"
+	aws ec2 describe-images --image-ids ${AmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-images.txt"
 fi
 
 #------------------------------------------------------------------------------
@@ -343,32 +343,12 @@ fi
 if [ -n "$RoleName" ]; then
 	echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute]"
 
-    # Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]
-    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSupport" --output text --region ${Region}) == "required" ]]; then
-        echo "EnaSupport is available for $InstanceType"
+	# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]
+	if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSupport" --output text --region ${Region}) == "required" ]]; then
+		echo "EnaSupport is available for $InstanceType"
 
-        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]"
-        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA.txt"
-
-		# Get Linux Kernel Module(modinfo ena)
-		echo "# Get Linux Kernel Module(modinfo ena)"
-		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
-			modinfo ena
-
-			if [ $(command -v nmcli) ]; then
-				# Get Network Interface Information
-				ethtool -S $(nmcli -t -f DEVICE device | grep -v lo)
-				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
-			fi
-		fi
-    fi
-
-    # Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]
-    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSrdSupported" --output text --region ${Region}) == "true" ]]; then
-        echo "EnaSrdSupported is available for $InstanceType"
-
-        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]"
-        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA_Express.txt"
+		echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA (Elastic Network Adapter)]"
+		aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA.txt"
 
 		# Get Linux Kernel Module(modinfo ena)
 		echo "# Get Linux Kernel Module(modinfo ena)"
@@ -381,22 +361,42 @@ if [ -n "$RoleName" ]; then
 				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
 			fi
 		fi
-    fi
+	fi
 
-    # Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]
-    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EfaSupported" --output text --region ${Region}) == "true" ]]; then
-        echo "EfaSupported is available for $InstanceType"
+	# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]
+	if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EnaSrdSupported" --output text --region ${Region}) == "true" ]]; then
+		echo "EnaSrdSupported is available for $InstanceType"
 
-        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]"
-        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_EFA.txt"
-    fi
+		echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - ENA Express (Elastic Network Adapter Express)]"
+		aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_ENA_Express.txt"
 
-    # Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]
-    if [[ $(aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --query 'SriovNetSupport.Value' --output text --region ${Region}) == "simple" ]]; then
-        echo "SriovNetSupport is available for $InstanceType"
+		# Get Linux Kernel Module(modinfo ena)
+		echo "# Get Linux Kernel Module(modinfo ena)"
+		if [ $(lsmod | awk '{print $1}' | grep -x ena) ]; then
+			modinfo ena
 
-        echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]"
-        aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_SR-IOV.txt"
+			if [ $(command -v nmcli) ]; then
+				# Get Network Interface Information
+				ethtool -S $(nmcli -t -f DEVICE device | grep -v lo)
+				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
+			fi
+		fi
+	fi
+
+	# Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]
+	if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo.EfaSupported" --output text --region ${Region}) == "true" ]]; then
+		echo "EfaSupported is available for $InstanceType"
+
+		echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Elastic Fabric Adapter (EFA)]"
+		aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].NetworkInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_EFA.txt"
+	fi
+
+	# Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]
+	if [[ $(aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --query 'SriovNetSupport.Value' --output text --region ${Region}) == "simple" ]]; then
+		echo "SriovNetSupport is available for $InstanceType"
+
+		echo "# Get EC2 Instance Attribute [Network Interface Performance Attribute - Single-root I/O virtualization (SR-IOV)]"
+		aws ec2 describe-instance-attribute --instance-id $InstanceId --attribute sriovNetSupport --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_NetworkInfo_SR-IOV.txt"
 
 		# Get Linux Kernel Module(modinfo ixgbevf)
 		echo "# Get Linux Kernel Module(modinfo ixgbevf)"
@@ -409,7 +409,7 @@ if [ -n "$RoleName" ]; then
 				ethtool -c $(nmcli -t -f DEVICE device | grep -v lo)
 			fi
 		fi
-    fi
+	fi
 fi
 
 #------------------------------------------------------------------------------
@@ -433,17 +433,17 @@ fi
 if [ -n "$RoleName" ]; then
 	echo "# Get EC2 Instance Attribute [Storage Interface Performance Attribute]"
 
-    # Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]
-    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.EbsOptimizedSupport" --output text --region ${Region}) == "default" ]]; then
-        echo "EbsOptimizedSupport is available for $InstanceType"
+	# Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]
+	if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.EbsOptimizedSupport" --output text --region ${Region}) == "default" ]]; then
+		echo "EbsOptimizedSupport is available for $InstanceType"
 
-        echo "# Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]"
-        aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_EbsInfo.txt"
-    fi
+		echo "# Get EC2 Instance Attribute [Storage Interface Performance Attribute - EBS Optimized Instance]"
+		aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo" --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-ec2-instance_describe-instance-types_EbsInfo.txt"
+	fi
 
-    # Get EC2 Instance Attribute [Storage Interface Performance Attribute - Amazon EBS and NVMe Volumes]
-    if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.NvmeSupport" --output text --region ${Region}) == "required" ]]; then
-        echo "NvmeSupport is available for $InstanceType"
+	# Get EC2 Instance Attribute [Storage Interface Performance Attribute - Amazon EBS and NVMe Volumes]
+	if [[ $(aws ec2 describe-instance-types --filters "Name=instance-type,Values=${InstanceType}" --query "InstanceTypes[].EbsInfo.NvmeSupport" --output text --region ${Region}) == "required" ]]; then
+		echo "NvmeSupport is available for $InstanceType"
 
 		# Get Linux Kernel Module(modinfo nvme)
 		echo "# Get Linux Kernel Module(modinfo nvme)"
@@ -458,7 +458,7 @@ if [ -n "$RoleName" ]; then
 			echo "# Get NVMe Device(nvme list)"
 			nvme list
 		fi
-    fi
+	fi
 
 fi
 
@@ -477,8 +477,8 @@ fi
 
 # Get Linux Block Device Read-Ahead Value(blockdev --report)
 if [ $(command -v blockdev) ]; then
-    echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
-    blockdev --report
+	echo "# Get Linux Block Device Read-Ahead Value(blockdev --report)"
+	blockdev --report
 fi
 
 #------------------------------------------------------------------------------
@@ -488,7 +488,7 @@ fi
 # Get Amazon Machine Image Information
 if [ -n "$RoleName" ]; then
 
-    # Get the latest AMI information of the OS type of this EC2 instance from Public AMI
+	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 	echo "# Get Amazon Machine Image Information"
 
 	NewestAmiInfo=$(aws ec2 describe-images --owner "099720109477" --filter "Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
