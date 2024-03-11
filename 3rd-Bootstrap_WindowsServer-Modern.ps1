@@ -2470,7 +2470,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://teratermproject.github.io/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on Tera Term version information]
-	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.1/teraterm-5.1.exe"
+	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.2/teraterm-5.2.exe"
 	Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download Terminal emulator (Tera Term)
