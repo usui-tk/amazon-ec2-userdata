@@ -137,7 +137,7 @@ dnf config-manager --set-enabled ol8_oracle_instantclient21
 dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_developer_EPEL_modular
-dnf config-manager --set-enabled ol8_olcne17
+dnf config-manager --set-enabled ol8_olcne18
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_UEKR6
@@ -148,6 +148,7 @@ dnf config-manager --set-disabled ol8_olcne13
 dnf config-manager --set-disabled ol8_olcne14
 dnf config-manager --set-disabled ol8_olcne15
 dnf config-manager --set-disabled ol8_olcne16
+dnf config-manager --set-disabled ol8_olcne17
 dnf config-manager --set-disabled ol8_kvm_appstream
 dnf config-manager --set-disabled ol8_developer_olcne
 dnf config-manager --set-disabled ol8_developer_UEKR6
