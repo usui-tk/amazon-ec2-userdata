@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Fedora 38]                 #
+#  Script Evaluated Operating System Information - [Fedora 39]                 #
 #                                                                              #
 ################################################################################
 
