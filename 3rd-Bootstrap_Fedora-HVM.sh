@@ -139,7 +139,7 @@ dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-syst
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
 # Package Install Fedora support tools (from Fedora Official Repository)
-dnf install -y redhat-lsb-core redhat-lsb-submod-security redhat-text-fonts
+dnf install -y redhat-lsb-core redhat-text-fonts
 
 # Package Install EC2 instance optimization tools (from Fedora Official Repository)
 dnf install -y ec2-hibinit-agent ec2-metadata
@@ -164,7 +164,7 @@ dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora Web-Based support tools (from Fedora Official Repository)
-dnf install -y cockpit cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-selinux cockpit-session-recording cockpit-sosreport cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
@@ -814,10 +814,10 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl is-enabled tuned
 fi
 
-# Configure Tuned software (select profile - throughput-performance)
+# Configure Tuned software (select profile - aws)
 tuned-adm list
 
-tuned-adm profile throughput-performance
+tuned-adm profile aws
 tuned-adm active
 
 #-------------------------------------------------------------------------------
