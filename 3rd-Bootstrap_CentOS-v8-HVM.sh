@@ -988,12 +988,11 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl is-enabled tuned
 fi
 
-# Configure Tuned software (select profile - throughput-performance)
+# Configure Tuned software (select profile - aws)
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance
-# tuned-adm profile aws
+tuned-adm profile aws
 tuned-adm active
 
 #-------------------------------------------------------------------------------
