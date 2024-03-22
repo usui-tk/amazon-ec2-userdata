@@ -1193,7 +1193,7 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl is-enabled tuned
 fi
 
-# Configure Tuned software (select profile - throughput-performance)
+# Configure Tuned software (select profile - aws)
 tuned-adm list
 
 tuned-adm active
@@ -1201,9 +1201,9 @@ tuned-adm active
 if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	# tuned-adm profile sap-netweaver
 	# tuned-adm profile sap-hana
-	tuned-adm profile throughput-performance
+	tuned-adm profile aws
 else
-	tuned-adm profile throughput-performance
+	tuned-adm profile aws
 fi
 
 tuned-adm active

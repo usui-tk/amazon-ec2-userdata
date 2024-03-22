@@ -814,7 +814,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from Oracle Linux Repository)
-dnf --disablerepo="*" --enablerepo="ol8_automation, ol8_developer" install -y ansible oci-ansible-collection
+dnf --disablerepo="*" --enablerepo="ol8_automation, ol8_developer" install -y ansible-core oci-ansible-collection
 
 ansible --version
 
@@ -1016,11 +1016,11 @@ if [ $(systemctl is-enabled tuned) = "disabled" ]; then
 	systemctl is-enabled tuned
 fi
 
-# Configure Tuned software (select profile - throughput-performance)
+# Configure Tuned software (select profile - aws)
 tuned-adm list
 
 tuned-adm active
-tuned-adm profile throughput-performance
+tuned-adm profile aws
 tuned-adm active
 
 #-------------------------------------------------------------------------------
