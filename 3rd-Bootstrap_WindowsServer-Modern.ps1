@@ -2442,10 +2442,36 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 	Write-Log "# Package Download Modern Web Browser (Microsoft Edge 64bit Edition)"
 	Get-WebContentToFile -Uri "$EDGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$EDGE_INSTALLER_FILE"
 
-	# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)
-	Write-Log "# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)"
-	Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$EDGE_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_MicrosoftEdgeSetup.log")
-	Start-Sleep -Seconds 5
+	if ($WindowsOSVersion -eq "10.0") {
+		switch ($WindowsOSName) {
+			'Windows Server 2016' {
+				# [Windows Server 2016]
+				# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)
+				Write-Log "# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)"
+				Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$EDGE_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_MicrosoftEdgeSetup.log")
+				Start-Sleep -Seconds 5
+			}
+			'Windows Server 2019' {
+				# [Windows Server 2019]
+				# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)
+				Write-Log "# Package Install Modern Web Browser (Microsoft Edge 64bit Edition)"
+				Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$EDGE_INSTALLER_FILE", "/quiet", "/norestart", "/L*v $LOGS_DIR\APPS_MicrosoftEdgeSetup.log")
+				Start-Sleep -Seconds 5
+			}
+			'Windows Server 2022' {
+				# [Windows Server 2022]
+				Write-Log ("# [Information] [Microsoft Edge 64bit Edition] Skip the installation process because it is installed as standard in the operating system : " + $WindowsOSVersion)
+			}
+			default {
+				# [No Target Server OS]
+				Write-Log ("# [Information] [Microsoft Edge 64bit Edition] No Target Server OS Version : " + $WindowsOSVersion)
+			}
+		}
+	}
+	else {
+		# [No Target Server OS]
+		Write-Log ("# [Information] [Microsoft Edge 64bit Edition] No Target Server OS Version : " + $WindowsOSVersion)
+	}
 }
 
 # Custom Package Installation (7-Zip)
@@ -2663,7 +2689,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -match "^10.0") {
 		# Initialize Parameter [# Depends on Fluentd version information]
-		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.5.2-x64.msi"
+		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.5.3-x64.msi"
 		Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
 		Write-Log "# Package Download System Utility (Fluentd)"
