@@ -2657,7 +2657,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	# Initialize Parameter [# Depends on PuTTY version information]
-	Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.80-installer.msi"
+	Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.81-installer.msi"
 	Set-Variable -Name PUTTY_INSTALLER_FILE -Scope Script -Value ($PUTTY_INSTALLER_URL.Substring($PUTTY_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	Write-Log "# Package Download System Utility (PuTTY)"
@@ -2668,7 +2668,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winscp.net/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	# Initialize Parameter [# Depends on WinSCP version information]
-	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.1-Setup.exe"
+	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.3-Setup.exe"
 	Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	Write-Log "# Package Download System Utility (WinSCP)"
