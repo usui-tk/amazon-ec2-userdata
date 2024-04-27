@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Fedora 39]                 #
+#  Script Evaluated Operating System Information - [Fedora 40]                 #
 #                                                                              #
 ################################################################################
 
@@ -283,20 +283,6 @@ fi
 # https://packages.fedoraproject.org/pkgs/awscli2/awscli2/
 #-------------------------------------------------------------------------------
 
-# Package Uninstall AWS-CLI v1 Tools (from RPM Package)
-if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
-	aws --version
-
-	which aws
-
-	if [ $(rpm -qa | grep awscli) ]; then
-		rpm -qi awscli
-
-		dnf remove -y awscli
-	fi
-
-fi
-
 # Package Install AWS-CLI v2 packages (from Fedora Official Repository)
 dnf install -y awscli2
 
@@ -557,7 +543,7 @@ if [ -n "$RoleName" ]; then
 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 	echo "# Get Amazon Machine Image Information"
 
-	NewestAmiInfo=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=Fedora-Cloud-Base-*-gp2*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
+	NewestAmiInfo=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=Fedora-Cloud-Base-*-gp3*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 fi
