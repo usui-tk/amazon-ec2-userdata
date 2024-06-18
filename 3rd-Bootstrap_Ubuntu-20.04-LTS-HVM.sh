@@ -610,24 +610,24 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-deb
 #-------------------------------------------------------------------------------
 
-curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh" | sh
+curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-fluent-package5-lts.sh | sh
 
-apt show td-agent
+apt show fluentd
 
 systemctl daemon-reload
 
-systemctl restart td-agent
+systemctl restart fluentd
 
-systemctl status -l td-agent
+systemctl status -l fluentd
 
-# Configure fluentd software (Start Daemon td-agent)
-if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-	systemctl enable td-agent
-	systemctl is-enabled td-agent
+# Configure fluentd software (Start Daemon fluentd)
+if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
+	systemctl enable fluentd
+	systemctl is-enabled fluentd
 fi
 
 # # Package bundled ruby gem package information
-/opt/td-agent/bin/fluent-gem list
+/opt/fluent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]

@@ -946,47 +946,24 @@ fi
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
-	################################################################################
-	# [Workaround] TreasureData Repository Configuration for RHEL-SAP Bundle
-	################################################################################
+curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh
 
-	# add GPG key
-	rpm --import "https://packages.treasuredata.com/GPG-KEY-td-agent"
-
-	# add treasure data repository to yum
-	echo "[treasuredata]" > /etc/yum.repos.d/td.repo
-	echo "name=TreasureData" >> /etc/yum.repos.d/td.repo
-	echo "baseurl=http://packages.treasuredata.com/4/redhat/8/\$basearch" >> /etc/yum.repos.d/td.repo
-	echo "gpgcheck=1" >> /etc/yum.repos.d/td.repo
-	echo "gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent" >> /etc/yum.repos.d/td.repo
-
-	# Cleanup repository information
-	dnf --enablerepo="*" --verbose clean all
-
-	# Package Install fluentd (from fluentd Official Repository)
-	dnf --enablerepo="treasuredata" install -y td-agent
-else
-	# Package Install fluentd (Setup with vendor installation scripts)
-	curl -fsSL "https://toolbelt.treasuredata.com/sh/install-redhat-td-agent4.sh" | sh
-fi
-
-rpm -qi td-agent
+rpm -qi fluent-package
 
 systemctl daemon-reload
 
-systemctl restart td-agent
+systemctl restart fluentd
 
-systemctl status -l td-agent
+systemctl status -l fluentd
 
-# Configure fluentd software (Start Daemon td-agent)
-if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-	systemctl enable td-agent
-	systemctl is-enabled td-agent
+# Configure fluentd software (Start Daemon fluentd)
+if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
+	systemctl enable fluentd
+	systemctl is-enabled fluentd
 fi
 
 # Package bundled ruby gem package information
-/opt/td-agent/bin/fluent-gem list
+/opt/fluent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
