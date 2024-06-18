@@ -142,7 +142,7 @@ dnf config-manager --set-enabled ol9_codeready_builder
 dnf config-manager --set-enabled ol9_oracle_instantclient
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
-dnf config-manager --set-enabled ol9_olcne18
+dnf config-manager --set-enabled ol9_olcne19
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol9_kvm_utils
@@ -150,6 +150,7 @@ dnf config-manager --set-disabled ol9_developer_UEKR7
 dnf config-manager --set-disabled ol9_developer_kvm_utils
 dnf config-manager --set-disabled ol9_distro_builder
 dnf config-manager --set-disabled ol9_olcne17
+dnf config-manager --set-disabled ol9_olcne18
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -197,7 +198,7 @@ else
 fi
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool policycoreutils psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool policycoreutils psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools-console setools-console-analyses setroubleshoot-server strace udica
@@ -305,7 +306,7 @@ dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt byobu co
 # dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-dnf --enablerepo="ol9_developer_EPEL" install -y ec2-hibinit-agent
+dnf --enablerepo="ol9_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [EPEL - OpenSCAP]
