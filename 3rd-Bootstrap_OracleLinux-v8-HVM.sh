@@ -333,7 +333,7 @@ dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_reposit
 dnf --enablerepo="ol8_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent
+dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent ec2-instance-connect
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo="ol8_developer_EPEL" install -y jnettop wdiff

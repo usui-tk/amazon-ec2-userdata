@@ -430,7 +430,7 @@ else
 fi
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y ec2-hibinit-agent
+dnf --enablerepo="epel" install -y ec2-hibinit-agent ec2-instance-connect
 
 # Package Install RHEL System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo="epel-playground" install -y jnettop
