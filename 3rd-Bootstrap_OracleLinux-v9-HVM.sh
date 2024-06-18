@@ -837,11 +837,26 @@ fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
+# https://www.terraform.io/docs/cli/install/yum.html
 # http://yum.oracle.com/repo/OracleLinux/OL9/developer/x86_64/index.html
 #-------------------------------------------------------------------------------
 
+# Repository Configuration (HashiCorp Linux Repository)
+dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+# Cleanup repository information
+dnf clean all
+
+# HashiCorp Linux repository package [dnf command]
+dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+dnf --enablerepo="hashicorp" -y install terraform
+
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-dnf --enablerepo="ol9_developer" -y install terraform terraform-provider-oci
+dnf --enablerepo="ol9_developer" -y install terraform-provider-oci
 
 rpm -qi terraform
 
