@@ -159,6 +159,9 @@ dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | 
 dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 
+# Package Install EC2 instance optimization tools (from Fedora Official Repository)
+dnf install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
 #-------------------------------------------------------------------------------
@@ -831,27 +834,29 @@ fi
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Setting SELinux permissive mode
-# getenforce
-# sestatus
+# Setting SELinux
+getenforce
+sestatus
 
-# if [ $(getenforce) = "Enforcing" ]; then
-# 	# Setting SELinux disabled mode
-# 	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
-# 	grubby --info=ALL
-# 	grubby --update-kernel ALL --args selinux=0
-# 	grubby --info=ALL
+if [ $(getenforce) = "Enforcing" ]; then
 
-# 	setenforce 0
-# 	sleep 5
-# 	getenforce
-# fi
+	# Setting SELinux disabled mode
+	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+	# 	grubby --info=ALL
+	# 	grubby --update-kernel ALL --args selinux=0
+	# 	grubby --info=ALL
 
-# Setting SELinux disabled mode
-#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
-# grubby --info=ALL
-# grubby --update-kernel ALL --args selinux=0
-# grubby --info=ALL
+	# Setting SELinux Permissive mode
+	grubby --info=ALL
+	grubby --update-kernel ALL --args enforcing=0
+	grubby --info=ALL
+
+	grep -E 'kernelopts=(\S+\s+)*(selinux=0|enforcing=0)+\b' /boot/grub2/grubenv
+
+	setenforce 0
+	sleep 5
+	getenforce
+fi
 
 # Setting System crypto policy (Default -> FUTURE)
 # update-crypto-policies --show
