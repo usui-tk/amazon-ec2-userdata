@@ -179,9 +179,6 @@ activate-global-python-argcomplete
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
 
-# EPEL repository package [dnf command]
-dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
-
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="ol8_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
@@ -306,9 +303,6 @@ cat /etc/yum.repos.d/hashicorp.repo
 
 # Cleanup repository information
 dnf clean all
-
-# HashiCorp Linux repository package [dnf command]
-dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
 # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
 dnf --enablerepo="hashicorp" -y install terraform
@@ -500,16 +494,21 @@ fi
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Setting SELinux permissive mode
+# Setting SELinux Permissive mode
 getenforce
 sestatus
 
-cat /etc/selinux/config
-sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
-cat /etc/selinux/config
-
 if [ $(getenforce) = "Enforcing" ]; then
+	# Setting SELinux disabled mode
+	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+	grubby --info=ALL
+	grubby --update-kernel ALL --args enforcing=0
+	grubby --info=ALL
+
+	grep -E 'kernelopts=(\S+\s+)*(selinux=0|enforcing=0)+\b' /boot/grub2/grubenv
+
 	setenforce 0
+	sleep 5
 	getenforce
 fi
 
@@ -540,21 +539,9 @@ strings /etc/locale.conf
 source /etc/locale.conf
 
 # Disable IPv6 Kernel Module
-echo "options ipv6 disable=1" >> /etc/modprobe.d/ipv6.conf
-
-# Disable IPv6 Kernel Parameter
-sysctl -a
-
-DisableIPv6Conf="/etc/sysctl.d/90-ipv6-disable.conf"
-
-cat /dev/null > $DisableIPv6Conf
-echo '# Custom sysctl Parameter for ipv6 disable' >> $DisableIPv6Conf
-echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> $DisableIPv6Conf
-echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
-
-sysctl --system
-sysctl -p
-sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
+grubby --info=ALL
+grubby --update-kernel ALL --args ipv6.disable=1
+grubby --info=ALL
 
 
 
@@ -691,8 +678,8 @@ rpm -ql mysql-connector-j
 
 ln -s /usr/share/java/mysql-connector-java.jar /opt/dataiku/dss_data/lib/jdbc/mysql-connector-java.jar
 
-ll /opt/dataiku/dss_data/lib/jdbc/mysql-connector-java.jar
-ll /usr/share/java
+ls -l /opt/dataiku/dss_data/lib/jdbc/mysql-connector-java.jar
+ls -l /usr/share/java
 
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [Database drivers for PostgreSQL Database]
@@ -709,7 +696,7 @@ rpm -ql postgresql-jdbc
 
 ln -s /usr/share/java/postgresql-jdbc/postgresql.jar /opt/dataiku/dss_data/lib/jdbc/postgresql.jar
 
-ll /opt/dataiku/dss_data/lib/jdbc/postgresql.jar
+ls -l /opt/dataiku/dss_data/lib/jdbc/postgresql.jar
 
 #-------------------------------------------------------------------------------
 # Advanced Java runtime configuration
