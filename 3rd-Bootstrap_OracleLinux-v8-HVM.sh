@@ -137,7 +137,7 @@ dnf config-manager --set-enabled ol8_oracle_instantclient21
 dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_developer_EPEL_modular
-dnf config-manager --set-enabled ol8_olcne18
+dnf config-manager --set-enabled ol8_olcne19
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_UEKR6
@@ -149,6 +149,7 @@ dnf config-manager --set-disabled ol8_olcne14
 dnf config-manager --set-disabled ol8_olcne15
 dnf config-manager --set-disabled ol8_olcne16
 dnf config-manager --set-disabled ol8_olcne17
+dnf config-manager --set-disabled ol8_olcne18
 dnf config-manager --set-disabled ol8_kvm_appstream
 dnf config-manager --set-disabled ol8_developer_olcne
 dnf config-manager --set-disabled ol8_developer_UEKR6
@@ -814,7 +815,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Ansible (from Oracle Linux Repository)
-dnf --disablerepo="*" --enablerepo="ol8_automation, ol8_developer" install -y ansible-core oci-ansible-collection
+dnf install -y ansible-core
 
 ansible --version
 
@@ -865,7 +866,7 @@ dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package
 dnf --enablerepo="hashicorp" -y install terraform
 
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-dnf --enablerepo="ol9_developer" -y install terraform-provider-oci
+dnf --enablerepo="ol8_developer" -y install terraform-provider-oci
 
 rpm -qi terraform
 
