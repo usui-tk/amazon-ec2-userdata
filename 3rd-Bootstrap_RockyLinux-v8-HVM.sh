@@ -987,16 +987,27 @@ fi
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Setting SELinux permissive mode
+# Setting SELinux
 getenforce
 sestatus
 
-cat /etc/selinux/config
-sed -i 's/^SELINUX=.*/SELINUX=permissive/' /etc/selinux/config
-cat /etc/selinux/config
-
 if [ $(getenforce) = "Enforcing" ]; then
+	# Setting SELinux disabled mode
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	# grubby --info=ALL
+	# grubby --update-kernel ALL --args selinux=0
+	# grubby --info=ALL
+
+	# Setting SELinux permissive mode
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	grubby --info=ALL
+	grubby --update-kernel ALL --args enforcing=0
+	grubby --info=ALL
+
+	grep -E 'kernelopts=(\S+\s+)*(selinux=0|enforcing=0)+\b' /boot/grub2/grubenv
+
 	setenforce 0
+	sleep 5
 	getenforce
 fi
 
