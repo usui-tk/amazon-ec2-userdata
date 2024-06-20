@@ -638,15 +638,13 @@ firewall-cmd --list-all
 su ec2-user -c "/opt/dataiku/dataiku-dss-12.6.4/installer.sh -d /opt/dataiku/dss_data -p 10000"
 
 /opt/dataiku/dataiku-dss-12.6.4//scripts/install/install-boot.sh "/opt/dataiku/dss_data" ec2-user
-chkconfig --list
+chkconfig --list dataiku
 
 /opt/dataiku/dataiku-dss-12.6.4/scripts/install/installdir-postinstall.sh "/opt/dataiku/dataiku-dss-12.6.4"
 
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss start"
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss status"
-
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss stop"
-su ec2-user -c "/opt/dataiku/dss_data/bin/dss status"
 
 #-------------------------------------------------------------------------------
 # Setting up DSS item exports to PDF or images
