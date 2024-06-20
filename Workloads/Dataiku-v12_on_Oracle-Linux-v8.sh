@@ -494,13 +494,13 @@ fi
 # System Setting
 #-------------------------------------------------------------------------------
 
-# Setting SELinux Permissive mode
+# Setting SELinux
 getenforce
 sestatus
 
 if [ $(getenforce) = "Enforcing" ]; then
 	# Setting SELinux disabled mode
-	#  https://docs.fedoraproject.org/en-US/quick-docs/getting-started-with-selinux/#getting-started-with-selinux-selinux-states-and-modes
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
 	grubby --info=ALL
 	grubby --update-kernel ALL --args enforcing=0
 	grubby --info=ALL
