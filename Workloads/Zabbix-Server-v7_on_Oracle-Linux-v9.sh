@@ -627,11 +627,23 @@ dnf install -y zabbix-web-japanese zabbix-agent2-plugin-postgresql zabbix-selinu
 #-------------------------------------------------------------------------------
 cd /tmp
 
-# [Issue - Not implemented as a scripting process]
-sudo -u postgres createuser --pwprompt zabbix
+ZabbixPassword="$(cat /dev/urandom | tr -dc '[:alnum:]' | head -c 16 | tee -a /tmp/postgresql-zabbix.secrets)"
+
+cat > /tmp/create_zabbix_user.sql << __EOF__
+create user zabbix password 'PASSWORD';
+__EOF__
+
+sed -i "s|PASSWORD|$ZabbixPassword|g" "/tmp/create_zabbix_user.sql"
+
+sudo -u postgres psql --file="/tmp/create_zabbix_user.sql"
 
 sudo -u postgres createdb -O zabbix zabbix
+
 zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix
+
+# Moving the generated password information file
+mv /tmp/postgresql-zabbix.secrets /root/
+mv /tmp/create_zabbix_user.sql /root/
 
 #-------------------------------------------------------------------------------
 # Firewall configuration
@@ -698,7 +710,7 @@ cat /usr/share/zabbix-sql-scripts/postgresql/timescaledb/schema.sql | sudo -u za
 # Zabbix Server configuration
 cat /etc/zabbix/zabbix_server.conf | grep -ie "DBPassword" -ie "StartReportWriters" -ie "WebServiceURL" -ie "AllowUnsupportedDBVersions"
 
-sed -i 's|# DBPassword=|DBPassword=zabbix|g' "/etc/zabbix/zabbix_server.conf"
+sed -i "s|# DBPassword=|DBPassword=$ZabbixPassword|g" "/etc/zabbix/zabbix_server.conf"
 sed -i 's|# StartReportWriters=0|StartReportWriters=1|g' "/etc/zabbix/zabbix_server.conf"
 sed -i 's|# WebServiceURL=|WebServiceURL=http://localhost:10053/report|g' "/etc/zabbix/zabbix_server.conf"
 # [Workaround]
