@@ -622,7 +622,7 @@ dnf install -y zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql
 # dnf install -y zabbix-server-pgsql zabbix-web-pgsql zabbix-apache-conf zabbix-sql-scripts zabbix-agent2 zabbix-web-service
 
 # Zabbix Server (Other)
-dnf install -y zabbix-web-japanese zabbix-agent2-plugin-postgresql zabbix-selinux-policy fping
+dnf install -y zabbix-web-japanese zabbix-agent2-plugin-postgresql zabbix-selinux-policy zabbix-get fping
 
 #-------------------------------------------------------------------------------
 # Create initial database
