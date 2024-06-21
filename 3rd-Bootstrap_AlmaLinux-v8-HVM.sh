@@ -1018,8 +1018,6 @@ if [ $(getenforce) = "Enforcing" ]; then
 	grubby --update-kernel ALL --args enforcing=0
 	grubby --info=ALL
 
-	grep -E 'kernelopts=(\S+\s+)*(selinux=0|enforcing=0)+\b' /boot/grub2/grubenv
-
 	setenforce 0
 	sleep 5
 	getenforce
