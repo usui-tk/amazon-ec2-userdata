@@ -116,7 +116,7 @@ find /etc/yum.repos.d/
 dnf list *release*
 
 dnf install -y centos-stream-release
-# dnf install -y centos-stream-release centos-release-opstools
+# dnf install -y centos-stream-release centos-release-cloud centos-release-opstools
 
 find /etc/yum.repos.d/
 
@@ -251,10 +251,12 @@ activate-global-python-argcomplete
 dnf install -y epel-release epel-next-release
 
 # Disable EPEL yum repository
+dnf repolist all
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel.repo
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/epel-*.repo
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
+dnf repolist all
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -354,14 +356,11 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+# https://gitlab.com/redhat/centos-stream/rpms/awscli2/-/tree/c9s
 #-------------------------------------------------------------------------------
 
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
+# Package Install AWS-CLI v2 packages (from CentOS Community Repository)
+dnf install -y awscli2
 
 aws --version
 
