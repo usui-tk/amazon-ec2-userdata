@@ -536,8 +536,6 @@ nginx -V
 
 nginx -t
 
-systemctl status -l nginx
-
 # Initial setup and automatic startup configuration of the nginx service
 if [ $(systemctl is-enabled nginx) = "disabled" ]; then
 	systemctl enable nginx --now
@@ -590,8 +588,6 @@ dnf install -y postgresql16-server postgresql16-contrib postgresql16-docs
 
 # Initial setup and automatic startup configuration of the postgresql service
 /usr/pgsql-16/bin/postgresql-16-setup initdb
-
-systemctl status -l postgresql-16
 
 if [ $(systemctl is-enabled postgresql-16) = "disabled" ]; then
 	systemctl enable postgresql-16 --now
