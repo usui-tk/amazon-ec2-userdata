@@ -597,7 +597,7 @@ if [ -n "$PublicIpv4" ]; then
 
 	gitlab-ctl show-config | grep -ie "external_url"
 
-	gitlab-ctl status
+	# gitlab-ctl status
 
 	systemctl status -l gitlab-runsvdir
 fi
