@@ -642,7 +642,7 @@ mv /tmp/postgresql-zabbix.secrets /root/
 mv /tmp/create_zabbix_user.sql /root/
 
 #-------------------------------------------------------------------------------
-# Firewall configuration
+# Firewall configuration (Zabbix Server)
 #-------------------------------------------------------------------------------
 firewall-cmd --state
 firewall-cmd --list-all
@@ -650,6 +650,7 @@ firewall-cmd --list-all
 firewall-cmd --permanent --zone=public --add-service=http
 firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --permanent --zone=public --add-port=10051/tcp
+
 firewall-cmd --reload
 
 firewall-cmd --list-all
@@ -677,6 +678,8 @@ cat /etc/yum.repos.d/timescale_timescaledb.repo
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
+
+dnf repolist enabled
 
 dnf makecache -y
 
@@ -728,6 +731,77 @@ systemctl enable zabbix-server zabbix-web-service zabbix-agent2 nginx php-fpm
 #    http://${Public IP}
 # Initial credentials : username = "Admin" / password = "zabbix"
 #-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+# Zabbix Server optional installation [Grafana]
+# https://grafana.com/docs/grafana/latest/setup-grafana/installation/redhat-rhel-fedora/
+#-------------------------------------------------------------------------------
+
+# Repository Configuration
+cat > /etc/yum.repos.d/grafana.repo << __EOF__
+[grafana]
+name=grafana
+baseurl=https://rpm.grafana.com
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://rpm.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+__EOF__
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
+dnf repolist enabled
+
+dnf makecache -y
+
+dnf repository-packages -y "grafana" list
+
+# Install Grafana Enterprise:
+# dnf --showduplicates list grafana-enterprise
+# dnf install -y grafana-enterprise
+
+# Install Grafana OSS:
+dnf --showduplicates list grafana
+dnf install -y grafana
+
+# Initial setup and automatic startup configuration of the grafana-server service
+if [ $(systemctl is-enabled grafana-server) = "disabled" ]; then
+	systemctl enable grafana-server --now
+	systemctl is-enabled grafana-server
+	systemctl status -l grafana-server
+fi
+
+# Firewall configuration (Grafana Server)
+firewall-cmd --state
+firewall-cmd --list-all
+
+firewall-cmd --permanent --zone=public --add-port=3000/tcp
+
+firewall-cmd --reload
+
+firewall-cmd --list-all
+
+
+# Grafana configuration (plugin installation for Zabbix plugin for Grafana)
+# https://grafana.com/docs/plugins/alexanderzobnin-zabbix-app/latest/installation/
+grafana-cli plugins list-remote
+
+grafana-cli plugins install alexanderzobnin-zabbix-app
+
+systemctl restart grafana-server
+systemctl status -l grafana-server
+
+grafana-cli plugins ls
+
+# Grafana configuration (plugin configuration for Zabbix plugin for Grafana)
+# https://grafana.com/docs/plugins/alexanderzobnin-zabbix-app/latest/configuration/
+
+
+
 
 #-------------------------------------------------------------------------------
 # Reboot
