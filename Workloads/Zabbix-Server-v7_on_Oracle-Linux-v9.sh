@@ -801,7 +801,8 @@ grafana-cli plugins ls
 # https://grafana.com/docs/plugins/alexanderzobnin-zabbix-app/latest/configuration/
 
 
-
+# [Workaround]
+# https://github.com/grafana/grafana-zabbix/issues/1834#issuecomment-2156000726
 
 #-------------------------------------------------------------------------------
 # Reboot
