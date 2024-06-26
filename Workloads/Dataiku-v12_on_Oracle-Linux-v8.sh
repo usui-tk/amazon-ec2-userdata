@@ -589,21 +589,7 @@ dnf install -y libXScrnSaver mesa-libgbm
 dnf install -y pandoc texlive-ec texlive-gsftopk texlive-metafont texlive-updmap-map texlive-xcolor
 
 #-------------------------------------------------------------------------------
-# Download and deploy the Dataiku DSS package
-# https://cdn.downloads.dataiku.com/public/dss/
-# https://cdn.downloads.dataiku.com/public/dss/12.6.4/
-#-------------------------------------------------------------------------------
-
-curl -sS "https://cdn.downloads.dataiku.com/public/dss/12.6.4/dataiku-dss-12.6.4.tar.gz" -o "/tmp/dataiku-dss-12.tar.gz"
-
-mkdir -p "/opt/dataiku"
-mkdir -p "/opt/dataiku/dss_data"
-
-tar -xzf "/tmp/dataiku-dss-12.tar.gz" -C "/opt/dataiku"
-chown -Rh ec2-user:ec2-user "/opt/dataiku"
-
-#-------------------------------------------------------------------------------
-# Firewall Settings
+# Firewall configuration (Dataiku DSS)
 #-------------------------------------------------------------------------------
 
 firewall-cmd --state
@@ -615,17 +601,39 @@ firewall-cmd --reload
 firewall-cmd --list-all
 
 #-------------------------------------------------------------------------------
-# Download and deploy the Dataiku DSS package
+# Download the Dataiku DSS package
 # https://cdn.downloads.dataiku.com/public/dss/
-# https://cdn.downloads.dataiku.com/public/dss/12.6.4/
 #-------------------------------------------------------------------------------
 
-su ec2-user -c "/opt/dataiku/dataiku-dss-12.6.4/installer.sh -d /opt/dataiku/dss_data -p 10000"
+# Identification of DSS (v12) version
+curl -s https://cdn.downloads.dataiku.com/public/dss/ | grep -oP '(?<=href=")[^"]+' | grep -E '^([0-9]+\.)+[0-9]+/$' | sort -V | grep -ie "12.*"
 
-/opt/dataiku/dataiku-dss-12.6.4//scripts/install/install-boot.sh "/opt/dataiku/dss_data" ec2-user
+# Latest version of DSS (v12) version
+DssVersion=$(curl -s https://cdn.downloads.dataiku.com/public/dss/ | grep -oP '(?<=href=")[^"]+' | grep -E '^([0-9]+\.)+[0-9]+/$' | sort -V | grep -ie "12.*" | tail -n 1 | sed 's|/$||')
+
+# Debug - DSS (v12) Latest version
+echo "$DssVersion"
+
+# Download and Extract Archive Files
+curl -sS "https://cdn.downloads.dataiku.com/public/dss/$DssVersion/dataiku-dss-$DssVersion.tar.gz" -o "/tmp/dataiku-dss-12.tar.gz"
+
+mkdir -p "/opt/dataiku"
+mkdir -p "/opt/dataiku/dss_data"
+
+tar -xzf "/tmp/dataiku-dss-12.tar.gz" -C "/opt/dataiku"
+chown -Rh ec2-user:ec2-user "/opt/dataiku"
+
+#-------------------------------------------------------------------------------
+# Deploy the Dataiku DSS package
+# https://cdn.downloads.dataiku.com/public/dss/
+#-------------------------------------------------------------------------------
+
+su ec2-user -c "/opt/dataiku/dataiku-dss-$DssVersion/installer.sh -d /opt/dataiku/dss_data -p 10000"
+
+"/opt/dataiku/dataiku-dss-$DssVersion/scripts/install/install-boot.sh" "/opt/dataiku/dss_data" ec2-user
 chkconfig --list dataiku
 
-/opt/dataiku/dataiku-dss-12.6.4/scripts/install/installdir-postinstall.sh "/opt/dataiku/dataiku-dss-12.6.4"
+# "/opt/dataiku/dataiku-dss-$DssVersion/scripts/install/installdir-postinstall.sh" "/opt/dataiku/dataiku-dss-12.6.4"
 
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss start"
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss status"
@@ -636,14 +644,14 @@ su ec2-user -c "/opt/dataiku/dss_data/bin/dss stop"
 # https://doc.dataiku.com/dss/latest/installation/custom/graphics-export.html
 #-------------------------------------------------------------------------------
 
-su ec2-user -c "/opt/dataiku/dss_data//bin/dssadmin install-graphics-export"
+su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin install-graphics-export"
 
 #-------------------------------------------------------------------------------
 # Dataiku and R integration
 # https://doc.dataiku.com/dss/latest/installation/custom/r.html
 #-------------------------------------------------------------------------------
 
-# su ec2-user -c "/opt/dataiku/dss_data//bin/dssadmin install-R-integration"
+# su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin install-R-integration"
 
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [Database drivers for Oracle Database]
@@ -670,7 +678,7 @@ curl -sS "https://download.oracle.com/otn-pub/otn_software/jdbc/234/ojdbc11.jar"
 # https://dev.mysql.com/downloads/connector/j/
 #-------------------------------------------------------------------------------
 
-dnf install --nogpgcheck -y "https://cdn.mysql.com//Downloads/Connector-J/mysql-connector-j-8.4.0-1.el8.noarch.rpm"
+dnf install --nogpgcheck -y "https://cdn.mysql.com/Downloads/Connector-J/mysql-connector-j-8.4.0-1.el8.noarch.rpm"
 
 rpm -ql mysql-connector-j
 
@@ -707,7 +715,7 @@ sed -i 's|backend.xmx = 8g|backend.xmx = 16g|g' "/opt/dataiku/dss_data/install.i
 
 cat "/opt/dataiku/dss_data/install.ini"
 
-su ec2-user -c "/opt/dataiku/dss_data//bin/dssadmin regenerate-config"
+su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin regenerate-config"
 
 #-------------------------------------------------------------------------------
 # Setting up DSS item exports to PDF or images
@@ -715,7 +723,7 @@ su ec2-user -c "/opt/dataiku/dss_data//bin/dssadmin regenerate-config"
 
 cd /tmp
 
-su ec2-user -c "/opt/dataiku/dss_data//bin/dssadmin verify-installation-integrity"
+su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin verify-installation-integrity"
 
 #-------------------------------------------------------------------------------
 # Access to the Dataiku Management Console
