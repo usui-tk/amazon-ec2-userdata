@@ -23,9 +23,9 @@ dnf module list
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-dnf list *release-el9
+dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-instantclient-release-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -40,7 +40,7 @@ dnf config-manager --set-enabled ol9_UEKR7
 dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
-dnf config-manager --set-enabled ol9_oracle_instantclient
+dnf config-manager --set-enabled ol9_oracle_instantclient23
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
 dnf config-manager --set-enabled ol9_olcne19
@@ -52,6 +52,7 @@ dnf config-manager --set-disabled ol9_developer_kvm_utils
 dnf config-manager --set-disabled ol9_distro_builder
 dnf config-manager --set-disabled ol9_olcne17
 dnf config-manager --set-disabled ol9_olcne18
+# dnf config-manager --set-disabled ol9_oracle_instantclient
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
