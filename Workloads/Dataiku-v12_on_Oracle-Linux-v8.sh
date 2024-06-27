@@ -623,6 +623,8 @@ DssVersion=$(curl -s https://cdn.downloads.dataiku.com/public/dss/ | grep -oP '(
 # Debug - DSS (v12) Latest version
 echo "$DssVersion"
 
+curl -s https://cdn.downloads.dataiku.com/public/dss/${DssVersion}/ | grep -oP '(?<=href=")[^"]+' | grep -v '^\./$' | awk -v version="$DssVersion" '{print "https://cdn.downloads.dataiku.com/public/dss/" version "/" $1}'
+
 # Download and Extract Archive Files
 curl -sS "https://cdn.downloads.dataiku.com/public/dss/$DssVersion/dataiku-dss-$DssVersion.tar.gz" -o "/tmp/dataiku-dss-12.tar.gz"
 
@@ -641,8 +643,6 @@ su ec2-user -c "/opt/dataiku/dataiku-dss-$DssVersion/installer.sh -d /opt/dataik
 
 "/opt/dataiku/dataiku-dss-$DssVersion/scripts/install/install-boot.sh" "/opt/dataiku/dss_data" ec2-user
 chkconfig --list dataiku
-
-# "/opt/dataiku/dataiku-dss-$DssVersion/scripts/install/installdir-postinstall.sh" "/opt/dataiku/dataiku-dss-12.6.4"
 
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss start"
 su ec2-user -c "/opt/dataiku/dss_data/bin/dss status"
