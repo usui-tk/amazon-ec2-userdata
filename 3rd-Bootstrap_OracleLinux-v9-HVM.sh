@@ -110,9 +110,9 @@ dnf module list
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-dnf list *release-el9
+dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-instantclient-release-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -139,7 +139,7 @@ dnf config-manager --set-enabled ol9_UEKR7
 dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
-dnf config-manager --set-enabled ol9_oracle_instantclient
+dnf config-manager --set-enabled ol9_oracle_instantclient23
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
 dnf config-manager --set-enabled ol9_olcne19
@@ -151,6 +151,7 @@ dnf config-manager --set-disabled ol9_developer_kvm_utils
 dnf config-manager --set-disabled ol9_distro_builder
 dnf config-manager --set-disabled ol9_olcne17
 dnf config-manager --set-disabled ol9_olcne18
+# dnf config-manager --set-disabled ol9_oracle_instantclient
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -345,7 +346,7 @@ dnf install -y oracle-database-preinstall-23ai
 
 # # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # # https://yum.oracle.com/oracle-instant-client.html
-dnf --enablerepo="ol9_oracle_instantclient" install -y oracle-instantclient19.19-basic oracle-instantclient19.19-devel oracle-instantclient19.19-jdbc oracle-instantclient19.19-sqlplus oracle-instantclient19.19-tools
+dnf --enablerepo="ol9_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
