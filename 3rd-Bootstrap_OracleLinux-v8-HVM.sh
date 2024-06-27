@@ -102,9 +102,9 @@ dnf module list
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-dnf list *release-el8
+dnf list *release*el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-el8 oracle-olcne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-olcne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -133,7 +133,7 @@ dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_automation2
 dnf config-manager --set-enabled ol8_oracle_software
-dnf config-manager --set-enabled ol8_oracle_instantclient21
+dnf config-manager --set-enabled ol8_oracle_instantclient23
 dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_developer_EPEL_modular
@@ -154,6 +154,7 @@ dnf config-manager --set-disabled ol8_kvm_appstream
 dnf config-manager --set-disabled ol8_developer_olcne
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_developer_UEKR7
+# dnf config-manager --set-disabled ol8_oracle_instantclient21
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -358,7 +359,7 @@ dnf install -y oracle-database-preinstall-23c
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-dnf --disablerepo="*" --enablerepo="ol8_oracle_instantclient21" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+dnf --enablerepo="ol8_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
