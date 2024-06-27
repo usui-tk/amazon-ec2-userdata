@@ -537,6 +537,15 @@ nginx -V
 
 nginx -t
 
+# nginx Server configuration
+cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
+
+sed -i '/listen\s*\[::\]:80;/s/^/#/' "/etc/nginx/nginx.conf"
+
+cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
+
+nginx -t
+
 # Initial setup and automatic startup configuration of the nginx service
 if [ $(systemctl is-enabled nginx) = "disabled" ]; then
 	systemctl enable nginx --now
