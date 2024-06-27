@@ -516,6 +516,22 @@ dnf module install nginx:1.24 -y
 dnf module list nginx
 nginx -V
 
+# nginx Server configuration
+cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
+
+sed -i '/listen\s*\[::\]:80;/s/^/#/' "/etc/nginx/nginx.conf"
+
+cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
+
+nginx -t
+
+# Initial setup and automatic startup configuration of the nginx service
+if [ $(systemctl is-enabled nginx) = "disabled" ]; then
+	systemctl enable nginx --now
+	systemctl is-enabled nginx
+	systemctl status -l nginx
+fi
+
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [nodejs and npm]
 #-------------------------------------------------------------------------------
