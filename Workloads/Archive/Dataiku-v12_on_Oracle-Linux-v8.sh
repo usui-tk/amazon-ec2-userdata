@@ -617,6 +617,9 @@ firewall-cmd --list-all
 # https://cdn.downloads.dataiku.com/public/dss/
 #-------------------------------------------------------------------------------
 
+# Change working directory
+cd /tmp
+
 # Identification of DSS (v12) version
 curl -s https://cdn.downloads.dataiku.com/public/dss/ | grep -oP '(?<=href=")[^"]+' | grep -E '^([0-9]+\.)+[0-9]+/$' | sort -V | grep -ie "12.*"
 
