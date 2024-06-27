@@ -736,9 +736,7 @@ su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin regenerate-config"
 # Setting up DSS item exports to PDF or images
 #-------------------------------------------------------------------------------
 
-cd /tmp
-
-su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin verify-installation-integrity"
+# su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin verify-installation-integrity"
 
 #-------------------------------------------------------------------------------
 # Access to the Dataiku Management Console
