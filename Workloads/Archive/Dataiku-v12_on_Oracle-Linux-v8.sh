@@ -604,7 +604,10 @@ dnf install -y pandoc texlive-ec texlive-gsftopk texlive-metafont texlive-updmap
 firewall-cmd --state
 firewall-cmd --list-all
 
-firewall-cmd --add-port=10000/tcp --zone=public --permanent
+firewall-cmd --permanent --zone=public --add-service=http
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --permanent --zone=public --add-port=10000/tcp
+
 firewall-cmd --reload
 
 firewall-cmd --list-all
