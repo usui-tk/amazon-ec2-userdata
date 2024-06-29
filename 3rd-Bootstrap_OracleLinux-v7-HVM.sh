@@ -98,7 +98,7 @@ yum repolist all
 # Package Install Oracle Linux yum repository Files (from Oracle Linux Repository)
 find /etc/yum.repos.d/
 
-yum list *release-el7
+yum list *release*el7
 
 yum install -y oraclelinux-release-el7 oracle-softwarecollection-release-el7 oracle-epel-release-el7 oracle-software-release-el7 oracle-instantclient-release-el7 oracle-olcne-release-el7 oracle-software-release-el7 oraclelinux-developer-release-el7
 yum --enablerepo="*" --verbose clean all
