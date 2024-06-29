@@ -818,32 +818,46 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-by-rpm
 #-------------------------------------------------------------------------------
 
-curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh
+# curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh
 
-rpm -qi fluent-package
+# rpm -qi fluent-package
 
-systemctl daemon-reload
+# systemctl daemon-reload
 
-systemctl restart fluentd
+# systemctl restart fluentd
 
-systemctl status -l fluentd
+# systemctl status -l fluentd
 
-# Configure fluentd software (Start Daemon fluentd)
-if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
-	systemctl enable fluentd
-	systemctl is-enabled fluentd
-fi
+# # Configure fluentd software (Start Daemon fluentd)
+# if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
+# 	systemctl enable fluentd
+# 	systemctl is-enabled fluentd
+# fi
 
-# Package bundled ruby gem package information
-/opt/fluent/bin/fluent-gem list
+# # Package bundled ruby gem package information
+# /opt/fluent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
 # http://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/index.html
 #-------------------------------------------------------------------------------
 
+# Repository Configuration (HashiCorp Linux Repository)
+yum-config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+# Cleanup repository information
+yum clean all
+
+# HashiCorp Linux repository package [yum command]
+yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
+
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+yum --enablerepo="hashicorp" install -y terraform
+
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-yum --enablerepo="ol7_developer" -y install terraform terraform-bundle terraform-provider-oci
+yum --enablerepo="ol7_developer" -y install terraform-provider-oci
 
 rpm -qi terraform
 
