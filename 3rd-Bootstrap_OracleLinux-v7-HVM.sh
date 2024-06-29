@@ -820,6 +820,43 @@ ansible localhost -m setup
 
 # curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh
 
+# ------------------------------------------------------------------------------
+# [workaround - START]
+# ------------------------------------------------------------------------------
+
+# ## add Treasure Data repository to yum
+# cat > /etc/yum.repos.d/fluent-package-lts.repo << __EOF__
+# [fluent-package-lts]
+# name=Fluentd Project
+# baseurl=https://packages.treasuredata.com/lts/5/redhat/RELEASEVER/\$basearch
+# enabled=1
+# gpgcheck=1
+# gpgkey=https://packages.treasuredata.com/GPG-KEY-td-agent
+#        https://packages.treasuredata.com/GPG-KEY-fluent-package
+# __EOF__
+
+# ## Updated release version information.
+# RELEASEVER=$(/usr/bin/python -c 'import yum;yb=yum.YumBase();yb.doConfigSetup(init_plugins=False);print yb.conf.yumvar["releasever"]' | sed -e 's/[^0-9]//g')
+
+# cat /etc/yum.repos.d/fluent-package-lts.repo
+
+# sed -i "s/RELEASEVER/$RELEASEVER/" /etc/yum.repos.d/fluent-package-lts.repo
+
+# cat /etc/yum.repos.d/fluent-package-lts.repo
+
+# # ------------------------------------------------------------------------------
+# # [workaround - END]
+# # ------------------------------------------------------------------------------
+
+# # Cleanup repository information
+# yum --enablerepo="*" --verbose clean all
+
+# # HashiCorp Linux repository package [yum command]
+# yum --disablerepo="*" --enablerepo="fluent-package-lts" list available > /tmp/command-log_yum_repository-package-list_fluent-package-lts.txt
+
+# # Package Install fluentd (from Treasure Data Repository)
+# yum --enablerepo="fluent-package-lts" install -y fluent-package
+
 # rpm -qi fluent-package
 
 # systemctl daemon-reload
@@ -847,13 +884,47 @@ yum-config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp
 
 cat /etc/yum.repos.d/hashicorp.repo
 
+# ------------------------------------------------------------------------------
+# [workaround - START]
+# ------------------------------------------------------------------------------
+
+## add hashicorp repository to yum
+cat > /etc/yum.repos.d/hashicorp.repo << __EOF__
+[hashicorp]
+name=Hashicorp Stable - \$basearch
+baseurl=https://rpm.releases.hashicorp.com/RHEL/RELEASEVER/\$basearch/stable
+enabled=1
+gpgcheck=1
+gpgkey=https://rpm.releases.hashicorp.com/gpg
+
+[hashicorp-test]
+name=Hashicorp Test - \$basearch
+baseurl=https://rpm.releases.hashicorp.com/RHEL/RELEASEVER/\$basearch/test
+enabled=0
+gpgcheck=1
+gpgkey=https://rpm.releases.hashicorp.com/gpg
+__EOF__
+
+## Updated release version information.
+RELEASEVER=$(/usr/bin/python -c 'import yum;yb=yum.YumBase();yb.doConfigSetup(init_plugins=False);print yb.conf.yumvar["releasever"]' | sed -e 's/[^0-9]//g')
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+sed -i "s/RELEASEVER/$RELEASEVER/" /etc/yum.repos.d/td.repo
+
+cat /etc/yum.repos.d/hashicorp.repo
+
+# ------------------------------------------------------------------------------
+# [workaround - END]
+# ------------------------------------------------------------------------------
+
 # Cleanup repository information
-yum clean all
+yum --enablerepo="*" --verbose clean all
 
 # HashiCorp Linux repository package [yum command]
 yum --disablerepo="*" --enablerepo="hashicorp" list available > /tmp/command-log_yum_repository-package-list_hashicorp.txt
 
-# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Repository)
 yum --enablerepo="hashicorp" install -y terraform
 
 # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
