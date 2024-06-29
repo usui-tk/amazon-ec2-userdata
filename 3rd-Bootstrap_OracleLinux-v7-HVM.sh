@@ -910,7 +910,7 @@ RELEASEVER=$(/usr/bin/python -c 'import yum;yb=yum.YumBase();yb.doConfigSetup(in
 
 cat /etc/yum.repos.d/hashicorp.repo
 
-sed -i "s/RELEASEVER/$RELEASEVER/" /etc/yum.repos.d/td.repo
+sed -i "s/RELEASEVER/$RELEASEVER/" /etc/yum.repos.d/hashicorp.repo
 
 cat /etc/yum.repos.d/hashicorp.repo
 
