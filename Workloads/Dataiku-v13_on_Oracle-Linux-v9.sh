@@ -504,7 +504,7 @@ grubby --info=ALL
 # Dataiku dependency installation [Java]
 # https://doc.dataiku.com/dss/latest/installation/custom/initial-install.html#manual-dependency-installation
 #-------------------------------------------------------------------------------
-dnf install -y java-11-openjdk java-11-openjdk-devel java-17-openjdk-headless
+dnf install -y java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless
 
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [nginx]
