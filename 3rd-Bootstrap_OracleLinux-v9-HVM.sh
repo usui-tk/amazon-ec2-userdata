@@ -345,6 +345,7 @@ dnf install -y pcp-oracle-conf
 # [workaround] Repository Configuration
 # ---------------------------------------
 cat > /etc/yum.repos.d/oracle-software-ol9.repo << __EOF__
+[ol9_oracle_software]
 name=Oracle Software for Oracle Linux \$releasever (\$basearch)
 baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL9/oracle/software/\$basearch/
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
@@ -353,7 +354,7 @@ enabled=1
 __EOF__
 # ---------------------------------------
 
-# dnf install -y ords sqlcl
+dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-database-preinstall-23ai
