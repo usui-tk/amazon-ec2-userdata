@@ -41,6 +41,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://docs.oracle.com/en/operating-systems/oracle-linux/6/
 #    http://yum.oracle.com/oracle-linux-6.html
 #    https://github.com/oracle/oracle-linux
+#    https://yum.oracle.com/repowatch/
 #
 #-------------------------------------------------------------------------------
 
