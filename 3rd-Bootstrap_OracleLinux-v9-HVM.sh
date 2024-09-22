@@ -339,22 +339,28 @@ dnf --enablerepo="ol9_developer_EPEL" install -y openscap openscap-engine-sce op
 dnf install -y ocfs2-tools
 dnf install -y pcp-oracle-conf
 
+# Download JDK Development Kit 17 RPM Package
+# curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
+
+# Package Install JDK Development Kit 17 (from Local File)
+# dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
+
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
 
 # [workaround] Repository Configuration
 # ---------------------------------------
-cat > /etc/yum.repos.d/oracle-software-ol9.repo << __EOF__
-[ol9_oracle_software]
-name=Oracle Software for Oracle Linux \$releasever (\$basearch)
-baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL9/oracle/software/\$basearch/
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-gpgcheck=1
-enabled=1
-__EOF__
+# cat > /etc/yum.repos.d/oracle-software-ol9.repo << __EOF__
+# [ol9_oracle_software]
+# name=Oracle Software for Oracle Linux \$releasever (\$basearch)
+# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL9/oracle/software/\$basearch/
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+# gpgcheck=1
+# enabled=1
+# __EOF__
 # ---------------------------------------
 
-dnf install -y ords sqlcl
+# dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-database-preinstall-23ai
