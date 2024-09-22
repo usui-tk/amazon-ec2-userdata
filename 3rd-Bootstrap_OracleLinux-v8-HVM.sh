@@ -350,8 +350,14 @@ dnf --enablerepo="ol8_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-ag
 dnf install -y oracleasm-support ocfs2-tools
 dnf install -y pcp-oracle-conf
 
+# Download JDK Development Kit 17 RPM Package
+# curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
+
+# Package Install JDK Development Kit 17 (from Local File)
+# dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
+
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
-dnf install -y ords sqlcl
+# dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-database-preinstall-19c
