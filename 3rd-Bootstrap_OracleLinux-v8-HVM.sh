@@ -350,7 +350,7 @@ dnf install -y oracleasm-support ocfs2-tools
 dnf install -y pcp-oracle-conf
 
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
-# yum install -y ords sqlcl
+# dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-database-preinstall-19c
