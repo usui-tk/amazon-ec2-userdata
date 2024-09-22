@@ -25,7 +25,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-olcne-release-el9.x86_64 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -44,6 +44,7 @@ dnf config-manager --set-enabled ol9_oracle_instantclient23
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
 dnf config-manager --set-enabled ol9_olcne19
+dnf config-manager --set-enabled ol9_ocne
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol9_kvm_utils
