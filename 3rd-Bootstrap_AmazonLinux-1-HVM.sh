@@ -193,6 +193,9 @@ fi
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
+# [Linux Support Updates for AWS CLI v2]
+# https://aws.amazon.com/jp/blogs/developer/linux-support-updates-for-aws-cli-v2/
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 
 # Package Uninstall AWS-CLI v1 Tools (from RPM Package)
@@ -210,7 +213,7 @@ if [ $(compgen -ac | sort | uniq | grep -x aws) ]; then
 fi
 
 # Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.17.51.zip" -o "/tmp/awscliv2.zip"
 unzip -oq "/tmp/awscliv2.zip" -d /tmp/
 
 # Package Install AWS-CLI v2 Tools (from Bundle Installer)
