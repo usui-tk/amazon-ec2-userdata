@@ -104,7 +104,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-olcne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
@@ -138,6 +138,7 @@ dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_developer_EPEL_modular
 dnf config-manager --set-enabled ol8_olcne19
+dnf config-manager --set-enabled ol8_ocne
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_UEKR6
@@ -335,7 +336,7 @@ dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_reposit
 dnf --enablerepo="ol8_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL" install -y ec2-hibinit-agent ec2-instance-connect
+dnf --enablerepo="ol8_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
 
 # Package Install Oracle Linux System Administration Tools (from EPEL-Playground Repository)
 # dnf --enablerepo="ol8_developer_EPEL" install -y jnettop wdiff
@@ -350,7 +351,7 @@ dnf install -y oracleasm-support ocfs2-tools
 dnf install -y pcp-oracle-conf
 
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
-# dnf install -y ords sqlcl
+dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-database-preinstall-19c
