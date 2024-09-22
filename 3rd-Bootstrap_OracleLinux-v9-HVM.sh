@@ -334,20 +334,32 @@ dnf --enablerepo="ol9_developer_EPEL" install -y openscap openscap-engine-sce op
 # Custom Package Installation [Oracle Software Product]
 #-------------------------------------------------------------------------------
 
-# # Package Install Oracle Database Utility (from Oracle Linux Repository)
-# # dnf install -y kmod-redhat-oracleasm oracleasm-support ocfs2-tools
+# Package Install Oracle Database Utility (from Oracle Linux Repository)
+# dnf install -y kmod-redhat-oracleasm oracleasm-support ocfs2-tools
 dnf install -y ocfs2-tools
 dnf install -y pcp-oracle-conf
 
-# # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
-# # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
-# # dnf install -y ords sqlcl
+# Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
+# https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
 
-# # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
+# [workaround] Repository Configuration
+# ---------------------------------------
+cat > /etc/yum.repos.d/oracle-software-ol9.repo << __EOF__
+name=Oracle Software for Oracle Linux \$releasever (\$basearch)
+baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL9/oracle/software/\$basearch/
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+gpgcheck=1
+enabled=1
+__EOF__
+# ---------------------------------------
+
+# dnf install -y ords sqlcl
+
+# Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-database-preinstall-23ai
 
-# # Package Install Oracle Instant Client (from Oracle Linux Repository)
-# # https://yum.oracle.com/oracle-instant-client.html
+# Package Install Oracle Instant Client (from Oracle Linux Repository)
+# https://yum.oracle.com/oracle-instant-client.html
 dnf --enablerepo="ol9_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
