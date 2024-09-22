@@ -348,6 +348,7 @@ dnf install -y pcp-oracle-conf
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
 
+# ---------------------------------------
 # [workaround] Repository Configuration
 # ---------------------------------------
 # cat > /etc/yum.repos.d/oracle-software-ol9.repo << __EOF__
