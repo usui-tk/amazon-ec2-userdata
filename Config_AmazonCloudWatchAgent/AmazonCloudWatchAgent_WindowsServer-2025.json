@@ -1,0 +1,127 @@
+{
+	"logs": {
+		"logs_collected": {
+			"files": {
+				"collect_list": [
+					{
+						"file_path": "C:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-agent.log",
+						"log_group_name": "/aws/ec2/windows-server-2025/awslog-ssm-agent",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
+					},
+					{
+						"file_path": "C:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
+						"log_group_name": "/aws/ec2/windows-server-2025/awslog-cloudwatch-agent",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
+					}
+				]
+			},
+			"windows_events": {
+				"collect_list": [
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "System",
+						"log_group_name": "/aws/ec2/windows-server-2025/WindowsEventLog-System",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
+					},
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "Application",
+						"log_group_name": "/aws/ec2/windows-server-2025/WindowsEventLog-Application",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
+					},
+					{
+						"event_format": "xml",
+						"event_levels": [
+							"VERBOSE",
+							"INFORMATION",
+							"WARNING",
+							"ERROR",
+							"CRITICAL"
+						],
+						"event_name": "Security",
+						"log_group_name": "/aws/ec2/windows-server-2025/WindowsEventLog-Security",
+						"log_stream_name": "{instance_id}",
+						"retention_in_days": 14
+					}
+				]
+			}
+		}
+	},
+	"metrics": {
+		"aggregation_dimensions": [
+			[
+				"InstanceId"
+			]
+		],
+		"append_dimensions": {
+			"AutoScalingGroupName": "${aws:AutoScalingGroupName}",
+			"ImageId": "${aws:ImageId}",
+			"InstanceId": "${aws:InstanceId}",
+			"InstanceType": "${aws:InstanceType}"
+		},
+		"metrics_collected": {
+			"LogicalDisk": {
+				"measurement": [
+					"% Free Space"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"Memory": {
+				"measurement": [
+					"% Committed Bytes In Use"
+				],
+				"metrics_collection_interval": 10
+			},
+			"Paging File": {
+				"measurement": [
+					"% Usage"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"PhysicalDisk": {
+				"measurement": [
+					"% Disk Time"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			},
+			"Processor": {
+				"measurement": [
+					"% User Time",
+					"% Idle Time",
+					"% Interrupt Time"
+				],
+				"metrics_collection_interval": 10,
+				"resources": [
+					"*"
+				]
+			}
+		}
+	}
+}
