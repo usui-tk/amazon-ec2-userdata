@@ -92,15 +92,6 @@ function Format-Message {
 } # end function Format-Message
 
 
-
-function Extract-Numbers {
-	param([string]$string)
-
-	$cleanString = $string -replace "[^0-9]"
-	return [long]$cleanString
-} # end function Extract-Numbers
-
-
 function Write-Log {
 	param([string]$message, $log = $USERDATA_LOG)
 
