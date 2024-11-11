@@ -2386,14 +2386,18 @@ if ($WindowsOSVersion -eq "10.0") {
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Custom Package Install (SQL Server Management Studio)
-# https://docs.microsoft.com/ja-jp/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-2017
+# https://learn.microsoft.com/en-us/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver16
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
 Write-LogSeparator "Package Install Database Administration Tool (SQL Server Management Studio)"
 
-# Initialize Parameter
-Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://go.microsoft.com/fwlink/?linkid=870039"
+# Initialize Parameter (for English Edition)
+# Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://aka.ms/ssmsfullsetup?clcid=0x409"
+# Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "SSMS-Setup-ENU.exe"
+
+# Initialize Parameter (for Japanese Edition)
+Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://aka.ms/ssmsfullsetup?clcid=0x411"
 Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "SSMS-Setup-JPN.exe"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
@@ -2420,24 +2424,25 @@ if ($WindowsOSVersion -match "^10.0") {
 Write-LogSeparator "Custom Package Download (Storage & Network Driver)"
 
 # Package Download Amazon Windows Paravirtual Drivers
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/xen-drivers-overview.html
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/xen-drivers-overview.html
 Write-Log "# Package Download Amazon Windows Paravirtual Drivers"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/AWSPV/Latest/AWSPVDriver.zip' -OutFile "$TOOL_DIR\AWSPVDriver.zip"
 
 # Package Download AWS NVMe Drivers
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/aws-nvme-drivers.html
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/aws-nvme-drivers.html
 Write-Log "# Package Download AWS NVMe Drivers"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/NVMe/Latest/AWSNVMe.zip' -OutFile "$TOOL_DIR\AWSNVMe.zip"
 
 # Package Download AWS ebsnvme-id command
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/nvme-ebs-volumes.html
+# https://docs.aws.amazon.com/ebs/latest/userguide/identify-nvme-ebs-device.html
 Write-Log "# Package Download AWS ebsnvme-id command"
 Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/EBSNVMeID/Latest/ebsnvme-id.zip' -OutFile "$TOOL_DIR\ebsnvme-id.zip"
 
 # Package Download Amazon Elastic Network Adapter Driver
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/enhanced-networking-ena.html
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ena-adapter-driver-install-upgrade-win.html
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
-Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-downloads/ENA/Latest/AwsEnaNetworkDriver.zip' -OutFile "$TOOL_DIR\AwsEnaNetworkDriver.zip"
+Get-WebContentToFile -Uri 'https://ec2-windows-drivers-downloads.s3.amazonaws.com/ENA/Latest/AwsEnaNetworkDriver.zip' -OutFile "$TOOL_DIR\AwsEnaNetworkDriver.zip"
 
 # Package Download Intel Network Driver
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
