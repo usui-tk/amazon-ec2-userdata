@@ -35,6 +35,10 @@
 #               [Windows_Server-2022-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2022-English-Full-Base-YYYY.MM.DD]
 #
+#      - 10.0 : Windows Server 2025 (Microsoft Windows Server 2025 [Datacenter Edition])
+#               [Windows_Server-2025-Japanese-Full-Base-YYYY.MM.DD]
+#               [Windows_Server-2025-English-Full-Base-YYYY.MM.DD]
+#
 ########################################################################################################################
 
 
@@ -159,6 +163,14 @@ elseif ($OSversion -match "^10.0.*") {
 		'20348' {
 			# Log Separator
 			Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2022"
+			Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL_MODERN))
+			Invoke-WebRequest -Uri $BOOTSTRAP_URL_MODERN -UseBasicParsing -OutFile $BOOTSTRAP_SCRIPT
+			Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
+			powershell.exe -ExecutionPolicy Bypass "$TEMP_DIR\$BOOTSTRAP_SCRIPT" -SkipNetworkProfileCheck
+		}
+		'26100' {
+			# Log Separator
+			Write-LogSeparator "# [Bootstrap Script] : Microsoft Windows Server 2025"
 			Write-Log ("# [Bootstrap Script] : " + ($BOOTSTRAP_URL_MODERN))
 			Invoke-WebRequest -Uri $BOOTSTRAP_URL_MODERN -UseBasicParsing -OutFile $BOOTSTRAP_SCRIPT
 			Write-Log "# Script Execution 2nd-Decision Script [COMPLETE] : $ScriptFullPath"
