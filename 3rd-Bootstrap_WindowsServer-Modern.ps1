@@ -377,7 +377,11 @@ function Get-EbsVolumesMappingInformation {
 	# Test Cmdlet
 	if (Get-Command -CommandType Cmdlet | Where-Object { $_.Name -eq "Get-EC2InstanceMetadata" }) {
 		Try {
-			Get-EC2InstanceMetadata -ListCategory
+			# Get-EC2InstanceMetadata -ListCategory
+
+			$EC2InstanceMetadataInstanceId = Get-EC2InstanceMetadata -Category InstanceId -ErrorAction SilentlyContinue
+			# Write the information to the Log Files
+			Write-Log "# [AWS - EC2] Instance ID : $EC2InstanceMetadataInstanceId"
 		}
 		Catch {
 			Write-Host "Could not access the instance Metadata using AWS Get-EC2Instance CMDLet. Verify that you provided your access keys or assigned an IAM role with adequate permissions." -ForegroundColor Yellow
@@ -884,14 +888,14 @@ function Get-Ec2BootstrapProgram {
 	Write-Log "# [Windows - OS Settings] Checking the existence of the sysprep file"
 
 	if (Test-Path $EC2Launchv2SysprepFile) {
-		Set-Variable -Name SysprepFile -Value $EC2Launchv2SysprepFile
+		Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2Launchv2SysprepFile
 		Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch v2] : " + $SysprepFile)
 		if ($WindowsOSVersion -match "^10.*") {
 			Get-Ec2LaunchV2Version
 		}
 	}
 	elseif (Test-Path $EC2LaunchSysprepFile) {
-		Set-Variable -Name SysprepFile -Value $EC2LaunchSysprepFile
+		Set-Variable -Name SysprepFile -Option Constant -Scope Script -Value $EC2LaunchSysprepFile
 		Write-Log ("# [Windows - OS Settings] Found sysprep file [EC2Launch] : " + $SysprepFile)
 		if ($WindowsOSVersion -match "^10.*") {
 			Get-Ec2LaunchVersion
@@ -1465,6 +1469,7 @@ Write-Log "# [Windows - OS Settings] Change Windows Folder Option Policy (Before
 Set-Variable -Name HKLM_FolderOptionRegistry -Option Constant -Scope Local -Value "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 Set-Variable -Name HKCU_FolderOptionRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
 
+# HKLM (HKEY_LOCAL_MACHINE)
 if (Test-Path -Path $HKLM_FolderOptionRegistry) {
 	# [Check] Show hidden files, folders, or drives
 	if ((Get-Item -Path $HKLM_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
@@ -1497,12 +1502,14 @@ if (Test-Path -Path $HKLM_FolderOptionRegistry) {
 	}
 }
 
+# HKCU (HKEY_CURRENT_USER)
 if ( -Not (Test-Path -Path $HKCU_FolderOptionRegistry ) ) {
 	Write-Log ("# New-Item - " + $HKCU_FolderOptionRegistry)
 	New-Item -Path $HKCU_FolderOptionRegistry -Force | Out-Null
 	Start-Sleep -Seconds 5
 }
 
+# HKCU (HKEY_CURRENT_USER)
 if (Test-Path -Path $HKCU_FolderOptionRegistry) {
 	# [Check] Show hidden files, folders, or drives
 	if ((Get-Item -Path $HKCU_FolderOptionRegistry).GetValueNames() -contains 'Hidden') {
@@ -1545,6 +1552,7 @@ Set-Variable -Name HKLM_DesktopIconRegistrySetting -Option Constant -Scope Local
 Set-Variable -Name HKCU_DesktopIconRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons"
 Set-Variable -Name HKCU_DesktopIconRegistrySetting -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\HideDesktopIcons\NewStartPanel"
 
+# HKLM (HKEY_LOCAL_MACHINE)
 if (Test-Path -Path $HKLM_DesktopIconRegistrySetting) {
 	#[CLSID] : My Computer
 	if ((Get-Item -Path $HKLM_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
@@ -1597,6 +1605,7 @@ if (Test-Path -Path $HKLM_DesktopIconRegistrySetting) {
 	}
 }
 
+# HKCU (HKEY_CURRENT_USER)
 if ( -Not (Test-Path -Path $HKCU_DesktopIconRegistry ) ) {
 	Write-Log ("# New-Item - " + $HKCU_DesktopIconRegistry)
 	New-Item -Path $HKCU_DesktopIconRegistry -Force | Out-Null
@@ -1607,6 +1616,7 @@ if ( -Not (Test-Path -Path $HKCU_DesktopIconRegistry ) ) {
 	Start-Sleep -Seconds 5
 }
 
+# HKCU (HKEY_CURRENT_USER)
 if (Test-Path -Path $HKCU_DesktopIconRegistrySetting) {
 	#[CLSID] : My Computer
 	if ((Get-Item -Path $HKCU_DesktopIconRegistrySetting).GetValueNames() -contains '{20D04FE0-3AEA-1069-A2D8-08002B30309D}') {
@@ -1660,6 +1670,65 @@ if (Test-Path -Path $HKCU_DesktopIconRegistrySetting) {
 }
 
 Write-Log "# [Windows - OS Settings] Change Display Desktop Icon Policy (After)"
+
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Windows Server OS Configuration [Left-aligned in the taskbar Setting]
+#-----------------------------------------------------------------------------------------------------------------------
+
+if ($WindowsOSVersion -eq "10.0") {
+	switch ($WindowsOSName) {
+		'Windows Server 2025' {
+			# [Windows Server 2025]
+			Write-Log ("# [Information] [Left-aligned in the taskbar Setting] Operating system to be configured : " + $WindowsOSVersion)
+
+			# Log Separator
+			Write-LogSeparator "Windows Server OS Configuration [Left-aligned in the taskbar Setting]"
+
+			# Change Task Bar Option Policy
+			Write-Log "# [Windows - OS Settings] Change Task Bar Option Policy (Before)"
+
+			Set-Variable -Name HKLM_TaskbarAlRegistry -Option Constant -Scope Local -Value "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+			Set-Variable -Name HKCU_TaskbarAlRegistry -Option Constant -Scope Local -Value "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced"
+
+			# HKLM (HKEY_LOCAL_MACHINE)
+			if (Test-Path -Path $HKLM_TaskbarAlRegistry) {
+				if ((Get-Item -Path $HKLM_TaskbarAlRegistry).GetValueNames() -contains 'TaskbarAl') {
+					Set-ItemProperty -Path $HKLM_TaskbarAlRegistry -Name 'TaskbarAl' -Value '0' -Force | Out-Null
+					Write-Log ("# Set-ItemProperty - " + $HKLM_TaskbarAlRegistry + "\TaskbarAl")
+				}
+				else {
+					New-ItemProperty -Path $HKLM_TaskbarAlRegistry -Name 'TaskbarAl' -Value '0' -PropertyType "DWord" -Force | Out-Null
+					Write-Log ("# New-ItemProperty - " + $HKLM_TaskbarAlRegistry + "\TaskbarAl")
+				}
+			}
+
+			# HKCU (HKEY_CURRENT_USER)
+			if ( -Not (Test-Path -Path $HKCU_TaskbarAlRegistry ) ) {
+				Write-Log ("# New-Item - " + $HKCU_TaskbarAlRegistry)
+				New-Item -Path $HKCU_TaskbarAlRegistry -Force | Out-Null
+				Start-Sleep -Seconds 5
+			}
+
+			# HKCU (HKEY_CURRENT_USER)
+			if (Test-Path -Path $HKCU_TaskbarAlRegistry) {
+				if ((Get-Item -Path $HKCU_TaskbarAlRegistry).GetValueNames() -contains 'TaskbarAl') {
+					Set-ItemProperty -Path $HKCU_TaskbarAlRegistry -Name 'TaskbarAl' -Value '0' -Force | Out-Null
+					Write-Log ("# Set-ItemProperty - " + $HKCU_TaskbarAlRegistry + "\TaskbarAl")
+				}
+				else {
+					New-ItemProperty -Path $HKCU_TaskbarAlRegistry -Name 'TaskbarAl' -Value '0' -PropertyType "DWord" -Force | Out-Null
+					Write-Log ("# New-ItemProperty - " + $HKCU_TaskbarAlRegistry + "\TaskbarAl")
+				}
+			}
+			Write-Log "# [Windows - OS Settings] Change Task Bar Option Policy (After)"
+		}
+		default {
+			# [No Target Server OS]
+			Write-Log ("# [Information] [Left-aligned in the taskbar Setting] No Target Server OS Version : " + $WindowsOSVersion)
+		}
+	}
+}
 
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -1919,6 +1988,24 @@ if ($Region) {
 else {
 	Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/windows_amd64/AmazonSSMAgentSetup.exe' -OutFile "$TOOL_DIR\AmazonSSMAgentSetup.exe"
 }
+
+
+# [Workaround]
+# https://github.com/aws/amazon-ssm-agent/issues/597
+
+# Check Windows OS Version
+# if ($WindowsOSVersion -eq "10.0") {
+# 	switch ($WindowsOSName) {
+# 		'Windows Server 2025' {
+# 			Write-Log ("# [Information] [AWS Systems Manager agent] The workaround is applied and the process is executed. : " + $WindowsOSVersion)
+# 			Add-WindowsCapability -Online -Name WMIC~~~~
+# 		}
+# 		default {
+# 			Write-Log ("# [Information] [AWS Systems Manager agent] This is not a workaround, so it will be skipped. : " + $WindowsOSVersion)
+# 		}
+# 	}
+# }
+
 
 # Logging Windows Server OS Parameter [AWS Systems Manager agent Information]
 Get-Ec2SystemManagerAgentVersion
