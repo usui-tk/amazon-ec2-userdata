@@ -23,7 +23,9 @@
 #               [Windows_Server-2022-Japanese-Full-Base-YYYY.MM.DD]
 #               [Windows_Server-2022-English-Full-Base-YYYY.MM.DD]
 #
-#      - 10.0 : Windows Server 2025 (TBU)
+#      - 10.0 : Windows Server 2025 (Microsoft Windows Server 2025 [Datacenter Edition])
+#               [Windows_Server-2025-Japanese-Full-Base-YYYY.MM.DD]
+#               [Windows_Server-2025-English-Full-Base-YYYY.MM.DD]
 #
 ########################################################################################################################
 
@@ -67,7 +69,7 @@ Set-Variable -Name EC2LaunchSysprepFile -Option Constant -Scope Script -Value "C
 # Set System & Application Config File (System Defined : Windows Server 2016, 2019)
 Set-Variable -Name EC2LaunchFile -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2-Windows\Launch\Config\LaunchConfig.json"
 
-# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019)
+# Set System & Application Config File (System Defined : Windows Server 2008 R2, 2012, 2012 R2, 2016, 2019, 2022, 2025)
 Set-Variable -Name EC2Launchv2File -Option Constant -Scope Script -Value "C:\ProgramData\Amazon\EC2Launch\config\agent-config.yml"
 
 # Set System & Application Log File (System Defined : All Windows Server)
@@ -767,6 +769,7 @@ function Get-WindowsServerInformation {
 	#   - Windows Server 2016    : 10.0 [Build No. 14393]
 	#   - Windows Server 2019    : 10.0 [Build No. 17763]
 	#   - Windows Server 2022    : 10.0 [Build No. 20348]
+	#   - Windows Server 2025    : 10.0 [Build No. 26100]
 	#--------------------------------------------------------------------------------------
 
 	# Initialize Parameter
@@ -824,6 +827,7 @@ function Get-WindowsServerInformation {
 	#   - Windows Server 2016    : 10.0 [Build No. 14393]
 	#   - Windows Server 2019    : 10.0 [Build No. 17763]
 	#   - Windows Server 2022    : 10.0 [Build No. 20348]
+	#   - Windows Server 2025    : 10.0 [Build No. 26100]
 	#---------------------------------------------------------------------------
 
 	# Set Parameter
@@ -835,6 +839,9 @@ function Get-WindowsServerInformation {
 	}
 	elseif ($osBuildNumber -eq "20348") {
 		Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value "Windows Server 2022"
+	}
+	elseif ($osBuildNumber -eq "26100") {
+		Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value "Windows Server 2025"
 	}
 	else {
 		Set-Variable -Name WindowsOSName -Option Constant -Scope Script -Value ($productName)
@@ -1045,6 +1052,10 @@ if ($PowerShellSecurityProtocol -match "^Ssl3|^Tls") {
 				[System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
 			}
 			'Windows Server 2022' {
+				# Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
+				[System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
+			}
+			'Windows Server 2025' {
 				# Set PowerShell SecurityProtocol [TLS v1.2, v1.3]
 				[System.Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13;
 			}
@@ -1294,6 +1305,9 @@ if ($RoleName) {
 		# Windows_Server-2022-Japanese-Full-Base
 		Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AMI-Information_Get-EC2Image_Windows_Server-2022-Japanese-Full-Base.txt" -Append -Force
 
+		# Windows_Server-2025-Japanese-Full-Base
+		# Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2025-Japanese-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AMI-Information_Get-EC2Image_Windows_Server-2025-Japanese-Full-Base.txt" -Append -Force
+
 		# Windows_Server-2016-English-Full-Base
 		Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AMI-Information_Get-EC2Image_Windows_Server-2016-English-Full-Base.txt" -Append -Force
 
@@ -1302,6 +1316,9 @@ if ($RoleName) {
 
 		# Windows_Server-2022-English-Full-Base
 		Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AMI-Information_Get-EC2Image_Windows_Server-2022-English-Full-Base.txt" -Append -Force
+
+		# Windows_Server-2025-English-Full-Base
+		# Get-EC2Image -Region $Region -ImageId ((Get-SSMParameterValue -Region $Region -Name "/aws/service/ami-windows-latest/Windows_Server-2025-English-Full-Base").Parameters[0].Value) | ConvertTo-Json -Depth 100 | Out-File "$LOGS_DIR\AMI-Information_Get-EC2Image_Windows_Server-2025-English-Full-Base.txt" -Append -Force
 	}
 
 }
@@ -1812,7 +1829,7 @@ Get-PowerPlanInformation
 # Log Separator
 Write-LogSeparator "Package Install System Utility (AWS-CLI v2)"
 
-# Check Windows OS Version[Windows Server 2008 R2, 2012, 2012 R2, 2016]
+# Check Windows OS Version
 if ($WindowsOSVersion -match "^10.0") {
 
 	# Package Download System Utility (AWS-CLI v2)
@@ -1828,7 +1845,6 @@ if ($WindowsOSVersion -match "^10.0") {
 	Start-Sleep -Seconds 5
 }
 else {
-	# Amazon CloudWatch Agent Support Windows OS Version (None)
 	Write-Log ("# [AWS - EC2-AWSCLI] Windows OS Version : " + $WindowsOSVersion + " - Not Suppoort Windows OS Version")
 }
 
@@ -1985,6 +2001,10 @@ if ($WindowsOSVersion -eq "10.0") {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
 			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 		}
+		'Windows Server 2025' {
+			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2025] : Windows OS Version : " + $WindowsOSVersion)
+			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2025.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+		}
 		default {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
 			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
@@ -1996,7 +2016,7 @@ else {
 	Write-Log ("# [Information] [Save Amazon CloudWatch Agent Config Files] No Target Windows OS Version : " + $WindowsOSVersion)
 }
 
-# Check Windows OS Version[Windows Server 2016, 2019, 2022]
+# Check Windows OS Version
 if ($WindowsOSVersion -match "^10.0") {
 
 	# Amazon CloudWatch Agent Support Windows OS Version
@@ -2006,7 +2026,7 @@ if ($WindowsOSVersion -match "^10.0") {
 	# Package Download System Utility (Amazon CloudWatch Agent)
 	# https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/install-CloudWatch-Agent-on-EC2-Instance-fleet.html
 	Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
-	Get-WebContentToFile -Uri 'https://s3.amazonaws.com/amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi' -OutFile "$TOOL_DIR\amazon-cloudwatch-agent.msi"
+	Get-WebContentToFile -Uri 'https://amazoncloudwatch-agent.s3.amazonaws.com/windows/amd64/latest/amazon-cloudwatch-agent.msi' -OutFile "$TOOL_DIR\amazon-cloudwatch-agent.msi"
 
 	# Package Install System Utility (Amazon CloudWatch Agent)
 	Write-Log "# Package Install System Utility (Amazon CloudWatch Agent)"
@@ -2058,7 +2078,7 @@ else {
 # Log Separator
 Write-LogSeparator "Package Install System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))"
 
-# Check Windows OS Version[Windows Server 2016, 2019, 2022]
+# Check Windows OS Version
 if ($WindowsOSVersion -match "^10.0") {
 
 	# Package Download System Utility (AWS Distro for OpenTelemetry Collector (ADOT Collector))
@@ -2219,10 +2239,10 @@ Write-LogSeparator "Package Install System Utility (PowerShell 7.4)"
 
 # Initialize Parameter [# Depends on PowerShell v7.4 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.4.1/PowerShell-7.4.1-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.4.6/PowerShell-7.4.6-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
-# Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016, 2019]
+# Check Windows OS Version
 if ($WindowsOSVersion -match "^10.0") {
 
 	# Package Download Commnand-Line Shell (PowerShell 7.4)
@@ -2265,18 +2285,24 @@ Set-Variable -Name WAC_INSTALLER_URL -Scope Script -Value "https://aka.ms/wacdow
 Set-Variable -Name WAC_INSTALLER_FILE -Scope Script -Value "WindowsAdminCenter.msi"
 Set-Variable -Name WAC_HTTPS_PORT -Scope Script -Value "443"
 
-# Check Windows OS Version [Windows Server 2012, 2012 R2, 2016]
-if ($WindowsOSVersion -match "^10.0") {
+# Check Windows OS Version
+if ($WindowsOSVersion -eq "10.0") {
+	switch ($WindowsOSName) {
+		'Windows Server 2025' {
+			Write-Log ("# [Information] [Windows Admin Center] Skip the installation process because it is installed as standard in the operating system : " + $WindowsOSVersion)
+		}
+		default {
+			# Package Download Web-based System Administrator Tool (Windows Admin Center)
+			Write-Log "# Package Download Web-based System Administrator Tool (Windows Admin Center)"
+			Get-WebContentToFile -Uri "$WAC_INSTALLER_URL" -OutFile "$TOOL_DIR\$WAC_INSTALLER_FILE"
 
-	# Package Download Web-based System Administrator Tool (Windows Admin Center)
-	Write-Log "# Package Download Web-based System Administrator Tool (Windows Admin Center)"
-	Get-WebContentToFile -Uri "$WAC_INSTALLER_URL" -OutFile "$TOOL_DIR\$WAC_INSTALLER_FILE"
+			# Package Install Web-based System Administrator Tool (Windows Admin Center)
+			## Write-Log "# Package Install Web-based System Administrator Tool (Windows Admin Center)"
+			## Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$WAC_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log", "SME_PORT=$WAC_HTTPS_PORT", "SSL_CERTIFICATE_OPTION=generate")
+			## Start-Sleep -Seconds 10
 
-	# Package Install Web-based System Administrator Tool (Windows Admin Center)
-	## Write-Log "# Package Install Web-based System Administrator Tool (Windows Admin Center)"
-	## Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$WAC_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_PowerShellCoreSetup.log", "SME_PORT=$WAC_HTTPS_PORT", "SSL_CERTIFICATE_OPTION=generate")
-	## Start-Sleep -Seconds 10
-
+		}
+	}
 }
 
 
@@ -2343,19 +2369,25 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 				# [Windows Server 2016]
 				# https://www.intel.com/content/www/us/en/download/18737/intel-network-adapter-driver-for-windows-server-2016.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772073/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2016.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831152/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2016.zip"
 			}
 			'Windows Server 2019' {
 				# [Windows Server 2019]
 				# https://www.intel.com/content/www/us/en/download/19372/intel-network-adapter-driver-for-windows-server-2019.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772072/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2019.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831149/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2019.zip"
 			}
 			'Windows Server 2022' {
 				# [Windows Server 2022]
 				# https://www.intel.com/content/www/us/en/download/706171/intel-network-adapter-driver-for-windows-server-2022.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2022)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/772066/Wired_driver_28.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-PROSetx64_For_WindowsServer2022.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831141/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2022.zip"
+			}
+			'Windows Server 2025' {
+				# [Windows Server 2025]
+				# [To-Be-Updated]
+				Write-Log "# Package Download Intel Network Driver (Windows Server 2025)"
+				# Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831141/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2025.zip"
 			}
 			default {
 				# [No Target Server OS]
@@ -2462,6 +2494,10 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 				# [Windows Server 2022]
 				Write-Log ("# [Information] [Microsoft Edge 64bit Edition] Skip the installation process because it is installed as standard in the operating system : " + $WindowsOSVersion)
 			}
+			'Windows Server 2025' {
+				# [Windows Server 2025]
+				Write-Log ("# [Information] [Microsoft Edge 64bit Edition] Skip the installation process because it is installed as standard in the operating system : " + $WindowsOSVersion)
+			}
 			default {
 				# [No Target Server OS]
 				Write-Log ("# [Information] [Microsoft Edge 64bit Edition] No Target Server OS Version : " + $WindowsOSVersion)
@@ -2479,7 +2515,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on 7-Zip version information]
-	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2301-x64.exe"
+	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2408-x64.exe"
 	Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download File archiver (7-Zip)
@@ -2496,7 +2532,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://teratermproject.github.io/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on Tera Term version information]
-	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.2/teraterm-5.2.exe"
+	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.3/teraterm-5.3.exe"
 	Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download Terminal emulator (Tera Term)
@@ -2512,12 +2548,13 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # Custom Package Installation (IrfanView)
 # https://www.irfanview.net/
 # https://www.irfanview.com/faq.htm#PAGE12
+# https://forest.watch.impress.co.jp/library/software/irfanview/
 # if ($FLAG_APP_INSTALL -eq $TRUE) {
 
 #     # Initialize Parameter [# Depends on IrfanView version information]
-#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview466_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview470_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
-#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview466_plugins_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview470_plugins_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     # Package Download Graphic Viewer (IrfanView)
@@ -2626,25 +2663,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	Get-WebContentToFile -Uri 'https://dy9cqqaswpltd.cloudfront.net/NoSQL_Workbench.exe' -OutFile "$TOOL_DIR\NoSQL_Workbench.exe"
 }
 
-# Package Download System Utility (AWS Directory Service PortTest Application)
-# https://docs.aws.amazon.com/workspaces/latest/adminguide/connect_verification.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-	Write-Log "# Package Download System Utility (AWS Directory Service PortTest Application)"
-	Get-WebContentToFile -Uri 'http://docs.aws.amazon.com/directoryservice/latest/admin-guide/samples/DirectoryServicePortTest.zip' -OutFile "$TOOL_DIR\DirectoryServicePortTest.zip"
-}
-
 # Package Download System Utility (AWSLogCollector)
 #
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	Write-Log "# Package Download System Utility (AWSLogCollector)"
 	Get-WebContentToFile -Uri 'https://ec2-downloads-windows.s3.amazonaws.com/Scripts/AWSLogCollector.zip' -OutFile "$TOOL_DIR\AWSLogCollector.zip"
-}
-
-# Package Download System Utility (AWS Diagnostics for Windows Server)
-# https://docs.aws.amazon.com/AWSEC2/latest/WindowsGuide/Windows-Server-Diagnostics.html
-if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-	Write-Log "# Package Download System Utility (AWS Diagnostics for Windows Server)"
-	Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-downloads-windows/AWSDiagnostics/AWSDiagnostics.zip' -OutFile "$TOOL_DIR\AWSDiagnostics.zip"
 }
 
 
@@ -2666,9 +2689,10 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (WinSCP)
 # https://winscp.net/
+# https://forest.watch.impress.co.jp/library/software/winscp/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	# Initialize Parameter [# Depends on WinSCP version information]
-	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.3-Setup.exe"
+	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.5-Setup.exe"
 	Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	Write-Log "# Package Download System Utility (WinSCP)"
@@ -2685,11 +2709,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (Fluentd)
 # https://www.fluentd.org/
-# https://td-agent-package-browser.herokuapp.com/4/windows
+# https://td-agent-package-browser.herokuapp.com/5/windows
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -match "^10.0") {
 		# Initialize Parameter [# Depends on Fluentd version information]
-		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/4/windows/td-agent-4.5.3-x64.msi"
+		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/5/windows/fluent-package-5.1.0-x64.msi"
 		Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
 		Write-Log "# Package Download System Utility (Fluentd)"
@@ -2697,34 +2721,35 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	}
 }
 
-# Package Download System Utility (Python 3.12)
+# Package Download System Utility (Python 3.13)
 # https://www.python.org/
 # https://www.python.org/downloads/windows/
-# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-#     # Initialize Parameter [# Depends on Python 3.10 version information]
-#     Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
-#     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on Python 3.13 version information]
+    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe"
+    Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
-#     Write-Log "# Package Download System Utility (Python 3.11)"
-#     Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
-# }
+    Write-Log "# Package Download System Utility (Python 3.13)"
+    Get-WebContentToFile -Uri "$PYTHON3_INSTALLER_URL" -OutFile "$TOOL_DIR\$PYTHON3_INSTALLER_FILE"
+}
 
 # # Package Download System Utility (WinMerge)
 # # https://winmerge.org/
-# if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
-#     # Initialize Parameter [# Depends on WinMerge version information]
-#     Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.38/WinMerge-2.16.38-x64-Setup.exe"
-#     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
+# # https://github.com/WinMerge/winmerge/releases
+if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
+    # Initialize Parameter [# Depends on WinMerge version information]
+    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.44/WinMerge-2.16.44-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
-#     Write-Log "# Package Download System Utility (WinMerge)"
-#     Get-WebContentToFile -Uri "$WINMERGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_INSTALLER_FILE"
-# }
+    Write-Log "# Package Download System Utility (WinMerge)"
+    Get-WebContentToFile -Uri "$WINMERGE_INSTALLER_URL" -OutFile "$TOOL_DIR\$WINMERGE_INSTALLER_FILE"
+}
 
 # Package Download System Utility (WinMerge - Japanese)
 # https://winmergejp.bitbucket.io/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge-v2-jp/2.16.38%2B-jp-1/WinMerge-2.16.38-jp-1-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge-v2-jp/2.16.44%2B-jp-1/WinMerge-2.16.44-jp-1-x64-Setup.exe"
 #     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
