@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Fedora 40]                 #
+#  Script Evaluated Operating System Information - [Fedora 41]                 #
 #                                                                              #
 ################################################################################
 
@@ -44,7 +44,7 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information
-dnf --enablerepo="*" --verbose clean all
+dnf --enablerepo="*" clean all
 
 # Show Linux Distribution/Distro information
 if [ $(command -v lsb_release) ]; then
@@ -96,7 +96,7 @@ eval $(grep ^VERSION_ID= /etc/os-release)
 #-------------------------------------------------------------------------------
 
 # yum repository metadata Clean up
-dnf --enablerepo="*" --verbose clean all
+dnf --enablerepo="*" clean all
 
 # Package Update Bash/DNF Administration Tools (from Fedora Official Repository)
 dnf install -y bash dnf dnf-conf dnf-utils dnf-plugins-core dnf-plugin-system-upgrade
@@ -105,7 +105,7 @@ dnf install -y bash dnf dnf-conf dnf-utils dnf-plugins-core dnf-plugin-system-up
 dnf repolist all
 
 # Cleanup repository information
-dnf --enablerepo="*" --verbose clean all
+dnf --enablerepo="*" clean all
 
 # Default Package Update
 dnf update -y
@@ -117,7 +117,7 @@ dnf update -y
 
 # Package replacement CURL Tools [curl-minimal to curl-full]
 if [ $(rpm -qa | grep -ve "libcurl-minimal" | grep -w curl-minimal) ]; then
-	dnf --enablerepo="*" --verbose clean all
+	dnf --enablerepo="*" clean all
 	sleep 5
 	dnf install -y --allowerasing curl-full libcurl-full
 fi
@@ -126,7 +126,7 @@ fi
 dnf install -y kernel-modules kernel-modules-extra kernel-tools
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bcftools bind-utils blktrace bpftool bpytop byobu collectd collectd collectd-utils collectd-utils collectl colordiff console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dateutils dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fping fzf gdisk git glances gnutls-utils hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 ipset iptraf-ng ipv6calc jc jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nload nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools sos srm strace stressapptest symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unicornscan unzip usermode util-linux util-linux-user vim-enhanced wdiff wget wireshark-cli xfsdump xfsprogs yamllint yq yum-utils zip zsh zstd
+dnf install -y abrt abrt-cli acpid arptables atop bash-completion bc bcc bcc-tools bcftools bind-utils blktrace bpftool bpytop byobu collectd collectd collectd-utils collectd-utils collectl colordiff console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dateutils dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fping fzf gdisk git glances gnutls-utils hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 ipset iptraf-ng ipv6calc jc jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nload nmap nmap-ncat numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools sos srm strace stressapptest symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vim-enhanced wdiff wget wireshark-cli xfsdump xfsprogs yamllint yq yum-utils zip zsh zstd
 
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
@@ -167,7 +167,7 @@ dnf install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
 #-------------------------------------------------------------------------------
 
 # Package Install Fedora Web-Based support tools (from Fedora Official Repository)
-dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-selinux cockpit-session-recording cockpit-sosreport cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-files cockpit-selinux cockpit-session-recording cockpit-sosreport cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
@@ -625,39 +625,39 @@ ansible localhost -m setup
 # https://www.terraform.io/docs/cli/install/yum.html
 #-------------------------------------------------------------------------------
 
-# # Repository Configuration (HashiCorp Linux Repository)
-# dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/fedora/hashicorp.repo"
+# Repository Configuration (HashiCorp Linux Repository)
+dnf config-manager addrepo --from-repofile="https://rpm.releases.hashicorp.com/fedora/hashicorp.repo"
 
-# cat /etc/yum.repos.d/hashicorp.repo
+cat /etc/yum.repos.d/hashicorp.repo
 
-# # Cleanup repository information
-# dnf --enablerepo="*" --verbose clean all
+# Cleanup repository information
+dnf --enablerepo="*" clean all
 
-# # HashiCorp Linux repository package [dnf command]
-# dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+# HashiCorp Linux repository package [dnf command]
+dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
-# # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# dnf --enablerepo="hashicorp" -y install terraform terraform-ls
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+dnf --enablerepo="hashicorp" -y install terraform terraform-ls
 
-# rpm -qi terraform
+rpm -qi terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
 #-------------------------------------------------------------------------------
-dnf --enablerepo="*" --verbose clean all
+dnf --enablerepo="*" clean all
 
 #-------------------------------------------------------------------------------
 # System information collection
@@ -809,26 +809,6 @@ tuned-adm list
 tuned-adm profile aws
 tuned-adm active
 
-#-------------------------------------------------------------------------------
-# Configure ACPI daemon (Advanced Configuration and Power Interface)
-#-------------------------------------------------------------------------------
-
-# Configure ACPI daemon software (Install acpid Package)
-dnf install -y acpid
-
-rpm -qi acpid
-
-systemctl daemon-reload
-
-systemctl restart acpid
-
-systemctl status -l acpid
-
-# Configure NTP Client software (Start Daemon chronyd)
-if [ $(systemctl is-enabled acpid) = "disabled" ]; then
-	systemctl enable acpid
-	systemctl is-enabled acpid
-fi
 
 #-------------------------------------------------------------------------------
 # System Setting
