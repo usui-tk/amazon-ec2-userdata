@@ -144,7 +144,7 @@ if [ $(rpm -qa | grep -w gnupg2-minimal) ]; then
 fi
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 # Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils

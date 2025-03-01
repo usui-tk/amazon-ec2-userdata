@@ -103,7 +103,7 @@ yum update -y
 #-------------------------------------------------------------------------------
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
-yum install -y acpid arptables bash-completion bc bind-utils blktrace crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect finger fio gdisk git gnutls-utils hdparm htop intltool iotop iperf3 ipset iptraf-ng jq kexec-tools latencytop-tui libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted patchutils perf psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget wireshark xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
+yum install -y acpid arptables bash-completion bc bind-utils blktrace bzip2 crash-trace-command crypto-utils curl dmidecode dstat ebtables ethtool expect finger fio gdisk git gnutls-utils hdparm htop intltool iotop iperf3 ipset iptraf-ng jq kexec-tools latencytop-tui libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils netsniff-ng nftables nmap numactl nvme-cli nvmetcli parted patchutils perf psacct psmisc rsync screen smartmontools strace symlinks sysfsutils sysstat system-lsb-core tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux uuid vim-enhanced wget wireshark xfsdump xfsprogs yum-plugin-versionlock yum-utils zip zsh zstd
 
 yum install -y amazon-efs-utils cifs-utils nfs-utils nfs4-acl-tools
 
