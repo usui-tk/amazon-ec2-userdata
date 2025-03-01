@@ -354,7 +354,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 
 	# [Workaround] Fixed values for variables ($releasever)
 	if [ $(grep -l '$releasever' /etc/yum.repos.d/epel* | wc -l) != "0" ]; then
-		grep -l '$releasever' /etc/yum.repos.d/epel* | xargs sed -i -e 's|$releasever|8|g'
+		grep -l '$releasever' /etc/yum.repos.d/epel* | xargs sed -i -e 's|$releasever|9|g'
 	fi
 
 	# Delete dnf/yum temporary data
