@@ -2444,6 +2444,12 @@ Get-WebContentToFile -Uri 'https://s3.amazonaws.com/ec2-windows-drivers-download
 Write-Log "# Package Download Amazon Elastic Network Adapter Driver"
 Get-WebContentToFile -Uri 'https://ec2-windows-drivers-downloads.s3.amazonaws.com/ENA/Latest/AwsEnaNetworkDriver.zip' -OutFile "$TOOL_DIR\AwsEnaNetworkDriver.zip"
 
+# Package Download Amazon Elastic Fabric Adapter Driver
+# https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/efa.html
+# https://github.com/aws/efawin
+Write-Log "# Package Download Amazon Elastic Fabric Adapter Driver"
+Get-WebContentToFile -Uri 'https://ec2-windows-drivers-efa.s3-us-west-2.amazonaws.com/Latest/EFADriver.zip' -OutFile "$TOOL_DIR\EFADriver.zip"
+
 # Package Download Intel Network Driver
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -eq "10.0") {
@@ -2452,25 +2458,25 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 				# [Windows Server 2016]
 				# https://www.intel.com/content/www/us/en/download/18737/intel-network-adapter-driver-for-windows-server-2016.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831152/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2016.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845889/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2016.zip"
 			}
 			'Windows Server 2019' {
 				# [Windows Server 2019]
 				# https://www.intel.com/content/www/us/en/download/19372/intel-network-adapter-driver-for-windows-server-2019.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831149/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2019.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845888/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2019.zip"
 			}
 			'Windows Server 2022' {
 				# [Windows Server 2022]
 				# https://www.intel.com/content/www/us/en/download/706171/intel-network-adapter-driver-for-windows-server-2022.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2022)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831141/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2022.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845884/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2022.zip"
 			}
 			'Windows Server 2025' {
 				# [Windows Server 2025]
-				# [To-Be-Updated]
+				# https://www.intel.com/content/www/us/en/download/838943/intel-network-adapter-driver-for-windows-server-2025.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2025)"
-				# Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/831141/Wired_driver_29.3_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2025.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845881/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2025.zip"
 			}
 			default {
 				# [No Target Server OS]
@@ -2598,7 +2604,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on 7-Zip version information]
-	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2408-x64.exe"
+	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2409-x64.exe"
 	Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download File archiver (7-Zip)
@@ -2661,18 +2667,18 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 
 
 # [Caution : Finally the installation process]
-# Custom Package Installation (Visual Studio Code 64bit Edition)
+# Custom Package Installation (Visual Studio Code - System Installer)
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter
 	Set-Variable -Name VSCODE_INSTALLER_URL -Scope Script -Value "https://go.microsoft.com/fwlink/?linkid=852157"
 	Set-Variable -Name VSCODE_INSTALLER_FILE -Scope Script -Value "VSCodeSetup-x64.exe"
 
-	# Package Download Text Editor (Visual Studio Code 64bit Edition)
-	Write-Log "# Package Download Text Editor (Visual Studio Code 64bit Edition)"
+	# Package Download Text Editor (Visual Studio Code - System Installer)
+	Write-Log "# Package Download Text Editor (Visual Studio Code - System Installer)"
 	Get-WebContentToFile -Uri "$VSCODE_INSTALLER_URL" -OutFile "$TOOL_DIR\$VSCODE_INSTALLER_FILE"
 
-	# Package Install Text Editor (Visual Studio Code 64bit Edition)
-	Write-Log "# Package Install Text Editor (Visual Studio Code 64bit Edition)"
+	# Package Install Text Editor (Visual Studio Code - System Installer)
+	Write-Log "# Package Install Text Editor (Visual Studio Code - System Installer)"
 	Start-Process -FilePath "$TOOL_DIR\$VSCODE_INSTALLER_FILE" -Verb runas -Wait -ArgumentList @("/verysilent", "/norestart", "/suppressmsgboxes", "/mergetasks=!runCode, desktopicon, addcontextmenufiles, addcontextmenufolders, associatewithfiles, addtopath", "/LOG=C:\EC2-Bootstrap\Logs\APPS_MicrosoftVisualStudioCodeSetup.log") | Out-Null
 }
 
@@ -2763,7 +2769,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	# Initialize Parameter [# Depends on PuTTY version information]
-	Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.81-installer.msi"
+	Set-Variable -Name PUTTY_INSTALLER_URL -Scope Script -Value "https://the.earth.li/~sgtatham/putty/latest/w64/putty-64bit-0.83-installer.msi"
 	Set-Variable -Name PUTTY_INSTALLER_FILE -Scope Script -Value ($PUTTY_INSTALLER_URL.Substring($PUTTY_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	Write-Log "# Package Download System Utility (PuTTY)"
@@ -2775,7 +2781,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://forest.watch.impress.co.jp/library/software/winscp/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	# Initialize Parameter [# Depends on WinSCP version information]
-	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.5-Setup.exe"
+	Set-Variable -Name WINSCP_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/w/winscp/10950/WinSCP-6.3.7-Setup.exe"
 	Set-Variable -Name WINSCP_INSTALLER_FILE -Scope Script -Value ($WINSCP_INSTALLER_URL.Substring($WINSCP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	Write-Log "# Package Download System Utility (WinSCP)"
@@ -2796,7 +2802,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -match "^10.0") {
 		# Initialize Parameter [# Depends on Fluentd version information]
-		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/5/windows/fluent-package-5.1.0-x64.msi"
+		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/5/windows/fluent-package-5.2.0-x64.msi"
 		Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
 		Write-Log "# Package Download System Utility (Fluentd)"
@@ -2809,7 +2815,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on Python 3.13 version information]
-    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.13.0/python-3.13.0-amd64.exe"
+    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.13.2/python-3.13.2-amd64.exe"
     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (Python 3.13)"
@@ -2821,7 +2827,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # # https://github.com/WinMerge/winmerge/releases
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinMerge version information]
-    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.44/WinMerge-2.16.44-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.46/WinMerge-2.16.46-x64-Setup.exe"
     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinMerge)"
@@ -2832,7 +2838,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmergejp.bitbucket.io/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://jaist.dl.sourceforge.net/project/winmerge-v2-jp/2.16.44%2B-jp-1/WinMerge-2.16.44-jp-1-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://download.sourceforge.net/winmerge-v2-jp/WinMerge-2.16.46-jp-1-x64-Setup.exe"
 #     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
