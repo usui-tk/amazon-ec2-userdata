@@ -42,6 +42,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://wiki.almalinux.org/
 #
 #    https://wiki.almalinux.org/cloud/AWS.html
+#    https://aws.amazon.com/marketplace/seller-profile?id=529d1014-352c-4bed-8b63-6120e4bd3342
 #    https://aws.amazon.com/marketplace/pp/prodview-ykmb6re2rcouy
 #
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
