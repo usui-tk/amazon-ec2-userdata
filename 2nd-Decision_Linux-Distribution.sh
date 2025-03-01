@@ -21,6 +21,7 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForRockyLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v8-HVM.sh"
 	ScriptForAlmaLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v9-HVM.sh"
 	ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
+	ScriptForCentOSv10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v10-HVM.sh"
 	ScriptForCentOSv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v9-HVM.sh"
 	ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
 	ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
@@ -188,8 +189,11 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "CentOS" ] || [ "${DIST}" = "CentOS Stream" ] || [ "${DIST_TYPE}" = "centos" ]; then
-			if [ "${REV}" = "9" ]; then
-				# Bootstrap Script for CentOS v9.x
+			if [ "${REV}" = "10" ]; then
+				# Bootstrap Script for CentOS Stream v10.x (Coughlan)
+				BootstrapScript=${ScriptForCentOSv10}
+			elif [ "${REV}" = "9" ]; then
+				# Bootstrap Script for CentOS Stream v9.x
 				BootstrapScript=${ScriptForCentOSv9}
 			elif [ "${REV}" = "8" ]; then
 				# Bootstrap Script for CentOS v8.x
