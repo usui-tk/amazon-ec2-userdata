@@ -41,9 +41,10 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://aws.amazon.com/jp/linux/amazon-linux-2023/faqs/
 #
 #    https://docs.aws.amazon.com/linux/index.html
-#    https://docs.aws.amazon.com/linux/al2023/release-notes/index.html
+#    https://docs.aws.amazon.com/linux/al2023/release-notes/relnotes.html
+#    https://docs.aws.amazon.com/linux/al2023/release-notes/support-info-by-support-statement.html
 #    https://docs.aws.amazon.com/linux/al2023/release-notes/support-info-by-package.html
-#    https://docs.aws.amazon.com/linux/al2023/ug/index.html
+#    https://docs.aws.amazon.com/linux/al2023/ug/what-is-amazon-linux.html
 #
 #    https://github.com/amazonlinux/amazon-linux-2023
 #
@@ -144,12 +145,13 @@ if [ $(rpm -qa | grep -w gnupg2-minimal) ]; then
 fi
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate nc ncompress net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils hdparm htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu libzip-tools low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 # Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
 
 # Package Install iSCSI Administration Tools (from Amazon Linux Official Repository)
+dnf install -y iscsi-initiator-utils
 ## dnf install -y iscsi-initiator-utils lsscsi sg3_utils stratisd stratis-cli
 
 # Package Install SELinux Tools (from Amazon Linux Official Repository)
@@ -177,8 +179,8 @@ dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | 
 dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 # Package Install AWS-related packages (from Amazon Linux Official Repository)
-dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux
-## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux
+dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux ec2rl
+## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux ec2rl
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel-livepatch]
@@ -313,16 +315,6 @@ fi
 dnf install -y awscli-2
 
 aws --version
-
-# Configuration AWS-CLI tools
-cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# Typically that would be added under one of the following paths:
-# - /etc/bash_completion.d
-# - /usr/local/etc/bash_completion.d
-# - /usr/share/bash-completion/completions
-
-complete -C aws_completer aws
-__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
@@ -654,47 +646,33 @@ fi
 # https://github.com/awslabs/aws-ec2rescue-linux
 #-------------------------------------------------------------------------------
 
-# Package Amazon EC2 Administration Tools (from S3 Bucket)
-curl -sS "https://s3.amazonaws.com/ec2rescuelinux/ec2rl-bundled.tgz" -o "/tmp/ec2rl-bundled.tgz"
-
-mkdir -p "/opt/aws"
-
-rm -rf /opt/aws/ec2rl*
-
-tar -xzf "/tmp/ec2rl-bundled.tgz" -C "/opt/aws"
-
-mv --force /opt/aws/ec2rl* "/opt/aws/ec2rl"
-
-cat > /etc/profile.d/ec2rl.sh << __EOF__
-export PATH=\$PATH:/opt/aws/ec2rl
-__EOF__
-
-source /etc/profile.d/ec2rl.sh
+# Package Install AWS-related packages (from Amazon Linux Official Repository)
+dnf install -y ec2rl
 
 # Check Version
-/opt/aws/ec2rl/ec2rl version
+/usr/bin/ec2rl version
 
-/opt/aws/ec2rl/ec2rl list
+/usr/bin/ec2rl list
 
 # Required Software Package
-# /opt/aws/ec2rl/ec2rl software-check
+# /usr/bin/ec2rl software-check
 
 # Diagnosis [dig modules]
-# /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
+# /usr/bin/ec2rl run --only-modules=dig --domain=amazon.com
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Ansible]
 #-------------------------------------------------------------------------------
 
-# # Package Install Amazon Linux System Administration Tools (from Amazon Linux Repository)
-# dnf install -y ansible
+# Package Install Amazon Linux System Administration Tools (from Amazon Linux Repository)
+dnf install -y ansible
 
-# # Package Information [ansible]
-# rpm -qi ansible
+# Package Information [ansible]
+rpm -qi ansible
 
-# # Ansible Information
-# ansible --version
-# ansible localhost -m setup
+# Ansible Information
+ansible --version
+ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
@@ -937,7 +915,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
-	# dnf install -y langpacks-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
+	dnf install -y langpacks-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
 
 	echo "# Setting System Language -> $Language"
 	locale
