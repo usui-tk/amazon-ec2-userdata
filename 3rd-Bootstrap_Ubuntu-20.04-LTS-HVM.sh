@@ -611,7 +611,7 @@ ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
-# https://docs.fluentd.org/installation/install-by-deb
+# https://docs.fluentd.org/installation/install-fluent-package/install-by-deb-fluent-package
 #-------------------------------------------------------------------------------
 
 curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-fluent-package5-lts.sh | sh

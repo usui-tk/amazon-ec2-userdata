@@ -787,7 +787,7 @@ ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
-# https://docs.fluentd.org/installation/install-by-rpm
+# https://docs.fluentd.org/installation/install-fluent-package/install-by-rpm-fluent-package
 #-------------------------------------------------------------------------------
 
 curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh

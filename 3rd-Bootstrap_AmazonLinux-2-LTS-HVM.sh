@@ -718,7 +718,7 @@ rpm -qi bcc
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
-# https://docs.fluentd.org/installation/install-by-rpm
+# https://docs.fluentd.org/installation/install-fluent-package/install-by-rpm-fluent-package
 #-------------------------------------------------------------------------------
 
 curl -fsSL https://toolbelt.treasuredata.com/sh/install-amazon2-fluent-package5-lts.sh | sh

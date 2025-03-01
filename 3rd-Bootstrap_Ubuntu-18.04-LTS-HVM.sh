@@ -619,7 +619,7 @@ ansible localhost -m setup
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [fluentd]
-# https://docs.fluentd.org/installation/install-by-deb
+# https://docs.fluentd.org/installation/install-fluent-package/install-by-deb-fluent-package
 #-------------------------------------------------------------------------------
 
 curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-bionic-td-agent4.sh" | sh
