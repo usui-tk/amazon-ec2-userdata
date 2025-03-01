@@ -102,7 +102,9 @@ yum update -y
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Official Repository)
 yum install -y acpid arptables_jf bc bcc collectl dstat dmidecode ebtables fio gdisk git hdparm jq kexec-tools lsof lzop iotop mlocate mtr nc net-snmp-utils nmap nvme-cli perf psmisc rsync sos strace sysstat tcpdump traceroute tree vim-enhanced yum-plugin-versionlock yum-utils wget
+
 yum install -y aws-efs-utils cifs-utils nfs-utils nfs4-acl-tools
+
 yum install -y iscsi-initiator-utils lsscsi
 
 # Package Install Python 3 Runtime (from Amazon Official Repository)

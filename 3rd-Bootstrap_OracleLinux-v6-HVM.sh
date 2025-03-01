@@ -160,9 +160,13 @@ yum install -y cloud-utils-growpart dracut-modules-growroot
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
 yum install -y abrt abrt-cli acpid bc bind-utils blktrace crash-trace-command crypto-utils curl dstat ebtables ethtool expect gdisk git hdparm intltool iotop kexec-tools latencytop-tui libicu lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils nmap numactl numatop parted psacct psmisc rsync screen smartmontools sos strace symlinks sysfsutils sysstat system-config-network-tui tcpdump time tmpwatch traceroute tree tzdata unzip usermode util-linux-ng vim-enhanced wget wireshark zip zsh
+
 yum install -y cifs-utils nfs-utils nfs4-acl-tools
+
 yum install -y iscsi-initiator-utils lsscsi scsi-target-utils sdparm sg3_utils
+
 yum install -y setroubleshoot-server "selinux-policy*" setools-console checkpolicy policycoreutils
+
 yum install -y pcp pcp-conf pcp-manager "pcp-pmda*" pcp-system-tools
 
 # Package Install Oracle Linux support tools (from Oracle Linux Repository)
