@@ -116,6 +116,9 @@ dnf list *release*el9
 dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9
 dnf --enablerepo="*" --verbose clean all
 
+# dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9 oracle-java-jdk-release-el9
+# dnf --enablerepo="*" --verbose clean all
+
 find /etc/yum.repos.d/
 
 # Check the OCI variables to be used in YUM
@@ -304,9 +307,9 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol9_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
+dnf --enablerepo="ol9_developer_EPEL" install -y aria2 atop bash-color-prompt byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
 
-# dnf --enablerepo="ol9_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+# dnf --enablerepo="ol9_developer_EPEL" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop lsb_release moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol9_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
@@ -455,24 +458,10 @@ fi
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
+# Package Install AWS-CLI v2 packages (from Oracle Linux Repository)
+dnf --enablerepo="ol9_developer, ol9_developer_EPEL" -y install awscli2
 
 aws --version
-
-# Configuration AWS-CLI tools
-cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# Typically that would be added under one of the following paths:
-# - /etc/bash_completion.d
-# - /usr/local/etc/bash_completion.d
-# - /usr/share/bash-completion/completions
-
-complete -C aws_completer aws
-__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__

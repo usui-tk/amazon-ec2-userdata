@@ -267,9 +267,9 @@ dnf repository-packages epel-next list > /tmp/command-log_dnf_repository-package
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y atop bash-color-prompt byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
+dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen stressapptest unicornscan wdiff yamllint
 
-# dnf --enablerepo="epel" install -y atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+# dnf --enablerepo="epel" install -y aria2 atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc jc jnettop moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
@@ -360,19 +360,9 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-CLI v2 packages (from CentOS Community Repository)
-dnf install -y awscli2
+dnf --enablerepo="epel" -y install awscli2
 
 aws --version
-
-# Configuration AWS-CLI tools
-cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# Typically that would be added under one of the following paths:
-# - /etc/bash_completion.d
-# - /usr/local/etc/bash_completion.d
-# - /usr/share/bash-completion/completions
-
-complete -C aws_completer aws
-__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__

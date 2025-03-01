@@ -108,6 +108,9 @@ dnf list *release*el8
 dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8
 dnf --enablerepo="*" --verbose clean all
 
+# dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8 oracle-java-jdk-release-el8
+# dnf --enablerepo="*" --verbose clean all
+
 find /etc/yum.repos.d/
 
 # Check the OCI variables to be used in YUM
@@ -334,7 +337,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol8_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol8_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol8_developer_EPEL" install -y atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+dnf --enablerepo="ol8_developer_EPEL" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="ol8_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
