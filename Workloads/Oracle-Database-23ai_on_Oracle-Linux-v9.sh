@@ -213,24 +213,10 @@ dnf install -y oracle-database-preinstall-23ai
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
-# Package download AWS-CLI v2 Tools (from Bundle Installer)
-curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-unzip -oq "/tmp/awscliv2.zip" -d /tmp/
-
-# Package Install AWS-CLI v2 Tools (from Bundle Installer)
-/tmp/aws/install -i "/opt/aws/awscli" -b "/usr/bin" --update
+# Package Install AWS-CLI v2 packages (from Oracle Linux Repository)
+dnf --enablerepo="ol9_developer, ol9_developer_EPEL" -y install awscli2
 
 aws --version
-
-# Configuration AWS-CLI tools
-cat > /etc/bash_completion.d/aws_bash_completer << __EOF__
-# Typically that would be added under one of the following paths:
-# - /etc/bash_completion.d
-# - /usr/local/etc/bash_completion.d
-# - /usr/share/bash-completion/completions
-
-complete -C aws_completer aws
-__EOF__
 
 # Setting AWS-CLI default Region & Output format
 aws configure << __EOF__
