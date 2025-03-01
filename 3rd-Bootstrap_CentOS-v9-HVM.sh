@@ -98,8 +98,8 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #-------------------------------------------------------------------------------
 # Default Package Update
 #-------------------------------------------------------------------------------
-# Yum Repositories (CentOS Stream release 8)
-#  http://mirror.centos.org/centos/9-stream/
+# Yum Repositories (CentOS Stream release 9)
+#  http://mirror.stream.centos.org/9-stream/
 #-------------------------------------------------------------------------------
 
 # Cleanup repository information and Update dnf tools
