@@ -732,7 +732,6 @@ if [ -n "$RoleName" ]; then
 	if [ -n "$LatestAmiId" ]; then
 		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 	fi
-
 fi
 
 #-------------------------------------------------------------------------------
