@@ -286,7 +286,7 @@ dnf list installed | grep kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
-# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/9/html-single/managing_systems_using_the_rhel_9_web_console/index
+# https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/managing_systems_using_the_rhel_9_web_console/index
 #-------------------------------------------------------------------------------
 
 # Package Install RHEL Web-Based support tools (from Red Hat Official Repository)
@@ -471,7 +471,7 @@ fi
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 #-------------------------------------------------------------------------------
 
-# Package Install AWS-CLI v2 packages (from AlmaLinux Community Repository)
+# Package Install AWS-CLI v2 packages (from Red Hat Official Repository)
 dnf --enablerepo="epel" -y install awscli2
 
 aws --version
@@ -721,9 +721,9 @@ if [ -n "$RoleName" ]; then
 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 	echo "# Get Amazon Machine Image Information"
 
-	LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
-	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+	LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
+
+	aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 fi
 
 #-------------------------------------------------------------------------------
