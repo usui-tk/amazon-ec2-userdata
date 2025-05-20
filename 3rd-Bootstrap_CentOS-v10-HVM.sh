@@ -168,7 +168,7 @@ dnf update -y
 dnf install -y kernel-modules kernel-modules-extra
 
 # Package Install CentOS System Administration Tools (from CentOS Community Repository)
-dnf install -y acpid arptables bash-color-prompt bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils policycoreutils psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-color-prompt bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils policycoreutils psacct psmisc python3-dnf-plugin-versionlock redhat-text-fonts rsync smartmontools sos stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
@@ -214,7 +214,7 @@ dnf list installed | grep kpatch
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS Web-Based support tools (from CentOS Community Repository)
-dnf install -y cockpit cockpit-files cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-files cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
@@ -235,7 +235,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install Python 3.9 Runtime (from CentOS Community Repository)
-dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-wheel
+dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
 dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 python3-pyasn1-modules python3-pyasn1-modules python3-pyyaml "python3-requests*" python3-six python3-urllib3
@@ -272,7 +272,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install CentOS System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y colordiff fping htop iftop ipv6calc jc lsb_release moreutils moreutils-parallel ncdu screen ssh-audit stressapptest wdiff
+dnf --enablerepo="epel" install -y colordiff fping htop iftop ipv6calc lsb_release ncdu screen ssh-audit stressapptest wdiff
 
 # dnf --enablerepo="epel" install -y aria2 atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen ssh-audit stressapptest unicornscan wdiff yamllint
 
@@ -365,7 +365,7 @@ fi
 #-------------------------------------------------------------------------------
 
 # Package Install AWS-CLI v2 packages (from CentOS Community Repository)
-dnf --enablerepo="epel" -y install awscli2
+dnf install -y awscli2
 
 aws --version
 
@@ -614,9 +614,9 @@ if [ -n "$RoleName" ]; then
 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 	echo "# Get Amazon Machine Image Information"
 
-	NewestAmiInfo=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=CentOS Stream 10*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
-	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+	LatestAmiId=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=CentOS Stream 10*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+
+	aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 fi
 
 #-------------------------------------------------------------------------------
@@ -975,13 +975,13 @@ sestatus
 
 if [ $(getenforce) = "Enforcing" ]; then
 	# Setting SELinux disabled mode
-	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/using_selinux/index#changing-selinux-states-and-modes
 	# grubby --info=ALL
 	# grubby --update-kernel ALL --args selinux=0
 	# grubby --info=ALL
 
 	# Setting SELinux permissive mode
-	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/9/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/using_selinux/index#changing-selinux-states-and-modes
 	grubby --info=ALL
 	grubby --update-kernel ALL --args enforcing=0
 	grubby --info=ALL
