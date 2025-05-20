@@ -231,10 +231,10 @@ if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.9]
+# Custom Package Installation [Python 3.12]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3.9 Runtime (from CentOS Community Repository)
+# Package Install Python 3.12 Runtime (from CentOS Community Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
@@ -242,7 +242,7 @@ dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 p
 dnf install -y python3-cloud-what python3-distro
 dnf install -y python3-argcomplete
 
-# Version Information (Python 3.9)
+# Version Information (Python 3.12)
 python3 -V
 pip3 -V
 
