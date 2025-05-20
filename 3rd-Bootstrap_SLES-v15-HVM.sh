@@ -123,14 +123,41 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.5" ]; then
-		# Next version of service pack
+	if [ "${VERSION_ID}" = "15.6" ]; then
+		# Current latest version of service pack (2025.5)
 		echo "SUSE Linux Enterprise Server 15 SP5"
 		cat /etc/os-release
 
+	elif [ "${VERSION_ID}" = "15.5" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP5 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
+		cat /etc/os-release
+
 	elif [ "${VERSION_ID}" = "15.4" ]; then
-		# Current latest version of service pack (2022.6)
-		echo "SUSE Linux Enterprise Server 15 SP4"
+		echo "SUSE Linux Enterprise Server 15 SP4 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "15.3" ]; then
@@ -235,7 +262,12 @@ zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-is
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.5" ]; then
+	if [ "${VERSION_ID}" = "15.6" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP6"
+		zypper --quiet --non-interactive install jq purge-kernels-service
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+	elif [ "${VERSION_ID}" = "15.5" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP5"
 		zypper --quiet --non-interactive install jq purge-kernels-service
 		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
@@ -287,7 +319,26 @@ SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.5" ]; then
+	if [ "${VERSION_ID}" = "15.6" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP6"
+
+		zypper --quiet --non-interactive install python3-susepubliccloudinfo
+
+		if [ $SapFlag -gt 0 ]; then
+			echo "SUSE Linux Enterprise Server for SAP Applications 15"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		else
+			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		fi
+
+	elif [ "${VERSION_ID}" = "15.5" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP5"
 
 		zypper --quiet --non-interactive install python3-susepubliccloudinfo
@@ -451,10 +502,31 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4"
+	if [ "${VERSION_ID}" = "15.6" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP6"
 
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP6
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.6/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	if [ "${VERSION_ID}" = "15.5" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP5"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP5
 		SUSEConnect --status-text
 		SUSEConnect --list-extensions
 		SUSEConnect -p PackageHub/15.5/x86_64
@@ -590,7 +662,10 @@ fi
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.5" ]; then
+	if [ "${VERSION_ID}" = "15.6" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP6"
+
+	elif [ "${VERSION_ID}" = "15.5" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP5"
 
 	elif [ "${VERSION_ID}" = "15.4" ]; then
@@ -1009,22 +1084,32 @@ SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 if [ $SapFlag -gt 0 ]; then
 	if [ -n "$RoleName" ]; then
 		echo "SUSE Linux Enterprise Server for SAP Applications 15"
+
 		echo "# Get Newest AMI Information from Public AMI (AWS Martketplace/PAYG)"
 		ProductCodes=$(curl -s "http://169.254.169.254/latest/meta-data/product-codes")
+
 		if [ -n "$ProductCodes" ]; then
 			NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=${ProductCodes}" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
 			aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 		else
-			NewestAmiId=$(aws ec2 describe-images --owners aws-marketplace --filters "Name=product-code,Values=6ajp9738nmxhrsj68dvuwztp9" --query "sort_by(Images, &CreationDate)[-1].[ImageId]" --output text --region ${Region})
-			aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+			LatestAmiId=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=suse-sles-sap-15-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(.Name | test("BETA|byos"; "i") | not)] | .[0].ImageId')
+
+			if [ -n "$LatestAmiId" ]; then
+				aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+			fi
 		fi
 	fi
 else
 	if [ -n "$RoleName" ]; then
 		echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-		echo "# Get Newest AMI Information from Public AMI"
-		NewestAmiId=$(aws ec2 describe-images --owner 013907871322 --filter "Name=name,Values=suse-sles-15-*-hvm-ssd-x86_64" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)' --output text --region ${Region} | grep -v byos | grep -v ecs | grep -v sapcal | sort -k 3 --reverse | head -n 1 | awk '{print $1}')
-		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		echo "# Get Newest AMI Information from Public AMI (AWS Martketplace/PAYG)"
+		LatestAmiId=$(aws ec2 describe-images --owner "013907871322" --filter "Name=name,Values=suse-sles-15-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(.Name | test("BETA|byos|sapcal|ecs"; "i") | not)] | .[0].ImageId')
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	fi
 fi
 
