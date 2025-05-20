@@ -593,8 +593,13 @@ if [ -n "$RoleName" ]; then
 		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
 	else
 		echo "# Get Newest AMI Information from Public AMI"
-		NewestAmiId=$(aws ec2 describe-images --owner 679593333241 --filter "Name=name,Values=openSUSE-Leap-15-*-hvm-ssd-x86_64*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)' --output text --region ${Region} | sort -k 3 --reverse | head -n 1 | awk '{print $1}')
-		aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		LatestAmiId=$(aws ec2 describe-images --owner "679593333241" --filter "Name=name,Values=openSUSE-Leap-15*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	fi
 fi
 
