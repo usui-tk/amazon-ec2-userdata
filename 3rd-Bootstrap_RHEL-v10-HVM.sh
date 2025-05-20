@@ -337,11 +337,6 @@ cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
 name=Extra Packages for Enterprise Linux \$releasever - \$basearch
 #baseurl=https://download.example/pub/epel/\$releasever\${releasever_minor:+z}/Everything/\$basearch/
 metalink=https://mirrors.fedoraproject.org/metalink?repo=epel\${releasever_minor:+-z}-\$releasever&arch=\$basearch
-gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-\$releasever_major
-gpgcheck=1
-repo_gpgcheck=0
-metadata_expire=24h
-countme=1
 enabled=0
 __EOF__
 
@@ -365,7 +360,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	rm -f /etc/yum.repos.d/epel-bootstrap.repo
 else
 	# Install EPEL yum repository
-	dnf --enablerepo="epel-bootstrap" -y install epel-release
+	dnf --enablerepo="epel-bootstrap" --nogpgcheck -y install epel-release
 
 	# Delete dnf/yum temporary data
 	rm -f /etc/yum.repos.d/epel-bootstrap.repo
