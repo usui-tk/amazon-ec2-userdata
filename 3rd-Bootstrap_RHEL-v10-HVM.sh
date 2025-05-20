@@ -36,7 +36,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution
-#  - RHEL v9
+#  - RHEL v10
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
 #    https://access.redhat.com/support/policy/updates/extras
 #    https://access.redhat.com/support/policy/updates/rhel-app-streams-life-cycle
@@ -109,14 +109,14 @@ systemctl list-units --type=service --all --no-pager > /tmp/command-log_systemct
 #          codeready-builder-for-rhel-10-rhui-rpms
 #          rhel-10-supplementary-rhui-rpms
 #-------------------------------------------------------------------------------
-#  - RHEL v9 (HA:High Availability)
+#  - RHEL v10 (HA:High Availability)
 #      (RHUI Client Package:rh-amazon-rhui-client-ha)
 #
 #      Red Hat Yum Repository Default Status (Enable/Disable)
 #      [Default - Enable]
 #      [Default - Disable]
 #-------------------------------------------------------------------------------
-#  - RHEL v9 (SAP Bundle)
+#  - RHEL v10 (SAP Bundle)
 #      (RHUI Client Package:rh-amazon-rhui-client-sap-bundle-e4s)
 #
 #      Red Hat Yum Repository Default Status (Enable/Disable)
@@ -307,10 +307,10 @@ if [ $(systemctl is-enabled cockpit.socket) = "disabled" ]; then
 fi
 
 #-------------------------------------------------------------------------------
-# Custom Package Installation [Python 3.9]
+# Custom Package Installation [Python 3.12]
 #-------------------------------------------------------------------------------
 
-# Package Install Python 3.9 Runtime (from Red Hat Official Repository)
+# Package Install Python 3.12 Runtime (from Red Hat Official Repository)
 dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools
 # dnf install -y python3 python3-pip python3-rpm-generators python3-rpm-macros python3-setuptools python3-test python3-virtualenv python3-wheel
 
@@ -318,7 +318,7 @@ dnf install -y python3-dateutil python3-jmespath python3-pyasn1 python3-pyasn1 p
 dnf install -y python3-cloud-what python3-distro
 dnf install -y python3-argcomplete
 
-# Version Information (Python 3.9)
+# Version Information (Python 3.12)
 python3 -V
 pip3 -V
 
