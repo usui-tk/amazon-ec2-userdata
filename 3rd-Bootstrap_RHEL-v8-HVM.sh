@@ -788,25 +788,45 @@ if [ -n "$RoleName" ]; then
 	echo "# Get Amazon Machine Image Information"
 
 	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
+
 		# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)
 		echo "# Get Newest AMI Information from Public AMI (RHEL-SAP Bundle)"
 		LatestAmiId=$(aws ec2 describe-images --owner "679593333241" --filters "Name=name,Values=RHEL-8.?.0-SAP-HVM*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	elif [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-ha") ]; then
+
 		# Get Newest AMI Information from Public AMI (RHEL-HA)
 		echo "# Get Newest AMI Information from Public AMI (RHEL-HA)"
 		LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL_HA-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-sap-bundle-e4s" -ve "rh-amazon-rhui-client-ha" | grep -ie "rh-amazon-rhui-client") ]; then
+
 		# Get Newest AMI Information from Public AMI (RHEL)
 		echo "# Get Newest AMI Information from Public AMI (RHEL)"
 		LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	else
+
 		# Get Newest AMI Information from Public AMI (RHEL)
 		echo "# Get Newest AMI Information from Public AMI (RHEL)"
 		LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-8.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	fi
 fi
 
@@ -1220,13 +1240,13 @@ sestatus
 
 if [ $(getenforce) = "Enforcing" ]; then
 	# Setting SELinux disabled mode
-	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-states-and-modes_using-selinux
 	# grubby --info=ALL
 	# grubby --update-kernel ALL --args selinux=0
 	# grubby --info=ALL
 
 	# Setting SELinux permissive mode
-	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-modes-at-boot-time_changing-selinux-states-and-modes
+	#  https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/8/html-single/using_selinux/index#changing-selinux-states-and-modes_using-selinux
 	grubby --info=ALL
 	grubby --update-kernel ALL --args enforcing=0
 	grubby --info=ALL
