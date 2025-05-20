@@ -630,20 +630,34 @@ if [ -n "$RoleName" ]; then
 	echo "# Get Amazon Machine Image Information"
 
 	if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-els") ]; then
+
 		# Get Newest AMI Information from Public AMI (RHEL-ELS)
 		echo "# Get Newest AMI Information from Public AMI (RHEL-ELS)"
 		LatestAmiId=$(aws ec2 describe-images --owner "679593333241" --filters "Name=name,Values=RHEL-6.10*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	elif [ $(rpm -qa | grep -ve "rh-amazon-rhui-client-els" | grep -ie "rh-amazon-rhui-client") ]; then
+
 		# Get Newest AMI Information from Public AMI (RHEL)
 		echo "# Get Newest AMI Information from Public AMI (RHEL)"
 		LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-6.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	else
 		# Get Newest AMI Information from Public AMI (RHEL)
 		echo "# Get Newest AMI Information from Public AMI (RHEL)"
 		LatestAmiId=$(aws ec2 describe-images --owner "309956199498" --filters "Name=name,Values=RHEL-6.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select((.Name | contains("BETA") or contains("Access")) | not)] | .[0].ImageId')
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+
+		if [ -n "$LatestAmiId" ]; then
+			aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+		fi
+
 	fi
 fi
 
