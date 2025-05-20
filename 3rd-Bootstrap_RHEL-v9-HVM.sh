@@ -45,7 +45,7 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #
 #    https://access.redhat.com/articles/3135121
 #
-#    https://aws.amazon.com/marketplace/pp/
+#    https://aws.amazon.com/marketplace/pp/prodview-aezl6to7jjkao
 #
 #-------------------------------------------------------------------------------
 
