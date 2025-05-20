@@ -466,16 +466,18 @@ fi
 # # Getting information about Amazon Machine Image
 # #------------------------------------------------------------------------------
 
-# # Get Amazon Machine Image Information
-# if [ -n "$RoleName" ]; then
+# Get Amazon Machine Image Information
+if [ -n "$RoleName" ]; then
 
-# 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
-# 	echo "# Get Amazon Machine Image Information"
+	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
+	echo "# Get Amazon Machine Image Information"
 
-# 	NewestAmiInfo=$(aws ec2 describe-images --owner "099720109477" --filter "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)|[0]' --output json --region ${Region})
-# 	NewestAmiId=$(echo $NewestAmiInfo| jq -r '.ImageId')
-# 	aws ec2 describe-images --image-ids ${NewestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
-# fi
+	LatestAmiId=$(aws ec2 describe-images --owner "099720109477" --filter "Name=name,Values=ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+
+	if [ -n "$LatestAmiId" ]; then
+		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+	fi
+fi
 
 
 #-------------------------------------------------------------------------------
