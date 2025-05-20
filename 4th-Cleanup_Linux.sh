@@ -98,16 +98,16 @@ if [ $(command -v rpm) ]; then
 			rpm -qa | grep -ie "kernel" | sort
 		fi
 
-		# Reconfigure GRUB 2 config file
-		if [ $(command -v grub2-mkconfig) ]; then
-			if [ $BootProgram = "UEFI" ]; then
-				grub2-mkconfig -o $(find /boot | grep -ie "efi" -ie "EFI" | grep -w grub.cfg)
-			elif [ $BootProgram = "BIOS" ]; then
-				grub2-mkconfig -o $(find /boot | grep -ve "efi" -ve "EFI" | grep -w grub.cfg)
-			else
-				grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
-			fi
-		fi
+		# # Reconfigure GRUB 2 config file
+		# if [ $(command -v grub2-mkconfig) ]; then
+		# 	if [ $BootProgram = "UEFI" ]; then
+		# 		grub2-mkconfig -o $(find /boot | grep -ie "efi" -ie "EFI" | grep -w grub.cfg)
+		# 	elif [ $BootProgram = "BIOS" ]; then
+		# 		grub2-mkconfig -o $(find /boot | grep -ve "efi" -ve "EFI" | grep -w grub.cfg)
+		# 	else
+		# 		grub2-mkconfig -o $(find /boot | grep -w grub.cfg)
+		# 	fi
+		# fi
 
 		# Show Linux Boot Program information
 		if [ $(command -v grubby) ]; then
