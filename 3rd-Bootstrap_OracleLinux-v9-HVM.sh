@@ -113,11 +113,9 @@ find /etc/yum.repos.d/
 
 dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9
-dnf --enablerepo="*" --verbose clean all
+dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-java-jdk-release-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9
 
-# dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9 oracle-java-jdk-release-el9
-# dnf --enablerepo="*" --verbose clean all
+dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
 
@@ -139,17 +137,19 @@ dnf module list
 
 # Enable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-enabled ol9_baseos_latest
-dnf config-manager --set-enabled ol9_UEKR7
+dnf config-manager --set-enabled ol9_UEKR8
 dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
 dnf config-manager --set-enabled ol9_oracle_instantclient23
+dnf config-manager --set-enabled ol9_java
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
 dnf config-manager --set-enabled ol9_olcne19
 dnf config-manager --set-enabled ol9_ocne
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
+dnf config-manager --set-disabled ol9_UEKR7
 dnf config-manager --set-disabled ol9_kvm_utils
 dnf config-manager --set-disabled ol9_developer_UEKR7
 dnf config-manager --set-disabled ol9_developer_kvm_utils
