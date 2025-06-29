@@ -303,24 +303,19 @@ pip3 -V
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # yum localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+# yum localinstall -y "https://archives.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm"
 
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
-cat > /etc/yum.repos.d/epel-bootstrap.repo << __EOF__
-[epel-bootstrap]
-name=Bootstrap EPEL
-mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-7&arch=\$basearch
+cat > /etc/yum.repos.d/epel.repo << __EOF__
+[epel]
+name=EPEL
+baseurl=https://archives.fedoraproject.org/pub/archive/epel/7/\$basearch
 failovermethod=priority
 enabled=0
 gpgcheck=0
 __EOF__
 
 yum --enablerepo="*" --verbose clean all
-
-yum --enablerepo="epel-bootstrap" -y install epel-release
-
-# Delete yum temporary data
-rm -f /etc/yum.repos.d/epel-bootstrap.repo
-rm -rf /var/cache/yum/x86_64/7Server/epel-bootstrap*
 
 # Disable EPEL yum repository
 egrep '^\[|enabled' /etc/yum.repos.d/epel*
