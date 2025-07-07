@@ -142,7 +142,7 @@ dnf config-manager --set-enabled ol10_appstream
 dnf config-manager --set-enabled ol10_addons
 dnf config-manager --set-enabled ol10_codeready_builder
 dnf config-manager --set-enabled ol10_developer
-# dnf config-manager --set-enabled ol10_developer_EPEL
+dnf config-manager --set-enabled ol10_u0_developer_EPEL
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol10_distro_builder
@@ -295,19 +295,19 @@ activate-global-python-argcomplete
 # Package Install EPEL(Extra Packages for Enterprise Linux) Repository Package
 # dnf localinstall -y "https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm"
 
-# # Cleanup repository information
-# dnf --enablerepo="*" --verbose clean all
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
 
-# # EPEL repository package [dnf command]
-# dnf repository-packages "ol10_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
+# EPEL repository package [dnf command]
+dnf repository-packages "ol10_u0_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
-# # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-# dnf --enablerepo="ol10_developer_EPEL" install -y colordiff fping htop iftop ipv6calc lsb_release ncdu screen ssh-audit stressapptest wdiff
+# Package Install Oracle Linux System Administration Tools (from EPEL Repository)
+dnf --enablerepo="ol10_u0_developer_EPEL" install -y colordiff fping htop iftop ipv6calc lsb_release ncdu screen ssh-audit stressapptest wdiff
 
-# dnf --enablerepo="ol10_developer_EPEL" install -y aria2 atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen ssh-audit stressapptest unicornscan wdiff yamllint
+# dnf --enablerepo="ol10_u0_developer_EPEL" install -y aria2 atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen ssh-audit stressapptest unicornscan wdiff yamllint
 
-# # Package Install EC2 instance optimization tools (from EPEL Repository)
-# dnf --enablerepo="ol10_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
+# Package Install EC2 instance optimization tools (from EPEL Repository)
+# dnf --enablerepo="ol10_u0_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
