@@ -504,8 +504,8 @@ dnf install -y java-17-openjdk java-17-openjdk-devel java-17-openjdk-headless
 # https://doc.dataiku.com/dss/latest/installation/custom/initial-install.html#manual-dependency-installation
 #-------------------------------------------------------------------------------
 dnf module list nginx
-dnf module enable nginx:1.24 -y
-dnf module install nginx:1.24 -y
+dnf module enable nginx:1.26 -y
+dnf module install nginx:1.26 -y
 dnf module list nginx
 nginx -V
 
@@ -529,8 +529,8 @@ fi
 # Dataiku dependency installation [nodejs and npm]
 #-------------------------------------------------------------------------------
 dnf module list nodejs
-dnf module enable nodejs:20 -y
-dnf module install nodejs:20 -y
+dnf module enable nodejs:22 -y
+dnf module install nodejs:22 -y
 dnf module list nodejs
 npm -v
 
