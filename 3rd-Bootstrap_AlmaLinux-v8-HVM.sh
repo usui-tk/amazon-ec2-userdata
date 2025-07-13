@@ -294,7 +294,7 @@ dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-pack
 dnf repository-packages epel-testing-modular list > /tmp/command-log_dnf_repository-package-list_epel-testing-modular.txt
 
 # Package Install AlmaLinux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff crudini dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
