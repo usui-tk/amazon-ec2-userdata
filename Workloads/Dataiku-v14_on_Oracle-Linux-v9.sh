@@ -539,7 +539,9 @@ npm -v
 # Dataiku dependency installation [R]
 # https://doc.dataiku.com/dss/latest/installation/custom/r.html
 #-------------------------------------------------------------------------------
-dnf install -y R R-devel R-core R-core-devel R-java R-java-devel
+dnf install -y R R-devel R-core R-core-devel R-java R-java-devel R-highlight
+
+# dnf install -y R-RInside R-RInside-devel R-Rcpp R-Rcpp-devel R-littler R-rJava R-rlecuyer
 
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [Others]
@@ -632,7 +634,7 @@ su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin install-graphics-export"
 # https://doc.dataiku.com/dss/latest/installation/custom/r.html
 #-------------------------------------------------------------------------------
 
-su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin install-R-integration"
+# su ec2-user -c "/opt/dataiku/dss_data/bin/dssadmin install-R-integration"
 
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [Database drivers for Oracle Database]
