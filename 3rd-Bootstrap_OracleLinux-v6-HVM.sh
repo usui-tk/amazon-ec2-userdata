@@ -96,6 +96,7 @@ find /etc/yum.repos.d/
 yum list *release*el6
 
 yum install -y oraclelinux-release-el6 oraclelinux-developer-release-el6 oracle-softwarecollection-release-el6
+
 yum --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
