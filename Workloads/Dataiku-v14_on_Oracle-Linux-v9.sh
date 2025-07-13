@@ -544,7 +544,7 @@ dnf install -y R R-devel R-core R-core-devel R-java R-java-devel
 #-------------------------------------------------------------------------------
 # Dataiku dependency installation [Others]
 #-------------------------------------------------------------------------------
-dnf install -y libcurl-devel libXScrnSaver mesa-libgbm
+dnf install -y libcurl-devel libxml2-devel libXScrnSaver mesa-libgbm
 dnf install -y pandoc texlive-ec texlive-gsftopk texlive-metafont texlive-updmap-map texlive-xcolor
 
 #-------------------------------------------------------------------------------
