@@ -490,6 +490,7 @@ grubby --info=ALL
 #          Building Dataiku Data Science Studio / DSS (v13)                    #
 ################################################################################
 ################################################################################
+# https://doc.dataiku.com/dss/latest/release_notes/index.html
 # https://doc.dataiku.com/dss/latest/installation/custom/index.html
 ################################################################################
 
