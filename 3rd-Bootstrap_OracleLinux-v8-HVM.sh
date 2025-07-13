@@ -105,7 +105,8 @@ find /etc/yum.repos.d/
 
 dnf list *release*el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oracle-software-release-el8 oraclelinux-developer-release-el8 oracle-java-jdk-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oraclelinux-developer-release-el8 oracle-software-release-el8  oracle-java-jdk-release-el8
+
 dnf --enablerepo="*" --verbose clean all
 
 find /etc/yum.repos.d/
