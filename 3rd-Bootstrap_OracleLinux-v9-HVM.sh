@@ -113,7 +113,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-instantclient-release-23ai-el9 oracle-java-jdk-release-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9
+dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9 oracle-instantclient-release-23ai-el9 oracle-java-jdk-release-el9
 
 dnf --enablerepo="*" --verbose clean all
 
