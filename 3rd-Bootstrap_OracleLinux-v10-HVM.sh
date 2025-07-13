@@ -194,7 +194,7 @@ else
 fi
 
 # Package Install Oracle Linux System Administration Tools (from Oracle Linux Repository)
-dnf install -y acpid arptables bash-color-prompt bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils policycoreutils psacct psmisc python3-dnf-plugin-versionlock redhat-text-fonts rsync smartmontools sos stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y acpid arptables bash-color-prompt bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 console-login-helper-messages-motdgen crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mtr nc net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils policycoreutils psacct psmisc python3-dnf-plugin-versionlock redhat-text-fonts rsync smartmontools sos stalld strace stratisd-tools symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
@@ -302,9 +302,9 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol10_u0_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol10_u0_developer_EPEL" install -y colordiff fping htop iftop ipv6calc lsb_release ncdu screen ssh-audit stressapptest wdiff
+dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all colordiff fping htop iftop ipv6calc lsb_release ncdu nkf screen ssh-audit stressapptest wdiff
 
-# dnf --enablerepo="ol10_u0_developer_EPEL" install -y aria2 atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nload screen ssh-audit stressapptest unicornscan wdiff yamllint
+# dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff dateutils fping glances htop iftop inotify-tools inxi ipv6calc jc lsb_release moreutils moreutils-parallel ncdu nkf nload screen ssh-audit stressapptest unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 # dnf --enablerepo="ol10_u0_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
@@ -1129,6 +1129,7 @@ fi
 # Setting System Language
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
+	dnf install -y default-fonts-cjk*
 	dnf install -y langpacks-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
 
 	echo "# Setting System Language -> $Language"
