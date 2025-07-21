@@ -41,7 +41,8 @@ CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/mas
 #    https://wiki.rockylinux.org/
 #    https://docs.rockylinux.org/site-index
 #
-#    https://aws.amazon.com/marketplace/pp/prodview-ygp66mwgbl2ii
+#    https://aws.amazon.com/marketplace/seller-profile?id=01538adc-2664-49d5-b926-3381dffce12d
+#    https://aws.amazon.com/marketplace/pp/prodview-z7hzo3jvdgrmi
 #    https://rockylinux.org/ami/
 #
 #    https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/
