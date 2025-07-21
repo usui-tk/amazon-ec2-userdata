@@ -18,8 +18,10 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForRHELv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v8-HVM.sh"
 	ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v7-HVM.sh"
 	ScriptForRHELv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RHEL-v6-HVM.sh"
+	ScriptForRockyLinuxv10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v10-HVM.sh"
 	ScriptForRockyLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v9-HVM.sh"
 	ScriptForRockyLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_RockyLinux-v8-HVM.sh"
+	ScriptForAlmaLinuxv10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v10-HVM.sh"
 	ScriptForAlmaLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v9-HVM.sh"
 	ScriptForAlmaLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_AlmaLinux-v8-HVM.sh"
 	ScriptForCentOSv10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v10-HVM.sh"
@@ -27,6 +29,7 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForCentOSv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v8-HVM.sh"
 	ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v7-HVM.sh"
 	ScriptForCentOSv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_CentOS-v6-HVM.sh"
+	ScriptForOracleLinuxv10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v10-HVM.sh"
 	ScriptForOracleLinuxv9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v9-HVM.sh"
 	ScriptForOracleLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v8-HVM.sh"
 	ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
@@ -173,7 +176,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "Rocky Linux" ] || [ "${DIST_TYPE}" = "rocky" ]; then
-			if [ $(echo ${REV} | grep -e '9.') ]; then
+			if [ $(echo ${REV} | grep -e '10.') ]; then
+				# Bootstrap Script for Rocky Linux v10.x
+				BootstrapScript=${ScriptForRockyLinuxv10}
+			elif [ $(echo ${REV} | grep -e '9.') ]; then
 				# Bootstrap Script for Rocky Linux v9.x
 				BootstrapScript=${ScriptForRockyLinuxv9}
 			elif [ $(echo ${REV} | grep -e '8.') ]; then
@@ -183,7 +189,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "AlmaLinux" ] || [ "${DIST_TYPE}" = "almalinux" ]; then
-			if [ $(echo ${REV} | grep -e '9.') ]; then
+			if [ $(echo ${REV} | grep -e '10.') ]; then
+				# Bootstrap Script for AlmaLinux v10.x
+				BootstrapScript=${ScriptForAlmaLinuxv10}
+			elif [ $(echo ${REV} | grep -e '9.') ]; then
 				# Bootstrap Script for AlmaLinux v9.x
 				BootstrapScript=${ScriptForAlmaLinuxv9}
 			elif [ $(echo ${REV} | grep -e '8.') ]; then
@@ -212,7 +221,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "Oracle Linux Server" ] || [ "${DIST_TYPE}" = "ol" ]; then
-			if [ $(echo ${REV} | grep -e '9.') ]; then
+			if [ $(echo ${REV} | grep -e '10.') ]; then
+				# Bootstrap Script for Oracle Linux v10.x
+				BootstrapScript=${ScriptForOracleLinuxv10}
+			elif [ $(echo ${REV} | grep -e '9.') ]; then
 				# Bootstrap Script for Oracle Linux v9.x
 				BootstrapScript=${ScriptForOracleLinuxv9}
 			elif [ $(echo ${REV} | grep -e '8.') ]; then
