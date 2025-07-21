@@ -210,7 +210,7 @@ dnf list installed | grep kpatch
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
-# https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10-beta/html-single/managing_systems_in_the_rhel_web_console/index
+# https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/10/html-single/managing_systems_in_the_rhel_web_console/index
 #-------------------------------------------------------------------------------
 
 # Package Install CentOS Web-Based support tools (from CentOS Community Repository)
