@@ -1130,7 +1130,7 @@ fi
 if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	# Custom Package Installation
 	dnf install -y default-fonts-cjk*
-	dnf install -y langpacks-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
+	dnf install -y langpacks-core-ja langpacks-core-font-ja glibc-langpack-ja google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
 
 	echo "# Setting System Language -> $Language"
 	locale
@@ -1142,6 +1142,9 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	strings /etc/locale.conf
 	source /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
+	# Custom Package Installation
+	dnf install -y langpacks-core-en langpacks-core-font-en glibc-langpack-en google-noto-sans-cjk-ttc-fonts google-noto-serif-cjk-ttc-fonts
+
 	echo "# Setting System Language -> $Language"
 	locale
 	localectl status --no-pager
