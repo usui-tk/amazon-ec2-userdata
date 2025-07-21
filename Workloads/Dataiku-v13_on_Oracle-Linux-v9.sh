@@ -510,6 +510,9 @@ dnf module install nginx:1.26 -y
 dnf module list nginx
 nginx -V
 
+# Package Install nginx modules (from EPEL Repository)
+# dnf --enablerepo="ol9_developer_EPEL" install -y nginx-mod-headers-more
+
 # nginx Server configuration
 cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
 
