@@ -529,6 +529,9 @@ nginx -V
 
 nginx -t
 
+# Package Install nginx modules (from EPEL Repository)
+# dnf --enablerepo="ol9_developer_EPEL" install -y nginx-mod-headers-more
+
 # nginx Server configuration
 cat /etc/nginx/nginx.conf | grep -ie "server" -ie "listen"
 
