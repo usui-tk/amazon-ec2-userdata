@@ -107,7 +107,7 @@ dnf module list
 # Package Install AlmaLinux yum repository Files (from AlmaLinux Community Repository)
 find /etc/yum.repos.d/
 
-dnf search release
+dnf list *release*
 
 dnf install -y almalinux-release
 dnf --enablerepo="*" --verbose clean all
