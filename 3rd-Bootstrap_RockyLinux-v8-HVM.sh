@@ -104,6 +104,23 @@ dnf update -y dnf dnf-data
 dnf repolist all
 dnf module list
 
+# Package Install Rocky Linux yum repository Files (from Rocky Linux Community Repository)
+find /etc/yum.repos.d/
+
+dnf list *release*
+
+dnf install -y rocky-release
+dnf --enablerepo="*" --verbose clean all
+
+find /etc/yum.repos.d/
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
+# Checking repository information
+dnf repolist all
+dnf module list
+
 # Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "beta, debug, source, test, devel, epel, rt", "media-*")
 repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "beta" -ve "debug" -ve "source" -ve "test" -ve "devel" -ve "epel" -ve "rt" -ve "media-*"  | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
