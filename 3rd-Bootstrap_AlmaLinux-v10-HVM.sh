@@ -273,7 +273,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list_epel.txt
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
-# Package Install CentOS System Administration Tools (from EPEL Repository)
+# Package Install AlmaLinux System Administration Tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y 7zip-standalone-all colordiff colorized-logs crudini fping htop iftop ipv6calc ipv6toolkit lsb_release ncdu nkf rpmconf screen ssh-audit stressapptest wdiff
 
 # dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest unicornscan wdiff yamllint
