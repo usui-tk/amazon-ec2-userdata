@@ -430,7 +430,7 @@ if [ $(rpm -qa | grep -ie "rh-amazon-rhui-client-sap-bundle-e4s") ]; then
 	dnf --enablerepo="epel" install -y aria2 atop bcftools bpytop byobu collectd collectd-utils colordiff dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
 else
 	# Utilities to be installed from the EPEL repository
-	dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff crudini dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc moreutils moreutils-parallel ncdu nload screen srm stressapptest tcping unicornscan wdiff yamllint
+	dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff crudini dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc ipv6toolkit moreutils moreutils-parallel ncdu nload rpmconf screen srm stressapptest tcping unicornscan wdiff yamllint
 fi
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
