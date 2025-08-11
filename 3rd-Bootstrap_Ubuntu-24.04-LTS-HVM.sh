@@ -113,7 +113,7 @@ apt install -y -q libiscsi-bin lsscsi scsitools sdparm sg3-utils
 
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 
-apt install -y -q pcp pcp-conf pcp-manager
+apt install -y -q pcp pcp-conf pcp-doc pcp-manager
 
 # Package Install Python 3 Runtime (from Ubuntu Official Repository)
 apt install -y -q python3 python3-pip python3-setuptools python3-testtools python3-ubuntutools python3-wheel

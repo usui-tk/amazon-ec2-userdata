@@ -118,7 +118,7 @@ apt install -y -q open-iscsi open-isns-utils lsscsi scsitools sdparm sg3-utils
 
 apt install -y -q apparmor apparmor-easyprof apparmor-profiles apparmor-profiles-extra apparmor-utils dh-apparmor
 
-apt install -y -q pcp pcp-conf pcp-manager
+apt install -y -q pcp pcp-conf pcp-doc pcp-manager
 
 # Package Install rsyslog Tools (from Debian Official Repository)
 apt install -y -q rsyslog
