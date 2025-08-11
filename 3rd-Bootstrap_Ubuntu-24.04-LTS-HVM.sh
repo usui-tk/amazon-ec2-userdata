@@ -105,7 +105,7 @@ apt update -y -q && apt upgrade -y -q && apt full-upgrade -y -q
 #-------------------------------------------------------------------------------
 
 # Package Install Ubuntu System Administration Tools (from Ubuntu Official Repository)
-apt install -y -q 7zip-standalone acpid acpitool aria2 arptables atop bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu bzip2 chrony collectd collectd-utils collectl colordiff colorized-logs crash crudini cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances glances hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jc jnettop jp kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm moreutils mtr ncdu ncompress needrestart netcat-openbsd netsniff-ng nftables nkf nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport ssh-audit strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget yq zip zstd
+apt install -y -q 7zip-standalone acpid acpitool aria2 arptables atop bash-completion bcc bcftools binutils blktrace bpfcc-tools byobu bzip2 chrony collectd collectd-utils collectl collectl colordiff colorized-logs crash crudini cryptol curl dateutils debian-goodies dstat ebtables ethtool expect file fio fping fzf gdisk git glances glances hardinfo hdparm htop httping iftop inotify-tools intltool inxi iotop ipcalc iperf3 iptraf-ng ipv6calc ipv6toolkit jc jnettop jp kexec-tools locales-all lsb-release lsof lvm2 lzop manpages mc mdadm moreutils mtr ncdu ncompress needrestart netcat-openbsd netsniff-ng nftables nkf nload nmap numactl numatop nvme-cli parted psmisc python3-bpfcc rsync rsyncrypto screen secure-delete shellcheck snmp sosreport ssh-audit strace stressapptest symlinks sysfsutils sysstat tcpdump time timelimit traceroute tree tzdata unzip usermode util-linux wdiff wget yq zip zstd
 
 apt install -y -q cifs-utils nfs-common nfs4-acl-tools nfstrace nfswatch
 
@@ -597,57 +597,57 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-fluent-package/install-by-deb-fluent-package
 #-------------------------------------------------------------------------------
 
-# curl -fsSL "https://toolbelt.treasuredata.com/sh/install-ubuntu-jammy-fluent-package5.sh" | sh
+curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-noble-fluent-package5-lts.sh | sh
 
-# apt show td-agent
+apt show td-agent
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart td-agent
+systemctl restart td-agent
 
-# systemctl status -l td-agent
+systemctl status -l td-agent
 
-# # Configure fluentd software (Start Daemon td-agent)
-# if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
-# 	systemctl enable td-agent
-# 	systemctl is-enabled td-agent
-# fi
+# Configure fluentd software (Start Daemon td-agent)
+if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
+	systemctl enable td-agent
+	systemctl is-enabled td-agent
+fi
 
-# # # Package bundled ruby gem package information
-# /opt/td-agent/bin/fluent-gem list
+# # Package bundled ruby gem package information
+/opt/td-agent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
 # https://www.terraform.io/docs/cli/install/apt.html
 #-------------------------------------------------------------------------------
 
-# # Import GPG Key File
-# wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+# Import GPG Key File
+wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
-# # Add the HashiCorp Linux Repository
-# echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+# Add the HashiCorp Linux Repository
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 
-# # apt repository metadata Clean up
-# apt clean -y
+# apt repository metadata Clean up
+apt clean -y
 
-# # Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# apt update -y -q && apt install -y -q terraform
+# Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+apt update -y -q && apt install -y -q terraform
 
-# # Package Information
-# apt show terraform
+# Package Information
+apt show terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
