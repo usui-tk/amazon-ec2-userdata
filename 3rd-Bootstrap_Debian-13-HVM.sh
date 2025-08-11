@@ -946,7 +946,8 @@ if [ "${VpcNetwork}" = "IPv4" ]; then
 	echo 'net.ipv6.conf.default.disable_ipv6 = 1' >> $DisableIPv6Conf
 
 	sysctl --system
-	sysctl -p
+
+	# sysctl -p
 
 	sysctl -a | grep -ie "local_port" -ie "ipv6" | sort
 elif [ "${VpcNetwork}" = "IPv6" ]; then
