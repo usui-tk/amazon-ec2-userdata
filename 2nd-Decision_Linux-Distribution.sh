@@ -41,6 +41,7 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
 	ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
 	ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
+	ScriptForDebian13="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-13-HVM.sh"
 	ScriptForDebian12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-12-HVM.sh"
 	ScriptForDebian11="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-11-HVM.sh"
 	ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
@@ -269,7 +270,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "Debian GNU/Linux" ] || [ "${DIST_TYPE}" = "debian" ]; then
-			if [ $(echo ${REV} | grep -e '12') ]; then
+			if [ $(echo ${REV} | grep -e '13') ]; then
+				# Bootstrap Script for Debian GNU/Linux 13 (Trixie)
+				BootstrapScript=${ScriptForDebian13}
+			elif [ $(echo ${REV} | grep -e '12') ]; then
 				# Bootstrap Script for Debian GNU/Linux 12 (Bookworm)
 				BootstrapScript=${ScriptForDebian12}
 			elif [ $(echo ${REV} | grep -e '11') ]; then
