@@ -302,9 +302,9 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol10_u0_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all colordiff colorized-logs crudini fping htop iftop ipv6calc ipv6toolkit lsb_release ncdu nkf rpmconf screen ssh-audit stressapptest wdiff
+dnf --enablerepo="ol10_u0_developer_EPEL" install -y dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest wdiff
 
-# dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest unicornscan wdiff yamllint
+# dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest unicornscan wdiff yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 # dnf --enablerepo="ol10_u0_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
