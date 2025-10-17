@@ -381,7 +381,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest wdiff
+dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest wdiff
 
 # dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest unicornscan wdiff yamllint
 
