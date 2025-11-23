@@ -112,6 +112,30 @@ dnf update -y dnf dnf-data
 # Checking repository information
 dnf repolist all
 
+# Package Install Amazon Linux yum repository Files (from Amazon Linux Official Repository)
+find /etc/yum.repos.d/
+
+dnf list *release*
+
+dnf install -y spal-release
+
+dnf --enablerepo="*" --verbose clean all
+
+find /etc/yum.repos.d/
+
+# Checking repository information
+dnf repolist all
+
+# Enable Yum Repository Data from Amazon Linux YUM repository
+dnf config-manager --set-enabled amazonlinux
+dnf config-manager --set-enabled kernel-livepatch
+
+# Disable Yum Repository Data from Amazon Linux YUM repository
+dnf config-manager --set-disabled amazonlinux-spal
+
+# Checking repository information
+dnf repolist all
+
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
 
@@ -125,6 +149,7 @@ dnf --enablerepo="*" --verbose clean all
 
 # Default Package Update
 dnf update -y
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
@@ -145,7 +170,7 @@ if [ $(rpm -qa | grep -w gnupg2-minimal) ]; then
 fi
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio gdisk git gnutls-utils hdparm htop intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu libzip-tools low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nkf nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y 7zip-standalone-all acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio fping gdisk git gnutls-utils hdparm htop iftop inotify-tools intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu libzip-tools low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nkf nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 # Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
@@ -182,6 +207,7 @@ dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep
 dnf install -y awscli-2 amazon-cloudwatch-agent amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux ec2rl
 ## dnf install -y awscli-2 amazon-chrony-config amazon-cloudwatch-agent amazon-ecr-credential-helper amazon-efs-utils amazon-ssm-agent aws-cfn-bootstrap aws-kinesis-agent aws-nitro-enclaves-cli ec2-hibinit-agent ec2-instance-connect ec2-instance-connect-selinux ec2rl
 
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel-livepatch]
 # https://docs.aws.amazon.com/linux/al2023/ug/live-patching.html
@@ -202,6 +228,7 @@ if [ $(systemctl is-enabled kpatch) = "disabled" ]; then
 	systemctl enable kpatch
 	systemctl is-enabled kpatch
 fi
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Python 3.9]
@@ -226,6 +253,31 @@ pip3 -V
 
 # Python package setting (python3-argcomplete)
 activate-global-python-argcomplete
+
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [SPAL - Supplementary Packages for Amazon Linux]
+# https://docs.aws.amazon.com/linux/al2023/ug/spal.html
+#-------------------------------------------------------------------------------
+
+# Package Install SPAL (Supplementary Packages for Amazon Linux) Repository Package
+# dnf install -y spal-release
+
+# Cleanup repository information
+dnf --enablerepo="*" --verbose clean all
+
+# Checking repository information
+dnf repolist all
+
+# SPAL repository package [dnf command]
+dnf repository-packages "amazonlinux-spal" list > /tmp/command-log_dnf_repository-package-list_amazonlinux-spal.txt
+
+# Package Install Oracle Linux System Administration Tools (from SPAL Repository)
+dnf --enablerepo="amazonlinux-spal" install -y byobu lsb_release moreutils moreutils-parallel ncdu rpmconf yq
+
+# Package Install Performance Co-Pilot (PCP) Tools (from SPAL Repository)
+dnf --enablerepo="amazonlinux-spal" install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
@@ -681,7 +733,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-fluent-package/install-by-rpm-fluent-package
 #-------------------------------------------------------------------------------
 
-curl -fsSL https://toolbelt.treasuredata.com/sh/install-amazon2023-fluent-package5-lts.sh | sh
+curl -fsSL https://fluentd.cdn.cncf.io/sh/install-amazon2023-fluent-package6-lts.sh | sh
 
 rpm -qi fluent-package
 
