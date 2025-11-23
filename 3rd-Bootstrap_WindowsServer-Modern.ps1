@@ -2392,13 +2392,9 @@ if ($WindowsOSVersion -eq "10.0") {
 # Log Separator
 Write-LogSeparator "Package Install Database Administration Tool (SQL Server Management Studio)"
 
-# Initialize Parameter (for English Edition)
-# Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://aka.ms/ssmsfullsetup?clcid=0x409"
-# Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "SSMS-Setup-ENU.exe"
-
-# Initialize Parameter (for Japanese Edition)
-Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://aka.ms/ssmsfullsetup?clcid=0x411"
-Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "SSMS-Setup-JPN.exe"
+# Initialize Parameter
+Set-Variable -Name SSMS_INSTALLER_URL -Scope Script -Value "https://aka.ms/ssms/22/release/vs_SSMS.exe"
+Set-Variable -Name SSMS_INSTALLER_FILE -Scope Script -Value "vs_SSMS.exe"
 
 # Check Windows OS Version [Windows Server 2008R2, 2012, 2012 R2, 2016]
 if ($WindowsOSVersion -match "^10.0") {
@@ -2458,25 +2454,25 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 				# [Windows Server 2016]
 				# https://www.intel.com/content/www/us/en/download/18737/intel-network-adapter-driver-for-windows-server-2016.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2016)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845889/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2016.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/868288/Wired_driver_30.5_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2016.zip"
 			}
 			'Windows Server 2019' {
 				# [Windows Server 2019]
 				# https://www.intel.com/content/www/us/en/download/19372/intel-network-adapter-driver-for-windows-server-2019.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2019)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845888/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2019.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/868286/Wired_driver_30.5_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2019.zip"
 			}
 			'Windows Server 2022' {
 				# [Windows Server 2022]
 				# https://www.intel.com/content/www/us/en/download/706171/intel-network-adapter-driver-for-windows-server-2022.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2022)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845884/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2022.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/868132/Wired_driver_30.5_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2022.zip"
 			}
 			'Windows Server 2025' {
 				# [Windows Server 2025]
 				# https://www.intel.com/content/www/us/en/download/838943/intel-network-adapter-driver-for-windows-server-2025.html
 				Write-Log "# Package Download Intel Network Driver (Windows Server 2025)"
-				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/845881/Wired_driver_30.0_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2025.zip"
+				Get-WebContentToFile -Uri 'https://downloadmirror.intel.com/868131/Wired_driver_30.5_x64.zip' -OutFile "$TOOL_DIR\Intel-NetworkDriver-x64_For_WindowsServer2025.zip"
 			}
 			default {
 				# [No Target Server OS]
@@ -2604,7 +2600,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://www.7-zip.org/faq.html
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on 7-Zip version information]
-	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2500-x64.exe"
+	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2501-x64.exe"
 	Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download File archiver (7-Zip)
@@ -2621,7 +2617,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://teratermproject.github.io/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on Tera Term version information]
-	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.4.0/teraterm-5.4.0.exe"
+	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.5.1/teraterm-5.5.1-x64.exe"
 	Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download Terminal emulator (Tera Term)
@@ -2798,11 +2794,11 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 
 # Package Download System Utility (Fluentd)
 # https://www.fluentd.org/
-# https://td-agent-package-browser.herokuapp.com/5/windows
+# https://fluentd.cdn.cncf.io/lts/6/windows/index.html
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -match "^10.0") {
 		# Initialize Parameter [# Depends on Fluentd version information]
-		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://s3.amazonaws.com/packages.treasuredata.com/5/windows/fluent-package-5.2.0-x64.msi"
+		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://fluentd.cdn.cncf.io/lts/6/windows/fluent-package-6.0.1-x64.msi"
 		Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
 		Write-Log "# Package Download System Utility (Fluentd)"
@@ -2815,7 +2811,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://www.python.org/downloads/windows/
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on Python 3.13 version information]
-    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.13.2/python-3.13.2-amd64.exe"
+    Set-Variable -Name PYTHON3_INSTALLER_URL -Scope Script -Value "https://www.python.org/ftp/python/3.13.9/python-3.13.9-amd64.exe"
     Set-Variable -Name PYTHON3_INSTALLER_FILE -Scope Script -Value ($PYTHON3_INSTALLER_URL.Substring($PYTHON3_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (Python 3.13)"
@@ -2827,7 +2823,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # # https://github.com/WinMerge/winmerge/releases
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
     # Initialize Parameter [# Depends on WinMerge version information]
-    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.46/WinMerge-2.16.46-x64-Setup.exe"
+    Set-Variable -Name WINMERGE_INSTALLER_URL -Scope Script -Value "https://github.com/WinMerge/winmerge/releases/download/v2.16.52/WinMerge-2.16.52-Setup.exe"
     Set-Variable -Name WINMERGE_INSTALLER_FILE -Scope Script -Value ($WINMERGE_INSTALLER_URL.Substring($WINMERGE_INSTALLER_URL.LastIndexOf("/") + 1))
 
     Write-Log "# Package Download System Utility (WinMerge)"
@@ -2838,7 +2834,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 # https://winmergejp.bitbucket.io/
 # if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 #     # Initialize Parameter [# Depends on WinMerge -Japanese version information]
-#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://download.sourceforge.net/winmerge-v2-jp/WinMerge-2.16.46-jp-1-x64-Setup.exe"
+#     Set-Variable -Name WINMERGE_JP_INSTALLER_URL -Scope Script -Value "https://download.sourceforge.net/winmerge-v2-jp/WinMerge-2.16.52-jp-1-x64-Setup.exe"
 #     Set-Variable -Name WINMERGE_JP_INSTALLER_FILE -Scope Script -Value ($WINMERGE_JP_INSTALLER_URL.Substring($WINMERGE_JP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     Write-Log "# Package Download System Utility (WinMerge - Japanese)"
