@@ -382,7 +382,7 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf screen ssh-audit ssldump stressapptest ugrep unicornscan wdiff yamllint yq
+dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf screen ssh-audit ssldump stressapptest ugrep unicornscan wdiff yamllint yq
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
