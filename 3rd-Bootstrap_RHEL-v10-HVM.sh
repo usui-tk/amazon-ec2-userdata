@@ -256,6 +256,21 @@ dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-syst
 
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
+
+#-------------------------------------------------------------------------------
+# Custom Package Installation [AI accelerator driver]
+# https://www.redhat.com/en/blog/introducing-new-and-simplified-ai-accelerator-driver-experience-rhel
+#-------------------------------------------------------------------------------
+
+# Package Install RHEL AI accelerator driver (from Red Hat Official Repository)
+dnf install -y rhel-drivers
+
+rhel-drivers list
+
+# rhel-drivers install nvidia
+# rhel-drivers install amdgpu
+
+
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
 # https://access.redhat.com/solutions/2206511
@@ -381,9 +396,9 @@ dnf repository-packages epel list > /tmp/command-log_dnf_repository-package-list
 dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-package-list_epel-testing.txt
 
 # Package Install RHEL System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest wdiff
+dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping fping gh htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest wdiff yq
 
-# dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit stressapptest unicornscan wdiff yamllint
+# dnf --enablerepo="epel" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest unicornscan wdiff yamllint yq
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 # dnf --enablerepo="epel" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
