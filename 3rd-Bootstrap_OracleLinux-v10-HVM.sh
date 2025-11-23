@@ -302,7 +302,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol10_u0_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest wdiff yq
+dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit lsb_release ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest wdiff yq
 
 # dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest unicornscan wdiff yamllint yq
 
