@@ -142,7 +142,7 @@ dnf config-manager --set-enabled ol10_appstream
 dnf config-manager --set-enabled ol10_addons
 dnf config-manager --set-enabled ol10_codeready_builder
 dnf config-manager --set-enabled ol10_developer
-dnf config-manager --set-enabled ol10_u0_developer_EPEL
+dnf config-manager --set-enabled ol10_u1_developer_EPEL
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol10_distro_builder
@@ -216,7 +216,7 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # dnf install -y bpftune
 
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
-# dnf install -y olcne-selinux olcne-utils olcnectl yq
+# dnf install -y olcne-selinux olcne-utils olcnectl
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [kernel live-patching tools]
@@ -299,15 +299,15 @@ activate-global-python-argcomplete
 dnf --enablerepo="*" --verbose clean all
 
 # EPEL repository package [dnf command]
-dnf repository-packages "ol10_u0_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
+dnf repository-packages "ol10_u1_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit lsb_release ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest wdiff yq
+dnf --enablerepo="ol10_u1_developer_EPEL" install -y 7zip-standalone-all aria2 colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit lsb_release ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest wdiff yq
 
-# dnf --enablerepo="ol10_u0_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest unicornscan wdiff yamllint yq
+# dnf --enablerepo="ol10_u1_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf rpmconf screen ssh-audit ssldump stressapptest unicornscan wdiff yamllint yq
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
-# dnf --enablerepo="ol10_u0_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
+# dnf --enablerepo="ol10_u1_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Oracle Software Product]
