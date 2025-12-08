@@ -123,9 +123,25 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.6" ]; then
-		# Current latest version of service pack (2025.5)
-		echo "SUSE Linux Enterprise Server 15 SP5"
+	if [ "${VERSION_ID}" = "15.7" ]; then
+		# Current latest version of service pack (2025.12)
+		echo "SUSE Linux Enterprise Server 15 SP7"
+		cat /etc/os-release
+
+	elif [ "${VERSION_ID}" = "15.6" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP6 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
+		cat /etc/os-release
+		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
+		if [ $ZypperMigrationStatus -eq 0 ]; then
+			echo "Successful execution [Zypper Migration Command]"
+			eval $(grep ^VERSION_ID= /etc/os-release)
+			# Update motd (message of the day)
+			eval $(grep ^PRETTY_NAME= /etc/os-release)
+			sed -i '1d' /etc/motd
+			sed -i "1i $PRETTY_NAME" /etc/motd
+		else
+			echo "Failed to execute [Zypper Migration Command]"
+		fi
 		cat /etc/os-release
 
 	elif [ "${VERSION_ID}" = "15.5" ]; then
@@ -262,7 +278,12 @@ zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-is
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.6" ]; then
+	if [ "${VERSION_ID}" = "15.7" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP7"
+		zypper --quiet --non-interactive install jq purge-kernels-service
+		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+	elif [ "${VERSION_ID}" = "15.6" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP6"
 		zypper --quiet --non-interactive install jq purge-kernels-service
 		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
@@ -319,7 +340,27 @@ SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.6" ]; then
+
+	if [ "${VERSION_ID}" = "15.7" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP7"
+
+		zypper --quiet --non-interactive install python3-susepubliccloudinfo
+
+		if [ $SapFlag -gt 0 ]; then
+			echo "SUSE Linux Enterprise Server for SAP Applications 15"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		else
+			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
+			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		fi
+
+	elif [ "${VERSION_ID}" = "15.6" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP6"
 
 		zypper --quiet --non-interactive install python3-susepubliccloudinfo
@@ -502,7 +543,29 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.6" ]; then
+
+	if [ "${VERSION_ID}" = "15.7" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP7"
+
+		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP6
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+		SUSEConnect -p PackageHub/15.7/x86_64
+		sleep 5
+
+		# Repository Configure SUSE Package Hub Repository
+		SUSEConnect --status-text
+		SUSEConnect --list-extensions
+
+		zypper clean --all
+		zypper --quiet refresh -fdb
+
+		zypper repos
+
+		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+		zypper --quiet --non-interactive install collectl mtr
+
+	elif [ "${VERSION_ID}" = "15.6" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP6"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP6
@@ -523,7 +586,7 @@ if [ -n "$VERSION_ID" ]; then
 		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 		zypper --quiet --non-interactive install collectl mtr
 
-	if [ "${VERSION_ID}" = "15.5" ]; then
+	elif [ "${VERSION_ID}" = "15.5" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP5"
 
 		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP5
@@ -662,7 +725,11 @@ fi
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.6" ]; then
+
+	if [ "${VERSION_ID}" = "15.7" ]; then
+		echo "SUSE Linux Enterprise Server 15 SP7"
+
+	elif [ "${VERSION_ID}" = "15.6" ]; then
 		echo "SUSE Linux Enterprise Server 15 SP6"
 
 	elif [ "${VERSION_ID}" = "15.5" ]; then
