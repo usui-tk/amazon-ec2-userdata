@@ -123,126 +123,42 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.7" ]; then
-		# Current latest version of service pack (2025.12)
-		echo "SUSE Linux Enterprise Server 15 SP7"
-		cat /etc/os-release
+	case "$VERSION_ID" in
+		15.7)
+			# Current latest version of service pack (2025.12)
+			echo "SUSE Linux Enterprise Server 15 SP7"
+			cat /etc/os-release
+			;;
+		15|15.[1-6])
+			# Target Migration Version
+			if [ "$VERSION_ID" = "15" ]; then
+				version_label="GA"
+			else
+				version_label="SP${VERSION_ID#15.}"
+			fi
 
-	elif [ "${VERSION_ID}" = "15.6" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP6 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
+			echo "SUSE Linux Enterprise Server 15 ${version_label} -> SUSE Linux Enterprise Server 15 Latest ServicePack"
+			cat /etc/os-release
 
-	elif [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP5 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
+			zypper migration --quiet --non-interactive --migration "1" \
+				--auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 
-	elif [ "${VERSION_ID}" = "15.4" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15.3" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP3 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1 -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "15" ]; then
-		echo "SUSE Linux Enterprise Server 15 GA -> SUSE Linux Enterprise Server 15 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			eval $(grep ^VERSION_ID= /etc/os-release)
-			# Update motd (message of the day)
-			eval $(grep ^PRETTY_NAME= /etc/os-release)
-			sed -i '1d' /etc/motd
-			sed -i "1i $PRETTY_NAME" /etc/motd
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-	fi
+			if [ $ZypperMigrationStatus -eq 0 ]; then
+				echo "Successful execution [Zypper Migration Command]"
+				eval $(grep ^VERSION_ID= /etc/os-release)
+				# Update motd (message of the day)
+				eval $(grep ^PRETTY_NAME= /etc/os-release)
+				sed -i '1d' /etc/motd
+				sed -i "1i $PRETTY_NAME" /etc/motd
+			else
+				echo "Failed to execute [Zypper Migration Command]"
+			fi
+			cat /etc/os-release
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 15 (Unknown)"
+			;;
+	esac
 fi
 
 # SUSE Linux Enterprise Server Software repository metadata Clean up
@@ -278,48 +194,31 @@ zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-is
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "15.7" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP7"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.6" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP6"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP5"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.4" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.3" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP3"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
-		zypper --quiet --non-interactive install jq purge-kernels-service
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1"
-		zypper --quiet --non-interactive install jq
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
-	elif [ "${VERSION_ID}" = "15" ]; then
-		echo "SUSE Linux Enterprise Server 15 GA"
-		# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
-		# zypper --quiet --non-interactive install pcp pcp-conf
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-	fi
+	case "$VERSION_ID" in
+		15.[2-7])
+			# SP2 ~ SP7: jq + purge-kernels-service
+			echo "SUSE Linux Enterprise Server 15 SP${VERSION_ID#15.}"
+			zypper --quiet --non-interactive install jq purge-kernels-service
+			# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+			# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+			;;
+		15.1)
+			# SP1: jq only
+			echo "SUSE Linux Enterprise Server 15 SP1"
+			zypper --quiet --non-interactive install jq
+			# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+			# zypper --quiet --non-interactive install pcp pcp-conf pcp-system-tools
+			;;
+		15)
+			# GA: None
+			echo "SUSE Linux Enterprise Server 15 GA"
+			# [Workaround] Commented out from the fact that cloud-init processing is interrupted at the time of installation of pcp-related packages
+			# zypper --quiet --non-interactive install pcp pcp-conf
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 15 (Unknown)"
+			;;
+	esac
 fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
@@ -340,166 +239,37 @@ SapFlag=0
 SapFlag=$(find /etc/zypp/repos.d/ -name "*SLE-Product-SLES_SAP15*" | wc -l)
 
 if [ -n "$VERSION_ID" ]; then
+	case "$VERSION_ID" in
+		15.[1-7])
+			# SP1〜SP7
+			echo "SUSE Linux Enterprise Server 15 SP${VERSION_ID#15.}"
+			zypper --quiet --non-interactive install python3-susepubliccloudinfo
+			;;
+		15)
+			# GA
+			echo "SUSE Linux Enterprise Server 15 GA"
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 15 (Unknown)"
+			;;
+	esac
 
-	if [ "${VERSION_ID}" = "15.7" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP7"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.6" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP6"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP5"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.4" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.3" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP3"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1"
-
-		zypper --quiet --non-interactive install python3-susepubliccloudinfo
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	elif [ "${VERSION_ID}" = "15" ]; then
-
-		echo "SUSE Linux Enterprise Server 15 GA"
-
-		if [ $SapFlag -gt 0 ]; then
-			echo "SUSE Linux Enterprise Server for SAP Applications 15"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		else
-			echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
-			# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-			zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
-		fi
-
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
+	# AWS Tools Installation (common to all versions)
+	if [ $SapFlag -gt 0 ]; then
+		echo "SUSE Linux Enterprise Server for SAP Applications 15"
 		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
 		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
 		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
-		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
+	else
+		echo "SUSE Linux Enterprise Server 15 (non SUSE Linux Enterprise Server for SAP Applications 15)"
+		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services
+		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Init
+		zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Instance_Tools
+		# zypper --quiet --non-interactive install --type pattern Amazon_Web_Services_Tools
 	fi
 fi
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
@@ -543,179 +313,41 @@ zypper --quiet --non-interactive update --auto-agree-with-licenses
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
+	case "$VERSION_ID" in
+		15|15.[1-7])
+			# Version Label
+			if [ "$VERSION_ID" = "15" ]; then
+				version_label="GA"
+			else
+				version_label="SP${VERSION_ID#15.}"
+			fi
 
-	if [ "${VERSION_ID}" = "15.7" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP7"
+			echo "SUSE Linux Enterprise Server 15 ${version_label}"
 
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP6
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.7/x86_64
-		sleep 5
+			# Add SUSE Package Hub Repository
+			SUSEConnect --status-text
+			SUSEConnect --list-extensions
+			SUSEConnect -p "PackageHub/${VERSION_ID}/x86_64"
+			sleep 5
 
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
+			# Repository Configure SUSE Package Hub Repository
+			SUSEConnect --status-text
+			SUSEConnect --list-extensions
 
-		zypper clean --all
-		zypper --quiet refresh -fdb
+			zypper clean --all
+			zypper --quiet refresh -fdb
 
-		zypper repos
+			zypper repos
 
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.6" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP6"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP6
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.6/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP5"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP5
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.5/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.4" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP4
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.4/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.3" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP3"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP3
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.3/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP2
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.2/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15 SP1
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15.1/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	elif [ "${VERSION_ID}" = "15" ]; then
-		echo "SUSE Linux Enterprise Server 15 GA"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 15
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect -p PackageHub/15/x86_64
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr
-
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-	fi
+			# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+			zypper --quiet --non-interactive install collectl mtr
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 15 (Unknown)"
+			;;
+	esac
 fi
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation (from openSUSE Build Service Repository)
@@ -725,62 +357,53 @@ fi
 
 # Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
 if [ -n "$VERSION_ID" ]; then
+	case "$VERSION_ID" in
+		15.[2-7])
+			# SP2〜SP7: 追加処理なし
+			echo "SUSE Linux Enterprise Server 15 SP${VERSION_ID#15.}"
+			;;
+		15.1)
+			# SP1: openSUSE Build Service Repository からインストール
+			echo "SUSE Linux Enterprise Server 15 SP1"
 
-	if [ "${VERSION_ID}" = "15.7" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP7"
+			# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports]
+			zypper repos
+			zypper addrepo --check --refresh --name "SLE_15_SP1_Backports" \
+				"https://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
+			zypper --gpg-auto-import-keys refresh utilities
 
-	elif [ "${VERSION_ID}" = "15.6" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP6"
+			# Repository Configure openSUSE Build Service Repository
+			zypper repos
+			zypper clean --all
+			zypper --quiet refresh -fdb
+			zypper repos
 
-	elif [ "${VERSION_ID}" = "15.5" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP5"
+			# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+			zypper --quiet --non-interactive install atop
+			;;
+		15)
+			# GA: openSUSE Build Service Repository からインストール
+			echo "SUSE Linux Enterprise Server 15 GA"
 
-	elif [ "${VERSION_ID}" = "15.4" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP4"
+			# Add openSUSE Build Service Repository [utilities/SLE_15]
+			zypper repos
+			zypper addrepo --check --refresh --name "SLE_15" \
+				"https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
+			zypper --gpg-auto-import-keys refresh utilities
 
-	elif [ "${VERSION_ID}" = "15.3" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP3"
+			# Repository Configure openSUSE Build Service Repository
+			zypper repos
+			zypper clean --all
+			zypper --quiet refresh -fdb
+			zypper repos
 
-	elif [ "${VERSION_ID}" = "15.2" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP2"
-
-	elif [ "${VERSION_ID}" = "15.1" ]; then
-		echo "SUSE Linux Enterprise Server 15 SP1"
-
-		# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports]
-		zypper repos
-		zypper addrepo --check --refresh --name "SLE_15_SP1_Backports" "https://download.opensuse.org/repositories/utilities/SLE_15_SP1_Backports/utilities.repo"
-		zypper --gpg-auto-import-keys refresh utilities
-
-		# Repository Configure openSUSE Build Service Repository
-		zypper repos
-		zypper clean --all
-		zypper --quiet refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-		zypper --quiet --non-interactive install atop
-
-	elif [ "${VERSION_ID}" = "15" ]; then
-		echo "SUSE Linux Enterprise Server 15 GA"
-
-		# Add openSUSE Build Service Repository [utilities/SLE_15]
-		zypper repos
-		zypper addrepo --check --refresh --name "SLE_15" "https://download.opensuse.org/repositories/utilities/SLE_15/utilities.repo"
-		zypper --gpg-auto-import-keys refresh utilities
-
-		# Repository Configure openSUSE Build Service Repository
-		zypper repos
-		zypper clean --all
-		zypper --quiet refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
-		zypper --quiet --non-interactive install atop
-
-	else
-		echo "SUSE Linux Enterprise Server 15 (Unknown)"
-	fi
+			# Package Install SLES System Administration Tools (from openSUSE Build Service Repository)
+			zypper --quiet --non-interactive install atop
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 15 (Unknown)"
+			;;
+	esac
 fi
 
 #-------------------------------------------------------------------------------
