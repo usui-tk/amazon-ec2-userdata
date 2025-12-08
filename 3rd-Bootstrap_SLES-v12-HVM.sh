@@ -129,100 +129,34 @@ zypper --quiet --non-interactive install hostinfo
 ZypperMigrationStatus="0"
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.6" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP6 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
+	case "$VERSION_ID" in
+		12|12.[1-6])
+			# バージョンラベルの設定
+			if [ "$VERSION_ID" = "12" ]; then
+				version_label="GA"
+			else
+				version_label="SP${VERSION_ID#12.}"
+			fi
 
-	elif [ "${VERSION_ID}" = "12.5" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP5 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
+			echo "SUSE Linux Enterprise Server 12 ${version_label} -> SUSE Linux Enterprise Server 12 Latest ServicePack"
+			cat /etc/os-release
 
-	elif [ "${VERSION_ID}" = "12.4" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP4 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
+			zypper migration --quiet --non-interactive --migration "1" \
+				--auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
 
-	elif [ "${VERSION_ID}" = "12.3" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP3 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "12.2" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP2 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "12.1" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP1 -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	elif [ "${VERSION_ID}" = "12" ]; then
-		echo "SUSE Linux Enterprise Server 12 GA -> SUSE Linux Enterprise Server 12 Lastest ServicePack"
-		cat /etc/os-release
-		zypper migration --quiet --non-interactive --migration "1" --auto-agree-with-licenses --recommends --details || ZypperMigrationStatus=$?
-		if [ $ZypperMigrationStatus -eq 0 ]; then
-			echo "Successful execution [Zypper Migration Command]"
-			/etc/cron.daily/hostinfo-refresh
-			eval $(grep ^VERSION_ID= /etc/os-release)
-		else
-			echo "Failed to execute [Zypper Migration Command]"
-		fi
-		cat /etc/os-release
-
-	else
-		echo "SUSE Linux Enterprise Server 12 (Unknown)"
-	fi
+			if [ $ZypperMigrationStatus -eq 0 ]; then
+				echo "Successful execution [Zypper Migration Command]"
+				/etc/cron.daily/hostinfo-refresh
+				eval $(grep ^VERSION_ID= /etc/os-release)
+			else
+				echo "Failed to execute [Zypper Migration Command]"
+			fi
+			cat /etc/os-release
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 12 (Unknown)"
+			;;
+	esac
 fi
 
 # SUSE Linux Enterprise Server Software repository metadata Clean up
@@ -254,23 +188,17 @@ zypper --quiet --non-interactive install cifs-utils nfs-client nfs-utils nfs4-ac
 zypper --quiet --non-interactive install libiscsi-utils lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.6" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP6"
-	elif [ "${VERSION_ID}" = "12.5" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP5"
-	elif [ "${VERSION_ID}" = "12.4" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP4"
-	elif [ "${VERSION_ID}" = "12.3" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP3"
-	elif [ "${VERSION_ID}" = "12.2" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP2"
-	elif [ "${VERSION_ID}" = "12.1" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP1"
-	elif [ "${VERSION_ID}" = "12" ]; then
-		echo "SUSE Linux Enterprise Server 12 GA"
-	else
-		echo "SUSE Linux Enterprise Server 12 (Unknown)"
-	fi
+	case "$VERSION_ID" in
+		12.[1-6])
+			echo "SUSE Linux Enterprise Server 12 SP${VERSION_ID#12.}"
+			;;
+		12)
+			echo "SUSE Linux Enterprise Server 12 GA"
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 12 (Unknown)"
+			;;
+	esac
 fi
 
 # Package Install Python 3 Runtime (from SUSE Linux Enterprise Server Software repository)
@@ -356,135 +284,38 @@ fi
 
 # Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
 if [ -n "$VERSION_ID" ]; then
-	if [ "${VERSION_ID}" = "12.6" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP6"
+	case "$VERSION_ID" in
+		12.[1-6])
+			# SP1~SP6
+			echo "SUSE Linux Enterprise Server 12 SP${VERSION_ID#12.}"
 
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP6
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.6/x86_64"
-		sleep 5
+			# Add SUSE Package Hub Repository
+			SUSEConnect --status-text
+			SUSEConnect --list-extensions
+			SUSEConnect --product "PackageHub/${VERSION_ID}/x86_64"
+			sleep 5
 
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
+			# Repository Configure SUSE Package Hub Repository
+			SUSEConnect --status-text
+			SUSEConnect --list-extensions
 
-		zypper clean --all
-		zypper --quiet refresh -fdb
+			zypper clean --all
+			zypper --quiet refresh -fdb
+			zypper repos
 
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12.5" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP5"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP5
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.5/x86_64"
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12.4" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP4"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP4
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.4/x86_64"
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12.3" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP3"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP3
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.3/x86_64"
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12.2" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP2"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP2
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.2/x86_64"
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12.1" ]; then
-		echo "SUSE Linux Enterprise Server 12 SP1"
-
-		# Add SUSE Package Hub Repository : Version - SUSE Linux Enterprise 12 SP1
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-		SUSEConnect --product "PackageHub/12.1/x86_64"
-		sleep 5
-
-		# Repository Configure SUSE Package Hub Repository
-		SUSEConnect --status-text
-		SUSEConnect --list-extensions
-
-		zypper clean --all
-		zypper --quiet refresh -fdb
-		zypper repos
-
-		# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
-		zypper --quiet --non-interactive install collectl mtr jq
-
-	elif [ "${VERSION_ID}" = "12" ]; then
-		echo "SUSE Linux Enterprise Server 12 GA"
-	else
-		echo "SUSE Linux Enterprise Server 12 (Unknown)"
-	fi
+			# Package Install SLES System Administration Tools (from SUSE Package Hub Repository)
+			zypper --quiet --non-interactive install collectl mtr jq
+			;;
+		12)
+			# GA: 追加処理なし
+			echo "SUSE Linux Enterprise Server 12 GA"
+			;;
+		*)
+			echo "SUSE Linux Enterprise Server 12 (Unknown)"
+			;;
+	esac
 fi
+
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
