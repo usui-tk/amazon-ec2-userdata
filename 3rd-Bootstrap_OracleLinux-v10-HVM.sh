@@ -113,7 +113,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el10
 
-dnf install -y oraclelinux-release-el10 oracle-epel-release-el10 oraclelinux-developer-release-el10
+dnf install -y oraclelinux-release-el10 oracle-epel-release-el10 oraclelinux-developer-release-el10 oracle-instantclient-release-26ai-el10
 
 dnf --enablerepo="*" --verbose clean all
 
@@ -143,6 +143,8 @@ dnf config-manager --set-enabled ol10_addons
 dnf config-manager --set-enabled ol10_codeready_builder
 dnf config-manager --set-enabled ol10_developer
 dnf config-manager --set-enabled ol10_u1_developer_EPEL
+dnf config-manager --set-enabled ol10_oracle_instantclient26
+
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol10_distro_builder
@@ -327,19 +329,6 @@ dnf install -y pcp-oracle-conf
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
 
-# ---------------------------------------
-# [workaround] Repository Configuration
-# ---------------------------------------
-# cat > /etc/yum.repos.d/oracle-software-ol10.repo << __EOF__
-# [ol10_oracle_software]
-# name=Oracle Software for Oracle Linux \$releasever (\$basearch)
-# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL10/oracle/software/\$basearch/
-# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
-# gpgcheck=1
-# enabled=1
-# __EOF__
-# ---------------------------------------
-
 # dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
@@ -347,7 +336,7 @@ dnf install -y pcp-oracle-conf
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-# dnf --enablerepo="ol10_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+# dnf --enablerepo="ol10_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
