@@ -96,8 +96,37 @@ tdnf repolist all
 # Cleanup repository information
 tdnf clean all
 
+################################################################################
+# [Workaround START]
+# Workaround for "GPG key expired" error when using tdnf command
+################################################################################
+
+# Temporarily disable GPG verification and update only the necessary packages
+tdnf install -y --nogpgcheck --refresh photon-repos tdnf
+
+grep -l "VMWARE-RPM-GPG-KEY[^-]" /etc/yum.repos.d/*.repo
+cat /etc/yum.repos.d/photon.repo
+
+# Remove only references to the old key (leave the 4096 key intact)
+sed -i 's| file:///etc/pki/rpm-gpg/VMWARE-RPM-GPG-KEY\b||g' /etc/yum.repos.d/*.repo
+cat /etc/yum.repos.d/photon.repo
+
+# Check imported VMware keys
+rpm -qa gpg-pubkey* --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n' | grep -i vmware
+
+# Delete the expired key (66fd4949)
+rpm -e gpg-pubkey-66fd4949-4803fe57
+
+################################################################################
+# [Workaround END]
+# Workaround for "GPG key expired" error when using tdnf command
+################################################################################
+
+
 # Default Package Update
-tdnf update -y
+tdnf clean all
+tdnf makecache
+tdnf update -y --refresh
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation
