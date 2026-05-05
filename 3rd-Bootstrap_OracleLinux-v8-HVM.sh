@@ -369,9 +369,7 @@ dnf install -y pcp-oracle-conf
 # dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
-# dnf install -y oracle-database-preinstall-19c
-# dnf install -y oracle-database-preinstall-21c
-dnf install -y oracle-database-preinstall-23ai
+dnf install -y oracle-ai-database-preinstall-26ai
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
