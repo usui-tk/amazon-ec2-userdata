@@ -2799,7 +2799,7 @@ if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 if ($FLAG_APP_DOWNLOAD -eq $TRUE) {
 	if ($WindowsOSVersion -match "^10.0") {
 		# Initialize Parameter [# Depends on Fluentd version information]
-		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://fluentd.cdn.cncf.io/lts/6/windows/fluent-package-6.0.1-x64.msi"
+		Set-Variable -Name FLUENTD_INSTALLER_URL -Scope Script -Value "https://fluentd.cdn.cncf.io/lts/6/windows/fluent-package-6.0.3-x64.msi"
 		Set-Variable -Name FLUENTD_INSTALLER_FILE -Scope Script -Value ($FLUENTD_INSTALLER_URL.Substring($FLUENTD_INSTALLER_URL.LastIndexOf("/") + 1))
 
 		Write-Log "# Package Download System Utility (Fluentd)"
