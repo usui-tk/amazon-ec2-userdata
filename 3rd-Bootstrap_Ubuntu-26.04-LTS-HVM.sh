@@ -625,33 +625,33 @@ fi
 # https://www.terraform.io/docs/cli/install/apt.html
 #-------------------------------------------------------------------------------
 
-# Import GPG Key File
-wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+# # Import GPG Key File
+# wget -O - https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
-# Add the HashiCorp Linux Repository
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+# # Add the HashiCorp Linux Repository
+# echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 
-# apt repository metadata Clean up
-apt clean -y
+# # apt repository metadata Clean up
+# apt clean -y
 
-# Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-apt update -y -q && apt install -y -q terraform
+# # Update and install Terraform Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+# apt update -y -q && apt install -y -q terraform
 
-# Package Information
-apt show terraform
+# # Package Information
+# apt show terraform
 
-terraform version
+# terraform version
 
-# Configure terraform software
+# # Configure terraform software
 
-## terraform -install-autocomplete
-cat > /etc/profile.d/terraform.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/terraform terraform
-fi
-__EOF__
+# ## terraform -install-autocomplete
+# cat > /etc/profile.d/terraform.sh << __EOF__
+# if [ -n "\$BASH_VERSION" ]; then
+#    complete -C /usr/bin/terraform terraform
+# fi
+# __EOF__
 
-source /etc/profile.d/terraform.sh
+# source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
