@@ -823,37 +823,37 @@ fi
 # http://yum.oracle.com/repo/OracleLinux/OL9/developer/x86_64/index.html
 #-------------------------------------------------------------------------------
 
-# # Repository Configuration (HashiCorp Linux Repository)
-# dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
+# Repository Configuration (HashiCorp Linux Repository)
+dnf config-manager --add-repo "https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo"
 
-# cat /etc/yum.repos.d/hashicorp.repo
+cat /etc/yum.repos.d/hashicorp.repo
 
-# # Cleanup repository information
-# dnf clean all
+# Cleanup repository information
+dnf clean all
 
-# # HashiCorp Linux repository package [dnf command]
-# dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+# HashiCorp Linux repository package [dnf command]
+dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
-# # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-# dnf --enablerepo="hashicorp" -y install terraform
+# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+dnf --enablerepo="hashicorp" -y install terraform
 
-# # Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
-# dnf --enablerepo="ol9_developer" -y install terraform-provider-oci
+# Package Install Infrastructure as Code (IaC) Tools (from Oracle Linux Repository)
+dnf --enablerepo="ol9_developer" -y install terraform-provider-oci
 
-# rpm -qi terraform
+rpm -qi terraform
 
-# terraform version
+terraform version
 
-# # Configure terraform software
+# Configure terraform software
 
-# ## terraform -install-autocomplete
-# cat > /etc/profile.d/terraform.sh << __EOF__
-# if [ -n "\$BASH_VERSION" ]; then
-#    complete -C /usr/bin/terraform terraform
-# fi
-# __EOF__
+## terraform -install-autocomplete
+cat > /etc/profile.d/terraform.sh << __EOF__
+if [ -n "\$BASH_VERSION" ]; then
+   complete -C /usr/bin/terraform terraform
+fi
+__EOF__
 
-# source /etc/profile.d/terraform.sh
+source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
