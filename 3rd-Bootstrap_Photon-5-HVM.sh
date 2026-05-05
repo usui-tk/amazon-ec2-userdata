@@ -133,6 +133,10 @@ rpm -e gpg-pubkey-66fd4949-4803fe57
 # Default Package Update
 tdnf clean all
 tdnf makecache
+tdnf update -y --refresh --exclude=hostname
+
+tdnf clean all
+tdnf makecache
 tdnf update -y --refresh
 
 #-------------------------------------------------------------------------------
