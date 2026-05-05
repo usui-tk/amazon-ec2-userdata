@@ -9,14 +9,15 @@
 #   https://github.com/oracle/oracle-linux/tree/main/oracle-linux-image-tools
 #
 # Pipeline phases:
-#   Phase 0: Preflight checks (KVM support, required commands, free disk)
-#   Phase 1: Provision the build host (KVM/libvirt/virt-install/libguestfs)
-#   Phase 2: Clone the oracle/oracle-linux repository
-#   Phase 3: Resolve ISO checksum and generate env.properties
-#   Phase 4: Run oracle-linux-image-tools to produce a VMDK
-#   Phase 5: Upload the VMDK to S3
-#   Phase 6: Convert the VMDK to an EBS snapshot via import-snapshot
-#   Phase 7: Register the snapshot as an AMI
+#   Phase 0:   Preflight checks (KVM support, required commands, free disk)
+#   Phase 1:   Provision the build host (KVM/libvirt/virt-install/libguestfs)
+#   Phase 1.5: Grant the qemu user traverse access to WORKSPACE (ACL)
+#   Phase 2:   Clone the oracle/oracle-linux repository
+#   Phase 3:   Resolve ISO checksum and generate env.properties
+#   Phase 4:   Run oracle-linux-image-tools to produce a VMDK
+#   Phase 5:   Upload the VMDK to S3
+#   Phase 6:   Convert the VMDK to an EBS snapshot via import-snapshot
+#   Phase 7:   Register the snapshot as an AMI
 #
 # Usage:
 #   1) Edit env.properties.aws-ol10 (WORKSPACE / S3_BUCKET / AWS_REGION, etc.)
@@ -326,7 +327,7 @@ phase0_preflight() {
   fi
 
   # Check required commands (those installed in Phase 1 are excluded)
-  local required_cmds=("git" "curl" "sudo" "realpath")
+  local required_cmds=("git" "curl" "sudo" "realpath" "findmnt" "df")
   for cmd in "${required_cmds[@]}"; do
     command -v "${cmd}" >/dev/null 2>&1 || die "Required command not found: ${cmd}"
   done
@@ -337,13 +338,45 @@ phase0_preflight() {
     aws sts get-caller-identity >/dev/null 2>&1 || die "AWS CLI authentication failed. Verify 'aws configure'."
   fi
 
-  # Check workspace free space (30GB+ recommended)
-  local avail_gb
+  # Check workspace free space and underlying filesystem characteristics.
+  # We read these via stat/findmnt because the WORKSPACE may live on tmpfs
+  # (typical for /tmp on modern Linux) which has size and persistence
+  # implications worth surfacing before the build starts.
+  local avail_gb fstype mount_opts
   avail_gb=$(df -BG "${WORKSPACE}" | awk 'NR==2 {print $4}' | tr -d 'G')
-  if [[ ${avail_gb} -lt 30 ]]; then
+  fstype=$(findmnt -n -o FSTYPE --target "${WORKSPACE}" 2>/dev/null || echo "unknown")
+  mount_opts=$(findmnt -n -o OPTIONS --target "${WORKSPACE}" 2>/dev/null || echo "")
+
+  log_info "Workspace path:       ${WORKSPACE}"
+  log_info "Workspace filesystem: ${fstype}"
+  log_info "Workspace free space: ${avail_gb}GB"
+
+  # Warn about insufficient free space (build needs ~20GB; 30GB recommended).
+  if [[ ${avail_gb} -lt 20 ]]; then
+    log_error "Workspace has only ${avail_gb}GB free. The build needs at least 20GB."
+    log_error "  Move WORKSPACE to a larger location, e.g. /var/tmp/ol10-build-ws"
+    log_error "  (which is typically disk-backed and persistent across reboots)."
+    die "Insufficient free space at WORKSPACE."
+  elif [[ ${avail_gb} -lt 30 ]]; then
     log_warn "Workspace has only ${avail_gb}GB free. 30GB or more is recommended."
-  else
-    log_info "Workspace free space: ${avail_gb}GB"
+  fi
+
+  # tmpfs caveats: RAM-backed, size-capped, cleared on reboot.
+  if [[ "${fstype}" == "tmpfs" ]]; then
+    log_warn "Workspace is on tmpfs (RAM-backed):"
+    log_warn "  * Size is typically capped at 50% of system RAM. Verify ${avail_gb}GB is enough."
+    log_warn "  * Contents are cleared on reboot. A reboot mid-build will lose all progress."
+    log_warn "  * If you encounter ENOSPC errors during Phase 4, switch to /var/tmp:"
+    log_warn "      WORKSPACE=\"/var/tmp/ol10-build-ws\""
+  fi
+
+  # noexec is fatal: oracle-linux-image-tools runs scripts inside WORKSPACE.
+  if [[ ",${mount_opts}," == *",noexec,"* ]]; then
+    log_error "The filesystem hosting ${WORKSPACE} is mounted with 'noexec'."
+    log_error "  oracle-linux-image-tools executes scripts in the workspace; this will fail."
+    log_error "  Move WORKSPACE to a filesystem without noexec, e.g. /var/tmp/ol10-build-ws"
+    log_error "  Current mount options: ${mount_opts}"
+    die "WORKSPACE filesystem has noexec; cannot proceed."
   fi
 
   log_info "Preflight checks completed"
@@ -376,6 +409,7 @@ phase1_install_prereqs() {
         libvirt-daemon-driver-qemu \
         edk2-ovmf \
         libosinfo osinfo-db osinfo-db-tools \
+        acl \
         || die "Failed to install RHEL/OL packages"
       ;;
     *debian*|*ubuntu*)
@@ -386,6 +420,7 @@ phase1_install_prereqs() {
         virtinst libguestfs-tools \
         ovmf \
         libosinfo-bin osinfo-db osinfo-db-tools \
+        acl \
         || die "Failed to install Debian/Ubuntu packages"
       ;;
     *)
@@ -409,7 +444,106 @@ phase1_install_prereqs() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 2: Clone the oracle/oracle-linux repository
+# Detect the system's qemu/libvirt run-as username.
+#
+# When libvirt runs in system mode (qemu:///system, the default that Oracle's
+# image-tools relies on), the spawned qemu process runs as a non-root user.
+# Different distros use different names:
+#   * RHEL / Fedora / Oracle Linux : "qemu"
+#   * Debian / Ubuntu              : "libvirt-qemu"
+#
+# Returns the username on stdout, or 1 if neither user exists.
+#------------------------------------------------------------------------------
+detect_qemu_user() {
+  local candidates=("qemu" "libvirt-qemu")
+  local user
+  for user in "${candidates[@]}"; do
+    if id "${user}" >/dev/null 2>&1; then
+      echo "${user}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+#------------------------------------------------------------------------------
+# Phase 1.5: Ensure the workspace path is reachable by the qemu user.
+#
+# libvirt in system mode launches QEMU as a non-root user. When WORKSPACE
+# lives under /root (or any directory without world-execute bit), the qemu
+# user cannot traverse the path and virt-install fails with:
+#   "Cannot access storage file ... (as uid:107, gid:107): Permission denied"
+#
+# Fix: walk every parent directory from WORKSPACE up to '/' and grant the
+# qemu user a traverse-only ACL (u:qemu:x). This is more granular and safer
+# than chmod o+x on /root.
+#------------------------------------------------------------------------------
+phase1_5_grant_qemu_access() {
+  log_step "Phase 1.5: Ensuring qemu user can access the workspace"
+
+  local qemu_user
+  qemu_user=$(detect_qemu_user) || {
+    log_warn "Could not detect a qemu/libvirt-qemu user."
+    log_warn "  Phase 1 may not have completed successfully, or libvirt is not installed."
+    log_warn "  Skipping ACL setup. Phase 4 will likely fail."
+    return 0
+  }
+  log_info "Detected qemu user: ${qemu_user}"
+
+  if ! command -v setfacl >/dev/null 2>&1; then
+    log_warn "setfacl not found. Install the 'acl' package:"
+    log_warn "  sudo dnf install acl       # RHEL/OL/Fedora"
+    log_warn "  sudo apt-get install acl   # Debian/Ubuntu"
+    log_warn "Continuing without ACL setup; Phase 4 may fail."
+    return 0
+  fi
+
+  log_info "Granting traverse-only ACL (u:${qemu_user}:x) to each parent of WORKSPACE."
+  log_info "  This allows qemu to reach files under ${WORKSPACE} without exposing"
+  log_info "  contents to the world. Existing permissions are preserved."
+
+  # Walk up the path, applying setfacl to each existing directory.
+  local path="${WORKSPACE}"
+  local fixed_count=0
+  local skipped_count=0
+  while [[ "${path}" != "/" && -n "${path}" ]]; do
+    if [[ -d "${path}" ]]; then
+      # Test whether the qemu user can already traverse it
+      if sudo -u "${qemu_user}" test -x "${path}" 2>/dev/null; then
+        skipped_count=$((skipped_count + 1))
+      else
+        log_info "  -> setfacl -m u:${qemu_user}:x ${path}"
+        if sudo setfacl -m "u:${qemu_user}:x" "${path}" 2>/dev/null; then
+          fixed_count=$((fixed_count + 1))
+        else
+          log_warn "    failed (filesystem may not support ACLs)"
+        fi
+      fi
+    fi
+    path=$(dirname "${path}")
+  done
+
+  log_info "ACL setup: ${fixed_count} directories updated, ${skipped_count} already accessible"
+
+  # Final verification: can the qemu user actually read a file in WORKSPACE?
+  local probe="${WORKSPACE}/.qemu-access-probe"
+  : > "${probe}"
+  if sudo -u "${qemu_user}" test -r "${probe}" 2>/dev/null; then
+    log_info "Verified: qemu user '${qemu_user}' can access ${WORKSPACE}"
+    rm -f "${probe}"
+  else
+    rm -f "${probe}"
+    log_error "Verification failed: qemu user '${qemu_user}' still cannot read ${WORKSPACE}"
+    log_error "  Possible reasons:"
+    log_error "    * The filesystem does not support POSIX ACLs (e.g. tmpfs without acl mount option)"
+    log_error "    * SELinux is blocking access (check: sudo ausearch -m avc -ts recent)"
+    log_error "  Workaround: relocate WORKSPACE to a path under /var/lib or /var/tmp:"
+    log_error "    WORKSPACE=\"/var/lib/ol10-build-ws\""
+    die "Workspace is not accessible by the qemu user."
+  fi
+}
+
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 phase2_clone_repo() {
   log_step "Phase 2: Cloning oracle/oracle-linux repository"
@@ -879,6 +1013,7 @@ main() {
 
   phase0_preflight
   phase1_install_prereqs
+  phase1_5_grant_qemu_access
   phase2_clone_repo
   phase3_prepare_env_properties
   phase4_run_build

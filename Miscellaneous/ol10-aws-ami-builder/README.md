@@ -1,5 +1,7 @@
 # Oracle Linux 10 AWS AMI Builder
 
+English | [日本語](./README.ja.md)
+
 A set of wrapper scripts that build an AWS AMI for Oracle Linux 10 Update 1 (x86_64) using the official Oracle [`oracle-linux-image-tools`](https://github.com/oracle/oracle-linux/tree/main/oracle-linux-image-tools) project.
 
 Created in response to the discontinuation of Oracle's official AMI offerings (owner ID `131827586825`) on the AWS Marketplace, with the goal of establishing an independent build and operations workflow for Oracle Linux AMIs.
@@ -16,7 +18,8 @@ Created in response to the discontinuation of Oracle's official AMI offerings (o
 | `build-ol10-aws-ami.sh` | Main build orchestrator. Runs the entire pipeline (prep through AMI registration) in seven phases. |
 | `env.properties.aws-ol10` | Parameter file for the build (ISO URL, S3 bucket, region, etc.). |
 | `setup-vmimport-role.sh` | One-time setup script that creates the `vmimport` IAM service role for AWS VM Import/Export. |
-| `README.en.md` | This document (English). |
+| `README.md` | This document (English). |
+| `README.ja.md` | Japanese version of this document. |
 
 ---
 
@@ -202,7 +205,7 @@ vi env.properties.local
 
 | Parameter | Example |
 |-----------|---------|
-| `WORKSPACE` | `/home/youruser/ol10-build-ws` |
+| `WORKSPACE` | `/tmp/ol10-build-ws` (default — universally accessible by the qemu user; switch to `/var/tmp/ol10-build-ws` if `/tmp` is tmpfs and too small) |
 | `S3_BUCKET` | `my-ol10-ami-import-bucket` (must match `setup-vmimport-role.sh`) |
 | `AWS_REGION` | `ap-northeast-1` |
 | `AMI_NAME` | Optional; auto-generates with timestamp if unset |
