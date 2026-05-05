@@ -2298,7 +2298,7 @@ else {
 
 
 #-----------------------------------------------------------------------------------------------------------------------
-# Custom Package Install (PowerShell 7.5)
+# Custom Package Install (PowerShell 7.6)
 # https://docs.microsoft.com/ja-jp/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7
 # https://github.com/PowerShell/PowerShell
 #
@@ -2313,27 +2313,27 @@ else {
 #-----------------------------------------------------------------------------------------------------------------------
 
 # Log Separator
-Write-LogSeparator "Package Install System Utility (PowerShell 7.5)"
+Write-LogSeparator "Package Install System Utility (PowerShell 7.6)"
 
 # Initialize Parameter [# Depends on PowerShell v7.5 version information]
 Set-Variable -Name PWSH -Scope Script -Value "C:\Program Files\PowerShell\7\pwsh.exe"
-Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.5.1/PowerShell-7.5.1-win-x64.msi"
+Set-Variable -Name PWSH_INSTALLER_URL -Scope Script -Value "https://github.com/PowerShell/PowerShell/releases/download/v7.6.1/PowerShell-7.6.1-win-x64.msi"
 Set-Variable -Name PWSH_INSTALLER_FILE -Scope Script -Value ($PWSH_INSTALLER_URL.Substring($PWSH_INSTALLER_URL.LastIndexOf("/") + 1))
 
 # Check Windows OS Version
 if ($WindowsOSVersion -match "^10.0") {
 
-	# Package Download Commnand-Line Shell (PowerShell 7.5)
-	Write-Log "# Package Download Commnand-Line Shell (PowerShell 7.5)"
+	# Package Download Commnand-Line Shell (PowerShell 7.6)
+	Write-Log "# Package Download Commnand-Line Shell (PowerShell 7.6)"
 	Get-WebContentToFile -Uri "$PWSH_INSTALLER_URL" -OutFile "$TOOL_DIR\$PWSH_INSTALLER_FILE"
 
-	# Package Install Commnand-Line Shell (PowerShell 7.5)
-	Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.5)"
+	# Package Install Commnand-Line Shell (PowerShell 7.6)
+	Write-Log "# Package Install Commnand-Line Shell (PowerShell 7.6)"
 	Start-Process "msiexec.exe" -Verb runas -Wait -ArgumentList @("/i $TOOL_DIR\$PWSH_INSTALLER_FILE", "/qn", "/L*v $LOGS_DIR\APPS_MicrosoftPowerShellSetup.log")
 	Start-Sleep -Seconds 10
 
-	# Package Configure Commnand-Line Shell (PowerShell 7.5)
-	Write-Log "# Package Configure Commnand-Line Shell (PowerShell 7.5)"
+	# Package Configure Commnand-Line Shell (PowerShell 7.6)
+	Write-Log "# Package Configure Commnand-Line Shell (PowerShell 7.6)"
 
 	# Install AWSPowerShell.NetCore
 	# Start-Process -FilePath $PWSH -Verb runas -PassThru -Wait -WindowStyle Hidden -ArgumentList @("-Command", "Get-Module -ListAvailable")
@@ -2598,9 +2598,10 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # Custom Package Installation (7-Zip)
 # http://www.7-zip.org/
 # https://www.7-zip.org/faq.html
+# https://github.com/ip7z/7zip
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on 7-Zip version information]
-	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://www.7-zip.org/a/7z2501-x64.exe"
+	Set-Variable -Name 7ZIP_INSTALLER_URL -Scope Script -Value "https://github.com/ip7z/7zip/releases/download/26.01/7z2601-x64.exe"
 	Set-Variable -Name 7ZIP_INSTALLER_FILE -Scope Script -Value ($7ZIP_INSTALLER_URL.Substring($7ZIP_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download File archiver (7-Zip)
@@ -2617,7 +2618,7 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # https://teratermproject.github.io/
 if ($FLAG_APP_INSTALL -eq $TRUE) {
 	# Initialize Parameter [# Depends on Tera Term version information]
-	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.5.1/teraterm-5.5.1-x64.exe"
+	Set-Variable -Name TERATERM_INSTALLER_URL -Scope Script -Value "https://github.com/TeraTermProject/teraterm/releases/download/v5.6.1/teraterm-5.6.1-x64.exe"
 	Set-Variable -Name TERATERM_INSTALLER_FILE -Scope Script -Value ($TERATERM_INSTALLER_URL.Substring($TERATERM_INSTALLER_URL.LastIndexOf("/") + 1))
 
 	# Package Download Terminal emulator (Tera Term)
@@ -2637,9 +2638,9 @@ if ($FLAG_APP_INSTALL -eq $TRUE) {
 # if ($FLAG_APP_INSTALL -eq $TRUE) {
 
 #     # Initialize Parameter [# Depends on IrfanView version information]
-#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview470_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11557/iview473_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_INSTALLER_URL.Substring($IRFANVIEW_INSTALLER_URL.LastIndexOf("/") + 1))
-#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview470_plugins_x64_setup.exe"
+#     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_URL -Scope Script -Value "https://dforest.watch.impress.co.jp/library/i/irfanview/11592/iview473_plugins_x64_setup.exe"
 #     Set-Variable -Name IRFANVIEW_PLUGIN_INSTALLER_FILE -Scope Script -Value ($IRFANVIEW_PLUGIN_INSTALLER_URL.Substring($IRFANVIEW_PLUGIN_INSTALLER_URL.LastIndexOf("/") + 1))
 
 #     # Package Download Graphic Viewer (IrfanView)
