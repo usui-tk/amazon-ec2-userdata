@@ -122,19 +122,25 @@ cat /etc/yum.repos.d/photon.repo
 rpm -qa gpg-pubkey* --qf '%{NAME}-%{VERSION}-%{RELEASE}\t%{SUMMARY}\n' | grep -i vmware
 
 # Delete the expired key (66fd4949)
-rpm -e gpg-pubkey-66fd4949-4803fe57
+if rpm -q gpg-pubkey-66fd4949-4803fe57 >/dev/null 2>&1; then
+    echo "Found the expired GPG key. Removing..."
+    rpm -e gpg-pubkey-66fd4949-4803fe57
+    echo "Removed the expired GPG key."
+else
+    echo "The expired GPG key is not installed. Skipping."
+fi
+
+# Avoiding Package Conflicts
+tdnf clean all
+tdnf makecache
+tdnf update -y --refresh --exclude=hostname
 
 ################################################################################
 # [Workaround END]
 # Workaround for "GPG key expired" error when using tdnf command
 ################################################################################
 
-
 # Default Package Update
-tdnf clean all
-tdnf makecache
-tdnf update -y --refresh --exclude=hostname
-
 tdnf clean all
 tdnf makecache
 tdnf update -y --refresh
