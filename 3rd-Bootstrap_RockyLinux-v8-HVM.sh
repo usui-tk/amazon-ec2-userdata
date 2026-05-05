@@ -161,7 +161,7 @@ dnf update -y
 dnf install -y kernel-modules kernel-modules-extra
 
 # Package Install Rocky Linux System Administration Tools (from Rocky Linux Community Repository)
-dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git gnutls-utils hdparm intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y abrt abrt-cli acpid arptables bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace crash-trace-command crypto-policies curl dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio gdisk git git-lfs gnutls-utils hdparm icu intltool iotop ipcalc iperf3 iproute-tc ipset iptraf-ng jq kexec-tools libicu libicu linuxptp lsof lvm2 lzop man-pages mc mcelog mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nmap nmap-ncat nmstate numactl nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rsync smartmontools sos sos-audit stalld strace symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user vdo vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
@@ -297,7 +297,7 @@ dnf repository-packages epel-testing list > /tmp/command-log_dnf_repository-pack
 dnf repository-packages epel-testing-modular list > /tmp/command-log_dnf_repository-package-list_epel-testing-modular.txt
 
 # Package Install Rocky Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff crudini dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc ipv6toolkit moreutils moreutils-parallel ncdu nload rpmconf screen srm ssldump stressapptest tcping unicornscan wdiff yamllint
+dnf --enablerepo="epel" install -y aria2 atop bash-color-prompt bcftools bpytop byobu collectd collectd-utils colordiff crudini dateutils fping glances htop httping iftop inotify-tools inxi ipv6calc ipv6toolkit java-latest-openjdk moreutils moreutils-parallel ncdu nload rpmconf screen srm ssldump sslscan stressapptest tcping unicornscan vnstat wdiff xq yamllint
 
 # Package Install EC2 instance optimization tools (from EPEL Repository)
 dnf --enablerepo="epel" install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
