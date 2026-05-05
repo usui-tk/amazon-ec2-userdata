@@ -48,12 +48,14 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForDebian11="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-11-HVM.sh"
 	ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
 	ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
+	ScriptForOpenSUSEv16="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-v16-HVM.sh"
+	ScriptForOpenSUSEv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-v15-HVM.sh"
 	ScriptForPhotonOS5="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-5-HVM.sh"
 	ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-3-HVM.sh"
 
 	# [For x86_64] Parameter Settings (BootstrapScript - Script independent of operating system version [operation check requires a specific version or higher])
 	ScriptForFedora="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Fedora-HVM.sh"
-	ScriptForOpenSUSE="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OpenSUSE-HVM.sh"
+
 	ScriptForKaliLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Kali-Linux-HVM.sh"
 
 # elif [ $(uname -m) = "aarch64" ]; then
@@ -307,12 +309,19 @@ function get_bootstrap_script () {
 			else
 				BootstrapScript=""
 			fi
+	elif [ "${DIST}" = "openSUSE Leap" ] || [ "${DIST_TYPE}" = "opensuse-leap" ]; then
+			if [ $(echo ${REV} | grep -e '16.') ]; then
+				# Bootstrap Script for openSUSE Leap 16.x
+				BootstrapScript=${ScriptForOpenSUSEv16}
+			elif [ $(echo ${REV} | grep -e '15.') ]; then
+				# Bootstrap Script for openSUSE Leap 15.x
+				BootstrapScript=${ScriptForOpenSUSEv15}
+			else
+				BootstrapScript=""
+			fi
 	elif [ "${DIST}" = "Fedora" ] || [ "${DIST_TYPE}" = "fedora" ]; then
 		# Bootstrap Script for Fedora
 		BootstrapScript=${ScriptForFedora}
-	elif [ "${DIST}" = "openSUSE Leap" ] || [ "${DIST_TYPE}" = "opensuse-leap" ]; then
-		# Bootstrap Script for openSUSE Leap 15.x
-		BootstrapScript=${ScriptForOpenSUSE}
 	elif [ "${DIST}" = "Kali GNU/Linux" ] || [ "${DIST_TYPE}" = "kali" ]; then
 		# Bootstrap Script for Kali Linux
 		BootstrapScript=${ScriptForKaliLinux}
