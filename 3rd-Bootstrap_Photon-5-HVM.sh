@@ -554,17 +554,7 @@ source /etc/profile.d/ec2rl.sh
 #-------------------------------------------------------------------------------
 
 # Package Install Photon System Administration Tools (from VMware Photon OS Official Repository)
-# tdnf install -y ansible
-
-# ansible --version
-
-# ansible localhost -m setup
-
-# Package Install Ansible (from Python Package Index (PyPI) Repository)
-pip3 install ansible
-pip3 show ansible
-
-which ansible
+tdnf install -y ansible
 
 ansible --version
 
