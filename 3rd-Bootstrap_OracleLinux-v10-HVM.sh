@@ -214,7 +214,7 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # Package Install Oracle Linux Troubleshooting support tools (from Oracle Linux Repository)
 # https://github.com/oracle/oled-tools
 # https://github.com/oracle/bpftune
-# dnf install -y oled-tools
+dnf install -y oled-tools
 # dnf install -y bpftune
 
 # Package Install Oracle Linux Cloud Native Environment (from Oracle Linux Repository)
@@ -332,7 +332,7 @@ dnf install -y pcp-oracle-conf
 # dnf install -y ords sqlcl
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
-# dnf install -y oracle-database-preinstall-23ai
+# dnf install -y oracle-ai-database-preinstall-26ai
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
