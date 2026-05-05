@@ -33,14 +33,13 @@
 
 set -euo pipefail
 
-readonly PGM=$(basename "$0")
-readonly SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)
 readonly OL_REPO_URL="https://github.com/oracle/oracle-linux.git"
 readonly OL_TOOLS_SUBDIR="oracle-linux-image-tools"
 
 # Default ISO information (Oracle Linux 10 Update 1, x86_64)
+# DEFAULT_ISO_URL is consumed in load_env() as the fallback when the user
+# has not set ISO_URL in their env.properties.
 readonly DEFAULT_ISO_URL="https://yum.oracle.com/ISOS/OracleLinux/OL10/u1/x86_64/OracleLinux-R10-U1-x86_64-dvd.iso"
-readonly DEFAULT_ISO_CHECKSUM_URL="${DEFAULT_ISO_URL}.sha256sum"
 
 # Execution mode flags
 SKIP_PREREQ=0
@@ -223,58 +222,63 @@ guide_ec2_kvm_issue() {
   local family
   family=$(echo "${instance_type}" | sed -E 's/\.[^.]+$//')
 
-  case "${family}" in
-    c8i|c8i-flex|c8id|m8i|m8i-flex|m8id|r8i|r8i-flex|r8id)
-      log_warn "[Case A] ${family} supports nested virtualization, but the feature is currently disabled."
-      echo
-      log_info "Action: enable nested virtualization on this instance."
-      log_info ""
-      log_info "  # 1) Stop the instance"
-      log_info "  aws ec2 stop-instances --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
-      log_info "  aws ec2 wait instance-stopped --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
-      log_info ""
-      log_info "  # 2) Enable nested virtualization"
-      log_info "  aws ec2 modify-instance-cpu-options \\"
-      log_info "    --instance-id ${EC2_INSTANCE_ID} --region ${EC2_REGION} \\"
-      log_info "    --nested-virtualization enabled"
-      log_info ""
-      log_info "  # 3) Start the instance and re-run this script"
-      log_info "  aws ec2 start-instances --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
-      log_info ""
-      log_info "  Reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html"
-      ;;
-    *.metal|*-metal|*metal*)
-      log_warn "[Case C] ${instance_type} is bare metal but /dev/kvm is unavailable."
-      echo
-      log_info "Action:"
-      log_info "  1) Check whether the kvm module is loaded"
-      log_info "       lsmod | grep kvm"
-      log_info "  2) If not loaded, load it manually"
-      log_info "       sudo modprobe kvm-intel    # for Intel CPUs"
-      log_info "       sudo modprobe kvm-amd      # for AMD CPUs"
-      log_info "  3) Verify /dev/kvm permissions"
-      log_info "       ls -l /dev/kvm"
-      ;;
-    *)
-      log_warn "[Case B] ${family} does NOT support nested virtualization."
-      echo
-      log_info "Action: switch to one of the following options."
-      log_info ""
-      log_info "  Option 1 (recommended): Use a nested-virtualization-capable C8i / M8i / R8i instance"
-      log_info "    - Example: m8i.xlarge (4 vCPU / 16 GB / approx \$0.30/h)"
-      log_info "    - Same price as the standard instance; no extra charge"
-      log_info "    - Sufficient spec to host the build VM"
-      log_info ""
-      log_info "  Option 2: Switch to a bare-metal instance"
-      log_info "    - Example: c5n.metal (approx \$5/h; acceptable for short builds)"
-      log_info ""
-      log_info "  List of nested-virt-capable instance types in this region:"
-      log_info "    aws ec2 describe-instance-types \\"
-      log_info "      --filters \"Name=processor-info.supported-features,Values=nested-virtualization\" \\"
-      log_info "      --query \"sort(InstanceTypes[].InstanceType)\" \\"
-      log_info "      --region ${EC2_REGION:-ap-northeast-1}"
-      ;;
-  esac
+  # IMPORTANT: detect bare-metal instances against the FULL instance_type,
+  # not against `family` — the family extraction strips the trailing
+  # ".metal" suffix, so 'c5n.metal' becomes 'c5n' and would otherwise match
+  # the catch-all "*) Case B" branch incorrectly.
+  if [[ "${instance_type}" == *.metal || "${instance_type}" == *.metal-* ]]; then
+    log_warn "[Case C] ${instance_type} is bare metal but /dev/kvm is unavailable."
+    echo
+    log_info "Action:"
+    log_info "  1) Check whether the kvm module is loaded"
+    log_info "       lsmod | grep kvm"
+    log_info "  2) If not loaded, load it manually"
+    log_info "       sudo modprobe kvm-intel    # for Intel CPUs"
+    log_info "       sudo modprobe kvm-amd      # for AMD CPUs"
+    log_info "  3) Verify /dev/kvm permissions"
+    log_info "       ls -l /dev/kvm"
+  else
+    case "${family}" in
+      c8i|c8i-flex|c8id|m8i|m8i-flex|m8id|r8i|r8i-flex|r8id)
+        log_warn "[Case A] ${family} supports nested virtualization, but the feature is currently disabled."
+        echo
+        log_info "Action: enable nested virtualization on this instance."
+        log_info ""
+        log_info "  # 1) Stop the instance"
+        log_info "  aws ec2 stop-instances --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
+        log_info "  aws ec2 wait instance-stopped --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
+        log_info ""
+        log_info "  # 2) Enable nested virtualization"
+        log_info "  aws ec2 modify-instance-cpu-options \\"
+        log_info "    --instance-id ${EC2_INSTANCE_ID} --region ${EC2_REGION} \\"
+        log_info "    --nested-virtualization enabled"
+        log_info ""
+        log_info "  # 3) Start the instance and re-run this script"
+        log_info "  aws ec2 start-instances --instance-ids ${EC2_INSTANCE_ID} --region ${EC2_REGION}"
+        log_info ""
+        log_info "  Reference: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html"
+        ;;
+      *)
+        log_warn "[Case B] ${family} does NOT support nested virtualization."
+        echo
+        log_info "Action: switch to one of the following options."
+        log_info ""
+        log_info "  Option 1 (recommended): Use a nested-virtualization-capable C8i / M8i / R8i instance"
+        log_info "    - Example: m8i.xlarge (4 vCPU / 16 GB / approx \$0.30/h)"
+        log_info "    - Same price as the standard instance; no extra charge"
+        log_info "    - Sufficient spec to host the build VM"
+        log_info ""
+        log_info "  Option 2: Switch to a bare-metal instance"
+        log_info "    - Example: c5n.metal (approx \$5/h; acceptable for short builds)"
+        log_info ""
+        log_info "  List of nested-virt-capable instance types in this region:"
+        log_info "    aws ec2 describe-instance-types \\"
+        log_info "      --filters \"Name=processor-info.supported-features,Values=nested-virtualization\" \\"
+        log_info "      --query \"sort(InstanceTypes[].InstanceType)\" \\"
+        log_info "      --region ${EC2_REGION:-ap-northeast-1}"
+        ;;
+    esac
+  fi
 
   echo
   log_error "Build cannot proceed. Apply the action above and re-run this script."
@@ -428,8 +432,23 @@ phase1_install_prereqs() {
       ;;
   esac
 
-  # Enable and start libvirtd
-  sudo systemctl enable --now libvirtd
+  # Enable and start the libvirt daemon.
+  # Modern RHEL 9+ / Fedora 35+ / Debian 12+ ship modular libvirt daemons
+  # (virtqemud, virtnetworkd, virtstoraged, ...) instead of monolithic
+  # libvirtd. We try the legacy unit first (still present on most distros
+  # as a compatibility wrapper), then fall back to modular daemons.
+  if systemctl list-unit-files libvirtd.service >/dev/null 2>&1 \
+     && systemctl list-unit-files libvirtd.service 2>/dev/null | grep -q '^libvirtd\.service'; then
+    sudo systemctl enable --now libvirtd
+    log_info "Enabled monolithic libvirtd.service"
+  elif systemctl list-unit-files virtqemud.service 2>/dev/null | grep -q '^virtqemud\.service'; then
+    sudo systemctl enable --now virtqemud.socket virtnetworkd.socket virtstoraged.socket 2>/dev/null \
+      || log_warn "Some modular libvirt sockets could not be enabled (may not exist on this distro)"
+    log_info "Enabled modular libvirt daemons (virtqemud / virtnetworkd / virtstoraged)"
+  else
+    log_warn "Neither libvirtd.service nor virtqemud.service was found."
+    log_warn "  You may need to start the libvirt daemon manually before Phase 4."
+  fi
 
   # Add the running user to libvirt and kvm groups (re-login may be required)
   if getent group libvirt >/dev/null 2>&1; then
@@ -665,6 +684,8 @@ detect_os_variant() {
 }
 
 #------------------------------------------------------------------------------
+# Phase 3: Resolve ISO checksum and OS_VARIANT, then generate
+#          oracle-linux-image-tools' env.properties.local
 #------------------------------------------------------------------------------
 phase3_prepare_env_properties() {
   log_step "Phase 3: Resolving ISO checksum and generating env.properties"
@@ -842,6 +863,32 @@ phase4_run_build() {
   local tool_dir="${WORK_REPO_DIR}/${OL_TOOLS_SUBDIR}"
   local tool_env="${tool_dir}/env.properties.local"
 
+  # Force libguestfs to run qemu directly instead of via libvirt.
+  #
+  # Why: virt-sparsify (called by oracle-linux-image-tools at the very end
+  # of the build) creates a temporary overlay subdirectory under the disk's
+  # own directory using mkdtemp(3), which always sets mode 0700. That mode
+  # cannot be relaxed by POSIX default ACLs (the auto-computed mask masks
+  # the qemu user's permission bits to 0). The libvirt 'qemu' user (uid
+  # 107) therefore fails to traverse the temp dir and the build aborts:
+  #
+  #   virt-sparsify: error: libguestfs error: could not create appliance
+  #     through libvirt. Cannot access storage file '...tmp.XXXX/...qcow2'
+  #     (as uid:107, gid:107): Permission denied
+  #
+  # The "direct" backend bypasses libvirt entirely and runs qemu as the
+  # current user, which (when the script runs as root) can access every
+  # directory regardless of mode.
+  #
+  # This affects ONLY libguestfs-based tools (virt-customize, virt-sysprep,
+  # virt-sparsify). virt-install in this phase still goes through libvirt,
+  # which is why Phase 1.5 grants the qemu user traverse ACLs on the parent
+  # path of WORKSPACE — both fixes are needed.
+  #
+  # User can override by setting LIBGUESTFS_BACKEND in env.properties.local.
+  export LIBGUESTFS_BACKEND="${LIBGUESTFS_BACKEND:-direct}"
+  log_info "LIBGUESTFS_BACKEND = ${LIBGUESTFS_BACKEND}"
+
   log_info "Starting build (this typically takes 20-60 minutes)"
   ( cd "${tool_dir}" && ./bin/build-image.sh --env "${tool_env}" ) \
     || die "build-image.sh failed"
@@ -850,8 +897,9 @@ phase4_run_build() {
   # Naming convention: OL10U1_x86_64-aws-b<BUILD_NUMBER>.vmdk
   VMDK_PATH=$(find "${WORKSPACE}" -maxdepth 3 -name '*.vmdk' -newer "${tool_env}" 2>/dev/null | head -n 1)
 
-  [[ -z "${VMDK_PATH}" || ! -f "${VMDK_PATH}" ]] \
-    && die "Built VMDK file was not found"
+  if [[ -z "${VMDK_PATH}" || ! -f "${VMDK_PATH}" ]]; then
+    die "Built VMDK file was not found under ${WORKSPACE}"
+  fi
 
   log_info "VMDK file: ${VMDK_PATH}"
   log_info "Size:      $(du -h "${VMDK_PATH}" | awk '{print $1}')"
@@ -909,23 +957,59 @@ phase6_import_snapshot() {
   log_info "import-snapshot task ID: ${import_task}"
   log_info "Polling until completion (typically 10-30 minutes)"
 
+  # Poll loop with hard timeout (90 minutes) and graceful handling of
+  # transient AWS API failures (network blips, throttling). A failed
+  # describe-import-snapshot-tasks call should not abort the build —
+  # we retry on the next iteration.
+  local -i poll_interval=60
+  local -i max_iterations=$((90 * 60 / poll_interval))   # 90 minutes
+  local -i iteration=0
+  local status="" progress="" query_output=""
+
   while :; do
-    local status progress
-    read -r status progress <<< "$(aws ec2 describe-import-snapshot-tasks \
-      --region "${AWS_REGION}" \
-      --import-task-ids "${import_task}" \
-      --query 'ImportSnapshotTasks[0].SnapshotTaskDetail.[Status,Progress]' \
-      --output text)"
+    iteration=$((iteration + 1))
+    if (( iteration > max_iterations )); then
+      die "import-snapshot did not complete within $((max_iterations * poll_interval / 60)) minutes (task: ${import_task})"
+    fi
+
+    if ! query_output=$(aws ec2 describe-import-snapshot-tasks \
+        --region "${AWS_REGION}" \
+        --import-task-ids "${import_task}" \
+        --query 'ImportSnapshotTasks[0].SnapshotTaskDetail.[Status,Progress]' \
+        --output text 2>/dev/null); then
+      log_warn "  describe-import-snapshot-tasks API call failed (transient); retrying in ${poll_interval}s"
+      sleep "${poll_interval}"
+      continue
+    fi
+
+    read -r status progress <<< "${query_output}"
+
+    # Empty status means the API returned successfully but with no data
+    # for our task (extremely unlikely; treat as transient and retry).
+    if [[ -z "${status}" ]]; then
+      log_warn "  Empty status returned by AWS API; retrying"
+      sleep "${poll_interval}"
+      continue
+    fi
 
     log_info "  Status: ${status} (${progress:-0}%)"
 
     case "${status}" in
-      completed) break ;;
+      completed)
+        break
+        ;;
       deleted|cancelled|deleting)
         die "import-snapshot task failed: ${status}"
         ;;
+      active|pending)
+        # in progress — keep polling
+        ;;
+      *)
+        # Unknown status code — log and continue (AWS may add new states)
+        log_warn "  Unrecognized status '${status}'; continuing to poll"
+        ;;
     esac
-    sleep 60
+    sleep "${poll_interval}"
   done
 
   SNAPSHOT_ID=$(aws ec2 describe-import-snapshot-tasks \
