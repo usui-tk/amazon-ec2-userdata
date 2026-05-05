@@ -48,6 +48,7 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForDebian11="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-11-HVM.sh"
 	ScriptForDebian10="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-10-HVM.sh"
 	ScriptForDebian9="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-9-HVM.sh"
+	ScriptForPhotonOS5="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-5-HVM.sh"
 	ScriptForPhotonOS3="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Photon-3-HVM.sh"
 
 	# [For x86_64] Parameter Settings (BootstrapScript - Script independent of operating system version [operation check requires a specific version or higher])
@@ -297,7 +298,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "VMware Photon OS" ] || [ "${DIST_TYPE}" = "photon" ]; then
-			if [ $(echo ${REV} | grep -e '3.') ]; then
+			if [ $(echo ${REV} | grep -e '5.') ]; then
+				# Bootstrap Script for VMware Photon OS 5.x
+				BootstrapScript=${ScriptForPhotonOS5}
+			elif [ $(echo ${REV} | grep -e '3.') ]; then
 				# Bootstrap Script for VMware Photon OS 3.x
 				BootstrapScript=${ScriptForPhotonOS3}
 			else
