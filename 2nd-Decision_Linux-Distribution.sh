@@ -34,11 +34,13 @@ if [ $(uname -m) = "x86_64" ]; then
 	ScriptForOracleLinuxv8="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v8-HVM.sh"
 	ScriptForOracleLinuxv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v7-HVM.sh"
 	ScriptForOracleLinuxv6="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_OracleLinux-v6-HVM.sh"
+	ScriptForUbuntu2604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-26.04-LTS-HVM.sh"
 	ScriptForUbuntu2404="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-24.04-LTS-HVM.sh"
 	ScriptForUbuntu2204="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-22.04-LTS-HVM.sh"
 	ScriptForUbuntu2004="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-20.04-LTS-HVM.sh"
 	ScriptForUbuntu1804="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-18.04-LTS-HVM.sh"
 	ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Ubuntu-16.04-LTS-HVM.sh"
+	ScriptForSLESv16="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v16-HVM.sh"
 	ScriptForSLESv15="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v15-HVM.sh"
 	ScriptForSLESv12="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_SLES-v12-HVM.sh"
 	ScriptForDebian13="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/3rd-Bootstrap_Debian-13-HVM.sh"
@@ -241,7 +243,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "Ubuntu" ] || [ "${DIST_TYPE}" = "ubuntu" ]; then
-			if [ $(echo ${REV} | grep -e '24.04') ]; then
+			if [ $(echo ${REV} | grep -e '26.04') ]; then
+				# Bootstrap Script for Ubuntu 26.04 LTS (Resolute Raccoon)
+				BootstrapScript=${ScriptForUbuntu2604}
+			elif [ $(echo ${REV} | grep -e '24.04') ]; then
 				# Bootstrap Script for Ubuntu 24.04 LTS (Noble Numbat)
 				BootstrapScript=${ScriptForUbuntu2404}
 			elif [ $(echo ${REV} | grep -e '22.04') ]; then
@@ -260,7 +265,10 @@ function get_bootstrap_script () {
 				BootstrapScript=""
 			fi
 	elif [ "${DIST}" = "SLES" ] || [ "${DIST_TYPE}" = "sles" ]; then
-			if [ $(echo ${REV} | grep -e '15') ]; then
+			if [ $(echo ${REV} | grep -e '16') ]; then
+				# Bootstrap Script for SUSE Linux Enterprise Server 16
+				BootstrapScript=${ScriptForSLESv16}
+			elif [ $(echo ${REV} | grep -e '15') ]; then
 				# Bootstrap Script for SUSE Linux Enterprise Server 15
 				BootstrapScript=${ScriptForSLESv15}
 			elif [ $(echo ${REV} | grep -e '12.') ]; then
