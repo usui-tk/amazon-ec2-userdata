@@ -104,10 +104,17 @@ tdnf clean all
 # Temporarily disable GPG verification and update only the necessary packages
 tdnf install -y --nogpgcheck --refresh photon-repos tdnf
 
-grep -l "VMWARE-RPM-GPG-KEY[^-]" /etc/yum.repos.d/*.repo
-cat /etc/yum.repos.d/photon.repo
-
 # Remove only references to the old key (leave the 4096 key intact)
+if grep -q "VMWARE-RPM-GPG-KEY[^-]" /etc/yum.repos.d/*.repo 2>/dev/null; then
+    echo "Found references to the expired GPG key. Affected files:"
+    grep -l "VMWARE-RPM-GPG-KEY[^-]" /etc/yum.repos.d/*.repo
+    sed -i 's| file:///etc/pki/rpm-gpg/VMWARE-RPM-GPG-KEY\b||g' /etc/yum.repos.d/*.repo
+    echo "Removed references to the expired GPG key."
+else
+    echo "No references to the expired GPG key were found. Skipping."
+fi
+
+cat /etc/yum.repos.d/photon.repo
 sed -i 's| file:///etc/pki/rpm-gpg/VMWARE-RPM-GPG-KEY\b||g' /etc/yum.repos.d/*.repo
 cat /etc/yum.repos.d/photon.repo
 
