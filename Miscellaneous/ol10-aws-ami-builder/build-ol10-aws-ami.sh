@@ -111,7 +111,12 @@ load_env() {
     : "${AWS_REGION:?AWS_REGION is not defined}"
     : "${AMI_NAME:=OracleLinux-10-U1-x86_64-$(date +%Y%m%d-%H%M)}"
     : "${AMI_DESCRIPTION:=Oracle Linux 10 Update 1 (x86_64) custom AMI built via oracle-linux-image-tools}"
-    : "${BOOT_MODE:=uefi-preferred}"
+    # AMI registration boot mode.
+    # IMPORTANT: oracle-linux-image-tools currently produces BIOS-only images
+    # for the AWS target (BOOT_MODE_BUILD must be 'bios'), so the AMI must
+    # be registered as legacy-bios. uefi-preferred would require an ESP in
+    # the disk image, which the upstream tool does not generate for AWS.
+    : "${BOOT_MODE:=legacy-bios}"
     : "${VMIMPORT_ROLE_NAME:=vmimport}"
   fi
 
@@ -123,7 +128,10 @@ load_env() {
   : "${ROOT_FS:=xfs}"
   : "${DISK_SIZE_GB:=10}"
   : "${SERIAL_CONSOLE_RUNTIME:=Yes}"
-  : "${BOOT_MODE_BUILD:=uefi}"
+  # Build-time boot mode.
+  # IMPORTANT: Oracle's build-image.sh enforces BOOT_MODE=bios for AWS.
+  # See cloud/aws/image-scripts.sh in oracle-linux-image-tools.
+  : "${BOOT_MODE_BUILD:=bios}"
 
   log_info "WORKSPACE          = ${WORKSPACE}"
   log_info "DISTR              = ${DISTR}"
@@ -135,6 +143,26 @@ load_env() {
     log_info "S3_BUCKET          = ${S3_BUCKET}"
     log_info "AMI_NAME           = ${AMI_NAME}"
     log_info "BOOT_MODE          = ${BOOT_MODE}"
+  fi
+
+  # Validate BOOT_MODE_BUILD: oracle-linux-image-tools restricts AWS to bios.
+  if [[ "${CLOUD,,}" == "aws" && "${BOOT_MODE_BUILD,,}" != "bios" ]]; then
+    log_error "BOOT_MODE_BUILD='${BOOT_MODE_BUILD}' is not supported for CLOUD=aws."
+    log_error "  oracle-linux-image-tools only accepts BOOT_MODE=bios for AWS targets."
+    log_error "  Set BOOT_MODE_BUILD=\"bios\" in env.properties.local (or remove the line"
+    log_error "  to use the default)."
+    die "Invalid BOOT_MODE_BUILD for AWS"
+  fi
+
+  # Cross-check the AMI registration boot mode.
+  # When the build produces a BIOS-only image, registering with uefi or
+  # uefi-preferred would fail at boot on UEFI-capable instances.
+  if [[ ${SKIP_AWS_IMPORT} -eq 0 && ${BUILD_ONLY} -eq 0 ]]; then
+    if [[ "${BOOT_MODE_BUILD,,}" == "bios" && "${BOOT_MODE,,}" != "legacy-bios" ]]; then
+      log_warn "BOOT_MODE_BUILD=bios produces a BIOS-only image, but AMI BOOT_MODE='${BOOT_MODE}'."
+      log_warn "  This will likely fail to boot on UEFI-capable instances."
+      log_warn "  Recommended setting: BOOT_MODE=\"legacy-bios\""
+    fi
   fi
 }
 
@@ -789,20 +817,32 @@ phase6_import_snapshot() {
 phase7_register_ami() {
   log_step "Phase 7: Registering AMI via register-image"
 
+  # Build the register-image argument list.
+  # NitroTPM (--tpm-support) requires UEFI boot; it is incompatible with
+  # legacy-bios AMIs and must be omitted in that case.
+  local -a register_args=(
+    --region "${AWS_REGION}"
+    --name "${AMI_NAME}"
+    --description "${AMI_DESCRIPTION}"
+    --architecture x86_64
+    --root-device-name /dev/sda1
+    --virtualization-type hvm
+    --ena-support
+    --boot-mode "${BOOT_MODE}"
+    --imds-support v2.0
+    --block-device-mappings "DeviceName=/dev/sda1,Ebs={SnapshotId=${SNAPSHOT_ID},VolumeSize=${DISK_SIZE_GB},VolumeType=gp3,DeleteOnTermination=true}"
+  )
+
+  # NitroTPM is only valid for UEFI-bootable AMIs
+  if [[ "${BOOT_MODE,,}" == "uefi" || "${BOOT_MODE,,}" == "uefi-preferred" ]]; then
+    register_args+=(--tpm-support v2.0)
+    log_info "Boot mode supports UEFI; enabling NitroTPM (--tpm-support v2.0)"
+  else
+    log_info "Boot mode is legacy-bios; NitroTPM (--tpm-support) is omitted (UEFI-only feature)"
+  fi
+
   local ami_id
-  ami_id=$(aws ec2 register-image \
-    --region "${AWS_REGION}" \
-    --name "${AMI_NAME}" \
-    --description "${AMI_DESCRIPTION}" \
-    --architecture x86_64 \
-    --root-device-name /dev/sda1 \
-    --virtualization-type hvm \
-    --ena-support \
-    --boot-mode "${BOOT_MODE}" \
-    --tpm-support v2.0 \
-    --imds-support v2.0 \
-    --block-device-mappings "DeviceName=/dev/sda1,Ebs={SnapshotId=${SNAPSHOT_ID},VolumeSize=${DISK_SIZE_GB},VolumeType=gp3,DeleteOnTermination=true}" \
-    --query 'ImageId' --output text) \
+  ami_id=$(aws ec2 register-image "${register_args[@]}" --query 'ImageId' --output text) \
     || die "register-image failed"
 
   log_info "AMI registered: ${ami_id}"
