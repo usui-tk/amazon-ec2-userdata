@@ -170,7 +170,7 @@ if [ $(rpm -qa | grep -w gnupg2-minimal) ]; then
 fi
 
 # Package Install Amazon Linux System Administration Tools (from Amazon Linux Official Repository)
-dnf install -y 7zip-standalone-all acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio fping gdisk git gnutls-utils hdparm htop icu iftop inotify-tools intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu libzip-tools low-memory-monitor lsof lvm2 lzop man-pages mc mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nkf nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
+dnf install -y 7zip-standalone-all acpid arptables atop bash-completion bc bcc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 collectd collectd-utils crypto-policies dmidecode dnf-data dnf-plugins-core dnf-utils ebtables ethtool expect fio fping gdisk git gnutls-utils hdparm htop icu iftop inotify-tools intltool iotop ipcalc iperf3 iproute-tc ipset jq kexec-tools libbpf-tools libicu libzip-tools low-memory-monitor lsof lsscsi lvm2 lzop man-pages mc mdadm mlocate mtr nc ncompress net-snmp-utils net-tools nftables nkf nmap nmap-ncat numactl nvme-cli parted patchutils perf pmempool psacct psmisc python3-dnf-plugin-versionlock rsync screen smartmontools strace symlinks sysfsutils sysstat tcpdump time traceroute tree tzdata unzip util-linux util-linux-user uuid vim-enhanced wget wireshark-cli xfsdump xfsprogs yum-utils zip zsh zstd
 
 # Package Install NFS/CIFS Administration Tools (from Amazon Linux Official Repository)
 dnf install -y cifs-utils nfs-utils nfsv4-client-utils nfs-stats-utils
@@ -181,7 +181,6 @@ dnf install -y iscsi-initiator-utils
 
 # Package Install SELinux Tools (from Amazon Linux Official Repository)
 dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console udica
-## dnf install -y "selinux-policy*" checkpolicy policycoreutils policycoreutils-python-utils policycoreutils-restorecond setools setools-console setools-console-analyses setroubleshoot-server udica
 
 # Package Install Federal Information Processing Standards (FIPS) Tools (from Amazon Linux Official Repository)
 dnf -y install crypto-policies crypto-policies-scripts
@@ -273,10 +272,13 @@ dnf repolist all
 dnf repository-packages "amazonlinux-spal" list > /tmp/command-log_dnf_repository-package-list_amazonlinux-spal.txt
 
 # Package Install Oracle Linux System Administration Tools (from SPAL Repository)
-dnf --enablerepo="amazonlinux-spal" install -y byobu lsb_release moreutils moreutils-parallel ncdu rpmconf sos yq
+dnf --enablerepo="amazonlinux-spal" install -y bcftools bpfilter byobu crudini ioping iptraf-ng lsb_release moreutils moreutils-parallel ncdu redhat-*-fonts rpmconf sg3_utils sos uv yq
 
 # Package Install Performance Co-Pilot (PCP) Tools (from SPAL Repository)
 dnf --enablerepo="amazonlinux-spal" install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-system-tools pcp-zeroconf
+
+# Package Install SELinux troubleshoot Tools (from SPAL Repository)
+dnf --enablerepo="amazonlinux-spal" install -y setroubleshoot setroubleshoot-plugins setroubleshoot-server
 
 
 #-------------------------------------------------------------------------------
