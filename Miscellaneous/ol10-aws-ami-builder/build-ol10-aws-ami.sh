@@ -347,6 +347,7 @@ phase1_install_prereqs() {
         libvirt-client libvirt-daemon-config-network \
         libvirt-daemon-driver-qemu \
         edk2-ovmf \
+        libosinfo osinfo-db osinfo-db-tools \
         || die "Failed to install RHEL/OL packages"
       ;;
     *debian*|*ubuntu*)
@@ -356,6 +357,7 @@ phase1_install_prereqs() {
         qemu-kvm libvirt-daemon-system libvirt-clients \
         virtinst libguestfs-tools \
         ovmf \
+        libosinfo-bin osinfo-db osinfo-db-tools \
         || die "Failed to install Debian/Ubuntu packages"
       ;;
     *)
@@ -430,7 +432,77 @@ derive_oracle_checksum_url() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 3: Resolve ISO checksum and generate the build-time env.properties
+# Find a valid OS_VARIANT short-id available in the local osinfo-db.
+#
+# Oracle's build-image.sh validates OS_VARIANT against the local osinfo
+# database via:
+#   osinfo-query os --fields=short-id short-id="${OS_VARIANT}"
+#
+# When the host's osinfo-db package is older than Oracle Linux 10's release,
+# auto-detection fails with:
+#   "can't determine OS_VARIANT; you must define it in your environment file"
+#
+# This function tries a list of candidate short-ids in priority order and
+# returns the first one that is actually present in the local database.
+# If oraclelinux10 entries exist they are preferred; otherwise we fall back
+# to RHEL 10 (binary compatible), then a generic Linux variant. virt-install
+# accepts these and the OL10 installer still runs from the ISO regardless.
+#------------------------------------------------------------------------------
+detect_os_variant() {
+  local -a candidates=(
+    # Most specific match for Oracle Linux 10 update 1
+    "oraclelinux10.1"
+    "oraclelinux10.0"
+    "oraclelinux10"
+    # RHEL 10 is binary-compatible with OL10 and a safe stand-in
+    "rhel10.1"
+    "rhel10.0"
+    "rhel10-unknown"
+    "rhel10"
+    # CentOS Stream 10 is also a close match
+    "centos-stream10"
+    "centos-stream-10"
+    # Last-known Oracle Linux entries (still close enough to OL10 for virt-install)
+    "oraclelinux9.7"
+    "oraclelinux9.6"
+    "oraclelinux9.5"
+    "oraclelinux9.4"
+    "oraclelinux9.3"
+    "oraclelinux9.2"
+    "oraclelinux9.1"
+    "oraclelinux9.0"
+    "oraclelinux9"
+    # Generic Linux fallbacks
+    "linux2024"
+    "linux2023"
+    "linux2022"
+  )
+
+  if ! command -v osinfo-query >/dev/null 2>&1; then
+    return 1
+  fi
+
+  # Build a single list of all known short-ids on the host (skip header rows)
+  local available
+  available=$(osinfo-query os --fields=short-id 2>/dev/null \
+    | tail -n +3 | awk '{print $1}' | grep -v '^$')
+
+  if [[ -z "${available}" ]]; then
+    return 1
+  fi
+
+  local variant
+  for variant in "${candidates[@]}"; do
+    if echo "${available}" | grep -qx "${variant}"; then
+      echo "${variant}"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 phase3_prepare_env_properties() {
   log_step "Phase 3: Resolving ISO checksum and generating env.properties"
@@ -497,6 +569,66 @@ phase3_prepare_env_properties() {
     log_info "  (source: ${checksum_url})"
   fi
 
+  # Resolve OS_VARIANT for virt-install / Oracle build-image.sh.
+  # When the user did not provide it, try to find a working short-id in the
+  # local osinfo-db. If nothing matches, fail with actionable guidance.
+  if [[ -z "${OS_VARIANT:-}" ]]; then
+    log_info "OS_VARIANT not set; auto-detecting from the local osinfo-db"
+    if ! command -v osinfo-query >/dev/null 2>&1; then
+      die "osinfo-query command not found. Install libosinfo / osinfo-db (Phase 1 should have done this)."
+    fi
+
+    OS_VARIANT=$(detect_os_variant) || true
+
+    if [[ -z "${OS_VARIANT}" ]]; then
+      log_error "No suitable OS_VARIANT short-id was found in the local osinfo-db."
+      log_error "Workarounds:"
+      log_error "  1) Update the database:"
+      log_error "       sudo dnf upgrade osinfo-db libosinfo                 # RHEL/OL"
+      log_error "       sudo apt-get install --only-upgrade osinfo-db        # Debian/Ubuntu"
+      log_error "  2) Install the latest osinfo-db tarball from upstream:"
+      log_error "       https://releases.pagure.org/libosinfo/"
+      log_error "       (then 'sudo osinfo-db-import --system osinfo-db-XXXXXX.tar.xz')"
+      log_error "  3) Set OS_VARIANT manually in env.properties.local, e.g."
+      log_error "       OS_VARIANT=\"linux2022\""
+      die "OS_VARIANT auto-detection failed."
+    fi
+
+    log_info "  -> selected: ${OS_VARIANT}"
+
+    # Categorize the chosen variant and emit an appropriate notice.
+    # OL10 is binary-compatible with RHEL 10 / CentOS Stream 10, so when one
+    # of those is selected the build is effectively equivalent. Older or
+    # generic fallbacks deserve a stronger warning.
+    case "${OS_VARIANT}" in
+      oraclelinux10*)
+        log_info "  Native Oracle Linux 10 profile. Optimal."
+        ;;
+      rhel10*|centos-stream10*|centos-stream-10*)
+        log_info "  Note: '${OS_VARIANT}' is binary-compatible with Oracle Linux 10."
+        log_info "  This is an excellent stand-in and produces an equivalent build."
+        log_info "  (To get a native 'oraclelinux10' entry, update osinfo-db from upstream:"
+        log_info "   https://releases.pagure.org/libosinfo/)"
+        ;;
+      oraclelinux9*)
+        log_warn "  Note: the chosen variant is from the OL9 family, not OL10."
+        log_warn "  The build will still produce a working OL10 image, but virt-install"
+        log_warn "  may apply OL9-era hardware defaults. Consider updating osinfo-db:"
+        log_warn "    sudo dnf upgrade osinfo-db libosinfo                 # RHEL/OL"
+        log_warn "    sudo apt-get install --only-upgrade osinfo-db        # Debian/Ubuntu"
+        ;;
+      linux*)
+        log_warn "  Note: a generic Linux profile was selected."
+        log_warn "  The build will work, but virt-install will use minimal defaults."
+        log_warn "  For a more accurate profile, update osinfo-db (see commands above)"
+        log_warn "  or install the latest tarball from https://releases.pagure.org/libosinfo/"
+        ;;
+      *)
+        log_warn "  Selected variant '${OS_VARIANT}' is unusual. Verify the build VM behavior."
+        ;;
+    esac
+  fi
+
   # Generate the env.properties file consumed by the build tool
   local tool_env="${WORK_REPO_DIR}/${OL_TOOLS_SUBDIR}/env.properties.local"
   cat > "${tool_env}" <<EOF
@@ -508,6 +640,7 @@ DISTR=${DISTR}
 CLOUD=${CLOUD}
 ISO_URL=${ISO_URL}
 ISO_CHECKSUM=${ISO_CHECKSUM}
+OS_VARIANT=${OS_VARIANT}
 
 BUILD_NUMBER=${BUILD_NUMBER}
 SETUP_SWAP=${SETUP_SWAP}
