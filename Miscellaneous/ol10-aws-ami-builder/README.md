@@ -226,20 +226,21 @@ Expected total time: **40–90 minutes** (depends on bandwidth and instance perf
 |-------|-------------|------------------|
 | 0 | Preflight checks | A few seconds |
 | 1 | Install KVM and other prerequisites | 2–5 min (first run only) |
-| 2 | Clone the repository | A few seconds |
-| 3 | Resolve ISO checksum / generate env file | A few seconds |
-| 4 | Build the VMDK (`virt-install` runs the OS installer) | **20–40 min** |
-| 5 | Upload to S3 | 2–10 min |
-| 6 | `import-snapshot` (creates EBS snapshot) | **10–30 min** |
-| 7 | `register-image` (registers the AMI) | Less than 1 min |
+| 2 | Grant qemu user traverse ACL on the workspace path | A few seconds |
+| 3 | Clone the repository | A few seconds |
+| 4 | Resolve ISO checksum / generate env file | A few seconds |
+| 5 | Build the VMDK (`virt-install` runs the OS installer) | **20–40 min** |
+| 6 | Upload to S3 | 2–10 min |
+| 7 | `import-snapshot` (creates EBS snapshot) | **10–30 min** |
+| 8 | `register-image` (registers the AMI) | Less than 1 min |
 
 ### 6.2 Execution modes
 
 | Option | Use case |
 |--------|----------|
 | `--skip-prereq` | Skip KVM package installation (Phase 1). Useful for re-runs. |
-| `--build-only` | Stop after VMDK is built (Phase 4). Run the AWS import separately. |
-| `--skip-aws-import` | Skip Phases 5–7 (equivalent to `--build-only`). |
+| `--build-only` | Stop after VMDK is built (Phase 5). Run the AWS import separately. |
+| `--skip-aws-import` | Skip Phases 6–8 (equivalent to `--build-only`). |
 
 ### 6.3 Phase 0 self-diagnosis
 
@@ -405,7 +406,7 @@ sudo dnf config-manager --set-enabled crb  # Oracle Linux 9 / RHEL 9
 sudo dnf install -y epel-release
 ```
 
-### Phase 4: `KVM acceleration not available, using 'qemu'` warning
+### Phase 5: `KVM acceleration not available, using 'qemu'` warning
 
 → Either nested virtualization is off, or `/dev/kvm` permissions are wrong.
 ```bash
@@ -415,7 +416,7 @@ sudo usermod -aG kvm,libvirt $USER
 # Log out and back in for the new groups to take effect
 ```
 
-### Phase 6: `ClientError: Unsupported kernel version`
+### Phase 7: `ClientError: Unsupported kernel version`
 
 → AWS VM Import does not recognize the OL10 kernel. This is the typical failure with `import-image`, but **should not occur** with this script since it uses `import-snapshot`. If it does occur, file a support request asking AWS to extend OL10 support.
 

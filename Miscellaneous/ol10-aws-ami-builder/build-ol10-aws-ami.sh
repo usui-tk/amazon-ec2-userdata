@@ -11,13 +11,13 @@
 # Pipeline phases:
 #   Phase 0:   Preflight checks (KVM support, required commands, free disk)
 #   Phase 1:   Provision the build host (KVM/libvirt/virt-install/libguestfs)
-#   Phase 1.5: Grant the qemu user traverse access to WORKSPACE (ACL)
-#   Phase 2:   Clone the oracle/oracle-linux repository
-#   Phase 3:   Resolve ISO checksum and generate env.properties
-#   Phase 4:   Run oracle-linux-image-tools to produce a VMDK
-#   Phase 5:   Upload the VMDK to S3
-#   Phase 6:   Convert the VMDK to an EBS snapshot via import-snapshot
-#   Phase 7:   Register the snapshot as an AMI
+#   Phase 2:   Grant the qemu user traverse access to WORKSPACE (ACL)
+#   Phase 3:   Clone the oracle/oracle-linux repository
+#   Phase 4:   Resolve ISO checksum and generate env.properties
+#   Phase 5:   Run oracle-linux-image-tools to produce a VMDK
+#   Phase 6:   Upload the VMDK to S3
+#   Phase 7:   Convert the VMDK to an EBS snapshot via import-snapshot
+#   Phase 8:   Register the snapshot as an AMI
 #
 # Usage:
 #   1) Edit env.properties.aws-ol10 (WORKSPACE / S3_BUCKET / AWS_REGION, etc.)
@@ -27,7 +27,7 @@
 #   --env <file>          : Path to the environment properties file (required)
 #   --skip-prereq         : Skip Phase 1 when build host packages are present
 #   --skip-aws-import     : Skip Phases 5-7 (build VMDK only)
-#   --build-only          : Run Phase 4 only
+#   --build-only          : Run Phase 5 only
 #   -h | --help           : Show this help
 #==============================================================================
 
@@ -288,7 +288,7 @@ guide_ec2_kvm_issue() {
 #------------------------------------------------------------------------------
 # Phase 0: Preflight checks
 #------------------------------------------------------------------------------
-phase0_preflight() {
+phase0_preflight_checks() {
   log_step "Phase 0: Preflight checks"
 
   # Warn (but do not abort) if running as root.
@@ -370,7 +370,7 @@ phase0_preflight() {
     log_warn "Workspace is on tmpfs (RAM-backed):"
     log_warn "  * Size is typically capped at 50% of system RAM. Verify ${avail_gb}GB is enough."
     log_warn "  * Contents are cleared on reboot. A reboot mid-build will lose all progress."
-    log_warn "  * If you encounter ENOSPC errors during Phase 4, switch to /var/tmp:"
+    log_warn "  * If you encounter ENOSPC errors during Phase 5, switch to /var/tmp:"
     log_warn "      WORKSPACE=\"/var/tmp/ol10-build-ws\""
   fi
 
@@ -389,7 +389,7 @@ phase0_preflight() {
 #------------------------------------------------------------------------------
 # Phase 1: Provision the build host
 #------------------------------------------------------------------------------
-phase1_install_prereqs() {
+phase1_install_prerequisites() {
   if [[ ${SKIP_PREREQ} -eq 1 ]]; then
     log_step "Phase 1: Skipping prerequisite package installation"
     return 0
@@ -447,7 +447,7 @@ phase1_install_prereqs() {
     log_info "Enabled modular libvirt daemons (virtqemud / virtnetworkd / virtstoraged)"
   else
     log_warn "Neither libvirtd.service nor virtqemud.service was found."
-    log_warn "  You may need to start the libvirt daemon manually before Phase 4."
+    log_warn "  You may need to start the libvirt daemon manually before Phase 5."
   fi
 
   # Add the running user to libvirt and kvm groups (re-login may be required)
@@ -486,7 +486,7 @@ detect_qemu_user() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 1.5: Ensure the workspace path is reachable by the qemu user.
+# Phase 2: Ensure the workspace path is reachable by the qemu user.
 #
 # libvirt in system mode launches QEMU as a non-root user. When WORKSPACE
 # lives under /root (or any directory without world-execute bit), the qemu
@@ -497,14 +497,14 @@ detect_qemu_user() {
 # qemu user a traverse-only ACL (u:qemu:x). This is more granular and safer
 # than chmod o+x on /root.
 #------------------------------------------------------------------------------
-phase1_5_grant_qemu_access() {
-  log_step "Phase 1.5: Ensuring qemu user can access the workspace"
+phase2_grant_qemu_access() {
+  log_step "Phase 2: Ensuring qemu user can access the workspace"
 
   local qemu_user
   qemu_user=$(detect_qemu_user) || {
     log_warn "Could not detect a qemu/libvirt-qemu user."
     log_warn "  Phase 1 may not have completed successfully, or libvirt is not installed."
-    log_warn "  Skipping ACL setup. Phase 4 will likely fail."
+    log_warn "  Skipping ACL setup. Phase 5 will likely fail."
     return 0
   }
   log_info "Detected qemu user: ${qemu_user}"
@@ -513,7 +513,7 @@ phase1_5_grant_qemu_access() {
     log_warn "setfacl not found. Install the 'acl' package:"
     log_warn "  sudo dnf install acl       # RHEL/OL/Fedora"
     log_warn "  sudo apt-get install acl   # Debian/Ubuntu"
-    log_warn "Continuing without ACL setup; Phase 4 may fail."
+    log_warn "Continuing without ACL setup; Phase 5 may fail."
     return 0
   fi
 
@@ -564,8 +564,8 @@ phase1_5_grant_qemu_access() {
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-phase2_clone_repo() {
-  log_step "Phase 2: Cloning oracle/oracle-linux repository"
+phase3_clone_repository() {
+  log_step "Phase 3: Cloning oracle/oracle-linux repository"
 
   if [[ -d "${WORK_REPO_DIR}/.git" ]]; then
     log_info "Updating existing clone: ${WORK_REPO_DIR}"
@@ -684,11 +684,11 @@ detect_os_variant() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 3: Resolve ISO checksum and OS_VARIANT, then generate
+# Phase 4: Resolve ISO checksum and OS_VARIANT, then generate
 #          oracle-linux-image-tools' env.properties.local
 #------------------------------------------------------------------------------
-phase3_prepare_env_properties() {
-  log_step "Phase 3: Resolving ISO checksum and generating env.properties"
+phase4_prepare_env_properties() {
+  log_step "Phase 4: Resolving ISO checksum and generating env.properties"
 
   # If ISO_CHECKSUM is empty, fetch it from the published checksum file.
   if [[ -z "${ISO_CHECKSUM:-}" ]]; then
@@ -855,10 +855,10 @@ EOF
 }
 
 #------------------------------------------------------------------------------
-# Phase 4: Run oracle-linux-image-tools to produce the VMDK
+# Phase 5: Run oracle-linux-image-tools to produce the VMDK
 #------------------------------------------------------------------------------
-phase4_run_build() {
-  log_step "Phase 4: Running oracle-linux-image-tools to build the VMDK"
+phase5_run_build() {
+  log_step "Phase 5: Running oracle-linux-image-tools to build the VMDK"
 
   local tool_dir="${WORK_REPO_DIR}/${OL_TOOLS_SUBDIR}"
   local tool_env="${tool_dir}/env.properties.local"
@@ -882,7 +882,7 @@ phase4_run_build() {
   #
   # This affects ONLY libguestfs-based tools (virt-customize, virt-sysprep,
   # virt-sparsify). virt-install in this phase still goes through libvirt,
-  # which is why Phase 1.5 grants the qemu user traverse ACLs on the parent
+  # which is why Phase 2 grants the qemu user traverse ACLs on the parent
   # path of WORKSPACE — both fixes are needed.
   #
   # User can override by setting LIBGUESTFS_BACKEND in env.properties.local.
@@ -906,10 +906,10 @@ phase4_run_build() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 5: Upload the VMDK to S3
+# Phase 6: Upload the VMDK to S3
 #------------------------------------------------------------------------------
-phase5_upload_to_s3() {
-  log_step "Phase 5: Uploading VMDK to S3"
+phase6_upload_to_s3() {
+  log_step "Phase 6: Uploading VMDK to S3"
 
   local vmdk_filename
   vmdk_filename=$(basename "${VMDK_PATH}")
@@ -936,10 +936,10 @@ phase5_upload_to_s3() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 6: Convert the VMDK to an EBS snapshot via import-snapshot
+# Phase 7: Convert the VMDK to an EBS snapshot via import-snapshot
 #------------------------------------------------------------------------------
-phase6_import_snapshot() {
-  log_step "Phase 6: Creating EBS snapshot via import-snapshot"
+phase7_import_snapshot() {
+  log_step "Phase 7: Creating EBS snapshot via import-snapshot"
 
   # Confirm that the vmimport role exists
   if ! aws iam get-role --role-name "${VMIMPORT_ROLE_NAME}" >/dev/null 2>&1; then
@@ -1030,10 +1030,10 @@ phase6_import_snapshot() {
 }
 
 #------------------------------------------------------------------------------
-# Phase 7: Register the snapshot as an AMI
+# Phase 8: Register the snapshot as an AMI
 #------------------------------------------------------------------------------
-phase7_register_ami() {
-  log_step "Phase 7: Registering AMI via register-image"
+phase8_register_ami() {
+  log_step "Phase 8: Registering AMI via register-image"
 
   # Build the register-image argument list.
   # NitroTPM (--tpm-support) requires UEFI boot; it is incompatible with
@@ -1095,12 +1095,12 @@ main() {
   parse_args "$@"
   load_env
 
-  phase0_preflight
-  phase1_install_prereqs
-  phase1_5_grant_qemu_access
-  phase2_clone_repo
-  phase3_prepare_env_properties
-  phase4_run_build
+  phase0_preflight_checks
+  phase1_install_prerequisites
+  phase2_grant_qemu_access
+  phase3_clone_repository
+  phase4_prepare_env_properties
+  phase5_run_build
 
   if [[ ${BUILD_ONLY} -eq 1 || ${SKIP_AWS_IMPORT} -eq 1 ]]; then
     log_info "Build-only mode. Skipping AWS import phases."
@@ -1108,9 +1108,9 @@ main() {
     exit 0
   fi
 
-  phase5_upload_to_s3
-  phase6_import_snapshot
-  phase7_register_ami
+  phase6_upload_to_s3
+  phase7_import_snapshot
+  phase8_register_ami
 }
 
 main "$@"

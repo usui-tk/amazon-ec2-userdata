@@ -226,20 +226,21 @@ vi env.properties.local
 |-------|------|---------|
 | 0 | 前提条件チェック | 数秒 |
 | 1 | KVM 等のパッケージ導入 | 2〜5 分(初回のみ) |
-| 2 | リポジトリ取得 | 数秒 |
-| 3 | ISO チェックサム取得 / env 生成 | 数秒 |
-| 4 | VMDK ビルド(`virt-install` で OS インストール) | **20〜40 分** |
-| 5 | S3 アップロード | 2〜10 分 |
-| 6 | `import-snapshot`(EBS スナップショット作成) | **10〜30 分** |
-| 7 | `register-image`(AMI 登録) | 1 分未満 |
+| 2 | qemu ユーザーへのワークスペース traverse ACL 付与 | 数秒 |
+| 3 | リポジトリ取得 | 数秒 |
+| 4 | ISO チェックサム取得 / env 生成 | 数秒 |
+| 5 | VMDK ビルド(`virt-install` で OS インストール) | **20〜40 分** |
+| 6 | S3 アップロード | 2〜10 分 |
+| 7 | `import-snapshot`(EBS スナップショット作成) | **10〜30 分** |
+| 8 | `register-image`(AMI 登録) | 1 分未満 |
 
 ### 6.2 実行モード
 
 | オプション | 用途 |
 |-----------|------|
 | `--skip-prereq` | KVM 等のパッケージ導入(Phase 1)をスキップ。2 回目以降の実行で時間短縮 |
-| `--build-only` | VMDK 生成(Phase 4)までで停止。AWS 取り込みは別途実行したい場合 |
-| `--skip-aws-import` | Phase 5〜7 をスキップ(`--build-only` と同等) |
+| `--build-only` | VMDK 生成(Phase 5)までで停止。AWS 取り込みは別途実行したい場合 |
+| `--skip-aws-import` | Phase 6〜8 をスキップ(`--build-only` と同等) |
 
 ### 6.3 Phase 0 の自動診断機能
 
@@ -406,7 +407,7 @@ sudo dnf config-manager --set-enabled crb  # Oracle Linux 9 / RHEL 9
 sudo dnf install -y epel-release
 ```
 
-### Phase 4 で `KVM acceleration not available, using 'qemu'` 警告
+### Phase 5 で `KVM acceleration not available, using 'qemu'` 警告
 
 → ネスト仮想化が無効、または `/dev/kvm` のパーミッション不足。
 ```bash
@@ -416,7 +417,7 @@ sudo usermod -aG kvm,libvirt $USER
 # グループ変更を反映するため再ログインが必要
 ```
 
-### Phase 6 で `ClientError: Unsupported kernel version`
+### Phase 7 で `ClientError: Unsupported kernel version`
 
 → AWS VM Import が OL10 のカーネルを未認識。`import-image` 経由ならこのエラーになりますが、本スクリプトは `import-snapshot` を使うため**本来は発生しません**。発生した場合は AWS サポートに OL10 サポート追加を依頼してください。
 
