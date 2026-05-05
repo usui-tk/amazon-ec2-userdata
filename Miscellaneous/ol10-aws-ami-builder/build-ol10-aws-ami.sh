@@ -400,24 +400,101 @@ phase2_clone_repo() {
 }
 
 #------------------------------------------------------------------------------
+# Derive the official Oracle checksum file URL from an ISO URL.
+#
+# Oracle publishes per-release checksum files at
+#   https://linux.oracle.com/security/gpg/checksum/
+# with names of the form:
+#   OracleLinux-R{major}-U{minor}-Server-{arch}.checksum
+#
+# Returns 0 with the URL on stdout when the ISO URL matches the expected
+# Oracle naming convention, or 1 otherwise.
+#------------------------------------------------------------------------------
+derive_oracle_checksum_url() {
+  local iso_url="$1"
+  local iso_filename
+  iso_filename=$(basename "${iso_url}")
+
+  # Match patterns like:
+  #   OracleLinux-R10-U1-x86_64-dvd.iso
+  #   OracleLinux-R9-U7-x86_64-dvd.iso
+  #   OracleLinux-R8-U1-Server-x86_64-dvd.iso  (older naming)
+  if [[ "${iso_filename}" =~ ^OracleLinux-R([0-9]+)-U([0-9]+)-(Server-)?([^-]+)-(dvd|boot)(-uek)?\.iso$ ]]; then
+    local release="R${BASH_REMATCH[1]}"
+    local update="U${BASH_REMATCH[2]}"
+    local arch="${BASH_REMATCH[4]}"
+    echo "https://linux.oracle.com/security/gpg/checksum/OracleLinux-${release}-${update}-Server-${arch}.checksum"
+    return 0
+  fi
+  return 1
+}
+
+#------------------------------------------------------------------------------
 # Phase 3: Resolve ISO checksum and generate the build-time env.properties
 #------------------------------------------------------------------------------
 phase3_prepare_env_properties() {
   log_step "Phase 3: Resolving ISO checksum and generating env.properties"
 
-  # If ISO_CHECKSUM is empty, fetch it from the .sha256sum file
+  # If ISO_CHECKSUM is empty, fetch it from the published checksum file.
   if [[ -z "${ISO_CHECKSUM:-}" ]]; then
-    local checksum_url="${ISO_CHECKSUM_URL:-${ISO_URL}.sha256sum}"
-    log_info "ISO_CHECKSUM not set; fetching from: ${checksum_url}"
+    local iso_filename
+    iso_filename=$(basename "${ISO_URL}")
+    local raw_sum=""
+    local checksum_url=""
 
-    local raw_sum
-    raw_sum=$(curl -fsSL "${checksum_url}" || true)
-    if [[ -z "${raw_sum}" ]]; then
-      die "Failed to fetch ISO checksum. Set ISO_CHECKSUM explicitly in your env.properties."
+    # Build the list of candidate URLs in priority order:
+    #   1. User-supplied ISO_CHECKSUM_URL (if any)
+    #   2. Legacy "<iso_url>.sha256sum" (works for OL7/OL8 on some mirrors)
+    #   3. Modern linux.oracle.com signed checksum file (OL9+)
+    local -a candidate_urls=()
+    [[ -n "${ISO_CHECKSUM_URL:-}" ]] && candidate_urls+=("${ISO_CHECKSUM_URL}")
+    candidate_urls+=("${ISO_URL}.sha256sum")
+    local oracle_url
+    if oracle_url=$(derive_oracle_checksum_url "${ISO_URL}"); then
+      candidate_urls+=("${oracle_url}")
     fi
-    # Expected format: "<sha256>  <filename>"
-    ISO_CHECKSUM=$(echo "${raw_sum}" | awk '{print $1}')
+
+    for checksum_url in "${candidate_urls[@]}"; do
+      log_info "Attempting checksum fetch from: ${checksum_url}"
+      raw_sum=$(curl -fsSL "${checksum_url}" 2>/dev/null || true)
+      if [[ -n "${raw_sum}" ]]; then
+        log_info "  -> success"
+        break
+      fi
+      log_warn "  -> failed (HTTP error or empty response)"
+    done
+
+    if [[ -z "${raw_sum}" ]]; then
+      log_error "Failed to fetch the ISO checksum from any of the candidate URLs."
+      log_error "Manual workaround:"
+      log_error "  1) Open the official checksum directory in a browser:"
+      log_error "       https://linux.oracle.com/security/gpg/"
+      log_error "  2) Locate the entry for your release (e.g. 'Oracle Linux 10.1 x86_64 checksum file')."
+      log_error "  3) Open the file and find the line for ${iso_filename}."
+      log_error "  4) Set ISO_CHECKSUM=<sha256_hash> in your env.properties.local and re-run."
+      die "Checksum auto-resolution failed."
+    fi
+
+    # Extract the SHA256 hash for our specific ISO filename.
+    # The checksum file may be a plain ".sha256sum" (single line) or a
+    # GPG clear-signed file with multiple hash entries; in both cases the
+    # pattern "<hash>  <filename>" lets us grep+awk the right value.
+    ISO_CHECKSUM=$(echo "${raw_sum}" | grep -F "${iso_filename}" | awk '{print $1}' | head -n 1)
+
+    if [[ -z "${ISO_CHECKSUM}" ]]; then
+      log_error "Checksum file was retrieved, but no entry was found for ${iso_filename}."
+      log_error "Inspect the file at: ${checksum_url}"
+      log_error "Then set ISO_CHECKSUM=<sha256_hash> in your env.properties.local and re-run."
+      die "Could not extract a checksum entry for ${iso_filename}."
+    fi
+
+    # Sanity-check the result looks like a SHA-256 hex string (64 chars).
+    if [[ ! "${ISO_CHECKSUM}" =~ ^[0-9a-fA-F]{64}$ ]]; then
+      die "Extracted value does not look like a SHA-256 hash: '${ISO_CHECKSUM}'"
+    fi
+
     log_info "ISO_CHECKSUM = ${ISO_CHECKSUM}"
+    log_info "  (source: ${checksum_url})"
   fi
 
   # Generate the env.properties file consumed by the build tool
