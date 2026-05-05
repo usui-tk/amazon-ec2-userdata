@@ -242,6 +242,9 @@ fi
 # # Setting AWS-CLI Pager settings
 # aws configure set cli_pager ''
 
+# # Setting AWS-CLI Error Format
+# aws configure set cli_error_format json
+
 # # Getting AWS-CLI default Region & Output format
 # aws configure list
 # cat ~/.aws/config
