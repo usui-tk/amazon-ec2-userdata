@@ -615,8 +615,10 @@ if [ $(systemctl is-enabled td-agent) = "disabled" ]; then
 	systemctl is-enabled td-agent
 fi
 
-# # Package bundled ruby gem package information
-/opt/td-agent/bin/fluent-gem list
+# Package bundled ruby gem package information
+if [ $(command -v fluent-gem) ]; then
+	fluent-gem list
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]

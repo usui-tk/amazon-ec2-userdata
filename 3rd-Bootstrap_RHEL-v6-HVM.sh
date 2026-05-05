@@ -766,7 +766,9 @@ chkconfig td-agent on
 chkconfig --list td-agent
 
 # Package bundled ruby gem package information
-/opt/td-agent/embedded/bin/fluent-gem list
+if [ $(command -v fluent-gem) ]; then
+	fluent-gem list
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up

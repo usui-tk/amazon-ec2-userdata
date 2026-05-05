@@ -635,8 +635,10 @@ if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
 	systemctl is-enabled fluentd
 fi
 
-# # Package bundled ruby gem package information
-/opt/fluent/bin/fluent-gem list
+# Package bundled ruby gem package information
+if [ $(command -v fluent-gem) ]; then
+	fluent-gem list
+fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]

@@ -884,7 +884,9 @@ ansible localhost -m setup
 # fi
 
 # # Package bundled ruby gem package information
-# /opt/fluent/bin/fluent-gem list
+# if [ $(command -v fluent-gem) ]; then
+# 	fluent-gem list
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
