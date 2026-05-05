@@ -150,8 +150,10 @@ tdnf update -y --refresh
 #-------------------------------------------------------------------------------
 
 # Package Install Photon System Administration Tools (from VMware Photon OS Official Repository)
-tdnf install -y bc bcc bcc-tools blktrace curl dstat ebtables ethtool expect hdparm intltool iotop jq kexec-tools lsof lvm2 man-pages mlocate nvme-cli parted psmisc rsync strace sysstat tcpdump traceroute tree unzip wget xfsprogs zip zsh
+tdnf install -y bc bcc bcc-tools blktrace curl dstat ebtables ethtool expect hdparm intltool iotop jq kexec-tools lsof lvm2 man-pages mlocate netcat nmap nvme-cli parted psmisc rsync strace sysstat tcpdump traceroute tree unzip wget xfsprogs zip zsh
+
 tdnf install -y cifs-utils nfs-utils
+
 tdnf install -y lsscsi sg3_utils
 
 # Package Install Python 3 Runtime (from VMware Photon OS Official Repository)
@@ -544,7 +546,7 @@ source /etc/profile.d/ec2rl.sh
 /opt/aws/ec2rl/ec2rl list
 
 # Required Software Package
-/opt/aws/ec2rl/ec2rl software-check
+# /opt/aws/ec2rl/ec2rl software-check
 
 # Diagnosis [dig modules]
 # /opt/aws/ec2rl/ec2rl run --only-modules=dig --domain=amazon.com
