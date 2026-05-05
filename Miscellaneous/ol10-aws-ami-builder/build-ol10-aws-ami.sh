@@ -258,8 +258,15 @@ guide_ec2_kvm_issue() {
 phase0_preflight() {
   log_step "Phase 0: Preflight checks"
 
-  # Forbid running directly as root (oracle-linux-image-tools must run unprivileged)
-  [[ $EUID -eq 0 ]] && die "Do not run as root. Run as a regular user with sudo privileges."
+  # Warn (but do not abort) if running as root.
+  # The upstream oracle-linux-image-tools project recommends running as a
+  # non-privileged user, but in environments such as freshly-launched EC2
+  # instances where only root is available, allow execution to continue.
+  if [[ $EUID -eq 0 ]]; then
+    log_warn "Running as root. oracle-linux-image-tools is designed to run as an unprivileged user."
+    log_warn "  Continuing anyway because the user explicitly opted in."
+    log_warn "  If KVM or libvirt permission errors occur in later phases, switch to a regular user with sudo."
+  fi
 
   # Detect EC2 vs. on-prem
   detect_ec2_environment
