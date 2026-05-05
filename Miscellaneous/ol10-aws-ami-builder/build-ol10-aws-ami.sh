@@ -79,6 +79,11 @@ parse_args() {
 
   [[ -z "${ENV_FILE}" ]] && die "--env option is required"
   [[ ! -f "${ENV_FILE}" ]] && die "Environment properties file not found: ${ENV_FILE}"
+
+  # Explicit return 0 to avoid the "&& die" pattern leaking a non-zero exit
+  # status when both checks pass. With set -e in the caller, returning a
+  # non-zero status from this function would silently abort the script.
+  return 0
 }
 
 #------------------------------------------------------------------------------
