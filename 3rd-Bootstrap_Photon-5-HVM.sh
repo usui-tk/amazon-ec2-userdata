@@ -103,9 +103,6 @@ tdnf update -y
 # Custom Package Installation
 #-------------------------------------------------------------------------------
 
-# Package Install Photon Linux-Kernel Modules and Tools (from VMware Photon OS Official Repository)
-tdnf install -y linux-aws-oprofile
-
 # Package Install Photon System Administration Tools (from VMware Photon OS Official Repository)
 tdnf install -y bc bcc bcc-tools blktrace curl dstat ebtables ethtool expect hdparm intltool iotop jq kexec-tools lsof lvm2 man-pages mlocate nvme-cli parted pmd pmd-cli pmd-python3 psmisc rsync strace sysstat tcpdump traceroute tree unzip wget xfsprogs zip zsh
 tdnf install -y cifs-utils nfs-utils
