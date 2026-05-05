@@ -597,7 +597,7 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-fluent-package/install-by-deb-fluent-package
 #-------------------------------------------------------------------------------
 
-curl -fsSL https://toolbelt.treasuredata.com/sh/install-debian-bookworm-fluent-package5-lts.sh | sh
+curl -fsSL https://fluentd.cdn.cncf.io/sh/install-debian-bookworm-fluent-package6-lts.sh | sh
 
 apt show fluentd
 

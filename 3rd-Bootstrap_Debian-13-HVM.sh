@@ -598,24 +598,24 @@ ansible localhost -m setup
 # https://docs.fluentd.org/installation/install-fluent-package/install-by-deb-fluent-package
 #-------------------------------------------------------------------------------
 
-# curl -fsSL https://toolbelt.treasuredata.com/sh/install-debian-bookworm-fluent-package5-lts.sh | sh
+curl -fsSL https://fluentd.cdn.cncf.io/sh/install-debian-trixie-fluent-package6-lts.sh | sh
 
-# apt show fluentd
+apt show fluentd
 
-# systemctl daemon-reload
+systemctl daemon-reload
 
-# systemctl restart fluentd
+systemctl restart fluentd
 
-# systemctl status -l fluentd
+systemctl status -l fluentd
 
-# # Configure fluentd software (Start Daemon fluentd)
-# if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
-# 	systemctl enable fluentd
-# 	systemctl is-enabled fluentd
-# fi
+# Configure fluentd software (Start Daemon fluentd)
+if [ $(systemctl is-enabled fluentd) = "disabled" ]; then
+	systemctl enable fluentd
+	systemctl is-enabled fluentd
+fi
 
-# # # Package bundled ruby gem package information
-# /opt/fluent/bin/fluent-gem list
+# # Package bundled ruby gem package information
+/opt/fluent/bin/fluent-gem list
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Terraform]
