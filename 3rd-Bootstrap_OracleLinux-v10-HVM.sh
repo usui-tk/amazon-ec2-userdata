@@ -254,7 +254,8 @@ dnf install -y oled-tools
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Linux Web-Based support tools (from Oracle Linux Repository)
-dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+# dnf install -y cockpit cockpit-packagekit cockpit-pcp cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
+dnf install -y cockpit cockpit-packagekit cockpit-session-recording cockpit-storaged cockpit-system cockpit-ws
 
 rpm -qi cockpit
 
