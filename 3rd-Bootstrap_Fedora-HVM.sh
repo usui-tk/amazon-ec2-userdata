@@ -7,7 +7,7 @@ exec > >(tee /var/log/user-data_3rd-bootstrap.log || logger -t user-data -s 2> /
 
 ################################################################################
 #                                                                              #
-#  Script Evaluated Operating System Information - [Fedora 41]                 #
+#  Script Evaluated Operating System Information - [Fedora 44]                 #
 #                                                                              #
 ################################################################################
 
@@ -67,16 +67,16 @@ fi
 rpm -qa --qf="%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n" | sort > /tmp/command-log_rpm_installed-package.txt
 
 # Default installation package [dnf command]
-dnf list installed > /tmp/command-log_dnf_installed-package.txt
+dnf list --installed > /tmp/command-log_dnf_installed-package.txt
 
 # Default repository package [dnf command]
-dnf list all > /tmp/command-log_dnf_repository-package-list.txt
+dnf list --available > /tmp/command-log_dnf_repository-package-list.txt
 
 # Default repository package group [dnf command]
-dnf group list -v > /tmp/command-log_dnf_repository-package-group-list.txt
+dnf group list > /tmp/command-log_dnf_repository-package-group-list.txt
 
 # Default repository list [dnf command]
-dnf repolist all > /tmp/command-log_dnf_repository-list.txt
+dnf repolist --all > /tmp/command-log_dnf_repository-list.txt
 
 # Default repository module [dnf command]
 dnf module list > /tmp/command-log_dnf_module-list.txt
@@ -539,7 +539,7 @@ if [ -n "$RoleName" ]; then
 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
 	echo "# Get Amazon Machine Image Information"
 
-	LatestAmiId=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=Fedora-Cloud-Base-AmazonEC2.x86_64-42-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+	LatestAmiId=$(aws ec2 describe-images --owner "125523088429" --filter "Name=name,Values=Fedora-Cloud-Base-AmazonEC2.x86_64-44-*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
 
 	if [ -n "$LatestAmiId" ]; then
 		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
