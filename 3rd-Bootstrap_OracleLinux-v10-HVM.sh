@@ -308,7 +308,7 @@ dnf --enablerepo="*" --verbose clean all
 dnf repository-packages "ol10_u1_developer_EPEL" list > /tmp/command-log_dnf_repository-package-list_ol9_developer_EPEL.txt
 
 # Package Install Oracle Linux System Administration Tools (from EPEL Repository)
-dnf --enablerepo="ol10_u1_developer_EPEL" install -y  7zip-standalone-all aria2 atop collectd collectd-utils colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit java-latest-openjdk jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf screen ssh-audit ssldump sslscan stressapptest uv vnstat wdiff yamllint yq
+dnf --enablerepo="ol10_u1_developer_EPEL" install -y  7zip-standalone-all aria2 atop colordiff colorized-logs crudini fping gh htop iftop inotify-tools ipv6calc ipv6toolkit java-latest-openjdk jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf screen ssh-audit ssldump sslscan stressapptest uv vnstat wdiff yamllint yq
 
 # dnf --enablerepo="ol10_u1_developer_EPEL" install -y 7zip-standalone-all aria2 atop byobu collectd collectd-utils colordiff colorized-logs crudini dateutils fping gh glances htop iftop inotify-tools inxi ipv6calc ipv6toolkit java-latest-openjdk jc lsb_release moreutils moreutils-parallel ncdu nkf nload rpmconf screen ssh-audit ssldump sslscan stressapptest unicornscan uv vnstat wdiff yamllint yq
 
@@ -324,19 +324,61 @@ dnf --enablerepo="ol10_u1_developer_EPEL" install -y  7zip-standalone-all aria2 
 dnf install -y ocfs2-tools
 dnf install -y pcp-oracle-conf
 
+
+
 # Download JDK Development Kit 17 RPM Package
 # curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
 
 # Package Install JDK Development Kit 17 (from Local File)
 # dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
 
+
+
+# Package Install Oracle Java SE Development Kit (JDK) (from Oracle Linux Repository)
+# https://yum.oracle.com/repo/OracleLinux/OL10/java/x86_64/index.html
+
+# ---------------------------------------
+# [workaround] Repository Configuration
+# ---------------------------------------
+# cat > /etc/yum.repos.d/oracle-java-jdk-ol10.repo << __EOF__
+# [ol10_java]
+# name=Oracle Java SE Development Kit (JDK) for Oracle Linux 10 ($basearch)
+# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL10/java/\$basearch/
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+# gpgcheck=1
+# enabled=1
+# __EOF__
+# ---------------------------------------
+
+# dnf install -y jdk-21-headless jdk-21-headful
+# dnf install -y jdk-25-headless jdk-25-headful
+
+
+
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
-# https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
+# https://yum.oracle.com/repo/OracleLinux/OL10/oracle/software/x86_64/index.html
+
+# ---------------------------------------
+# [workaround] Repository Configuration
+# ---------------------------------------
+# cat > /etc/yum.repos.d/oracle-software-ol10.repo << __EOF__
+# [ol10_oracle_software]
+# name=Oracle Software for Oracle Linux \$releasever (\$basearch)
+# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL10/oracle/software/\$basearch/
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+# gpgcheck=1
+# enabled=1
+# __EOF__
+# ---------------------------------------
 
 # dnf install -y ords sqlcl
 
+
+
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 # dnf install -y oracle-ai-database-preinstall-26ai
+
+
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
