@@ -105,7 +105,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el8
 
-dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-23ai-el8 oracle-ocne-release-el8 oraclelinux-developer-release-el8 oracle-software-release-el8  oracle-java-jdk-release-el8
+dnf install -y oraclelinux-release-el8 oracle-epel-release-el8 oraclelinux-automation-manager-release-el8 oracle-instantclient-release-26ai-el8 oracle-ocne-release-el8 oraclelinux-developer-release-el8 oracle-software-release-el8  oracle-java-jdk-release-el8
 
 dnf --enablerepo="*" --verbose clean all
 
@@ -135,12 +135,13 @@ dnf config-manager --set-enabled ol8_addons
 dnf config-manager --set-enabled ol8_codeready_builder
 dnf config-manager --set-enabled ol8_oracle_software
 dnf config-manager --set-enabled ol8_java
-dnf config-manager --set-enabled ol8_oracle_instantclient23
+dnf config-manager --set-enabled ol8_oracle_instantclient26
 dnf config-manager --set-enabled ol8_developer
 dnf config-manager --set-enabled ol8_developer_EPEL
 dnf config-manager --set-enabled ol8_developer_EPEL_modular
-dnf config-manager --set-enabled ol8_olcne19
 dnf config-manager --set-enabled ol8_ocne
+dnf config-manager --set-enabled ol8_olcne19
+
 
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol8_UEKR6
@@ -161,6 +162,7 @@ dnf config-manager --set-disabled ol8_developer_olcne
 dnf config-manager --set-disabled ol8_developer_UEKR6
 dnf config-manager --set-disabled ol8_developer_UEKR7
 # dnf config-manager --set-disabled ol8_oracle_instantclient21
+# dnf config-manager --set-disabled ol8_oracle_instantclient23
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -359,21 +361,55 @@ dnf --enablerepo="ol8_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-ag
 dnf install -y oracleasm-support ocfs2-tools
 dnf install -y pcp-oracle-conf
 
+
+
 # Download JDK Development Kit 17 RPM Package
 # curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
 
 # Package Install JDK Development Kit 17 (from Local File)
 # dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
 
+
+
+# Package Install Oracle Java SE Development Kit (JDK) (from Oracle Linux Repository)
+# https://yum.oracle.com/repo/OracleLinux/OL8/java/x86_64/index.html
+
+# dnf install -y jdk-21-headless jdk-21-headful
+# dnf install -y jdk-25-headless jdk-25-headful
+
+
+
+# Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
+# https://yum.oracle.com/repo/OracleLinux/OL8/oracle/software/x86_64/index.html
+
+# ---------------------------------------
+# [workaround] Repository Configuration
+# ---------------------------------------
+# cat > /etc/yum.repos.d/oracle-software-ol8.repo << __EOF__
+# [ol8_oracle_software]
+# name=Oracle Software for Oracle Linux \$releasever (\$basearch)
+# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL8/oracle/software/\$basearch/
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+# gpgcheck=1
+# enabled=1
+# __EOF__
+# ---------------------------------------
+
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # dnf install -y ords sqlcl
+
+
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-ai-database-preinstall-26ai
 
+
+
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-dnf --enablerepo="ol8_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+dnf --enablerepo="ol8_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+
+
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
