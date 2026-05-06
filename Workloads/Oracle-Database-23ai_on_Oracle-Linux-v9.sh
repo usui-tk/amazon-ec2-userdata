@@ -187,15 +187,28 @@ dnf --enablerepo="ol9_developer_EPEL" install -y amazon-ec2-utils ec2-hibinit-ag
 dnf install -y ocfs2-tools
 dnf install -y pcp-oracle-conf
 
-# Download JDK Development Kit 17 RPM Package
+
+
+# Download JDK Development Kit 21 RPM Package
 # https://www.oracle.com/java/technologies/downloads/
-curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
+curl -sS "https://download.oracle.com/java/21/latest/jdk-21_linux-x64_bin.rpm" -o "/tmp/jdk-21_linux-x64_bin.rpm"
 
-# Package Install JDK Development Kit 17 (from Local File)
-dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
+# Package Install JDK Development Kit 21 (from Local File)
+dnf localinstall -y "/tmp/jdk-21_linux-x64_bin.rpm"
 
+
+
+# Download JDK Development Kit 25 RPM Package
+# https://www.oracle.com/java/technologies/downloads/
+curl -sS "https://download.oracle.com/java/25/latest/jdk-25_linux-x64_bin.rpm" -o "/tmp/jdk-25_linux-x64_bin.rpm"
+
+# Package Install JDK Development Kit 25 (from Local File)
+dnf localinstall -y "/tmp/jdk-25_linux-x64_bin.rpm"
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
+
+
+
 
 # ---------------------------------------
 # [workaround] Repository Configuration
@@ -212,8 +225,12 @@ __EOF__
 
 dnf install -y ords sqlcl
 
+
+
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-database-preinstall-23ai
+
+
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
