@@ -152,7 +152,9 @@ dnf config-manager --set-enabled ol9_olcne19
 dnf config-manager --set-disabled ol9_UEKR7
 dnf config-manager --set-disabled ol9_kvm_utils
 dnf config-manager --set-disabled ol9_developer_UEKR7
+dnf config-manager --set-disabled ol9_developer_UEKR8
 dnf config-manager --set-disabled ol9_developer_kvm_utils
+dnf config-manager --set-disabled ol9_developer_ocne
 dnf config-manager --set-disabled ol9_distro_builder
 dnf config-manager --set-disabled ol9_olcne17
 dnf config-manager --set-disabled ol9_olcne18
