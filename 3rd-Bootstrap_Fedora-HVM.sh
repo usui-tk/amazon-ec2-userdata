@@ -550,7 +550,7 @@ fi
 # https://github.com/aws/amazon-ssm-agent
 #-------------------------------------------------------------------------------
 
-dnf localinstall --nogpgcheck -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+dnf install --nogpgcheck -y "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
 
 rpm -qi amazon-ssm-agent
 
@@ -618,34 +618,34 @@ ansible localhost -m setup
 # https://www.terraform.io/docs/cli/install/yum.html
 #-------------------------------------------------------------------------------
 
-# Repository Configuration (HashiCorp Linux Repository)
-dnf config-manager addrepo --from-repofile="https://rpm.releases.hashicorp.com/fedora/hashicorp.repo"
+# # Repository Configuration (HashiCorp Linux Repository)
+# dnf config-manager addrepo --from-repofile="https://rpm.releases.hashicorp.com/fedora/hashicorp.repo"
 
-cat /etc/yum.repos.d/hashicorp.repo
+# cat /etc/yum.repos.d/hashicorp.repo
 
-# Cleanup repository information
-dnf --enablerepo="*" clean all
+# # Cleanup repository information
+# dnf --enablerepo="*" clean all
 
-# HashiCorp Linux repository package [dnf command]
-dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
+# # HashiCorp Linux repository package [dnf command]
+# dnf repository-packages hashicorp list > /tmp/command-log_dnf_repository-package-list_hashicorp.txt
 
-# Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
-dnf --enablerepo="hashicorp" -y install terraform terraform-ls
+# # Package Install Infrastructure as Code (IaC) Tools (from HashiCorp Linux Repository)
+# dnf --enablerepo="hashicorp" -y install terraform terraform-ls
 
-rpm -qi terraform
+# rpm -qi terraform
 
-terraform version
+# terraform version
 
-# Configure terraform software
+# # Configure terraform software
 
-## terraform -install-autocomplete
-cat > /etc/profile.d/terraform.sh << __EOF__
-if [ -n "\$BASH_VERSION" ]; then
-   complete -C /usr/bin/terraform terraform
-fi
-__EOF__
+# ## terraform -install-autocomplete
+# cat > /etc/profile.d/terraform.sh << __EOF__
+# if [ -n "\$BASH_VERSION" ]; then
+#    complete -C /usr/bin/terraform terraform
+# fi
+# __EOF__
 
-source /etc/profile.d/terraform.sh
+# source /etc/profile.d/terraform.sh
 
 #-------------------------------------------------------------------------------
 # Custom Package Clean up
