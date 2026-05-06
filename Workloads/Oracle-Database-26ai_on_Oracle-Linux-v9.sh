@@ -569,7 +569,7 @@ grubby --info=ALL
 #-------------------------------------------------------------------------------
 
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
-dnf install -y oracle-database-preinstall-26ai
+dnf install -y oracle-ai-database-preinstall-26ai
 
 #-------------------------------------------------------------------------------
 # Firewall configuration
