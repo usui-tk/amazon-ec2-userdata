@@ -142,9 +142,6 @@ dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjs
 # dnf install -y redhat-lsb redhat-text-fonts
 dnf install -y redhat-text-fonts
 
-# Package Install EC2 instance optimization tools (from Fedora Official Repository)
-dnf install -y ec2-hibinit-agent ec2-metadata
-
 # Package Install Fedora RPM Development Tools (from Fedora Official Repository)
 dnf install -y rpmdevtools rpm-build rpmconf rpmconf-base redhat-rpm-config
 
