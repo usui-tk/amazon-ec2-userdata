@@ -41,7 +41,7 @@ dnf config-manager --set-enabled ol9_UEKR8
 dnf config-manager --set-enabled ol9_appstream
 dnf config-manager --set-enabled ol9_addons
 dnf config-manager --set-enabled ol9_codeready_builder
-dnf config-manager --set-enabled ol9_oracle_instantclient23
+dnf config-manager --set-enabled ol9_oracle_instantclient26
 dnf config-manager --set-enabled ol9_java
 dnf config-manager --set-enabled ol9_developer
 dnf config-manager --set-enabled ol9_developer_EPEL
@@ -59,6 +59,7 @@ dnf config-manager --set-disabled ol9_distro_builder
 dnf config-manager --set-disabled ol9_olcne17
 dnf config-manager --set-disabled ol9_olcne18
 # dnf config-manager --set-disabled ol9_oracle_instantclient
+# dnf config-manager --set-disabled ol9_oracle_instantclient23
 
 # Cleanup repository information
 dnf --enablerepo="*" --verbose clean all
@@ -216,7 +217,7 @@ dnf install -y oracle-database-preinstall-23ai
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-# dnf --enablerepo="ol9_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+dnf --enablerepo="ol9_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
