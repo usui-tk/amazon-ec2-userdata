@@ -139,7 +139,8 @@ dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-syst
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
 # Package Install Fedora support tools (from Fedora Official Repository)
-dnf install -y redhat-lsb redhat-text-fonts
+# dnf install -y redhat-lsb redhat-text-fonts
+dnf install -y redhat-text-fonts
 
 # Package Install EC2 instance optimization tools (from Fedora Official Repository)
 dnf install -y ec2-hibinit-agent ec2-metadata
