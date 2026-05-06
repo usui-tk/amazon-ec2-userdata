@@ -158,7 +158,7 @@ dnf repolist all
 dnf module list
 
 # Get Dnf/Yum Repository List (Exclude Dnf/Yum repository related to "BaseOS GA (x86_64), BaseOS (x86_64)")
-repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "BaseOS GA (x86_64)" -ve "BaseOS (x86_64)" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
+repolist=$(dnf repolist all --quiet | grep -ie "enabled" -ie "disabled" | grep -ve "BaseOS GA (x86_64)" -ve "baseos_base" | grep -ie "enabled" | awk '{print $1}' | awk '{ sub("/.*$",""); print $0; }' | sort)
 
 # Oracle Linux YUM repository package [dnf command]
 for repo in $repolist
