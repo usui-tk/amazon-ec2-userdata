@@ -384,6 +384,8 @@ dnf install -y pcp-oracle-conf
 # https://yum.oracle.com/oracle-instant-client.html
 # dnf --enablerepo="ol10_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
 
+
+
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
 # https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/configuring-instance-metadata-service.html
