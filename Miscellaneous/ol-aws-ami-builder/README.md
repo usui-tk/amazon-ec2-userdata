@@ -1,8 +1,8 @@
-# Oracle Linux 10 AWS AMI Builder
+# Oracle Linux AWS AMI Builder
 
 English | [日本語](./README.ja.md)
 
-A set of wrapper scripts that build an AWS AMI for Oracle Linux 10 Update 1 (x86_64) using the official Oracle [`oracle-linux-image-tools`](https://github.com/oracle/oracle-linux/tree/main/oracle-linux-image-tools) project.
+A set of wrapper scripts that build AWS AMIs for **Oracle Linux 8, 9, or 10** (x86_64) using the official Oracle [`oracle-linux-image-tools`](https://github.com/oracle/oracle-linux/tree/main/oracle-linux-image-tools) project.
 
 Created in response to the discontinuation of Oracle's official AMI offerings (owner ID `131827586825`) on the AWS Marketplace, with the goal of establishing an independent build and operations workflow for Oracle Linux AMIs.
 
@@ -15,8 +15,10 @@ Created in response to the discontinuation of Oracle's official AMI offerings (o
 
 | File | Purpose |
 |------|---------|
-| `build-ol10-aws-ami.sh` | Main build orchestrator. Runs the entire pipeline (prep through AMI registration) in seven phases. |
-| `env.properties.aws-ol10` | Parameter file for the build (ISO URL, S3 bucket, region, etc.). |
+| `build-ol-aws-ami.sh` | Main build orchestrator. Runs the entire pipeline (prep through AMI registration) in nine phases. Version-agnostic — pick the target OL version via `--env`. |
+| `env.properties.aws-ol10` | Build parameters for **Oracle Linux 10 Update 1** (x86_64). |
+| `env.properties.aws-ol9` | Build parameters for **Oracle Linux 9 Update 7** (x86_64). |
+| `env.properties.aws-ol8` | Build parameters for **Oracle Linux 8 Update 10** (x86_64). |
 | `setup-vmimport-role.sh` | One-time setup script that creates the `vmimport` IAM service role for AWS VM Import/Export. |
 | `README.md` | This document (English). |
 | `README.ja.md` | Japanese version of this document. |
@@ -170,7 +172,7 @@ aws ec2 describe-instance-types \
 ```bash
 git clone <your repository hosting these scripts> ol10-aws-ami-builder
 cd ol10-aws-ami-builder
-chmod +x build-ol10-aws-ami.sh setup-vmimport-role.sh
+chmod +x build-ol-aws-ami.sh setup-vmimport-role.sh
 ```
 
 ### 5.2 Configure the AWS CLI
@@ -196,10 +198,22 @@ This role is required by AWS VM Import/Export to read the staged VMDK from S3. R
 
 ### 5.4 Edit the environment file
 
+Pick the env template that matches your target Oracle Linux version:
+
 ```bash
+# Oracle Linux 10 Update 1
 cp env.properties.aws-ol10 env.properties.local
+
+# Oracle Linux 9 Update 7
+cp env.properties.aws-ol9 env.properties.local
+
+# Oracle Linux 8 Update 10
+cp env.properties.aws-ol8 env.properties.local
+
 vi env.properties.local
 ```
+
+The script auto-detects the OL major and update version from `ISO_URL`, so switching versions is just a matter of using a different env file (or editing `ISO_URL` to point at a different release).
 
 **Minimum settings to update:**
 
@@ -217,7 +231,7 @@ vi env.properties.local
 ### 6.1 Standard run (full pipeline)
 
 ```bash
-./build-ol10-aws-ami.sh --env env.properties.local
+./build-ol-aws-ami.sh --env env.properties.local
 ```
 
 Expected total time: **40–90 minutes** (depends on bandwidth and instance performance).

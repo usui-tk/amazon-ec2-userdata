@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 #==============================================================================
-# build-ol10-aws-ami.sh
+# build-ol-aws-ami.sh
 #
-# Wrapper script that builds an AWS AMI for Oracle Linux 10 Update 1 (x86_64)
-# using the official Oracle oracle-linux-image-tools project.
+# Wrapper script that builds an AWS AMI for Oracle Linux (x86_64) using the
+# official Oracle oracle-linux-image-tools project.
+#
+# Supported Oracle Linux versions: 8 / 9 / 10 (x86_64).
+# The actual version, ISO URL, and AMI naming are driven from the env
+# properties file specified with --env. See env.properties.aws-ol10 (or
+# env.properties.aws-ol9 / env.properties.aws-ol8) for working examples.
 #
 # Reference:
 #   https://github.com/oracle/oracle-linux/tree/main/oracle-linux-image-tools
@@ -20,13 +25,13 @@
 #   Phase 8:   Register the snapshot as an AMI
 #
 # Usage:
-#   1) Edit env.properties.aws-ol10 (WORKSPACE / S3_BUCKET / AWS_REGION, etc.)
-#   2) ./build-ol10-aws-ami.sh --env env.properties.aws-ol10
+#   1) Edit env.properties.aws-ol{8,9,10} (WORKSPACE / S3_BUCKET / AWS_REGION, etc.)
+#   2) ./build-ol-aws-ami.sh --env env.properties.aws-ol10
 #
 # Options:
 #   --env <file>          : Path to the environment properties file (required)
 #   --skip-prereq         : Skip Phase 1 when build host packages are present
-#   --skip-aws-import     : Skip Phases 5-7 (build VMDK only)
+#   --skip-aws-import     : Skip Phases 6-8 (build VMDK only)
 #   --build-only          : Run Phase 5 only
 #   -h | --help           : Show this help
 #==============================================================================
@@ -36,9 +41,11 @@ set -euo pipefail
 readonly OL_REPO_URL="https://github.com/oracle/oracle-linux.git"
 readonly OL_TOOLS_SUBDIR="oracle-linux-image-tools"
 
-# Default ISO information (Oracle Linux 10 Update 1, x86_64)
+# Default ISO information.
 # DEFAULT_ISO_URL is consumed in load_env() as the fallback when the user
-# has not set ISO_URL in their env.properties.
+# has not set ISO_URL in their env.properties. The default points to the
+# latest OL10 release; users targeting OL9 or OL8 must set ISO_URL in their
+# env file (see env.properties.aws-ol9 / env.properties.aws-ol8).
 readonly DEFAULT_ISO_URL="https://yum.oracle.com/ISOS/OracleLinux/OL10/u1/x86_64/OracleLinux-R10-U1-x86_64-dvd.iso"
 
 # Execution mode flags
@@ -61,7 +68,7 @@ die() { log_error "$*"; exit 1; }
 # Argument parsing
 #------------------------------------------------------------------------------
 usage() {
-  sed -n '/^# build-ol10-aws-ami.sh/,/^#==============/p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '/^# build-ol-aws-ami.sh/,/^#==============/p' "$0" | sed 's/^# \{0,1\}//'
   exit "${1:-0}"
 }
 
@@ -87,6 +94,29 @@ parse_args() {
 }
 
 #------------------------------------------------------------------------------
+# Parse the OL major and update version from an ISO URL or filename.
+#
+# Examples:
+#   OracleLinux-R10-U1-x86_64-dvd.iso  -> major=10, update=1
+#   OracleLinux-R9-U7-x86_64-dvd.iso   -> major=9,  update=7
+#   OracleLinux-R8-U10-x86_64-dvd.iso  -> major=8,  update=10
+#
+# Sets the global variables OL_MAJOR_VERSION and OL_UPDATE_VERSION.
+# Returns 1 if no match.
+#------------------------------------------------------------------------------
+parse_ol_version_from_iso() {
+  local iso_ref="$1"
+  local iso_filename
+  iso_filename=$(basename "${iso_ref}")
+  if [[ "${iso_filename}" =~ OracleLinux-R([0-9]+)-U([0-9]+) ]]; then
+    OL_MAJOR_VERSION="${BASH_REMATCH[1]}"
+    OL_UPDATE_VERSION="${BASH_REMATCH[2]}"
+    return 0
+  fi
+  return 1
+}
+
+#------------------------------------------------------------------------------
 # Load environment properties and validate required keys
 #------------------------------------------------------------------------------
 load_env() {
@@ -97,9 +127,25 @@ load_env() {
 
   # Required parameters (build)
   : "${WORKSPACE:?WORKSPACE is not defined}"
-  : "${DISTR:=ol10-slim}"
   : "${ISO_URL:=${DEFAULT_ISO_URL}}"
   : "${CLOUD:=aws}"
+
+  # Auto-detect Oracle Linux version from the ISO URL.
+  # If the user supplied a custom ISO_URL that doesn't follow Oracle's naming
+  # convention, they can override OL_MAJOR_VERSION / OL_UPDATE_VERSION in
+  # env.properties.local explicitly.
+  if [[ -z "${OL_MAJOR_VERSION:-}" || -z "${OL_UPDATE_VERSION:-}" ]]; then
+    if parse_ol_version_from_iso "${ISO_URL}"; then
+      log_info "Detected Oracle Linux version from ISO URL: ${OL_MAJOR_VERSION}.${OL_UPDATE_VERSION}"
+    else
+      die "Could not parse the Oracle Linux version from ISO_URL='${ISO_URL}'.
+       Set OL_MAJOR_VERSION and OL_UPDATE_VERSION explicitly in your env file."
+    fi
+  fi
+
+  # DISTR slug used by oracle-linux-image-tools.
+  # Convention: ol{major}-slim (e.g. ol10-slim, ol9-slim, ol8-slim).
+  : "${DISTR:=ol${OL_MAJOR_VERSION}-slim}"
 
   # Resolve workspace to an absolute path
   WORKSPACE=$(realpath -m "${WORKSPACE}")
@@ -109,8 +155,8 @@ load_env() {
   if [[ ${SKIP_AWS_IMPORT} -eq 0 && ${BUILD_ONLY} -eq 0 ]]; then
     : "${S3_BUCKET:?S3_BUCKET is not defined}"
     : "${AWS_REGION:?AWS_REGION is not defined}"
-    : "${AMI_NAME:=OracleLinux-10-U1-x86_64-$(date +%Y%m%d-%H%M)}"
-    : "${AMI_DESCRIPTION:=Oracle Linux 10 Update 1 (x86_64) custom AMI built via oracle-linux-image-tools}"
+    : "${AMI_NAME:=OracleLinux-${OL_MAJOR_VERSION}-U${OL_UPDATE_VERSION}-x86_64-$(date +%Y%m%d-%H%M)}"
+    : "${AMI_DESCRIPTION:=Oracle Linux ${OL_MAJOR_VERSION} Update ${OL_UPDATE_VERSION} (x86_64) custom AMI built via oracle-linux-image-tools}"
     # AMI registration boot mode.
     # IMPORTANT: oracle-linux-image-tools currently produces BIOS-only images
     # for the AWS target (BOOT_MODE_BUILD must be 'bios'), so the AMI must
@@ -133,6 +179,7 @@ load_env() {
   # See cloud/aws/image-scripts.sh in oracle-linux-image-tools.
   : "${BOOT_MODE_BUILD:=bios}"
 
+  log_info "OL version         = ${OL_MAJOR_VERSION}.${OL_UPDATE_VERSION}"
   log_info "WORKSPACE          = ${WORKSPACE}"
   log_info "DISTR              = ${DISTR}"
   log_info "CLOUD              = ${CLOUD}"
@@ -615,49 +662,62 @@ derive_oracle_checksum_url() {
 #------------------------------------------------------------------------------
 # Find a valid OS_VARIANT short-id available in the local osinfo-db.
 #
+#------------------------------------------------------------------------------
+# Find a valid OS_VARIANT short-id available in the local osinfo-db.
+#
 # Oracle's build-image.sh validates OS_VARIANT against the local osinfo
 # database via:
 #   osinfo-query os --fields=short-id short-id="${OS_VARIANT}"
 #
-# When the host's osinfo-db package is older than Oracle Linux 10's release,
+# When the host's osinfo-db package is older than the target OL release,
 # auto-detection fails with:
 #   "can't determine OS_VARIANT; you must define it in your environment file"
 #
-# This function tries a list of candidate short-ids in priority order and
-# returns the first one that is actually present in the local database.
-# If oraclelinux10 entries exist they are preferred; otherwise we fall back
-# to RHEL 10 (binary compatible), then a generic Linux variant. virt-install
-# accepts these and the OL10 installer still runs from the ISO regardless.
+# This function builds a candidate list dynamically based on
+# OL_MAJOR_VERSION / OL_UPDATE_VERSION and returns the first match.
+# Priority order:
+#   1. Native oraclelinux{N}.{U} (most specific)
+#   2. oraclelinux{N}.{U-1}, ..., oraclelinux{N} (older updates of the same major)
+#   3. rhel{N}.* / centos-stream{N} (binary-compatible stand-ins)
+#   4. older oraclelinux majors / generic linuxYYYY (last resort)
 #------------------------------------------------------------------------------
 detect_os_variant() {
-  local -a candidates=(
-    # Most specific match for Oracle Linux 10 update 1
-    "oraclelinux10.1"
-    "oraclelinux10.0"
-    "oraclelinux10"
-    # RHEL 10 is binary-compatible with OL10 and a safe stand-in
-    "rhel10.1"
-    "rhel10.0"
-    "rhel10-unknown"
-    "rhel10"
-    # CentOS Stream 10 is also a close match
-    "centos-stream10"
-    "centos-stream-10"
-    # Last-known Oracle Linux entries (still close enough to OL10 for virt-install)
-    "oraclelinux9.7"
-    "oraclelinux9.6"
-    "oraclelinux9.5"
-    "oraclelinux9.4"
-    "oraclelinux9.3"
-    "oraclelinux9.2"
-    "oraclelinux9.1"
-    "oraclelinux9.0"
-    "oraclelinux9"
-    # Generic Linux fallbacks
-    "linux2024"
-    "linux2023"
-    "linux2022"
-  )
+  local major="${OL_MAJOR_VERSION:-10}"
+  local update="${OL_UPDATE_VERSION:-1}"
+
+  local -a candidates=()
+
+  # 1. Exact OL match for this major + update, then walk backwards over updates
+  local u
+  candidates+=("oraclelinux${major}.${update}")
+  for ((u = update - 1; u >= 0; u--)); do
+    candidates+=("oraclelinux${major}.${u}")
+  done
+  candidates+=("oraclelinux${major}-unknown" "oraclelinux${major}")
+
+  # 2. RHEL of the same major (binary compatible with OL)
+  candidates+=("rhel${major}.${update}")
+  for ((u = update - 1; u >= 0; u--)); do
+    candidates+=("rhel${major}.${u}")
+  done
+  candidates+=("rhel${major}-unknown" "rhel${major}")
+
+  # 3. CentOS Stream of the same major
+  candidates+=("centos-stream${major}" "centos-stream-${major}")
+
+  # 4. Older OL majors (one step down) as a graceful degradation path
+  if [[ "${major}" -gt 8 ]]; then
+    local prev_major=$((major - 1))
+    # Check the most-likely range of OL{prev_major} updates first
+    local prev_u
+    for prev_u in 10 9 8 7 6 5 4 3 2 1 0; do
+      candidates+=("oraclelinux${prev_major}.${prev_u}")
+    done
+    candidates+=("oraclelinux${prev_major}")
+  fi
+
+  # 5. Generic linuxYYYY fallbacks (osinfo-db ships these as catch-alls)
+  candidates+=("linux2024" "linux2023" "linux2022" "linux2020" "linux2018")
 
   if ! command -v osinfo-query >/dev/null 2>&1; then
     return 1
@@ -724,7 +784,7 @@ phase4_prepare_env_properties() {
       log_error "Manual workaround:"
       log_error "  1) Open the official checksum directory in a browser:"
       log_error "       https://linux.oracle.com/security/gpg/"
-      log_error "  2) Locate the entry for your release (e.g. 'Oracle Linux 10.1 x86_64 checksum file')."
+      log_error "  2) Locate the entry for your release (e.g. 'Oracle Linux ${OL_MAJOR_VERSION}.${OL_UPDATE_VERSION} x86_64 checksum file')."
       log_error "  3) Open the file and find the line for ${iso_filename}."
       log_error "  4) Set ISO_CHECKSUM=<sha256_hash> in your env.properties.local and re-run."
       die "Checksum auto-resolution failed."
@@ -780,36 +840,32 @@ phase4_prepare_env_properties() {
     log_info "  -> selected: ${OS_VARIANT}"
 
     # Categorize the chosen variant and emit an appropriate notice.
-    # OL10 is binary-compatible with RHEL 10 / CentOS Stream 10, so when one
-    # of those is selected the build is effectively equivalent. Older or
-    # generic fallbacks deserve a stronger warning.
-    case "${OS_VARIANT}" in
-      oraclelinux10*)
-        log_info "  Native Oracle Linux 10 profile. Optimal."
-        ;;
-      rhel10*|centos-stream10*|centos-stream-10*)
-        log_info "  Note: '${OS_VARIANT}' is binary-compatible with Oracle Linux 10."
-        log_info "  This is an excellent stand-in and produces an equivalent build."
-        log_info "  (To get a native 'oraclelinux10' entry, update osinfo-db from upstream:"
-        log_info "   https://releases.pagure.org/libosinfo/)"
-        ;;
-      oraclelinux9*)
-        log_warn "  Note: the chosen variant is from the OL9 family, not OL10."
-        log_warn "  The build will still produce a working OL10 image, but virt-install"
-        log_warn "  may apply OL9-era hardware defaults. Consider updating osinfo-db:"
-        log_warn "    sudo dnf upgrade osinfo-db libosinfo                 # RHEL/OL"
-        log_warn "    sudo apt-get install --only-upgrade osinfo-db        # Debian/Ubuntu"
-        ;;
-      linux*)
-        log_warn "  Note: a generic Linux profile was selected."
-        log_warn "  The build will work, but virt-install will use minimal defaults."
-        log_warn "  For a more accurate profile, update osinfo-db (see commands above)"
-        log_warn "  or install the latest tarball from https://releases.pagure.org/libosinfo/"
-        ;;
-      *)
-        log_warn "  Selected variant '${OS_VARIANT}' is unusual. Verify the build VM behavior."
-        ;;
-    esac
+    # Oracle Linux is binary-compatible with RHEL / CentOS Stream of the same
+    # major version, so when one of those is selected the build is effectively
+    # equivalent. Older or generic fallbacks deserve a stronger warning.
+    local target_major="${OL_MAJOR_VERSION}"
+    if [[ "${OS_VARIANT}" =~ ^oraclelinux${target_major}([.-]|$) ]]; then
+      log_info "  Native Oracle Linux ${target_major} profile. Optimal."
+    elif [[ "${OS_VARIANT}" =~ ^rhel${target_major}([.-]|$) ]] \
+       || [[ "${OS_VARIANT}" =~ ^centos-stream-?${target_major}$ ]]; then
+      log_info "  Note: '${OS_VARIANT}' is binary-compatible with Oracle Linux ${target_major}."
+      log_info "  This is an excellent stand-in and produces an equivalent build."
+      log_info "  (To get a native 'oraclelinux${target_major}' entry, update osinfo-db from upstream:"
+      log_info "   https://releases.pagure.org/libosinfo/)"
+    elif [[ "${OS_VARIANT}" =~ ^oraclelinux[0-9]+ ]]; then
+      log_warn "  Note: the chosen variant is from a different OL major than ${target_major}."
+      log_warn "  The build will still produce a working OL${target_major} image, but virt-install"
+      log_warn "  may apply older hardware defaults. Consider updating osinfo-db:"
+      log_warn "    sudo dnf upgrade osinfo-db libosinfo                 # RHEL/OL"
+      log_warn "    sudo apt-get install --only-upgrade osinfo-db        # Debian/Ubuntu"
+    elif [[ "${OS_VARIANT}" =~ ^linux ]]; then
+      log_warn "  Note: a generic Linux profile was selected."
+      log_warn "  The build will work, but virt-install will use minimal defaults."
+      log_warn "  For a more accurate profile, update osinfo-db (see commands above)"
+      log_warn "  or install the latest tarball from https://releases.pagure.org/libosinfo/"
+    else
+      log_warn "  Selected variant '${OS_VARIANT}' is unusual. Verify the build VM behavior."
+    fi
   fi
 
   # Generate the env.properties file consumed by the build tool
@@ -894,7 +950,8 @@ phase5_run_build() {
     || die "build-image.sh failed"
 
   # Locate the produced VMDK file
-  # Naming convention: OL10U1_x86_64-aws-b<BUILD_NUMBER>.vmdk
+  # Naming convention: OL{N}U{M}_x86_64-aws-b<BUILD_NUMBER>.vmdk
+  # (e.g. OL10U1_x86_64-aws-b0.vmdk, OL9U7_x86_64-aws-b0.vmdk)
   VMDK_PATH=$(find "${WORKSPACE}" -maxdepth 3 -name '*.vmdk' -newer "${tool_env}" 2>/dev/null | head -n 1)
 
   if [[ -z "${VMDK_PATH}" || ! -f "${VMDK_PATH}" ]]; then
@@ -1070,7 +1127,7 @@ phase8_register_ami() {
     --region "${AWS_REGION}" \
     --resources "${ami_id}" \
     --tags "Key=Name,Value=${AMI_NAME}" \
-           "Key=OS,Value=OracleLinux10U1" \
+           "Key=OS,Value=OracleLinux${OL_MAJOR_VERSION}U${OL_UPDATE_VERSION}" \
            "Key=Architecture,Value=x86_64" \
            "Key=BuiltBy,Value=oracle-linux-image-tools" \
            "Key=BuildDate,Value=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
