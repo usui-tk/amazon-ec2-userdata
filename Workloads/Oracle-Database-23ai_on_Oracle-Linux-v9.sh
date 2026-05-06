@@ -234,7 +234,9 @@ dnf install -y oracle-database-preinstall-23ai
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
-dnf --enablerepo="ol9_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+# dnf --enablerepo="ol9_oracle_instantclient26" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS-CLI v2]
