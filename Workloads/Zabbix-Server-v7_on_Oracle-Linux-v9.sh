@@ -533,8 +533,6 @@ dnf module install nginx:1.26 -y
 dnf module list nginx
 nginx -V
 
-nginx -t
-
 # Package Install nginx modules (from EPEL Repository)
 # dnf --enablerepo="ol9_developer_EPEL" install -y nginx-mod-headers-more
 
@@ -580,8 +578,8 @@ dnf --enablerepo="*" --verbose clean all
 dnf repolist enabled
 dnf config-manager --set-disabled pgdg15
 dnf config-manager --set-disabled pgdg14
-dnf config-manager --set-disabled pgdg13
-dnf config-manager --set-disabled pgdg12
+# dnf config-manager --set-disabled pgdg13
+# dnf config-manager --set-disabled pgdg12
 dnf repolist enabled
 
 dnf makecache -y
