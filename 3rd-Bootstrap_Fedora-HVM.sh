@@ -126,7 +126,7 @@ fi
 dnf install -y kernel-modules kernel-modules-extra kernel-tools
 
 # Package Install Fedora System Administration Tools (from Fedora Official Repository)
-dnf install -y 7zip-standalone-all abrt abrt-cli acpid aria2 arptables atop bash-color-prompt bash-completion bc bcc bcc-tools bcftools bind-utils blktrace bpftool bpftrace byobu collectd collectd-utils collectl colordiff colorized-logs console-login-helper-messages-motdgen crash-trace-command crudini crypto-policies curl dateutils dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fping fzf gdisk gh git git-lfs glances gnutls-utils hdparm htop httping icu iftop inotify-tools intltool inxi iotop ipcalc iperf3 iproute-tc ipset iptraf-ng ipv6calc ipv6toolkit java-latest-openjdk jc jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsb_release lsof lvm2 lzop man-pages mc mcelog mdadm moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nkf nload nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock redhat-text-fonts rpmconf rsync screen smartmontools sos ssh-audit ssldump sslscan stalld strace stratisd-tools stressapptest symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user uv vdo vim-enhanced vnstat wdiff wget wireshark-cli xfsdump xfsprogs xq yamllint yq yum-utils zip zsh zstd
+dnf install -y 7zip-standalone-all abrt abrt-cli acpid aria2 arptables atop bash-color-prompt bash-completion bc bcc bcc-tools bcftools bind-utils blktrace bpftool bpftrace byobu collectd collectd-utils collectl colordiff colorized-logs console-login-helper-messages-motdgen crash-trace-command crudini crypto-policies curl dateutils dnf-data dnf-plugins-core dnf-utils dstat ebtables ethtool expect fio fping fzf gdisk gh git git-lfs glances gnutls-utils hdparm htop httping icu iftop inotify-tools intltool inxi iotop ipcalc iperf3 iproute-tc ipset iptraf-ng ipv6calc ipv6toolkit java-latest-openjdk jc jq kexec-tools libbpf-tools libicu libzip-tools linuxptp lsb_release lsof lvm2 lzop man-pages mc mcelog mdadm moreutils moreutils-parallel mtr nc ncdu ncompress net-snmp-utils net-tools nftables nkf nload nmap nmap-ncat nmstate numactl numatop nvme-cli nvmetcli parted patchutils pmempool psacct psmisc python3-dnf-plugin-versionlock rpmconf rsync screen smartmontools sos ssh-audit ssldump sslscan stalld strace stratisd-tools stressapptest symlinks sysfsutils sysstat tcpdump time tlog tmpwatch traceroute tree tzdata unzip usermode util-linux util-linux-user uv vdo vim-enhanced vnstat wdiff wget wireshark-cli xfsdump xfsprogs xq yamllint yq yum-utils zip zsh zstd
 
 dnf install -y cifs-utils nfs-utils nfs4-acl-tools
 
@@ -139,7 +139,7 @@ dnf install -y pcp pcp-conf pcp-export-pcp2json "pcp-pmda*" pcp-selinux pcp-syst
 dnf install -y rsyslog-mmnormalize rsyslog-mmaudit rsyslog-mmfields rsyslog-mmjsonparse
 
 # Package Install Fedora support tools (from Fedora Official Repository)
-dnf install -y redhat-lsb-core redhat-text-fonts
+dnf install -y redhat-text-fonts
 
 # Package Install EC2 instance optimization tools (from Fedora Official Repository)
 dnf install -y ec2-hibinit-agent ec2-metadata
