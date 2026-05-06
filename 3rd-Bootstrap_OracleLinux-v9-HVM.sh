@@ -113,7 +113,7 @@ find /etc/yum.repos.d/
 
 dnf list *release*el9
 
-dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9 oracle-instantclient-release-23ai-el9 oracle-java-jdk-release-el9
+dnf install -y oraclelinux-release-el9 oracle-epel-release-el9 oracle-ocne-release-el9 oraclelinux-developer-release-el9 oracle-instantclient-release-26ai-el9 oracle-java-jdk-release-el9
 
 dnf --enablerepo="*" --verbose clean all
 
@@ -346,11 +346,37 @@ dnf --enablerepo="ol9_developer_EPEL" install -y openscap openscap-engine-sce op
 dnf install -y ocfs2-tools
 dnf install -y pcp-oracle-conf
 
+
+
 # Download JDK Development Kit 17 RPM Package
 # curl -sS "https://download.oracle.com/java/17/latest/jdk-17_linux-x64_bin.rpm" -o "/tmp/jdk-17_linux-x64_bin.rpm"
 
 # Package Install JDK Development Kit 17 (from Local File)
 # dnf localinstall -y "/tmp/jdk-17_linux-x64_bin.rpm"
+
+
+
+# Package Install Oracle Java SE Development Kit (JDK) (from Oracle Linux Repository)
+# https://yum.oracle.com/repo/OracleLinux/OL9/java/x86_64/index.html
+
+# ---------------------------------------
+# [workaround] Repository Configuration
+# ---------------------------------------
+# cat > /etc/yum.repos.d/oracle-java-jdk-ol9.repo << __EOF__
+# [ol9_java]
+# name=Oracle Java SE Development Kit (JDK) for Oracle Linux 9 ($basearch)
+# baseurl=https://yum\$ociregion.\$ocidomain/repo/OracleLinux/OL9/java/\$basearch/
+# gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+# gpgcheck=1
+# enabled=1
+# __EOF__
+# ---------------------------------------
+
+# dnf install -y jdk-21-headless jdk-21-headful
+# dnf install -y jdk-25-headless jdk-25-headful
+
+
+
 
 # Package Install Oracle Database Developer Tool (from Oracle Linux Repository)
 # https://yum.oracle.com/repo/OracleLinux/OL9/oracle/software/x86_64/index.html
@@ -370,12 +396,18 @@ dnf install -y pcp-oracle-conf
 
 # dnf install -y ords sqlcl
 
+
+
 # Package Install Oracle Database Pre-Installation Tools (from Oracle Linux Repository)
 dnf install -y oracle-ai-database-preinstall-26ai
+
+
 
 # Package Install Oracle Instant Client (from Oracle Linux Repository)
 # https://yum.oracle.com/oracle-instant-client.html
 dnf --enablerepo="ol9_oracle_instantclient23" install -y oracle-instantclient-basic oracle-instantclient-devel oracle-instantclient-jdbc oracle-instantclient-sqlplus oracle-instantclient-tools
+
+
 
 #-------------------------------------------------------------------------------
 # Get AWS Instance MetaData Service (IMDS v1, v2)
