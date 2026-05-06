@@ -148,7 +148,6 @@ dnf config-manager --set-enabled ol9_developer_EPEL
 dnf config-manager --set-enabled ol9_ocne
 dnf config-manager --set-enabled ol9_olcne19
 
-
 # Disable Yum Repository Data from Oracle Linux YUM repository (yum.oracle.com)
 dnf config-manager --set-disabled ol9_UEKR7
 dnf config-manager --set-disabled ol9_kvm_utils
