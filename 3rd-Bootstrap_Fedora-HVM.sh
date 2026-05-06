@@ -151,14 +151,16 @@ dnf install -y rpmdevtools rpm-build rpmconf rpmconf-base redhat-rpm-config
 #-------------------------------------------------------------------------------
 
 # Default installation information for AWS-related packages
-dnf list installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+dnf list --installed | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 # Repository information for AWS-related packages
-dnf list --all | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
+dnf list --available | awk '{print $1}' | grep -ie "aws" -ie "amazon" -ie "ec2" | grep -ve "texlive" | sort
 
 
 # Package Install EC2 instance optimization tools (from Fedora Official Repository)
-dnf install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
+# dnf install -y amazon-ec2-utils ec2-hibinit-agent ec2-instance-connect
+dnf install -y amazon-ec2-utils ec2-instance-connect
+
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [Cockpit]
