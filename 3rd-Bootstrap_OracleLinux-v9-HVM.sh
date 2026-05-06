@@ -707,18 +707,18 @@ fi
 # Getting information about Amazon Machine Image
 #------------------------------------------------------------------------------
 
-# Get Amazon Machine Image Information
-if [ -n "$RoleName" ]; then
+# # Get Amazon Machine Image Information
+# if [ -n "$RoleName" ]; then
 
-	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
-	echo "# Get Amazon Machine Image Information"
+# 	# Get the latest AMI information of the OS type of this EC2 instance from Public AMI
+# 	echo "# Get Amazon Machine Image Information"
 
-	LatestAmiId=$(aws ec2 describe-images --owner "131827586825" --filter "Name=name,Values=OL9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
+# 	LatestAmiId=$(aws ec2 describe-images --owner "131827586825" --filter "Name=name,Values=OL9.*" "Name=virtualization-type,Values=hvm" "Name=architecture,Values=x86_64" --query 'sort_by(Images[].{YMD:CreationDate,Name:Name,ImageId:ImageId},&YMD)|reverse(@)' --output json --region ${Region} | jq -r '[.[] | select(contains({Name: "BETA"}) | not)] | .[0].ImageId')
 
-	if [ -n "$LatestAmiId" ]; then
-		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
-	fi
-fi
+# 	if [ -n "$LatestAmiId" ]; then
+# 		aws ec2 describe-images --image-ids ${LatestAmiId} --output json --region ${Region} > "/var/log/user-data_aws-cli_amazon-machine-images_describe-describe-images.txt"
+# 	fi
+# fi
 
 #-------------------------------------------------------------------------------
 # Custom Package Installation [AWS Systems Manager agent (aka SSM agent)]
