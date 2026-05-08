@@ -131,7 +131,7 @@ ZypperMigrationStatus="0"
 if [ -n "$VERSION_ID" ]; then
 	case "$VERSION_ID" in
 		12|12.[1-6])
-			# バージョンラベルの設定
+			# Configuring Version Labels
 			if [ "$VERSION_ID" = "12" ]; then
 				version_label="GA"
 			else
