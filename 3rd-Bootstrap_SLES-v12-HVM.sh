@@ -214,6 +214,13 @@ zypper --quiet refresh -fdb
 #  - Pattern : Amazon Web Services
 #-------------------------------------------------------------------------------
 
+# Installation Package information for AWS-related packages
+zypper search --installed-only --match-substrings "aws" "amazon" "ec2" --sort-by-name
+
+# Repository Package information for AWS-related packages
+zypper search-packages search "aws" "amazon" "ec2"
+
+
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 # zypper --quiet --non-interactive install --type pattern Amazon-Web-Services
 zypper --quiet --non-interactive install --type pattern Amazon-Web-Services-Instance-Init
