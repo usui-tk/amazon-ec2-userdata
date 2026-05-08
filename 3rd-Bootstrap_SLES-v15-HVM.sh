@@ -125,7 +125,7 @@ ZypperMigrationStatus="0"
 if [ -n "$VERSION_ID" ]; then
 	case "$VERSION_ID" in
 		15.7)
-			# Current latest version of service pack (2025.12)
+			# Current latest version of service pack (2026.04)
 			echo "SUSE Linux Enterprise Server 15 SP7"
 			cat /etc/os-release
 			;;
@@ -185,13 +185,14 @@ zypper --quiet --non-interactive install --type pattern enhanced_base
 #-------------------------------------------------------------------------------
 
 # Package Install SLES System Administration Tools (from SUSE Linux Enterprise Server Software repository - Select package)
-zypper --quiet --non-interactive install aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace clone-master-clean-up cloud-netconfig-ec2 collectd conntrack-tools curl dstat ebtables ethtool expect fio gdisk git-core gperftools hdparm hostinfo intltool iotop iotop kexec-tools kmod-bash-completion libicu lsb-release lvm2 lzop man-pages mcelog mdadm mlocate net-snmp nftables nmap numactl nvme-cli nvmetcli parted patchutils pmdk pmdk-tools psmisc rsync sdparm seccheck smartmontools strace supportutils supportutils-plugin-suse-public-cloud sysfsutils sysstat tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zypper-log
+zypper --quiet --non-interactive install 7zip aaa_base aaa_base-extras arptables bash-completion bc bcc-tools bind-utils blktrace bpftool bpftrace bzip2 clone-master-clean-up cloud-netconfig-ec2 collectd conntrack-tools crypto-policies curl dstat ebtables ethtool expect fio fping gdisk git git-core git-lfs gperftools hdparm hostinfo iftop inotify-tools intltool iotop ipset jq kexec-tools kmod-bash-completion libicu linuxptp lsb-release lsof lvm2 lzop man-pages mcelog mdadm mlocate net-snmp net-tools nftables nmap numactl numatop nvme-cli nvmetcli parted patchutils pmdk pmdk-tools policycoreutils psmisc rsync screen sdparm seccheck smartmontools strace supportutils supportutils-plugin-cloud-init supportutils-plugin-suse-public-cloud sysfsutils sysstat tcpdump time traceroute tree tuned unrar unzip util-linux vim-enhanced wget xfsdump xfsprogs zip zsh zstd zypper-log
 
 zypper --quiet --non-interactive install aws-efs-utils cifs-utils nfs-client nfs-utils nfs4-acl-tools yast2-nfs-client
 
 zypper --quiet --non-interactive install libiscsi-utils libiscsi8 lsscsi open-iscsi sdparm sg3_utils yast2-iscsi-client
 
 zypper --quiet --non-interactive install openscap openscap-content openscap-utils
+
 
 if [ -n "$VERSION_ID" ]; then
 	case "$VERSION_ID" in
@@ -233,6 +234,13 @@ zypper --quiet refresh -fdb
 # Custom Package Installation (from SUSE Linux Enterprise Server Software repository)
 #  - Pattern : Amazon Web Services
 #-------------------------------------------------------------------------------
+
+# Installation Package information for AWS-related packages
+zypper search --installed-only --match-substrings "aws" "amazon" "ec2" --sort-by-name
+
+# Repository Package information for AWS-related packages
+zypper search-packages search "aws" "amazon" "ec2"
+
 
 # Package Install SLES System AWS Tools (from SUSE Linux Enterprise Server Software repository)
 SapFlag=0
@@ -359,11 +367,11 @@ fi
 if [ -n "$VERSION_ID" ]; then
 	case "$VERSION_ID" in
 		15.[2-7])
-			# SP2〜SP7: 追加処理なし
+			# SP2–SP7: No additional processing
 			echo "SUSE Linux Enterprise Server 15 SP${VERSION_ID#15.}"
 			;;
 		15.1)
-			# SP1: openSUSE Build Service Repository からインストール
+			# SP1: Install from openSUSE Build Service Repository
 			echo "SUSE Linux Enterprise Server 15 SP1"
 
 			# Add openSUSE Build Service Repository [utilities/SLE_15_SP1_Backports]
@@ -382,7 +390,7 @@ if [ -n "$VERSION_ID" ]; then
 			zypper --quiet --non-interactive install atop
 			;;
 		15)
-			# GA: openSUSE Build Service Repository からインストール
+			# GA: Install from openSUSE Build Service Repository
 			echo "SUSE Linux Enterprise Server 15 GA"
 
 			# Add openSUSE Build Service Repository [utilities/SLE_15]
