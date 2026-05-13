@@ -8,7 +8,7 @@ exec > >(tee /var/log/user-data_1st-userdata.log || logger -t user-data -s 2> /d
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(Script)
-DecisionScript="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Bastion/2nd-Decision_Linux-Distribution.sh"
+DecisionScript="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Bastion/2nd-Decision_Linux-Distribution.sh"
 
 # Parameter file Settings
 cat > /tmp/userdata-parameter << __EOF__

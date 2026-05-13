@@ -38,7 +38,7 @@ echo $VpcNetwork
 #-------------------------------------------------------------------------------
 
 # Parameter Settings
-CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_OpenSUSE-HVM.json"
+CWAgentConfig="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_OpenSUSE-HVM.json"
 
 #-------------------------------------------------------------------------------
 # Acquire unique information of Linux distribution

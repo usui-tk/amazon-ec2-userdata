@@ -8,10 +8,10 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 #-------------------------------------------------------------------------------
 
 # Parameter Settings(BootstrapScript)
-ScriptForAmazonLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Bastion/3rd-Bootstrap_BastionServer_AmazonLinux-HVM.sh"
-ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Bastion/3rd-Bootstrap_BastionServer_RHEL-v7-HVM.sh"
-ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Bastion/3rd-Bootstrap_BastionServer_CentOS-v7-HVM.sh"
-ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Bastion/3rd-Bootstrap_BastionServer_Ubuntu-16.04-LTS-HVM.sh"
+ScriptForAmazonLinux="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Bastion/3rd-Bootstrap_BastionServer_AmazonLinux-HVM.sh"
+ScriptForRHELv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Bastion/3rd-Bootstrap_BastionServer_RHEL-v7-HVM.sh"
+ScriptForCentOSv7="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Bastion/3rd-Bootstrap_BastionServer_CentOS-v7-HVM.sh"
+ScriptForUbuntu1604="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Bastion/3rd-Bootstrap_BastionServer_Ubuntu-16.04-LTS-HVM.sh"
 
 #-------------------------------------------------------------------------------
 # Define Function

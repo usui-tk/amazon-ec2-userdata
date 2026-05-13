@@ -1,6 +1,6 @@
 <powershell>
 # Parameter Settings(Script)
-Set-Variable -Name DecisionScript -Option Constant -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/2nd-Decision_WindowsServer-Version.ps1"
+Set-Variable -Name DecisionScript -Option Constant -Scope Script -Value "https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/2nd-Decision_WindowsServer-Version.ps1"
 
 # Bootstrap Script Executite
 

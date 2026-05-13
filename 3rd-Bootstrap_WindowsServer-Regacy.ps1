@@ -2119,33 +2119,33 @@ Set-Variable -Name ServiceStatusForAmazonCloudWatchAgent -Scope Script -Value ($
 Write-Log "# Package Download System Utility (Amazon CloudWatch Agent)"
 if ($WindowsOSVersion -eq "6.1") {
 	Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2008 R2] : Windows OS Version : " + $WindowsOSVersion)
-	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2008R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.2") {
 	Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012] : Windows OS Version : " + $WindowsOSVersion)
-	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "6.3") {
 	Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2012 R2] : Windows OS Version : " + $WindowsOSVersion)
-	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+	Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2012R2.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 }
 elseif ($WindowsOSVersion -eq "10.0") {
 	switch ($WindowsOSName) {
 		'Windows Server 2016' {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2016] : Windows OS Version : " + $WindowsOSVersion)
-			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2016.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 		}
 		'Windows Server 2019' {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2019] : Windows OS Version : " + $WindowsOSVersion)
-			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2019.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2019.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 		}
 		'Windows Server 2022' {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
-			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 		}
 		default {
 			Write-Log ("# Save Amazon CloudWatch Agent Config Files [Windows Server 2022] : Windows OS Version : " + $WindowsOSVersion)
-			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/master/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
+			Get-WebContentToFile -Uri 'https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/Config_AmazonCloudWatchAgent/AmazonCloudWatchAgent_WindowsServer-2022.json' -OutFile "$TOOL_DIR\AmazonCloudWatchAgent-Config.json"
 		}
 	}
 }
