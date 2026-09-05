@@ -10,6 +10,7 @@ exec > >(tee /var/log/user-data_2nd-decision.log || logger -t user-data -s 2> /d
 if [ $(uname -m) = "x86_64" ]; then
 
 	# [For x86_64] Parameter Settings (BootstrapScript - Script dependent on operating system version)
+	ScriptForAmazonLinux2027="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/3rd-Bootstrap_AmazonLinux-2027-HVM.sh"
 	ScriptForAmazonLinux2023="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/3rd-Bootstrap_AmazonLinux-2023-HVM.sh"
 	ScriptForAmazonLinux2="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/3rd-Bootstrap_AmazonLinux-2-LTS-HVM.sh"
 	ScriptForAmazonLinux1="https://raw.githubusercontent.com/usui-tk/amazon-ec2-userdata/main/3rd-Bootstrap_AmazonLinux-1-HVM.sh"
@@ -150,7 +151,10 @@ function get_os_info () {
 function get_bootstrap_script () {
 	# Select a Bootstrap script
 	if [ "${DIST}" = "Amazon Linux AMI" ] || [ "${DIST}" = "Amazon Linux" ] || [ "${DIST_TYPE}" = "amzn" ]; then
-			if [ "${REV}" = "2023" ]; then
+			if [ "${REV}" = "2027" ]; then
+				# Bootstrap Script for Amazon Linux 2027
+				BootstrapScript=${ScriptForAmazonLinux2027}
+			elif [ "${REV}" = "2023" ]; then
 				# Bootstrap Script for Amazon Linux 2023
 				BootstrapScript=${ScriptForAmazonLinux2023}
 			elif [ "${REV}" = "2" ]; then
