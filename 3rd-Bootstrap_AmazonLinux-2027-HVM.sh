@@ -124,7 +124,7 @@ dnf config-manager --set-enabled amazonlinux
 # dnf config-manager --set-enabled kernel-livepatch
 
 # Disable Yum Repository Data from Amazon Linux YUM repository
-dnf config-manager --set-disabled amazonlinux-spal
+# dnf config-manager --set-disabled amazonlinux-spal
 
 # Checking repository information
 dnf repolist all
