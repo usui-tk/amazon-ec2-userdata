@@ -72,7 +72,11 @@ if [ $(command -v rpm) ]; then
 
 		# Package Installed Kernel Package
 		if [ -n "$DEFAULTKERNEL" ]; then
-			dnf --showduplicate list ${DEFAULTKERNEL}
+			if [ $(command -v dnf5) ]; then
+				dnf5 list --showduplicates ${DEFAULTKERNEL}
+			else
+				dnf --showduplicate list ${DEFAULTKERNEL}
+			fi
 		else
 			rpm -qa | grep -ie "kernel" | sort
 		fi
