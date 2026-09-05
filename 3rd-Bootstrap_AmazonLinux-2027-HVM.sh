@@ -983,6 +983,9 @@ if [ "${Language}" = "ja_JP.UTF-8" ]; then
 	strings /etc/locale.conf
 	source /etc/locale.conf
 elif [ "${Language}" = "en_US.UTF-8" ]; then
+	# Custom Package Installation
+	dnf install -y langpacks-en glibc-langpack-en
+
 	echo "# Setting System Language -> $Language"
 	locale
 	localectl status --no-pager
